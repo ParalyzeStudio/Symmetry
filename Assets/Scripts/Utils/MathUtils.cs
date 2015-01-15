@@ -4,6 +4,11 @@ public class MathUtils
 {
     public const float DEFAULT_EPSILON = 0.1f;
 
+    static public Vector3 BuildVector3FromVector2(Vector2 vector, float zValue)
+    {
+        return new Vector3(vector.x, vector.y, zValue);
+    }
+
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
         return Mathf.Abs(floatA - floatB) < epsilon;
