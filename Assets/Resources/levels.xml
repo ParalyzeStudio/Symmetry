@@ -4,14 +4,13 @@
 		<contours>
 			<contour>
 				<point line="6" column="8"/>
-				<point line="7" column="8"/>
-				<point line="7" column="12"/>
 				<point line="6" column="12"/>
-				<point line="6" column="11"/>
-				<point line="5" column="11"/>
-				<point line="5" column="11"/>
-				<point line="5" column="9"/>
-				<point line="6" column="9"/>
+				<point line="7" column="12"/>
+				<point line="7" column="11"/>
+				<point line="8" column="11"/>
+				<point line="8" column="9"/>
+				<point line="7" column="9"/>
+				<point line="7" column="8"/>
 			</contour>
 		</contours>
 		<shapes>

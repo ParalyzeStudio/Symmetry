@@ -4,15 +4,19 @@ using System.Collections.Generic;
 
 public class LevelManager : MonoBehaviour
 {
-    public List<Level> m_levels;
+    private List<Level> m_levels;
+    public Level m_currentLevel { get; set; }
 
-    public LevelManager()
+    public void Awake()
     {
+        Debug.Log("AWAKE LEVELMANAGER");
         m_levels = new List<Level>();
+        m_currentLevel = null;
     }
 
     public void ParseLevelsFile()
     {
+        Debug.Log("ParseLevelsFile");
         TextAsset levelsFile = (TextAsset) Resources.Load("levels");
 
         XMLParser xmlParser = new XMLParser();
@@ -44,6 +48,14 @@ public class LevelManager : MonoBehaviour
             }
 
             m_levels.Add(level);
+        }
+    }
+
+    public void SetCurrentLevelByNumber(int iLevelNumber)
+    {
+        if (iLevelNumber < m_levels.Count + 1)
+        {
+            m_currentLevel = m_levels[iLevelNumber - 1];
         }
     }
 }
