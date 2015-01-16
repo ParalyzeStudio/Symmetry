@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class GameController : MonoBehaviour
 {
     public Vector2 m_designScreenSize;
     public float m_gridSpacing = 100.0f;
+    private float m_prevGridSpacing;
     private int m_currentLevelNumber;
     private bool m_levelBuilt;
 
@@ -13,16 +15,38 @@ public class GameController : MonoBehaviour
     protected void Awake()
     {
         m_levelBuilt = false;
+        m_prevGridSpacing = 0.0f;
     }
 
     protected void Start()
     {
+        Debug.Log("START");
+        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
+        LevelManager levelManager = (LevelManager)levelManagerObject.GetComponent<LevelManager>();
+        levelManager.ParseLevelsFile();
         BuildLevel(1);
     }
 
     protected void Update()
     {
+        if (m_gridSpacing != m_prevGridSpacing)
+        {
+            m_prevGridSpacing = m_gridSpacing;
+            Debug.Log("UPDATE EDITOR");
+            GameObject[] grids = GameObject.FindGameObjectsWithTag("Grid");
+            foreach (GameObject grid in grids)
+            {
+                DestroyImmediate(grid);
+            }
+            BuildGrid();
+        }
+        //if (Application.isEditor)
+        //{
+        //    Debug.Log("UPDATE");
 
+        //    DestroyImmediate(m_grid);
+        //    BuildGrid();
+        //}
     }
 
     /**
@@ -30,7 +54,7 @@ public class GameController : MonoBehaviour
      * **/
     public void BuildMainMenu()
     {
-
+        
     }
 
     /**
@@ -51,11 +75,16 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /**
+     * We build the grid of anchors that is displayed on the screen and that will help the player positionning shapes and axis...
+     * Two anchors are separated from each other of a distance of m_gridSpacing that can be set in the editor
+     * **/
     private void BuildGrid()
     {
         float fGridZValue = -10.0f;
         GameObject grid = new GameObject("Grid");
         grid.transform.position = new Vector3(0, 0, fGridZValue);
+        grid.tag = "Grid";
 
         int numLines = Mathf.FloorToInt(m_designScreenSize.y / m_gridSpacing);
         int numColumns = Mathf.FloorToInt(m_designScreenSize.x / m_gridSpacing);
@@ -95,16 +124,25 @@ public class GameController : MonoBehaviour
         }
     }
 
+    /**
+     * GUI elements such as pause button, help button, retry button and other stuff
+     * **/
     private void BuildGUI()
     {
 
     }
 
+    /**
+     * Here we build the contour of the shape the player has to reproduce
+     * **/
     private void BuildContour()
     {
 
     }
 
+    /**
+     * We set the shapes the player initally starts with
+     * **/
     private void BuildShapes()
     {
 

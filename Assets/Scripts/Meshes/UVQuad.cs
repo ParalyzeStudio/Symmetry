@@ -26,7 +26,11 @@ public class UVQuad : MonoBehaviour
      * **/
     protected void InitQuadMesh()
     {
-        Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
+        //Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
+        Mesh mesh = new Mesh();
+        mesh.name = "UVQuad";
+
+        GetComponent<MeshFilter>().sharedMesh = mesh;
 
         Vector3[] vertices = new Vector3[4];
         vertices[0] = new Vector3(-0.5f, 0.5f, 0.0f); //top-left
