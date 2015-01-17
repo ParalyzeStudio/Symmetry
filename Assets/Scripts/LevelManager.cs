@@ -29,6 +29,7 @@ public class LevelManager : MonoBehaviour
             string levelName = levelNode.GetValue("@name");
             Debug.Log(levelName);
 
+            //Parse contours
             XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
             foreach (XMLNode contourNode in contoursNodeList)
             {
@@ -45,6 +46,36 @@ public class LevelManager : MonoBehaviour
                     contour.m_points.Add(new Vector2(contourPointLine, contourPointColumn));
                 }
                 level.m_contours.Add(contour);
+            }
+
+            //Parse shapes
+            XMLNodeList shapesNodeList = levelNode.GetNodeList("shapes>0>shape");
+            foreach (XMLNode shapeNode in shapesNodeList)
+            {
+                Shape shape = new Shape();
+                XMLNodeList shapeTrianglesNodeList = shapeNode.GetNodeList("gridTriangle");
+                foreach (XMLNode gridTriangleNode in shapeTrianglesNodeList)
+                {
+                    GridTriangle triangle = new GridTriangle();
+
+                    XMLNodeList trianglePointsNodeList = gridTriangleNode.GetNodeList("point");
+                    int trianglePointIndex = 0;
+                    foreach (XMLNode trianglePointNode in trianglePointsNodeList)
+                    {
+                        string strContourPointLine = trianglePointNode.GetValue("@line");
+                        string strContourPointColumn = trianglePointNode.GetValue("@column");
+
+                        int contourPointLine = int.Parse(strContourPointLine);
+                        int contourPointColumn = int.Parse(strContourPointColumn);
+
+                        triangle.m_points[trianglePointIndex] = new Vector2(contourPointLine, contourPointColumn);
+                        trianglePointIndex++;
+                    }
+
+                    shape.m_triangles.Add(triangle);
+                }
+
+                level.m_shapes.Add(shape);
             }
 
             m_levels.Add(level);
