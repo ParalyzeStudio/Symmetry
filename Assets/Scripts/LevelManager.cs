@@ -9,14 +9,12 @@ public class LevelManager : MonoBehaviour
 
     public void Awake()
     {
-        Debug.Log("AWAKE LEVELMANAGER");
         m_levels = new List<Level>();
         m_currentLevel = null;
     }
 
     public void ParseLevelsFile()
     {
-        Debug.Log("ParseLevelsFile");
         TextAsset levelsFile = (TextAsset) Resources.Load("levels");
 
         XMLParser xmlParser = new XMLParser();
@@ -27,7 +25,6 @@ public class LevelManager : MonoBehaviour
         {
             Level level = new Level();
             string levelName = levelNode.GetValue("@name");
-            Debug.Log(levelName);
 
             //Parse contours
             XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
@@ -53,6 +50,16 @@ public class LevelManager : MonoBehaviour
             foreach (XMLNode shapeNode in shapesNodeList)
             {
                 Shape shape = new Shape();
+                //Get the color of the shape
+                string strShapeColor = shapeNode.GetValue("@color");
+                string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
+                Color shapeColor = new Color();
+                shapeColor.r = float.Parse(strSplitColor[0]);
+                shapeColor.g = float.Parse(strSplitColor[1]);
+                shapeColor.b = float.Parse(strSplitColor[2]);
+                shapeColor.a = float.Parse(strSplitColor[3]);
+                shape.m_color = shapeColor;
+
                 XMLNodeList shapeTrianglesNodeList = shapeNode.GetNodeList("gridTriangle");
                 foreach (XMLNode gridTriangleNode in shapeTrianglesNodeList)
                 {

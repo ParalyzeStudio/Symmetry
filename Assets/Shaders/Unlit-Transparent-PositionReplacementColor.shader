@@ -1,10 +1,13 @@
-﻿Shader "Custom/Unlit/Opaque/PositionColor" {
+﻿Shader "Custom/Unlit/Transparent/PositionTintColor" {
+Properties {
+	_Color ("Repl. Color (RGBA)", Color) = (1,1,1,1)
+}
 
 SubShader {
 	Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
 	
 	ZWrite Off
-	Blend One Zero 
+	Blend SrcAlpha OneMinusSrcAlpha 
 	
 	Pass {  
 		CGPROGRAM
@@ -29,8 +32,7 @@ SubShader {
 			{
 				v2f OUT;
 				OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
-				OUT.color = IN.color;
-				
+				OUT.color = _Color;
 				return OUT;
 			}
 			

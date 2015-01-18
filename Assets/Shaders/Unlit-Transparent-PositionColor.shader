@@ -1,7 +1,4 @@
 ﻿Shader "Custom/Unlit/Transparent/PositionColor" {
-Properties {
-	_Color ("Color (RGBA)", Color) = (1,1,1,1)
-}
 
 SubShader {
 	Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
@@ -32,7 +29,7 @@ SubShader {
 			{
 				v2f OUT;
 				OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
-				OUT.color = _Color;
+				OUT.color = IN.color;
 				return OUT;
 			}
 			

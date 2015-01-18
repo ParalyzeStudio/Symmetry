@@ -14,36 +14,36 @@
 			</contour>
 		</contours>
 		<shapes>
-			<shape>
+			<shape color="1,0,0,0.5">
 				<gridTriangle>
 					<point line="8" column="4"/>
-					<point line="7" column="4"/>
 					<point line="8" column="5"/>
+					<point line="7" column="4"/>
 				</gridTriangle>
 				<gridTriangle>
 					<point line="7" column="4"/>
+					<point line="8" column="5"/>
 					<point line="7" column="5"/>
-					<point line="8" column="4"/>
 				</gridTriangle>
 				<gridTriangle>
 					<point line="8" column="5"/>
+					<point line="8" column="6"/>
+					<point line="7" column="5"/>
+				</gridTriangle>
+				<gridTriangle>
 					<point line="7" column="5"/>
 					<point line="8" column="6"/>
-				</gridTriangle>
-				<gridTriangle>
-					<point line="7" column="5"/>
 					<point line="7" column="6"/>
-					<point line="8" column="6"/>
 				</gridTriangle>
 				<gridTriangle>
 					<point line="9" column="5"/>
-					<point line="8" column="5"/>
 					<point line="9" column="6"/>
+					<point line="8" column="5"/>
 				</gridTriangle>
 				<gridTriangle>
 					<point line="8" column="5"/>
-					<point line="8" column="6"/>
 					<point line="9" column="6"/>
+					<point line="8" column="6"/>
 				</gridTriangle>
 			</shape>
 		</shapes>

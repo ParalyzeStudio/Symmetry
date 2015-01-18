@@ -10,9 +10,11 @@ public class GameController : MonoBehaviour
 
     public GameObject m_gridPfb; //prefab to instantiate the grid
     public GameObject m_contoursPfb; //prefab to instantiate contours
+    public GameObject m_shapePfb; //prefab to instantiate a shape
 
     public const float GRID_Z_VALUE = -10.0f;
     public const float CONTOURS_Z_VALUE = -20.0f;
+    public const float SHAPES_Z_VALUE = -30.0f;
 
     protected void Awake()
     {
@@ -22,7 +24,6 @@ public class GameController : MonoBehaviour
 
     protected void Start()
     {
-        Debug.Log("START");
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
         m_levelManager = levelManagerObject.GetComponent<LevelManager>();
         m_levelManager.ParseLevelsFile();
@@ -62,6 +63,7 @@ public class GameController : MonoBehaviour
     {
         GameObject grid = (GameObject) Instantiate(m_gridPfb);
         grid.transform.position = new Vector3(0, 0, GRID_Z_VALUE);
+        grid.GetComponent<GridBuilder>().Build();
     }
 
     /**
@@ -86,6 +88,19 @@ public class GameController : MonoBehaviour
      * **/
     private void BuildShapes()
     {
+        GameObject shapesObject = new GameObject("Shapes");
+        List<Shape> allShapes = m_levelManager.m_currentLevel.m_shapes;
+        foreach (Shape shape in allShapes)
+        {
+            GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
+            shapeObject.GetComponent<ShapeRenderer>().m_triangles = shape.m_triangles; //pass the array of grid triangles to the renderer
+            shapeObject.GetComponent<ShapeRenderer>().m_color = shape.m_color; //pass the color of the shape to the renderer
+            shapeObject.GetComponent<ShapeRenderer>().Render(false);
 
+            shapeObject.transform.parent = shapesObject.transform;
+            shapeObject.transform.localPosition = Vector3.zero;
+        }
+
+        shapesObject.transform.position = new Vector3(0, 0, SHAPES_Z_VALUE);
     }
 }

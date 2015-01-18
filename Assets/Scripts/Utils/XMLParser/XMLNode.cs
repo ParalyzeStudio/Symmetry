@@ -53,8 +53,6 @@ public class XMLNode: Hashtable
 						{
 							actualPath = actualPath + ">" + bits[j];
 						}
-						
-						//Debug.Log("xml path search truncated. Wanted: " + path + " got: " + actualPath);
 					}
 					
 					return ob;
