@@ -9,6 +9,11 @@ public class MathUtils
         return new Vector3(vector.x, vector.y, zValue);
     }
 
+    static public Vector2 BuildVector2FromVector3(Vector2 vector)
+    {
+        return new Vector2(vector.x, vector.y);
+    }
+
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
         return Mathf.Abs(floatA - floatB) < epsilon;
@@ -133,5 +138,35 @@ public class MathUtils
         }
 
         return (testValue >= (valueA - epsilon) && testValue <= (valueB + epsilon));
+    }
+
+    /**
+     * Calculate the determinant of 3 points
+     * **/
+    static public float Determinant(Vector2 u, Vector2 v, Vector2 w, bool normalize)
+    {
+        if (normalize)
+        {
+            Vector2 vec1 = u - w;
+            Vector2 vec2 = v - w;
+            float determinant = u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+            return determinant / (vec1.magnitude * vec2.magnitude);
+        }
+        else
+            return u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+    }
+
+    /**
+     * Determines if a point is inside the triangle defined by pointA, pointB and pointC 
+     * Depending on the vertices order (clockwise or counter-clockwise) the signs of det1, det2 and det3 can be positive or negative
+     * so we just check if they are of the same sign
+     * **/
+    static public bool IsInsideTriangle(Vector2 testPoint, Vector2 pointA, Vector2 pointB, Vector2 pointC)
+    {
+        float det1 = Determinant(pointA, pointB, testPoint, false);
+        float det2 = Determinant(pointB, pointC, testPoint, false);
+        float det3 = Determinant(pointC, pointA, testPoint, false);
+
+        return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }
 }

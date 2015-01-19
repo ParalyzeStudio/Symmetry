@@ -11,15 +11,25 @@ public class ShapeRenderer : MonoBehaviour
     private Color m_prevColor; //used to detect changes in shape color
     public List<GridTriangle> m_triangles { get; set; } //the list of triangles that will serve as mesh triangles to render this shape
 
-    public void Render(bool bDoubleSided)
+    /**
+     * Renders the shape based on the m_triangles list and the m_color public variables
+     * We can specify a mesh object if we want to render again on this one or pass null to create a new mesh
+     * **/
+    public void Render(Mesh overwriteMesh, bool bDoubleSided)
     {
         //Obtain the GridBuilder to make transformations from grid coordinates to world coordinates
         GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
         GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
 
         //Build the mesh
-        Mesh mesh = new Mesh();
-        mesh.name = "ShapeMesh";
+        Mesh mesh;
+        if (overwriteMesh == null)
+        {
+            mesh = new Mesh();
+            mesh.name = "ShapeMesh";
+        }
+        else
+            mesh = overwriteMesh;
 
         int vertexCount = 3 * m_triangles.Count;
         if (bDoubleSided) //we draw front and back faces
@@ -47,9 +57,26 @@ public class ShapeRenderer : MonoBehaviour
         mesh.normals = normals;
         mesh.colors = colors;
 
-        GetComponent<MeshFilter>().sharedMesh = mesh;
+        if (overwriteMesh == null)
+            GetComponent<MeshFilter>().sharedMesh = mesh;
 
         m_prevColor = m_color;
+    }
+
+    /**
+     * Shift all m_triangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
+     * **/
+    public void ShiftShapeVertices(Vector2 shift)
+    {
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
+        {
+            GridTriangle triangle = m_triangles[iTriangleIndex];
+            Vector2[] triangePoints = triangle.m_points;
+            for (int iPointIndex = 0; iPointIndex != 3; iPointIndex++)
+            {
+                triangePoints[iPointIndex] += shift;
+            }
+        }
     }
 
     public void Update()
