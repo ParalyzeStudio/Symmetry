@@ -95,7 +95,7 @@ public class GameController : MonoBehaviour
             GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
             shapeObject.GetComponent<ShapeRenderer>().m_triangles = shape.m_triangles; //pass the array of grid triangles to the renderer
             shapeObject.GetComponent<ShapeRenderer>().m_color = shape.m_color; //pass the color of the shape to the renderer
-            shapeObject.GetComponent<ShapeRenderer>().Render(null, false);
+            shapeObject.GetComponent<ShapeRenderer>().Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
             shapeObject.transform.parent = shapesObject.transform;
             shapeObject.transform.localPosition = Vector3.zero;

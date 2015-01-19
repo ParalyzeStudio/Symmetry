@@ -11,11 +11,18 @@ public class ShapeRenderer : MonoBehaviour
     private Color m_prevColor; //used to detect changes in shape color
     public List<GridTriangle> m_triangles { get; set; } //the list of triangles that will serve as mesh triangles to render this shape
 
+    public enum RenderFaces
+    {
+        FRONT,
+        BACK,
+        DOUBLE_SIDED
+    };
+
     /**
      * Renders the shape based on the m_triangles list and the m_color public variables
      * We can specify a mesh object if we want to render again on this one or pass null to create a new mesh
      * **/
-    public void Render(Mesh overwriteMesh, bool bDoubleSided)
+    public void Render(Mesh overwriteMesh, RenderFaces renderFaces)
     {
         //Obtain the GridBuilder to make transformations from grid coordinates to world coordinates
         GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
@@ -32,10 +39,13 @@ public class ShapeRenderer : MonoBehaviour
             mesh = overwriteMesh;
 
         int vertexCount = 3 * m_triangles.Count;
-        if (bDoubleSided) //we draw front and back faces
-            vertexCount *= 2;
+        int indexCount;
+        if (renderFaces == RenderFaces.DOUBLE_SIDED) //we draw front and back faces
+            indexCount = 2 * vertexCount;
+        else
+            indexCount = vertexCount;
         Vector3[] vertices = new Vector3[vertexCount];
-        int[] indices = new int[vertexCount];
+        int[] indices = new int[indexCount];
         Color[] colors = new Color[vertexCount];
         Vector3[] normals = new Vector3[vertexCount];
         int iTriangleIndex = 0;
@@ -45,13 +55,41 @@ public class ShapeRenderer : MonoBehaviour
             {
                 GridTriangle gridTriangle = m_triangles[iTriangleIndex];
                 vertices[iTriangleIndex * 3 + i] = gridBuilder.GetAnchorWorldCoordinatesFromGridCoordinates(gridTriangle.m_points[i]);
-                indices[iTriangleIndex * 3 + i] = iTriangleIndex * 3 + i;
                 normals[iTriangleIndex * 3 + i] = Vector3.forward;
                 colors[iTriangleIndex * 3 + i] = m_color;
                 
             }
             iTriangleIndex++;
         }
+
+        //populate the array of indices separately
+        iTriangleIndex = 0;
+        while (iTriangleIndex != m_triangles.Count)
+        {
+            if (renderFaces == RenderFaces.FRONT)
+            {
+                indices[iTriangleIndex * 3] = iTriangleIndex * 3;
+                indices[iTriangleIndex * 3 + 1] = iTriangleIndex * 3 + 1;
+                indices[iTriangleIndex * 3 + 2] = iTriangleIndex * 3 + 2;
+            }
+            else if (renderFaces == RenderFaces.BACK)
+            {
+                indices[iTriangleIndex * 3] = iTriangleIndex * 3;
+                indices[iTriangleIndex * 3 + 1] = iTriangleIndex * 3 + 2;
+                indices[iTriangleIndex * 3 + 2] = iTriangleIndex * 3 + 1;
+            }
+            else //double sided
+            {
+                indices[iTriangleIndex * 6] = iTriangleIndex * 3;
+                indices[iTriangleIndex * 6 + 1] = iTriangleIndex * 3 + 1;
+                indices[iTriangleIndex * 6 + 2] = iTriangleIndex * 3 + 2;
+                indices[iTriangleIndex * 6 + 3] = iTriangleIndex * 3;
+                indices[iTriangleIndex * 6 + 4] = iTriangleIndex * 3 + 2;
+                indices[iTriangleIndex * 6 + 5] = iTriangleIndex * 3 + 1;
+            }
+            iTriangleIndex++;
+        }
+
         mesh.vertices = vertices;
         mesh.triangles = indices;
         mesh.normals = normals;
@@ -59,6 +97,8 @@ public class ShapeRenderer : MonoBehaviour
 
         if (overwriteMesh == null)
             GetComponent<MeshFilter>().sharedMesh = mesh;
+        else
+            mesh.RecalculateBounds();
 
         m_prevColor = m_color;
     }

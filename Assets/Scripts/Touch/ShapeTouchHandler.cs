@@ -32,8 +32,7 @@ public class ShapeTouchHandler : TouchHandler
             return false;
 
         //move the shape of delta vector
-        this.gameObject.transform.position += MathUtils.BuildVector3FromVector2(delta, 0);
-        this.gameObject.GetComponent<ShapeRenderer>().Render(this.gameObject.GetComponent<MeshFilter>().sharedMesh, false);
+        this.gameObject.transform.localPosition += MathUtils.BuildVector3FromVector2(delta, 0);
 
         return true;
     }
@@ -57,8 +56,8 @@ public class ShapeTouchHandler : TouchHandler
         Vector2 shift = newGridAnchorCoords - oldGridAnchorCoords;
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
-        this.gameObject.transform.position = Vector3.zero; //reset game object position to zero
-        shapeRenderer.Render(meshFilter.sharedMesh, false); //render again the shape
+        this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
+        shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
     }
 }
 
