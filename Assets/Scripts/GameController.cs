@@ -28,6 +28,8 @@ public class GameController : MonoBehaviour
         m_levelManager = levelManagerObject.GetComponent<LevelManager>();
         m_levelManager.ParseLevelsFile();
         BuildLevel(1);
+
+        TouchHandler.s_touchDeactivated = false;
     }
 
     /**

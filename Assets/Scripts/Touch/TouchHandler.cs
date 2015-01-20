@@ -8,6 +8,7 @@ using System.Collections;
 public class TouchHandler : MonoBehaviour
 {
     public const float MOVE_EPSILON = 0.5f;
+    public static bool s_touchDeactivated;
 
     //public Vector2 m_touchArea;
     protected bool m_selected;
@@ -88,6 +89,9 @@ public class TouchHandler : MonoBehaviour
      * **/
     void Update()
     {
+        if (s_touchDeactivated)
+            return;
+
         Vector2 touchLocation;
 #if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
         if (Input.touchCount == 1)
