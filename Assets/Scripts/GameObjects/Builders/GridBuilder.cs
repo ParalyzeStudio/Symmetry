@@ -7,6 +7,8 @@ public class GridBuilder : MonoBehaviour
 {
     public float m_gridSpacing = 100.0f;
     private float m_prevGridSpacing;
+    public float m_gridAnchorUniformScaling = 16.0f;
+    private float m_prevGridAnchorUniformScaling = 1.0f;
     public List<GameObject> m_gridAnchors { get; set; }
     private int m_numLines; //number of lines in the grid
     private int m_numColumns; //number of columns in the grid
@@ -16,11 +18,24 @@ public class GridBuilder : MonoBehaviour
     public void Awake()
     {
         m_prevGridSpacing = 0.0f;
+        m_prevGridAnchorUniformScaling = 0.0f;
         m_gridAnchors = new List<GameObject>();
     }
 
     public void Build()
     {
+        //fresh build destroy a previously created anchorsHolder and clear the vector of gridAnchors
+        GameObject anchorsHolder = GameObject.FindGameObjectWithTag("AnchorsHolder");
+        if (anchorsHolder != null)
+            DestroyImmediate(anchorsHolder);
+        m_gridAnchors.Clear();
+
+        anchorsHolder = new GameObject();
+        anchorsHolder.name = "AnchorsHolder";
+        anchorsHolder.tag = "AnchorsHolder";
+        anchorsHolder.transform.parent = this.transform;
+        anchorsHolder.transform.localPosition = Vector3.zero;
+
         GameObject gameControllerObject = GameObject.FindGameObjectWithTag("GameController");
         GameController gameController = gameControllerObject.GetComponent<GameController>();
 
@@ -55,7 +70,7 @@ public class GridBuilder : MonoBehaviour
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_gridAnchorPfb, anchorLocalPosition, Quaternion.identity);
-                clonedGridAnchor.transform.parent = this.transform;
+                clonedGridAnchor.transform.parent = anchorsHolder.transform;
                 clonedGridAnchor.transform.localPosition = anchorLocalPosition;
                 m_gridAnchors.Add(clonedGridAnchor);
             }
@@ -139,12 +154,13 @@ public class GridBuilder : MonoBehaviour
         if (m_gridSpacing != m_prevGridSpacing)
         {
             m_prevGridSpacing = m_gridSpacing;
-            foreach (GameObject gridAnchor in m_gridAnchors)
-            {
-                DestroyImmediate(gridAnchor);
-            }
-            m_gridAnchors.Clear();
+
             Build();
+        }
+        if (m_gridAnchorUniformScaling != m_prevGridAnchorUniformScaling)
+        {
+            m_prevGridAnchorUniformScaling = m_gridAnchorUniformScaling;
+            
         }
     }
 }

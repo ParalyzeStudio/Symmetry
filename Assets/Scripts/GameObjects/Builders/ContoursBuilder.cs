@@ -5,11 +5,6 @@ public class ContoursBuilder : MonoBehaviour
 {
     public GameObject m_contourSegmentPfb;
 
-    public void Start()
-    {
-        Build();
-    }
-
     public void Build()
     {
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");

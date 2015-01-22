@@ -8,6 +8,7 @@ using System.Collections;
 public class TouchHandler : MonoBehaviour
 {
     public const float MOVE_EPSILON = 0.5f;
+    public const float ON_CLICK_MAX_DISPLACEMENT = 32.0f;
     public static bool s_touchDeactivated;
 
     //public Vector2 m_touchArea;
@@ -16,6 +17,7 @@ public class TouchHandler : MonoBehaviour
     protected bool m_mouseButtonPressed;
 #endif
     protected Vector2 m_prevPointerLocation;
+    protected Vector2 m_pointerDownPointerLocation;
 
     public virtual void Awake()
     {
@@ -43,6 +45,7 @@ public class TouchHandler : MonoBehaviour
     {
         m_selected = true;
         m_prevPointerLocation = pointerLocation;
+        m_pointerDownPointerLocation = pointerLocation;
     }
 
     /**
@@ -65,9 +68,11 @@ public class TouchHandler : MonoBehaviour
      * **/
     protected virtual void OnPointerUp()
     {
-        if (m_selected && IsPointerLocationContainedInObject(m_prevPointerLocation))
-            OnClick();
+        float pointerDisplacementSqrLength = (m_prevPointerLocation - m_pointerDownPointerLocation).sqrMagnitude;
 
+        if (m_selected && IsPointerLocationContainedInObject(m_prevPointerLocation) && pointerDisplacementSqrLength <= ON_CLICK_MAX_DISPLACEMENT)
+            OnClick();
+ 
         m_selected = false;
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
         m_mouseButtonPressed = false;
