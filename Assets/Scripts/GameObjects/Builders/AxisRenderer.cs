@@ -35,7 +35,7 @@ public class AxisRenderer : MonoBehaviour
     {
         GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
         GridBuilder gridBuilder = (GridBuilder)gridObject.GetComponent<GridBuilder>();
-        Vector2 worldPosition = gridBuilder.GetAnchorWorldCoordinatesFromGridCoordinates(gridPosition);
+        Vector2 worldPosition = gridBuilder.GetWorldCoordinatesFromGridCoordinates(gridPosition);
 
         if (m_endpoint1 == null) //no endpoints set yet, initiate the first one
         {

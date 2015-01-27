@@ -6,6 +6,11 @@ public class ShapesHolder : MonoBehaviour
 {
     public List<GameObject> m_shapes { get; set; }
 
+    public ShapesHolder()
+    {
+        m_shapes = new List<GameObject>();
+    }
+
     public void AddShape(GameObject shape)
     {
         m_shapes.Add(shape);

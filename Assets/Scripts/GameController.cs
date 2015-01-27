@@ -21,6 +21,14 @@ public class GameController : MonoBehaviour
 
     public ActionMode m_actionMode = ActionMode.SYMMETRY_AXIS;
 
+    public enum GameStatus
+    {
+        RUNNING,
+        PAUSED,
+        VICTORY,
+        DEFEAT
+    };
+
     public const float GRID_Z_VALUE = -10.0f;
     public const float CONTOURS_Z_VALUE = -20.0f;
     public const float SHAPES_Z_VALUE = -30.0f;
@@ -39,6 +47,19 @@ public class GameController : MonoBehaviour
         BuildLevel(1);
 
         TouchHandler.s_touchDeactivated = false;
+    }
+
+    protected void Update()
+    {
+        GameStatus gameStatus = GetGameStatus();
+        if (gameStatus == GameStatus.VICTORY)
+        {
+
+        }
+        else if (gameStatus == GameStatus.DEFEAT)
+        {
+
+        }
     }
 
     /**
@@ -102,19 +123,52 @@ public class GameController : MonoBehaviour
     private void BuildShapes()
     {
         GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
+        ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
         List<Shape> allShapes = m_levelManager.m_currentLevel.m_shapes;
         foreach (Shape shape in allShapes)
         {
+            //First triangulate the shape
+            shape.Triangulate();
+
+            //Then pass the data contained into a Shape object to a newly created ShapeRenderer object
             GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
             ShapeRenderer shapeRenderer = shapeObject.GetComponent<ShapeRenderer>();
-            shapeRenderer.m_triangles = shape.m_triangles; //pass the array of grid triangles to the renderer
+            shapeRenderer.m_gridTriangles = shape.m_gridTriangles; //pass the array of grid triangles to the renderer
+            //shapeRenderer.m_triangles = shape.m_triangles;
             shapeRenderer.m_color = shape.m_color; //pass the color of the shape to the renderer
             shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
             shapeObject.transform.parent = shapesObject.transform;
             shapeObject.transform.localPosition = Vector3.zero;
+
+            shapesHolder.AddShape(shapeObject);
         }
 
         shapesObject.transform.position = new Vector3(0, 0, SHAPES_Z_VALUE);
+    }
+
+    /**
+     * Returns the current status of the game
+     * **/
+    public GameStatus GetGameStatus()
+    {
+        return GameStatus.RUNNING;
+    }
+
+    /**
+     * Checks if the contour is filled exactly
+     * Calculate the sum of the areas of contours and compare it to the area occupied by all the shapes
+     * **/
+    public bool IsVictory()
+    {
+        float contoursArea = 0;
+        List<Contour> contours = m_levelManager.m_currentLevel.m_contours;
+        for (int iContourIndex = 0; iContourIndex != contours.Count; iContourIndex++)
+        {
+            Contour contour = contours[iContourIndex];
+            contoursArea += contour.m_area;
+        }
+
+        return false;
     }
 }

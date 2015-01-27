@@ -31,11 +31,13 @@ public class LevelManager : MonoBehaviour
             foreach (XMLNode contourNode in contoursNodeList)
             {
                 Contour contour = new Contour();
+                string strContourArea = contourNode.GetValue("@area");
+                contour.m_area = float.Parse(strContourArea);
                 XMLNodeList contourPointsNodeList = contourNode.GetNodeList("point");
-                foreach (XMLNode contourPointsNode in contourPointsNodeList)
+                foreach (XMLNode contourPointNode in contourPointsNodeList)
                 {
-                    string strContourPointLine = contourPointsNode.GetValue("@line");
-                    string strContourPointColumn = contourPointsNode.GetValue("@column");
+                    string strContourPointLine = contourPointNode.GetValue("@line");
+                    string strContourPointColumn = contourPointNode.GetValue("@column");
 
                     int contourPointLine = int.Parse(strContourPointLine);
                     int contourPointColumn = int.Parse(strContourPointColumn);
@@ -60,27 +62,40 @@ public class LevelManager : MonoBehaviour
                 shapeColor.a = float.Parse(strSplitColor[3]);
                 shape.m_color = shapeColor;
 
-                XMLNodeList shapeTrianglesNodeList = shapeNode.GetNodeList("gridTriangle");
-                foreach (XMLNode gridTriangleNode in shapeTrianglesNodeList)
+                //XMLNode contourNode = shapeNode.GetNode("contour");
+                XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");
+                foreach (XMLNode contourPointNode in contourPointsNodeList)
                 {
-                    GridTriangle triangle = new GridTriangle();
+                    string strContourPointLine = contourPointNode.GetValue("@line");
+                    string strContourPointColumn = contourPointNode.GetValue("@column");
 
-                    XMLNodeList trianglePointsNodeList = gridTriangleNode.GetNodeList("point");
-                    int trianglePointIndex = 0;
-                    foreach (XMLNode trianglePointNode in trianglePointsNodeList)
-                    {
-                        string strContourPointLine = trianglePointNode.GetValue("@line");
-                        string strContourPointColumn = trianglePointNode.GetValue("@column");
+                    int contourPointLine = int.Parse(strContourPointLine);
+                    int contourPointColumn = int.Parse(strContourPointColumn);
 
-                        int contourPointLine = int.Parse(strContourPointLine);
-                        int contourPointColumn = int.Parse(strContourPointColumn);
-
-                        triangle.m_points[trianglePointIndex] = new Vector2(contourPointLine, contourPointColumn);
-                        trianglePointIndex++;
-                    }
-
-                    shape.m_triangles.Add(triangle);
+                    shape.m_contour.Add(new Vector2(contourPointLine, contourPointColumn));
                 }
+
+                //XMLNodeList shapeTrianglesNodeList = shapeNode.GetNodeList("gridTriangle");
+                //foreach (XMLNode gridTriangleNode in shapeTrianglesNodeList)
+                //{
+                //    GridTriangle triangle = new GridTriangle();
+
+                //    XMLNodeList trianglePointsNodeList = gridTriangleNode.GetNodeList("point");
+                //    int trianglePointIndex = 0;
+                //    foreach (XMLNode trianglePointNode in trianglePointsNodeList)
+                //    {
+                //        string strTrianglePointLine = trianglePointNode.GetValue("@line");
+                //        string strTrianglePointColumn = trianglePointNode.GetValue("@column");
+
+                //        int contourPointLine = int.Parse(strTrianglePointLine);
+                //        int contourPointColumn = int.Parse(strTrianglePointColumn);
+
+                //        triangle.m_points[trianglePointIndex] = new Vector2(contourPointLine, contourPointColumn);
+                //        trianglePointIndex++;
+                //    }
+
+                //    shape.m_gridTriangles.Add(triangle);
+                //}
 
                 level.m_shapes.Add(shape);
             }

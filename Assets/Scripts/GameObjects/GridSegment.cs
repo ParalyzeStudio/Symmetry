@@ -26,8 +26,8 @@ public class GridSegment : UVQuad
 
             GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
             GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
-            Vector2 startPoint = gridBuilder.GetAnchorWorldCoordinatesFromGridCoordinates(m_startPointGrid);
-            Vector2 endPoint = gridBuilder.GetAnchorWorldCoordinatesFromGridCoordinates(m_endPointGrid);
+            Vector2 startPoint = gridBuilder.GetWorldCoordinatesFromGridCoordinates(m_startPointGrid);
+            Vector2 endPoint = gridBuilder.GetWorldCoordinatesFromGridCoordinates(m_endPointGrid);
             m_length = (endPoint - startPoint).magnitude;
 
             //set the correct position
