@@ -30,6 +30,46 @@ public class MathUtils
     }
 
     /**
+     * Simply tells if two segments intersect without giving the coordinates of the intersection point
+     * **/
+    static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    {
+        float det1 = Determinant(segment1Point1, segment1Point2, segment2Point1, false);
+        float det2 = Determinant(segment1Point1, segment1Point2, segment2Point2, false);
+
+        if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
+        {
+            float det3 = Determinant(segment2Point1, segment2Point2, segment1Point1, false);
+            float det4 = Determinant(segment2Point1, segment2Point2, segment1Point2, false);
+
+            if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if (det1 == 0 || det2 == 0)
+        {
+            if (det1 == 0 && det2 == 0) //two segments are collinear and on the same line
+            {
+                return false;
+            }
+            else //one point of the second segment is contained into the first segment but not the other point
+            {
+                return false;
+            }
+        }
+        else /** (det1 * det2) > 0 **/
+        {
+            return false;
+        }
+    }
+
+
+    /**
      * Find the intersection of two segments if it exists
      * **/
     static public void TwoSegmentsIntersection(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2, out bool intersects, out Vector2 intersection)

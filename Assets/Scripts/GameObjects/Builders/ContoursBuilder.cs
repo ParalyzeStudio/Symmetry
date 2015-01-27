@@ -14,8 +14,11 @@ public class ContoursBuilder : MonoBehaviour
         List<Contour> contours = levelManager.m_currentLevel.m_contours;
         foreach (Contour contour in contours)
         {
+            //First triangulate the contour
+            contour.Triangulate();
+
             GameObject contourObject = new GameObject("Contour");
-            List<Vector2> contourPoints = contour.m_points;
+            List<Vector2> contourPoints = contour.m_contour;
             for (int iPointIndex = 0; iPointIndex != contourPoints.Count; iPointIndex++)
             {
                 Vector2 startPointGrid = contourPoints[iPointIndex];

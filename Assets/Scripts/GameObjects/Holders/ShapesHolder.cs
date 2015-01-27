@@ -4,25 +4,25 @@ using System.Collections.Generic;
 
 public class ShapesHolder : MonoBehaviour
 {
-    public List<GameObject> m_shapes { get; set; }
+    public List<GameObject> m_shapesObj { get; set; }
 
     public ShapesHolder()
     {
-        m_shapes = new List<GameObject>();
+        m_shapesObj = new List<GameObject>();
     }
 
     public void AddShape(GameObject shape)
     {
-        m_shapes.Add(shape);
+        m_shapesObj.Add(shape);
     }
 
     public void RemoveShape(GameObject shape)
     {
-        for (int shapeIndex = 0; shapeIndex != m_shapes.Count; shapeIndex++)
+        for (int shapeIndex = 0; shapeIndex != m_shapesObj.Count; shapeIndex++)
         {
-            if (m_shapes[shapeIndex] == shape)
+            if (m_shapesObj[shapeIndex] == shape)
             {
-                m_shapes.Remove(shape);
+                m_shapesObj.Remove(shape);
                 return;
             }
         }
@@ -30,6 +30,6 @@ public class ShapesHolder : MonoBehaviour
 
     public void ClearShapes()
     {
-        m_shapes.Clear();
+        m_shapesObj.Clear();
     }
 }

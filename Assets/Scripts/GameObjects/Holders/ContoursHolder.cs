@@ -5,12 +5,10 @@ using System.Collections.Generic;
 public class ContoursHolder : MonoBehaviour
 {
     public List<GameObject> m_contoursObj { get; set; }
-    public List<Contour> m_contours { get; set; }
 
     public ContoursHolder()
     {
         m_contoursObj = new List<GameObject>();
-        m_contours = new List<Contour>();
     }
 
     public void AddContour(GameObject contour)

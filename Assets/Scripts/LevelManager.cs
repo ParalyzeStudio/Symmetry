@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour
                     int contourPointLine = int.Parse(strContourPointLine);
                     int contourPointColumn = int.Parse(strContourPointColumn);
 
-                    contour.m_points.Add(new Vector2(contourPointLine, contourPointColumn));
+                    contour.m_contour.Add(new Vector2(contourPointLine, contourPointColumn));
                 }
                 level.m_contours.Add(contour);
             }

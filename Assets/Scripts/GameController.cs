@@ -29,6 +29,8 @@ public class GameController : MonoBehaviour
         DEFEAT
     };
 
+    private GameStatus m_gameStatus;
+
     public const float GRID_Z_VALUE = -10.0f;
     public const float CONTOURS_Z_VALUE = -20.0f;
     public const float SHAPES_Z_VALUE = -30.0f;
@@ -134,7 +136,6 @@ public class GameController : MonoBehaviour
             GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
             ShapeRenderer shapeRenderer = shapeObject.GetComponent<ShapeRenderer>();
             shapeRenderer.m_gridTriangles = shape.m_gridTriangles; //pass the array of grid triangles to the renderer
-            //shapeRenderer.m_triangles = shape.m_triangles;
             shapeRenderer.m_color = shape.m_color; //pass the color of the shape to the renderer
             shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
@@ -152,7 +153,16 @@ public class GameController : MonoBehaviour
      * **/
     public GameStatus GetGameStatus()
     {
-        return GameStatus.RUNNING;
+        if (m_gameStatus == GameStatus.DEFEAT || m_gameStatus == GameStatus.VICTORY)
+            return m_gameStatus;
+
+        bool victory = IsVictory();
+        if (victory)
+            m_gameStatus = GameStatus.VICTORY;
+        else
+            m_gameStatus = GameStatus.RUNNING;
+
+        return m_gameStatus;
     }
 
     /**
@@ -161,14 +171,60 @@ public class GameController : MonoBehaviour
      * **/
     public bool IsVictory()
     {
-        float contoursArea = 0;
-        List<Contour> contours = m_levelManager.m_currentLevel.m_contours;
-        for (int iContourIndex = 0; iContourIndex != contours.Count; iContourIndex++)
+        //First we check if one of the shapes intersects a contour
+        List<Shape> allShapes = m_levelManager.m_currentLevel.m_shapes;
+        List<Contour> allContours = m_levelManager.m_currentLevel.m_contours;
+        for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
         {
-            Contour contour = contours[iContourIndex];
+            Shape shape = allShapes[iShapeIndex];
+           
+            for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+            {
+                if (shape.IntersectsContour(allContours[iContourIndex]))
+                    return false;
+            }
+        }
+
+        Debug.Log("1: NO SHAPE/CONTOUR INTERSECTION");
+
+        //if not we check if every shape is inside a contour
+        for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
+        {
+            Shape shape = allShapes[iShapeIndex];
+            bool shapeInsideContour = false;
+            for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+            {
+                Contour contour = allContours[iContourIndex];
+                if (contour.ContainsGridPoint(shape.m_gridTriangles[0].GetBarycentre()))
+                {
+                    shapeInsideContour = true;
+                    break;
+                }
+            }
+
+            if (!shapeInsideContour)
+                return false;
+        }
+
+        Debug.Log("2: ALL SHAPES INSIDE CONTOUR");
+
+        //finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
+        float contoursArea = 0;
+        for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+        {
+            Contour contour = allContours[iContourIndex];
             contoursArea += contour.m_area;
         }
 
-        return false;
+        float shapesArea = 0;
+        for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
+        {
+            shapesArea += allShapes[iShapeIndex].m_area;
+        }
+
+        if (contoursArea == shapesArea)
+            Debug.Log("3: SAME AREA");
+
+        return (contoursArea == shapesArea);
     }
 }
