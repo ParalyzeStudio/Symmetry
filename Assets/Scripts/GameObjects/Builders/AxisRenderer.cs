@@ -41,7 +41,7 @@ public class AxisRenderer : MonoBehaviour
         {
             m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
             m_endpoint1.transform.parent = this.transform; //set this endpoint as a child of the axis itself
-            m_endpoint1.transform.localPosition = MathUtils.BuildVector3FromVector2(worldPosition, 0);
+            m_endpoint1.transform.localPosition = GeometryUtils.BuildVector3FromVector2(worldPosition, 0);
             m_endpoint1GridPosition = gridPosition;
             m_buildStatus = BuildStatus.FIRST_ENDPOINT_SET;
         }
@@ -51,7 +51,7 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_endpoint2 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
                 m_endpoint2.transform.parent = this.transform; //set this endpoint as a child of the axis itself
-                m_endpoint2.transform.localPosition = MathUtils.BuildVector3FromVector2(worldPosition, 0);
+                m_endpoint2.transform.localPosition = GeometryUtils.BuildVector3FromVector2(worldPosition, 0);
                 m_endpoint2GridPosition = gridPosition;
                 m_buildStatus = BuildStatus.SECOND_ENDPOINT_SET;
                 BuildAxisSegment();
@@ -71,5 +71,17 @@ public class AxisRenderer : MonoBehaviour
         segment.m_endPointGrid = m_endpoint2GridPosition;
         m_buildStatus = BuildStatus.BUILDING_SEGMENT;
         m_buildStatus = BuildStatus.DONE_BUILDING;
+
+        OnFinishBuildAxisSegment();
+    }
+
+
+    /**
+     * Callback that is called when axis segment has being drawn
+     * **/
+    public void OnFinishBuildAxisSegment()
+    {
+        Symmetrizer symmetrizer = this.gameObject.GetComponent<Symmetrizer>();
+        symmetrizer.Symmetrize();
     }
 }

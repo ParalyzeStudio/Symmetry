@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour
                     int contourPointLine = int.Parse(strContourPointLine);
                     int contourPointColumn = int.Parse(strContourPointColumn);
 
-                    contour.m_contour.Add(new Vector2(contourPointLine, contourPointColumn));
+                    contour.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
                 }
                 level.m_contours.Add(contour);
             }
@@ -62,7 +62,6 @@ public class LevelManager : MonoBehaviour
                 shapeColor.a = float.Parse(strSplitColor[3]);
                 shape.m_color = shapeColor;
 
-                //XMLNode contourNode = shapeNode.GetNode("contour");
                 XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");
                 foreach (XMLNode contourPointNode in contourPointsNodeList)
                 {
@@ -72,30 +71,8 @@ public class LevelManager : MonoBehaviour
                     int contourPointLine = int.Parse(strContourPointLine);
                     int contourPointColumn = int.Parse(strContourPointColumn);
 
-                    shape.m_contour.Add(new Vector2(contourPointLine, contourPointColumn));
+                    shape.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
                 }
-
-                //XMLNodeList shapeTrianglesNodeList = shapeNode.GetNodeList("gridTriangle");
-                //foreach (XMLNode gridTriangleNode in shapeTrianglesNodeList)
-                //{
-                //    GridTriangle triangle = new GridTriangle();
-
-                //    XMLNodeList trianglePointsNodeList = gridTriangleNode.GetNodeList("point");
-                //    int trianglePointIndex = 0;
-                //    foreach (XMLNode trianglePointNode in trianglePointsNodeList)
-                //    {
-                //        string strTrianglePointLine = trianglePointNode.GetValue("@line");
-                //        string strTrianglePointColumn = trianglePointNode.GetValue("@column");
-
-                //        int contourPointLine = int.Parse(strTrianglePointLine);
-                //        int contourPointColumn = int.Parse(strTrianglePointColumn);
-
-                //        triangle.m_points[trianglePointIndex] = new Vector2(contourPointLine, contourPointColumn);
-                //        trianglePointIndex++;
-                //    }
-
-                //    shape.m_gridTriangles.Add(triangle);
-                //}
 
                 level.m_shapes.Add(shape);
             }

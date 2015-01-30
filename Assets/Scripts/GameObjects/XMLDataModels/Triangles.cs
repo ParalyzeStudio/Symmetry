@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 /**
- * Class that holds data for a triangle in grid coordinates (line, column)
+ * Class that holds data for a triangle in grid coordinates (column, line)
  * **/
 public class GridTriangle
 {
@@ -26,11 +26,25 @@ public class GridTriangle
                 Vector2 triangleEdgePoint1 = m_points[iTriangleEdgeIndex];
                 Vector2 triangleEdgePoint2 = (iTriangleEdgeIndex == 2) ? m_points[0] : m_points[iTriangleEdgeIndex + 1];
 
-                if (MathUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2))
+                if (GeometryUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2))
                     return true;
             }
         }
         return false;
+    }
+
+    public bool IntersectsSegment(Vector2 segmentPoint1, Vector2 segmentPoint2)
+    {
+        return GeometryUtils.TwoSegmentsIntersect(m_points[0], m_points[1], segmentPoint1, segmentPoint2) ||
+               GeometryUtils.TwoSegmentsIntersect(m_points[1], m_points[2], segmentPoint1, segmentPoint2) ||
+               GeometryUtils.TwoSegmentsIntersect(m_points[2], m_points[0], segmentPoint1, segmentPoint2);
+    }
+
+    public bool IntersectsLine(Vector2 linePoint1, Vector2 linePoint2)
+    {
+        return GeometryUtils.SegmentIntersectsLine(m_points[0], m_points[1], linePoint1, linePoint2) ||
+               GeometryUtils.SegmentIntersectsLine(m_points[1], m_points[2], linePoint1, linePoint2) ||
+               GeometryUtils.SegmentIntersectsLine(m_points[2], m_points[0], linePoint1, linePoint2);
     }
 
     public Vector2 GetBarycentre()
@@ -40,7 +54,7 @@ public class GridTriangle
 
     public bool ContainsGridPoint(Vector2 gridPoint)
     {
-        return MathUtils.IsInsideTriangle(gridPoint, m_points[0], m_points[1], m_points[2]);
+        return GeometryUtils.IsInsideTriangle(gridPoint, m_points[0], m_points[1], m_points[2]);
     }
 
     public float GetArea()

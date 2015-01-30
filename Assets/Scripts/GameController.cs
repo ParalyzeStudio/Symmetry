@@ -54,13 +54,9 @@ public class GameController : MonoBehaviour
     protected void Update()
     {
         GameStatus gameStatus = GetGameStatus();
-        if (gameStatus == GameStatus.VICTORY)
+        if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
         {
-
-        }
-        else if (gameStatus == GameStatus.DEFEAT)
-        {
-
+            EndLevel();
         }
     }
 
@@ -84,7 +80,6 @@ public class GameController : MonoBehaviour
             BuildGUI();
             BuildContours();
             BuildShapes();
-
 
             m_levelBuilt = true;
         }
@@ -135,9 +130,9 @@ public class GameController : MonoBehaviour
             //Then pass the data contained into a Shape object to a newly created ShapeRenderer object
             GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
             ShapeRenderer shapeRenderer = shapeObject.GetComponent<ShapeRenderer>();
-            shapeRenderer.m_gridTriangles = shape.m_gridTriangles; //pass the array of grid triangles to the renderer
-            shapeRenderer.m_color = shape.m_color; //pass the color of the shape to the renderer
-            shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+            shapeRenderer.m_shape = shape; //pass the array of grid triangles to the renderer
+            //shapeRenderer.m_color = shape.m_color; //pass the color of the shape to the renderer
+            shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true);
 
             shapeObject.transform.parent = shapesObject.transform;
             shapeObject.transform.localPosition = Vector3.zero;
@@ -185,7 +180,7 @@ public class GameController : MonoBehaviour
             }
         }
 
-        Debug.Log("1: NO SHAPE/CONTOUR INTERSECTION");
+        //Debug.Log("1: NO SHAPE/CONTOUR INTERSECTION");
 
         //if not we check if every shape is inside a contour
         for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
@@ -206,7 +201,7 @@ public class GameController : MonoBehaviour
                 return false;
         }
 
-        Debug.Log("2: ALL SHAPES INSIDE CONTOUR");
+        //Debug.Log("2: ALL SHAPES INSIDE CONTOUR");
 
         //finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
         float contoursArea = 0;
@@ -222,9 +217,19 @@ public class GameController : MonoBehaviour
             shapesArea += allShapes[iShapeIndex].m_area;
         }
 
-        if (contoursArea == shapesArea)
-            Debug.Log("3: SAME AREA");
+        //if (contoursArea == shapesArea)
+            //Debug.Log("3: SAME AREA");
 
         return (contoursArea == shapesArea);
+    }
+
+
+    /**
+     * Ends the current level by fading out the grid and contours and disabling touch
+     * After a few seconds launch next level
+     * **/
+    public void EndLevel()
+    {
+
     }
 }

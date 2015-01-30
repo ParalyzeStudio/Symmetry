@@ -15,7 +15,7 @@
 		</contours>
 		<shapes>
 			<shape color="1,0,0,0.5">
-				<contour>
+				<!--<contour>
 					<point line="8" column="9"/>
 					<point line="7" column="9"/>
 					<point line="7" column="8"/>
@@ -24,15 +24,15 @@
 					<point line="7" column="12"/>
 					<point line="7" column="11"/>
 					<point line="8" column="11"/>
-				</contour>
-				<!--<contour area="6">
+				</contour>-->
+				<contour area="6">
 					<point line="8" column="4"/>
 					<point line="7" column="4"/>
 					<point line="7" column="6"/>
 					<point line="9" column="6"/>
 					<point line="9" column="5"/>
 					<point line="8" column="5"/>
-				</contour>-->
+				</contour>
 				<gridTriangle>
 					<point line="8" column="4"/>
 					<point line="8" column="5"/>

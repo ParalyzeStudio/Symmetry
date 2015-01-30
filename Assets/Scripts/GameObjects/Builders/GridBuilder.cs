@@ -10,8 +10,8 @@ public class GridBuilder : MonoBehaviour
     public float m_gridAnchorUniformScaling = 16.0f;
     private float m_prevGridAnchorUniformScaling = 1.0f;
     public List<GameObject> m_gridAnchors { get; set; }
-    private int m_numLines; //number of lines in the grid
-    private int m_numColumns; //number of columns in the grid
+    public int m_numLines { get; set; } //number of lines in the grid
+    public int m_numColumns { get; set; } //number of columns in the grid
 
     public GameObject m_gridAnchorPfb;
 
@@ -24,6 +24,8 @@ public class GridBuilder : MonoBehaviour
 
     public void Build()
     {
+        m_prevGridSpacing = m_gridSpacing;
+
         //fresh build destroy a previously created anchorsHolder and clear the vector of gridAnchors
         GameObject anchorsHolder = GameObject.FindGameObjectWithTag("AnchorsHolder");
         if (anchorsHolder != null)
@@ -78,39 +80,34 @@ public class GridBuilder : MonoBehaviour
     }
 
     /**
-     * Calculates the world coordinates of a point knowing its grid coordinates (line, column) 
+     * Calculates the world coordinates of a point knowing its grid coordinates (column, line) 
      * **/
     public Vector2 GetWorldCoordinatesFromGridCoordinates(Vector2 gridCoordinates)
     {
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
         {
-            anchorPositionX = ((gridCoordinates.y - m_numColumns / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionX = ((gridCoordinates.x - m_numColumns / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of columns
         {
-            anchorPositionX = ((gridCoordinates.y - 1 - m_numColumns / 2) * m_gridSpacing);
+            anchorPositionX = ((gridCoordinates.x - 1 - m_numColumns / 2) * m_gridSpacing);
         }
         float anchorPositionY;
         if (m_numLines % 2 == 0) //even number of lines
         {
-            anchorPositionY = ((gridCoordinates.x - m_numLines / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionY = ((gridCoordinates.y - m_numLines / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of lines
         {
-            anchorPositionY = ((gridCoordinates.x - 1 - m_numLines / 2) * m_gridSpacing);
+            anchorPositionY = ((gridCoordinates.y - 1 - m_numLines / 2) * m_gridSpacing);
         }
 
         return new Vector2(anchorPositionX, anchorPositionY);
-
-        //int targetAnchorIndex = (int) ((gridCoordinates.x - 1) * m_numColumns + (gridCoordinates.y - 1));
-        //GameObject targetAnchor = m_gridAnchors[targetAnchorIndex];
-
-        //return targetAnchor.transform.position;
     }
 
     /**
-     * Calculates the grid coordinates (line, column) of a point knowing its world coordinates
+     * Calculates the grid coordinates (column, line) of a point knowing its world coordinates
      * **/
     public Vector2 GetGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
     {
@@ -134,7 +131,7 @@ public class GridBuilder : MonoBehaviour
             iColNumber = worldCoordinates.x / m_gridSpacing + m_numColumns / 2 + 1;
         }
 
-        return new Vector2(iLineNumber, iColNumber);
+        return new Vector2(iColNumber, iLineNumber);
     }
 
     /**
@@ -165,7 +162,10 @@ public class GridBuilder : MonoBehaviour
         }
 
         if (iMinDistanceAnchorIndex >= 0)
+        {
+            Vector2 gridCoordinates = GetGridCoordinatesFromWorldCoordinates(m_gridAnchors[iMinDistanceAnchorIndex].transform.position);
             return GetGridCoordinatesFromWorldCoordinates(m_gridAnchors[iMinDistanceAnchorIndex].transform.position);
+        }
         else
             return Vector2.zero;
     }
@@ -181,7 +181,6 @@ public class GridBuilder : MonoBehaviour
         if (m_gridAnchorUniformScaling != m_prevGridAnchorUniformScaling)
         {
             m_prevGridAnchorUniformScaling = m_gridAnchorUniformScaling;
-            
         }
     }
 }

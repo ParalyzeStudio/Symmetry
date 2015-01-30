@@ -17,7 +17,7 @@ public class AxisTouchHandler : TouchHandler
             return false;
 
         Rect touchAreaRect = new Rect();
-        touchAreaRect.position = MathUtils.BuildVector2FromVector3(endpoint.transform.position) - 0.5f * m_endpointTouchArea;
+        touchAreaRect.position = GeometryUtils.BuildVector2FromVector3(endpoint.transform.position) - 0.5f * m_endpointTouchArea;
 
         touchAreaRect.width = m_endpointTouchArea.x;
         touchAreaRect.height = m_endpointTouchArea.y;
