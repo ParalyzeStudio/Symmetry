@@ -48,8 +48,11 @@ public class Symmetrizer : MonoBehaviour
         GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
         ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
 
+        //Extract, triangles
         List<GridTriangle> leftTriangles, rightTriangles;
-        ExtractShapesOnBothSidesOfAxis(out leftTriangles, out rightTriangles);
+        ExtractTrianglesOnBothSidesOfAxis(out leftTriangles, out rightTriangles);
+
+        //Rebuild shapes from those lists of triangles
         if (leftTriangles.Count > 0)
         {
             List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles, true);
@@ -87,7 +90,7 @@ public class Symmetrizer : MonoBehaviour
      * Creates a copy of all shape triangles on both sides of the axis of symmetry axis into 2 newly created shapes 
      * that will be symmetrized.
      * **/
-    private void ExtractShapesOnBothSidesOfAxis(out List<GridTriangle> leftTriangles, out List<GridTriangle> rightTriangles)
+    private void ExtractTrianglesOnBothSidesOfAxis(out List<GridTriangle> leftTriangles, out List<GridTriangle> rightTriangles)
     {
         ////Build the 2 shapes that will acquire the newly created triangles
         Shape newShape1 = new Shape();
@@ -121,13 +124,13 @@ public class Symmetrizer : MonoBehaviour
         List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisEndPoint, axisNormal);
 
         ////Extract triangles that are in the ribbon of the axis...
-        //... on the right side of the line that passes by the axisStartPoint
+        //... on the left side of the line that passes by the axisStartPoint
         List<GridTriangle> extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[0], 
                                                                            line1GridBoxIntersections[1], 
                                                                            allTriangles,
                                                                            true);
 
-        //... on the left side of the line that passes by the axisStartPoint
+        //... on the right side of the line that passes by the axisStartPoint
         extractedTriangles = ExtractTrianglesOnLineSide(line2GridBoxIntersections[0],
                                                         line2GridBoxIntersections[1],
                                                         extractedTriangles,
@@ -137,12 +140,12 @@ public class Symmetrizer : MonoBehaviour
         leftTriangles = ExtractTrianglesOnLineSide(axisStartPoint,
                                                    axisEndPoint,
                                                    extractedTriangles,
-                                                   false);
+                                                   true);
 
         rightTriangles = ExtractTrianglesOnLineSide(axisStartPoint,
                                                     axisEndPoint,
                                                     extractedTriangles,
-                                                    true);
+                                                    false);
     }
 
     /**
@@ -159,7 +162,7 @@ public class Symmetrizer : MonoBehaviour
             GridTriangle triangle = triangles[iTriangleIndex];
             if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //TODO find the intersection points and split the triangle accordingly
             {
-
+               
             }
             else
             {
@@ -276,7 +279,7 @@ public class Symmetrizer : MonoBehaviour
             {
                 Vector2 originalVertex = originalTriangle.m_points[i];
                 float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisStartPoint, axisDirection);
-                Vector2 reflectedVertex = originalVertex + (bLeftSide ? -1 : 1) * axisNormal * 2 * distanceToAxis;
+                Vector2 reflectedVertex = originalVertex + (bLeftSide ? 1 : -1) * axisNormal * 2 * distanceToAxis;
                 reflectedTriangle.m_points[i] = reflectedVertex;
             }
 
