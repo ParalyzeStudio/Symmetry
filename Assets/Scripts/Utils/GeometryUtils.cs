@@ -277,4 +277,18 @@ public class GeometryUtils
 
         return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }
+
+    /**
+     * Calculate the distance from a point to a line
+     * **/
+    static public float DistanceToLine(Vector2 point, Vector2 linePoint, Vector2 lineDirection)
+    {
+        //equation of the line ax + by + c = 0
+        float a = -lineDirection.y;
+        float b = lineDirection.x;
+        float c = -a * linePoint.x - b * linePoint.y;
+
+        float distance = Mathf.Abs(a * point.x + b * point.y + c) / Mathf.Sqrt(a * a + b * b);
+        return distance;
+    }
 }

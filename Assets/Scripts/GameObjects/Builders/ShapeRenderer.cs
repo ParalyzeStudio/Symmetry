@@ -23,7 +23,7 @@ public class ShapeRenderer : MonoBehaviour
     {
         m_color = m_shape.m_color;
         m_prevColor = m_color;
-    }
+    }   
 
     /**
      * Renders the shape based on the m_gridTriangles list and the m_color public variables

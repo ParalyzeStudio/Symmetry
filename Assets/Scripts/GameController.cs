@@ -8,10 +8,6 @@ public class GameController : MonoBehaviour
     private bool m_levelBuilt;
     private LevelManager m_levelManager;
 
-    public GameObject m_gridPfb; //prefab to instantiate the grid
-    public GameObject m_contoursPfb; //prefab to instantiate contours
-    public GameObject m_shapePfb; //prefab to instantiate a shape
-
     public enum ActionMode
     {
         SHAPES,
@@ -121,23 +117,14 @@ public class GameController : MonoBehaviour
     {
         GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
         ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
+        ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
         List<Shape> allShapes = m_levelManager.m_currentLevel.m_shapes;
         foreach (Shape shape in allShapes)
         {
             //First triangulate the shape
             shape.Triangulate();
 
-            //Then pass the data contained into a Shape object to a newly created ShapeRenderer object
-            GameObject shapeObject = (GameObject) Instantiate(m_shapePfb);
-            ShapeRenderer shapeRenderer = shapeObject.GetComponent<ShapeRenderer>();
-            shapeRenderer.m_shape = shape; //pass the array of grid triangles to the renderer
-            //shapeRenderer.m_color = shape.m_color; //pass the color of the shape to the renderer
-            shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true);
-
-            shapeObject.transform.parent = shapesObject.transform;
-            shapeObject.transform.localPosition = Vector3.zero;
-
-            shapesHolder.AddShape(shapeObject);
+            shapeBuilder.CreateFromShapeData(shape);
         }
 
         shapesObject.transform.position = new Vector3(0, 0, SHAPES_Z_VALUE);
@@ -217,8 +204,8 @@ public class GameController : MonoBehaviour
             shapesArea += allShapes[iShapeIndex].m_area;
         }
 
-        //if (contoursArea == shapesArea)
-            //Debug.Log("3: SAME AREA");
+        if (contoursArea == shapesArea)
+            Debug.Log("3: SAME AREA");
 
         return (contoursArea == shapesArea);
     }
