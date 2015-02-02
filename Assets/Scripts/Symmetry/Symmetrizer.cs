@@ -104,18 +104,22 @@ public class Symmetrizer : MonoBehaviour
         Vector2 axisNormal = new Vector2(axisDirection.y, -axisDirection.x); //take the normal in clockwise order compared to the axisDirection
 
         ////First get all triangles
-        List<Shape> allShapes = m_levelManager.m_currentLevel.m_shapes;
+        GameObject shapesObj = GameObject.FindGameObjectWithTag("Shapes");
+        ShapesHolder shapesHolder = shapesObj.GetComponent<ShapesHolder>();
+        List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
         List<GridTriangle> allTriangles = new List<GridTriangle>();
         int trianglesListCapacity = 0;
-        for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
         {
-            trianglesListCapacity += allShapes[iShapeIndex].m_gridTriangles.Count;
+            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            trianglesListCapacity += shape.m_gridTriangles.Count;
         }
         allTriangles.Capacity = trianglesListCapacity;
 
-        for (int iShapeIndex = 0; iShapeIndex != allShapes.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
         {
-            List<GridTriangle> shapeTriangles = allShapes[iShapeIndex].m_gridTriangles;
+            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            List<GridTriangle> shapeTriangles = shape.m_gridTriangles;
             allTriangles.AddRange(shapeTriangles);
         }
 

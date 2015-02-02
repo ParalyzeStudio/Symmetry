@@ -5,18 +5,20 @@ using System.Collections.Generic;
 public class ShapesHolder : MonoBehaviour
 {
     public List<GameObject> m_shapesObj { get; set; }
+    //public List<Shape> m_shapes { get; set; }
 
-    public ShapesHolder()
+    public void Awake()
     {
         m_shapesObj = new List<GameObject>();
+        //m_shapes = new List<Shape>();
     }
 
-    public void AddShape(GameObject shape)
+    public void AddShapeObject(GameObject shape)
     {
         m_shapesObj.Add(shape);
     }
 
-    public void RemoveShape(GameObject shape)
+    public void RemoveShapeObject(GameObject shape)
     {
         for (int shapeIndex = 0; shapeIndex != m_shapesObj.Count; shapeIndex++)
         {
@@ -28,8 +30,30 @@ public class ShapesHolder : MonoBehaviour
         }
     }
 
-    public void ClearShapes()
+    public void ClearShapeObjects()
     {
         m_shapesObj.Clear();
     }
+
+    //public void AddShape(Shape shape)
+    //{
+    //    m_shapes.Add(shape);
+    //}
+
+    //public void RemoveShapeObject(Shape shape)
+    //{
+    //    for (int shapeIndex = 0; shapeIndex != m_shapesObj.Count; shapeIndex++)
+    //    {
+    //        if (m_shapes[shapeIndex] == shape)
+    //        {
+    //            m_shapes.Remove(shape);
+    //            return;
+    //        }
+    //    }
+    //}
+
+    //public void ClearShapes()
+    //{
+    //    m_shapes.Clear();
+    //}
 }

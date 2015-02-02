@@ -74,7 +74,7 @@ public class LevelManager : MonoBehaviour
                     shape.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
                 }
 
-                level.m_shapes.Add(shape);
+                level.m_initialShapes.Add(shape);
             }
 
             m_levels.Add(level);
