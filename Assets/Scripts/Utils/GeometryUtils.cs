@@ -252,16 +252,16 @@ public class GeometryUtils
     /**
      * Checks if a point that we know is on a line is also contained in a segment defined by pointA and pointB
      * **/
-    static public bool isLinePointContainedInSegment(Vector2 point, Vector2 pointA, Vector2 pointB)
+    static public bool isLinePointContainedInSegment(Vector2 linePoint, Vector2 segmentPointA, Vector2 segmentPointB)
     {
-        float minX = Mathf.Min(pointA.x, pointB.x);
-        float maxX = Mathf.Max(pointA.x, pointB.x);
-        float minY = Mathf.Min(pointA.y, pointB.y);
-        float maxY = Mathf.Max(pointA.y, pointB.y);
+        float minX = Mathf.Min(segmentPointA.x, segmentPointB.x);
+        float maxX = Mathf.Max(segmentPointA.x, segmentPointB.x);
+        float minY = Mathf.Min(segmentPointA.y, segmentPointB.y);
+        float maxY = Mathf.Max(segmentPointA.y, segmentPointB.y);
 
-        return (MathUtils.isValueInInterval(point.x, minX, maxX)
+        return (MathUtils.isValueInInterval(linePoint.x, minX, maxX)
                 &&
-                MathUtils.isValueInInterval(point.y, minY, maxY));
+                MathUtils.isValueInInterval(linePoint.y, minY, maxY));
     }
 
     /**

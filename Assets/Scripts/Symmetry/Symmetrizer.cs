@@ -160,9 +160,25 @@ public class Symmetrizer : MonoBehaviour
         for (int iTriangleIndex = 0; iTriangleIndex != triangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = triangles[iTriangleIndex];
-            if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //TODO find the intersection points and split the triangle accordingly
+            if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //find the intersection points and split the triangle accordingly
             {
-               
+                GridTriangle[] splitTriangles;
+                int splitTrianglesCount;
+                triangle.Split(lineStartPoint, lineEndPoint, out splitTriangles, out splitTrianglesCount);
+
+                for (int i = 0; i != splitTrianglesCount; i++)
+                {
+                    Vector2 triangleBarycentre = splitTriangles[i].GetBarycentre();
+                    float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
+
+                    //the triangle barycentre is on the side of the line we want
+                    if (barycentreDet > 0 && bLeftSide
+                        ||
+                        barycentreDet < 0 && !bLeftSide)
+                    {
+                        extractedTriangles.Add(splitTriangles[i]);
+                    }
+                }
             }
             else
             {
@@ -280,7 +296,15 @@ public class Symmetrizer : MonoBehaviour
                 Vector2 originalVertex = originalTriangle.m_points[i];
                 float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisStartPoint, axisDirection);
                 Vector2 reflectedVertex = originalVertex + (bLeftSide ? 1 : -1) * axisNormal * 2 * distanceToAxis;
-                reflectedTriangle.m_points[i] = reflectedVertex;
+
+                //place the reflected vertex in correct order to produce a ccw triangle (invert last two vertices)
+                if (i == 1)
+                    reflectedTriangle.m_points[2] = reflectedVertex;
+                else if (i == 2)
+                    reflectedTriangle.m_points[1] = reflectedVertex;
+                else
+                    reflectedTriangle.m_points[0] = reflectedVertex;
+
             }
 
             reflectedTriangles.Add(reflectedTriangle);

@@ -6,17 +6,17 @@ public class MathUtils
 
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
-        return Mathf.Abs(floatA - floatB) < epsilon;
+        return Mathf.Abs(floatA - floatB) <= epsilon;
     }
 
     static public bool AreVec2PointsEqual(Vector2 pointA, Vector2 pointB, float epsilon = DEFAULT_EPSILON)
     {
-        return (pointB - pointA).sqrMagnitude < epsilon;
+        return (pointB - pointA).sqrMagnitude <= epsilon;
     }
 
     static public bool AreVec3PointsEqual(Vector3 pointA, Vector3 pointB, float epsilon = DEFAULT_EPSILON)
     {
-        return (pointB - pointA).sqrMagnitude < epsilon;
+        return (pointB - pointA).sqrMagnitude <= epsilon;
     }
 
     /**
