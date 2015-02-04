@@ -8,6 +8,15 @@ public class GameController : MonoBehaviour
     private bool m_levelBuilt;
     private LevelManager m_levelManager;
 
+    public enum SceneMode
+    {
+        MENU,
+        LEVELS,
+        GAME
+    }
+
+    public SceneMode m_sceneMode;
+
     public enum ActionMode
     {
         SHAPES,
@@ -33,35 +42,52 @@ public class GameController : MonoBehaviour
 
     protected void Awake()
     {
-        m_levelBuilt = false;
-        m_levelManager = null;
+        if (m_sceneMode == SceneMode.GAME)
+        {
+            m_levelBuilt = false;
+            m_levelManager = null;
+        }
     }
 
     protected void Start()
     {
-        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
-        m_levelManager = levelManagerObject.GetComponent<LevelManager>();
-        m_levelManager.ParseLevelsFile();
-        BuildLevel(1);
+        if (m_sceneMode == SceneMode.GAME)
+        {
+            GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
+            m_levelManager = levelManagerObject.GetComponent<LevelManager>();
+            m_levelManager.ParseLevelsFile();
+            BuildLevel(1);
+        }
 
         TouchHandler.s_touchDeactivated = false;
     }
 
     protected void Update()
     {
-        GameStatus gameStatus = GetGameStatus();
-        if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
+        if (m_sceneMode == SceneMode.GAME)
         {
-            EndLevel();
+            GameStatus gameStatus = GetGameStatus();
+            if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
+            {
+                EndLevel();
+            }
         }
     }
 
     /**
-     * Builds main menu (play button, options...)
+     * Builds and shows main menu (play button, options...)
      * **/
-    public void BuildMainMenu()
+    public void BuildAndShowMainMenu()
     {
         
+    }
+
+    /**
+     * Builds and shows main menu (play button, options...)
+     * **/
+    public void BuildAndShowLevelsMenu()
+    {
+
     }
 
     /**

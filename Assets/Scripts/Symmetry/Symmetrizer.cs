@@ -6,7 +6,8 @@ public class Symmetrizer : MonoBehaviour
 {
     public enum SymmetryType
     {
-        SYMMETRY_AXIS,
+        SYMMETRY_AXIS_90, //axis are either horizontal or vertical
+        SYMMETRY_AXIS_45, //axis are 45 degrees diagonals
         SYMMETRY_POINT,
         SUBTRACTION_AXIS,
         SUBTRACTION_POINT
@@ -26,7 +27,8 @@ public class Symmetrizer : MonoBehaviour
     {
         switch (m_type)
         {
-            case SymmetryType.SYMMETRY_AXIS:
+            case SymmetryType.SYMMETRY_AXIS_90:
+            case SymmetryType.SYMMETRY_AXIS_45:
                 SymmetrizeByAxis();
                 break;
             case SymmetryType.SYMMETRY_POINT:
