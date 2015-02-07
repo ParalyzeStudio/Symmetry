@@ -90,6 +90,11 @@ public class GameController : MonoBehaviour
 
     }
 
+    public void LoadAndStartLevel(int iLevelNumber)
+    {
+        BuildLevel(iLevelNumber);
+    }
+
     /**
      * Builds everything that appears on a screen for a certain level (GUI, grid, contours, shapes)
      * **/

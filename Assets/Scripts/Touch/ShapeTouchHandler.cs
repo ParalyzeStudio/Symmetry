@@ -59,5 +59,14 @@ public class ShapeTouchHandler : TouchHandler
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
         shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
     }
+
+    protected override void OnClick()
+    {
+        base.OnClick();
+
+        float currentOpacity = this.gameObject.GetComponent<ShapeRenderer>().m_color.a;
+        float targetOpacity = 0.25f;
+        this.gameObject.GetComponent<ShapeAnimator>().FadeFromTo(currentOpacity, targetOpacity, 2.0f, 0.0f);
+    }
 }
 

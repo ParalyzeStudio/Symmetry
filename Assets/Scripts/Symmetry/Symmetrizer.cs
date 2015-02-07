@@ -168,6 +168,8 @@ public class Symmetrizer : MonoBehaviour
             GridTriangle triangle = triangles[iTriangleIndex];
             if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //find the intersection points and split the triangle accordingly
             {
+                if (triangle.m_points[0] == new Vector2(8, 5) && MathUtils.AreVec2PointsEqual(triangle.m_points[1], new Vector2(7,6)))
+                    Debug.Log("SPLIT");
                 GridTriangle[] splitTriangles;
                 int splitTrianglesCount;
                 triangle.Split(lineStartPoint, lineEndPoint, out splitTriangles, out splitTrianglesCount);

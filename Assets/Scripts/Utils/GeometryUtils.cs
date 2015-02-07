@@ -20,6 +20,9 @@ public class GeometryUtils
         float det1 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint1, false);
         float det2 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint2, false);
 
+        if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+            return false;
+
         return (det1 * det2) < 0;
     }
 
@@ -50,7 +53,7 @@ public class GeometryUtils
 
         //Both lines equation
         float x, y;
-        if (lineDirection.x != 0 && segmentPoint1.x != segmentPoint2.x) //y = a1x + b1 && y = a2x + b2
+        if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && y = a2x + b2
         {
             float a1 = lineDirection.y / lineDirection.x;
             float b1 = linePoint.y - a1 * linePoint.x;
@@ -69,7 +72,7 @@ public class GeometryUtils
                 y = a1 * x + b1;
             }
         }
-        else if (lineDirection.x != 0 && segmentPoint1.x == segmentPoint2.x) //y = a1x + b1 && x = a2
+        else if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && x = a2
         {
             float a1 = lineDirection.y / lineDirection.x;
             float b1 = linePoint.y - a1 * linePoint.x;
@@ -78,7 +81,7 @@ public class GeometryUtils
             x = a2;
             y = a1 * a2 + b1;
         }
-        else if (lineDirection.x == 0 && segmentPoint1.x != segmentPoint2.x) //x = a1 && y = a2x + b2
+        else if (MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //x = a1 && y = a2x + b2
         {
             float a1 = linePoint.x;
             float a2 = (segmentPoint2.y - segmentPoint1.y) / (segmentPoint2.x - segmentPoint1.x);
@@ -96,9 +99,9 @@ public class GeometryUtils
 
 
         //Check if ((x, y) point is contained in the segment
-        if (segmentPoint1.x == segmentPoint2.x)
+        if (MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x))
         {
-            if (y >= segmentPoint1.y && y <= segmentPoint2.y)
+            if (MathUtils.isValueInInterval(y, segmentPoint1.y, segmentPoint2.y))
             {
                 intersects = true;
                 intersection = new Vector2(x, y);
@@ -113,7 +116,7 @@ public class GeometryUtils
         }
         else
         {
-            if (x >= segmentPoint1.x && x <= segmentPoint2.x)
+            if (MathUtils.isValueInInterval(x, segmentPoint1.x, segmentPoint2.x))
             {
                 intersects = true;
                 intersection = new Vector2(x, y);
@@ -135,8 +138,13 @@ public class GeometryUtils
     {
         float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1, false);
         float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2, false);
-
-        if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
+        
+        if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+        {
+            //two segments are collinear and on the same line OR one point of the second segment is contained into the first segment but not the other point
+            return false;       
+        }
+        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
         {
             float det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1, false);
             float det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2, false);
@@ -146,17 +154,6 @@ public class GeometryUtils
                 return true;
             }
             else
-            {
-                return false;
-            }
-        }
-        else if (det1 == 0 || det2 == 0)
-        {
-            if (det1 == 0 && det2 == 0) //two segments are collinear and on the same line
-            {
-                return false;
-            }
-            else //one point of the second segment is contained into the first segment but not the other point
             {
                 return false;
             }
@@ -250,9 +247,31 @@ public class GeometryUtils
     }
 
     /**
-     * Checks if a point that we know is on a line is also contained in a segment defined by pointA and pointB
+     * Checks if a point is contained in the segment [pointA ; pointB]
      * **/
-    static public bool isLinePointContainedInSegment(Vector2 linePoint, Vector2 segmentPointA, Vector2 segmentPointB)
+    static public bool IsPointContainedInSegment(Vector2 point, Vector2 segmentPointA, Vector2 segmentPointB)
+    {
+        if (MathUtils.AreVec2PointsEqual(point, segmentPointA) || MathUtils.AreVec2PointsEqual(point, segmentPointB))
+            return true;
+
+        float det = MathUtils.Determinant(segmentPointA, segmentPointB, point, false);
+        if (!MathUtils.AreFloatsEqual(det, 0)) //points are not aligned, thus point can never be on the segment AB
+            return false;
+
+        Vector2 u = point - segmentPointA; //AM vector
+        Vector2 v = segmentPointB - segmentPointA; //AB vector
+
+        float dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
+        if (dotProduct > 0)
+            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so fot product AM.AB should be majored by AB squared length
+        else //AM and AB are of opposite sign
+            return false;
+    }
+
+    /**
+     * Checks if a point that we know is on a line holding pointA and pointB is also contained in the segment [pointA ; pointB]
+     * **/
+    static public bool IsLinePointContainedInSegment(Vector2 linePoint, Vector2 segmentPointA, Vector2 segmentPointB)
     {
         float minX = Mathf.Min(segmentPointA.x, segmentPointB.x);
         float maxX = Mathf.Max(segmentPointA.x, segmentPointB.x);

@@ -114,7 +114,13 @@ public class GridTriangle
 
         GeometryUtils.SegmentLineIntersection(m_points[1], m_points[2], linePoint1, lineDirection, out intersection, out intersects);
         if (intersects)
+        {
+            if (intersections.Count == 0
+                ||
+                intersections.Count == 1 && !MathUtils.AreVec2PointsEqual(intersection, intersections[0]))
             intersections.Add(intersection);
+        }
+            
 
         if (intersections.Count < 2)
         {
@@ -227,12 +233,12 @@ public class GridTriangle
             bool isEdge1Intersected = false;
             bool isEdge2Intersected = false;
             //find where the first intersection is
-            isEdge1Intersected = GeometryUtils.isLinePointContainedInSegment(intersections[0], m_points[0], m_points[1]);
+            isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[0], m_points[1]);
             if (isEdge1Intersected)
                 intersectionEdgesNumber[0] = 1; //intersection is on the first edge of the triangle
             else
             {
-                isEdge2Intersected = GeometryUtils.isLinePointContainedInSegment(intersections[0], m_points[1], m_points[2]);
+                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[1], m_points[2]);
                 if (isEdge2Intersected)
                     intersectionEdgesNumber[0] = 2; //intersection is on the second edge of the triangle
                 else
@@ -242,7 +248,7 @@ public class GridTriangle
             //find where the second intersection is
             if (!isEdge1Intersected)
             {
-                isEdge1Intersected = GeometryUtils.isLinePointContainedInSegment(intersections[1], m_points[0], m_points[1]);
+                isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[0], m_points[1]);
                 if (isEdge1Intersected)
                     intersectionEdgesNumber[1] = 1; //intersection is on the first edge of the triangle
                 else
@@ -255,7 +261,7 @@ public class GridTriangle
             }
             else
             {
-                isEdge2Intersected = GeometryUtils.isLinePointContainedInSegment(intersections[1], m_points[1], m_points[2]);
+                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[1], m_points[2]);
                 if (isEdge2Intersected)
                     intersectionEdgesNumber[1] = 2; //intersection is on the second edge of the triangle
                 else
