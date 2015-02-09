@@ -135,6 +135,18 @@ public class GridBuilder : MonoBehaviour
     }
 
     /**
+     * Returns the anchor game object at grid position passed as parameter
+     * **/
+    public GameObject GetAnchorAtGridPosition(Vector2 gridPosition)
+    {
+        int iColumnNumber = Mathf.RoundToInt(gridPosition.x);
+        int iLineNumber = Mathf.RoundToInt(gridPosition.y);
+
+        return m_gridAnchors[(iLineNumber - 1) * m_numColumns + (iColumnNumber - 1)];
+    }
+
+
+    /**
      * Returns the grid anchor coordinates that is the closest to the position vector passed as parameter
      * **/
     public Vector2 GetClosestGridAnchorCoordinatesForPosition(Vector2 position)
@@ -168,6 +180,132 @@ public class GridBuilder : MonoBehaviour
         }
         else
             return Vector2.zero;
+    }
+
+    /**
+     * Returns the list of anchors the player can draw an axis on knowing the position of the axis start point
+     * For example on a vertical axis return the anchors on the same column as the start point
+     * **/
+    public List<GameObject> GetAnchorsConstrainedBySymmetryType(Vector2 point, Symmetrizer.SymmetryType symmetryType)
+    {
+        List<GameObject> anchors = new List<GameObject>();
+
+        bool bStraightAxes = false;
+        bool bDiagonalAxes = false;
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT)
+            bStraightAxes = true;
+
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_DIAGONALS)
+            bDiagonalAxes = true;
+
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL)
+        {
+            bStraightAxes = true;
+            bDiagonalAxes = true;
+        }
+
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL || bStraightAxes)
+        {
+            for (int iColumnNumber = 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
+            {
+                anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, point.y)));
+            }
+        }
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL || bStraightAxes)
+        {
+            for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
+            {
+                anchors.Add(GetAnchorAtGridPosition(new Vector2(point.x, iLineNumber)));
+            }
+        }
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT || bDiagonalAxes)
+        {
+            int iPointColumnNumber = Mathf.RoundToInt(point.x);
+            int iPointLineNumber = Mathf.RoundToInt(point.y);
+
+            //find anchors on the left of the reference anchor
+            int belowLinesCount = iPointLineNumber - 1;
+            int leftColumnsCount = iPointColumnNumber - 1;
+            int minDimension = Mathf.Min(leftColumnsCount, belowLinesCount);
+            if (minDimension == belowLinesCount)
+            {
+                for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iPointLineNumber - iLineNumber), iLineNumber)));
+                }
+            }
+            else
+            {
+                for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iPointColumnNumber - iColumnNumber))));
+                }
+            }
+
+            //and on the right
+            int aboveLinesCount = m_numLines - iPointLineNumber;
+            int rightColumnsCount = m_numColumns - iPointColumnNumber;
+            minDimension = Mathf.Min(rightColumnsCount, aboveLinesCount);
+            if (minDimension == aboveLinesCount)
+            {
+                for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iLineNumber - iPointLineNumber), iLineNumber)));
+                }
+            }
+            else
+            {
+                for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iColumnNumber - iPointColumnNumber))));
+                }
+            }
+        }
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_TOP_LEFT || bDiagonalAxes)
+        {
+            int iPointColumnNumber = Mathf.RoundToInt(point.x);
+            int iPointLineNumber = Mathf.RoundToInt(point.y);
+
+            //find anchors on the right of the reference anchor
+            int belowLinesCount = iPointLineNumber - 1;
+            int rightColumnsCount = m_numColumns - iPointColumnNumber;
+            int minDimension = Mathf.Min(rightColumnsCount, belowLinesCount);
+            if (minDimension == belowLinesCount)
+            {
+                for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iPointLineNumber - iLineNumber), iLineNumber)));
+                }
+            }
+            else
+            {
+                for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iColumnNumber - iPointColumnNumber))));
+                }
+            }
+
+            //and on the left
+            int aboveLinesCount = m_numLines - iPointLineNumber;
+            int leftColumnsCount = iPointColumnNumber - 1;
+            minDimension = Mathf.Min(leftColumnsCount, aboveLinesCount);
+            if (minDimension == aboveLinesCount)
+            {
+                for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iLineNumber - iPointLineNumber), iLineNumber)));
+                }
+            }
+            else
+            {
+                for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
+                {
+                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iPointColumnNumber - iColumnNumber))));
+                }
+            }
+        }
+
+        return anchors;
     }
 
     protected void Update()

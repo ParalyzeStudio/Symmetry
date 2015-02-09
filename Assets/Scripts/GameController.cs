@@ -49,6 +49,9 @@ public class GameController : MonoBehaviour
         }
     }
 
+    //TMP DEBUG
+    public GameObject m_gridAnchorSelectedPfb;
+
     protected void Start()
     {
         if (m_sceneMode == SceneMode.GAME)
@@ -57,6 +60,22 @@ public class GameController : MonoBehaviour
             m_levelManager = levelManagerObject.GetComponent<LevelManager>();
             m_levelManager.ParseLevelsFile();
             BuildLevel(1);
+
+            GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
+
+
+            /*** DEBUG TMP ***/
+            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
+            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
+            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
+            List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
+            foreach (GameObject anchor in anchors)
+            {
+                Vector2 gridPos = gridBuilder.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
+                Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
+                Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
+            }
+            /*** DEBUG TMP ***/
         }
 
         TouchHandler.s_touchDeactivated = false;

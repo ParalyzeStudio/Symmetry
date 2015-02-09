@@ -6,12 +6,24 @@ public class Symmetrizer : MonoBehaviour
 {
     public enum SymmetryType
     {
-        SYMMETRY_AXIS_90, //axis are either horizontal or vertical
-        SYMMETRY_AXIS_45, //axis are 45 degrees diagonals
+        SYMMETRY_AXIS_HORIZONTAL, //axis are horizontal
+        SYMMETRY_AXIS_VERTICAL, //axis are vertical
+        SYMMETRY_AXES_STRAIGHT, //axis are either horizontal or vertical
+        SYMMETRY_AXIS_DIAGONAL_TOP_LEFT, //axis is diagonal (45 degrees) passing through top left hand corner
+        SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT, //axis is diagonal (45 degrees) passing through bottom left hand corner
+        SYMMETRY_AXES_DIAGONALS, //both diagonals
+        SYMMETRY_AXES_ALL, //both straight and diagonal axes
         SYMMETRY_POINT,
         SUBTRACTION_AXIS,
         SUBTRACTION_POINT
     };
+    //public const int SYMMETRY_AXIS_HORIZONTAL           = 0x00000001;
+    //public const int SYMMETRY_AXIS_VERTICAL             = 0x00000010;
+    //public const int SYMMETRY_AXIS_STRAIGHT             = 0x00000011; //SYMMETRY_AXIS_HORIZONTAL && SYMMETRY_AXIS_VERTICAL
+    //public const int SYMMETRY_AXIS_DIAGONAL_TOP_LEFT    = 0x00000100;
+    //public const int SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT = 0x00001000;
+    //public const int SYMMETRY_AXIS_DIAGONALS            = 0x00001100; //SYMMETRY_AXIS_DIAGONAL_TOP_LEFT && SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT
+    //public const int SYMMETRY_AXIS_ALL                  = 0x00001111; //SYMMETRY_AXIS_STRAIGHT && SYMMETRY_AXIS_DIAGONALS
 
     public SymmetryType m_type;
 
@@ -27,8 +39,10 @@ public class Symmetrizer : MonoBehaviour
     {
         switch (m_type)
         {
-            case SymmetryType.SYMMETRY_AXIS_90:
-            case SymmetryType.SYMMETRY_AXIS_45:
+            case SymmetryType.SYMMETRY_AXIS_HORIZONTAL:
+            case SymmetryType.SYMMETRY_AXIS_VERTICAL:
+            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_TOP_LEFT:
+            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT:
                 SymmetrizeByAxis();
                 break;
             case SymmetryType.SYMMETRY_POINT:
