@@ -60,6 +60,8 @@ public class TouchHandler : MonoBehaviour
         if (delta.sqrMagnitude < MOVE_EPSILON)
             return false;
 
+        m_prevPointerLocation = pointerLocation;
+
         return true;
     }
 
@@ -95,7 +97,7 @@ public class TouchHandler : MonoBehaviour
     void Update()
     {
         if (s_touchDeactivated)
-            return;
+            return;        
 
         Vector2 touchLocation;
 #if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
@@ -134,7 +136,7 @@ public class TouchHandler : MonoBehaviour
 
         }
 #elif UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR //devices with mouse
-        
+
         if (Input.GetMouseButton(0))
         {
             touchLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -143,26 +145,17 @@ public class TouchHandler : MonoBehaviour
             {
                 m_mouseButtonPressed = true;
                 if (IsPointerLocationContainedInObject(touchLocation))
-                {                    
+                {
                     OnPointerDown(touchLocation);
                 }
-                //Rect touchAreaRect = new Rect();
-                //Vector2 position = transform.position;
-                //touchAreaRect.position = position - 0.5f * m_touchArea;
-                //touchAreaRect.width = m_touchArea.x;
-                //touchAreaRect.height = m_touchArea.y;
-                //if (touchAreaRect.Contains(touchLocation))
-                //{
-                //    OnPointerDown(touchLocation);
-                //}
+                else
+                    m_prevPointerLocation = touchLocation;
             }
             else //other presses = OnPointerMove
             {
                 Vector2 delta = Vector2.zero;
                 OnPointerMove(touchLocation, ref delta);
-            }
-
-            m_prevPointerLocation = touchLocation;
+            }            
         }
         else
         {

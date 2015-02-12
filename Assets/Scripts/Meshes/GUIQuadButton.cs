@@ -28,17 +28,28 @@ public class GUIQuadButton : UVQuad
     /**
      * Callback called when button is pressed for the first time
      * **/
-    public virtual void OnPress()
+    public virtual bool OnPress()
     {
-        m_state = ButtonState.PRESSED;
+        if (m_state == ButtonState.IDLE)
+        {
+            m_state = ButtonState.PRESSED;
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Callback called immediately after the button has been released
      * **/
-    public virtual void OnRelease()
+    public virtual bool OnRelease()
     {
-        m_state = ButtonState.IDLE;
+        if (m_state == ButtonState.PRESSED)
+        {
+            m_state = ButtonState.IDLE;
+            return true;
+        }
+        return false;
     }
 
     /**

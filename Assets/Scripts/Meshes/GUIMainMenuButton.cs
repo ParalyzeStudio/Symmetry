@@ -2,14 +2,14 @@
 
 public class GUIMainMenuButton : GUIQuadButton
 {
-    public override void OnPress()
+    public override bool OnPress()
     {
-
+        return base.OnPress();
     }
 
-    public override void OnRelease()
+    public override bool OnRelease()
     {
-
+        return base.OnRelease();
     }
 
     public override void OnClick()
