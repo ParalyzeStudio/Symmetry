@@ -9,8 +9,8 @@ public class Symmetrizer : MonoBehaviour
         SYMMETRY_AXIS_HORIZONTAL, //axis are horizontal
         SYMMETRY_AXIS_VERTICAL, //axis are vertical
         SYMMETRY_AXES_STRAIGHT, //axis are either horizontal or vertical
-        SYMMETRY_AXIS_DIAGONAL_TOP_LEFT, //axis is diagonal (45 degrees) passing through top left hand corner
-        SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT, //axis is diagonal (45 degrees) passing through bottom left hand corner
+        SYMMETRY_AXIS_DIAGONAL_LEFT, //axis is diagonal (45 degrees) passing through top left hand corner
+        SYMMETRY_AXIS_DIAGONAL_RIGHT, //axis is diagonal (45 degrees) passing through bottom left hand corner
         SYMMETRY_AXES_DIAGONALS, //both diagonals
         SYMMETRY_AXES_ALL, //both straight and diagonal axes
         SYMMETRY_POINT,
@@ -41,8 +41,8 @@ public class Symmetrizer : MonoBehaviour
         {
             case SymmetryType.SYMMETRY_AXIS_HORIZONTAL:
             case SymmetryType.SYMMETRY_AXIS_VERTICAL:
-            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_TOP_LEFT:
-            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT:
+            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT:
+            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT:
                 SymmetrizeByAxis();
                 break;
             case SymmetryType.SYMMETRY_POINT:

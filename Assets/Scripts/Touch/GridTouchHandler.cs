@@ -5,7 +5,18 @@ public class GridTouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
-        return true;
+        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
+        GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
+        Vector2 gridSize = gridBuilder.m_gridSize;
+        Vector2 gridPosition = this.gameObject.transform.position;
+
+        float borderThickness = 0.5f * gridBuilder.m_gridSpacing;
+        Vector2 gridMax = gridPosition + 0.5f * gridSize + new Vector2(borderThickness, borderThickness);
+        Vector2 gridMin = gridPosition - 0.5f * gridSize - new Vector2(borderThickness, borderThickness);
+
+        return pointerLocation.x <= gridMax.x && pointerLocation.x >= gridMin.x
+               &&
+               pointerLocation.y <= gridMax.y && pointerLocation.y >= gridMin.y;
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)

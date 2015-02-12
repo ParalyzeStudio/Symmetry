@@ -6,6 +6,7 @@ public class BackgroundAdaptativeSize : MonoBehaviour
 {
     private Vector2 m_designScreenSize; //the size of the background as it was designed in photoshop
     private float m_previousCameraSize;
+    public Vector2 m_screenSizeInUnits { get; set; }
 
     void Awake()
     {
@@ -15,14 +16,19 @@ public class BackgroundAdaptativeSize : MonoBehaviour
         m_previousCameraSize = 0; //initialization will be done in the first update call
     }
 
+    void Start()
+    {
+        InvalidateSize();
+    }
+
     /***
      *  Background do not scale when camera size changes so counter that effect by
      *  recaluting the new local scale of this quad object every frame
      ***/
-	void Update () 
+    public void InvalidateSize()
     {
         float fCameraSize = Camera.main.orthographicSize;
-        if (fCameraSize !=  m_previousCameraSize)
+        if (fCameraSize != m_previousCameraSize)
         {
             m_previousCameraSize = fCameraSize;
             float fScreenWidth = (float)Screen.width;
@@ -44,7 +50,14 @@ public class BackgroundAdaptativeSize : MonoBehaviour
                 fBackgroundHeightInUnits = fBackgroundWidthInUnits / fDesignScreenRatio; //we scale the height (borders are cropped)
             }
 
+            m_screenSizeInUnits = new Vector2(fBackgroundWidthInUnits, fBackgroundHeightInUnits);
             this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
         }
+    }
+
+    
+	void Update () 
+    {
+        InvalidateSize();
 	}
 }

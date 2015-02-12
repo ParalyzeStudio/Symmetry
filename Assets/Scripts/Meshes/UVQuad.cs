@@ -42,7 +42,7 @@ public class UVQuad : MonoBehaviour
         mesh.triangles = indices;
 
         //uvs are likely to change on every frame, create a function and call it in the Update() method (also useful for updating the scene in Unity in Edit mode)
-        UpdateUVs();
+        UpdateUVs(true);
 
         Vector3[] normals = new Vector3[4] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward };
         mesh.normals = normals;
@@ -51,9 +51,9 @@ public class UVQuad : MonoBehaviour
     /**
      * Simply update the UVs array
      * **/
-    private void UpdateUVs()
+    protected virtual void UpdateUVs(bool bForceUpdate)
     {
-        if (m_textureRange.Equals(m_prevTextureRange)) //same value do not update
+        if (!bForceUpdate && m_textureRange.Equals(m_prevTextureRange)) //same value do not update
             return;
 
         Vector2[] uvs = new Vector2[4];
@@ -70,9 +70,9 @@ public class UVQuad : MonoBehaviour
     /**
      * Switch between CLAMP and REPEAT wrap modes
      * **/
-    private void UpdateWrapMode()
+    private void UpdateWrapMode(bool bForceUpdate)
     {
-        if (m_textureWrapMode.Equals(m_prevTextureWrapMode)) //same value do not update
+        if (!bForceUpdate && m_textureWrapMode.Equals(m_prevTextureWrapMode)) //same value do not update
             return;
 
         MeshRenderer renderer = GetComponent<MeshRenderer>();
@@ -83,8 +83,8 @@ public class UVQuad : MonoBehaviour
 
     protected virtual void Update()
     {
-        UpdateUVs();
-        UpdateWrapMode();
+        UpdateUVs(false);
+        UpdateWrapMode(false);
     }
 }
 

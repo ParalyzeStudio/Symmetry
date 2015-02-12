@@ -50,32 +50,35 @@ public class GameController : MonoBehaviour
     }
 
     //TMP DEBUG
-    public GameObject m_gridAnchorSelectedPfb;
+    //public GameObject m_gridAnchorSelectedPfb;
 
     protected void Start()
     {
+        GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
+        backgroundObject.GetComponent<BackgroundAdaptativeSize>().InvalidateSize();
+
         if (m_sceneMode == SceneMode.GAME)
         {
             GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
             m_levelManager = levelManagerObject.GetComponent<LevelManager>();
             m_levelManager.ParseLevelsFile();
-            BuildLevel(1);
+            BuildAndShowLevel(1);
 
             GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
 
 
-            /*** DEBUG TMP ***/
-            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
-            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
-            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
-            List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
-            foreach (GameObject anchor in anchors)
-            {
-                Vector2 gridPos = gridBuilder.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
-                Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
-                Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
-            }
-            /*** DEBUG TMP ***/
+            ///*** DEBUG TMP ***/
+            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
+            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
+            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
+            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
+            //foreach (GameObject anchor in anchors)
+            //{
+            //    Vector2 gridPos = gridBuilder.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
+            //    Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
+            //    Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
+            //}
+            ///*** DEBUG TMP ***/
         }
 
         TouchHandler.s_touchDeactivated = false;
@@ -111,13 +114,13 @@ public class GameController : MonoBehaviour
 
     public void LoadAndStartLevel(int iLevelNumber)
     {
-        BuildLevel(iLevelNumber);
+        BuildAndShowLevel(iLevelNumber);
     }
 
     /**
      * Builds everything that appears on a screen for a certain level (GUI, grid, contours, shapes)
      * **/
-    public void BuildLevel(int iLevelNumber)
+    public void BuildAndShowLevel(int iLevelNumber)
     {
         if (!m_levelBuilt)
         {
@@ -128,7 +131,15 @@ public class GameController : MonoBehaviour
             BuildShapes();
 
             m_levelBuilt = true;
+
+            ShowLevel();
         }
+    }
+
+    public void ShowLevel()
+    {
+
+
     }
 
     /**
@@ -147,7 +158,9 @@ public class GameController : MonoBehaviour
      * **/
     private void BuildGUI()
     {
-
+        GameObject guiTopBannerObject = GameObject.FindGameObjectWithTag("GUITopBanner");
+        GameHUD interfaceHolder = guiTopBannerObject.GetComponent<GameHUD>();
+        interfaceHolder.BuildActionButtonsForLevel(m_levelManager.m_currentLevel.m_number);
     }
 
     /**

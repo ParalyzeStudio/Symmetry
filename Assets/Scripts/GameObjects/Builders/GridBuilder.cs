@@ -5,27 +5,26 @@ using System;
 [ExecuteInEditMode]
 public class GridBuilder : MonoBehaviour
 {
-    public float m_gridSpacing = 100.0f;
-    private float m_prevGridSpacing;
-    public float m_gridAnchorUniformScaling = 16.0f;
-    private float m_prevGridAnchorUniformScaling = 1.0f;
     public List<GameObject> m_gridAnchors { get; set; }
-    public int m_numLines { get; set; } //number of lines in the grid
-    public int m_numColumns { get; set; } //number of columns in the grid
-
+    //public int m_minNumLines { get; set; } //minimal number of lines in the grid
+    //public int m_minNumColumns { get; set; } //minimal number of columns in the grid
+    public Vector2 m_gridSize { get; set; }
+    public int m_minNumLines; //minimal number of lines in the grid
+    public int m_minNumColumns; //minimal number of columns in the grid
+    private int m_prevMinNumLines;
+    private int m_prevMinNumColumns;
+    public int m_numLines { get; set; }
+    public int m_numColumns { get; set; }
+    public float m_gridSpacing { get; set; }
     public GameObject m_gridAnchorPfb;
 
     public void Awake()
     {
-        m_prevGridSpacing = 0.0f;
-        m_prevGridAnchorUniformScaling = 0.0f;
         m_gridAnchors = new List<GameObject>();
     }
 
     public void Build()
     {
-        m_prevGridSpacing = m_gridSpacing;
-
         //fresh build destroy a previously created anchorsHolder and clear the vector of gridAnchors
         GameObject anchorsHolder = GameObject.FindGameObjectWithTag("AnchorsHolder");
         if (anchorsHolder != null)
@@ -41,8 +40,31 @@ public class GridBuilder : MonoBehaviour
         GameObject gameControllerObject = GameObject.FindGameObjectWithTag("GameController");
         GameController gameController = gameControllerObject.GetComponent<GameController>();
 
-        m_numLines = Mathf.FloorToInt(gameController.m_designScreenSize.y / m_gridSpacing);
-        m_numColumns = Mathf.FloorToInt(gameController.m_designScreenSize.x / m_gridSpacing);
+        //get the screen viewport dimensions
+        float fCameraSize = Camera.main.orthographicSize;
+        float fScreenWidth = (float)Screen.width;
+        float fScreenHeight = (float)Screen.height;
+        float fScreenRatio = fScreenWidth / fScreenHeight;
+        float fScreenHeightInUnits = 2.0f * fCameraSize;
+        float fScreenWidthInUnits = fScreenRatio * fScreenHeightInUnits;
+
+        //The grid occupies 85% of the screen height and 90% of the screen width
+        m_gridSize = new Vector2(0.9f * fScreenWidthInUnits, 0.78f * fScreenHeightInUnits);
+        float columnGridSpacing = m_gridSize.x / (float) (m_minNumColumns - 1);
+        float lineGridSpacing = m_gridSize.y / (float) (m_minNumLines - 1);
+        m_gridSpacing = Mathf.Min(columnGridSpacing, lineGridSpacing);
+        m_numColumns = Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
+        m_numLines = Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
+
+        //set the position for the grid
+        Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
+        this.gameObject.transform.position = gridPosition;
+
+        //Debug.Log(">>>DEBUG GRID");
+        //Debug.Log("grid width:" + gridSize.x + " height:" + gridSize.y);
+        //Debug.Log("gridSpacing:" + m_gridSpacing);
+        //Debug.Log("m_numColumns:" + m_numColumns);
+        //Debug.Log("m_numLines:" + m_numLines);
 
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {
@@ -103,7 +125,9 @@ public class GridBuilder : MonoBehaviour
             anchorPositionY = ((gridCoordinates.y - 1 - m_numLines / 2) * m_gridSpacing);
         }
 
-        return new Vector2(anchorPositionX, anchorPositionY);
+        Vector2 anchorLocalPosition = new Vector2(anchorPositionX, anchorPositionY);
+        Vector2 anchorWorldPosition = anchorLocalPosition + GeometryUtils.BuildVector2FromVector3(gameObject.transform.position);
+        return anchorWorldPosition;
     }
 
     /**
@@ -111,6 +135,8 @@ public class GridBuilder : MonoBehaviour
      * **/
     public Vector2 GetGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
     {
+        worldCoordinates -= GeometryUtils.BuildVector2FromVector3(gameObject.transform.position);
+
         float iLineNumber;
         if (m_numLines % 2 == 0) //even number of lines
         {
@@ -149,21 +175,23 @@ public class GridBuilder : MonoBehaviour
     /**
      * Returns the grid anchor coordinates that is the closest to the position vector passed as parameter
      * **/
-    public Vector2 GetClosestGridAnchorCoordinatesForPosition(Vector2 position)
+    public Vector2 GetClosestGridAnchorCoordinatesForPosition(Vector2 worldPosition)
     {
+        Vector2 localPosition = worldPosition - GeometryUtils.BuildVector2FromVector3(gameObject.transform.position);
+
         float sqrMinDistance = float.MaxValue;
         int iMinDistanceAnchorIndex = -1;
         for (int iAnchorIndex = 0; iAnchorIndex != m_gridAnchors.Count; iAnchorIndex++)
         {
-            Vector2 gridAnchorPosition = m_gridAnchors[iAnchorIndex].transform.position;
-            float dx = position.x - gridAnchorPosition.x;
+            Vector2 gridAnchorLocalPosition = m_gridAnchors[iAnchorIndex].transform.position - gameObject.transform.position;
+            float dx = localPosition.x - gridAnchorLocalPosition.x;
             if (dx <= m_gridSpacing)
             {
-                float dy = position.y - gridAnchorPosition.y;
+                float dy = localPosition.y - gridAnchorLocalPosition.y;
                 if (dy <= m_gridSpacing)
                 {
                     //this anchor is one of the 4 anchors surrounding the position
-                    float sqrDistance = (position - gridAnchorPosition).sqrMagnitude;
+                    float sqrDistance = (localPosition - gridAnchorLocalPosition).sqrMagnitude;
                     if (sqrDistance < sqrMinDistance)
                     {
                         sqrMinDistance = sqrDistance;
@@ -174,10 +202,7 @@ public class GridBuilder : MonoBehaviour
         }
 
         if (iMinDistanceAnchorIndex >= 0)
-        {
-            Vector2 gridCoordinates = GetGridCoordinatesFromWorldCoordinates(m_gridAnchors[iMinDistanceAnchorIndex].transform.position);
             return GetGridCoordinatesFromWorldCoordinates(m_gridAnchors[iMinDistanceAnchorIndex].transform.position);
-        }
         else
             return Vector2.zero;
     }
@@ -218,7 +243,7 @@ public class GridBuilder : MonoBehaviour
                 anchors.Add(GetAnchorAtGridPosition(new Vector2(point.x, iLineNumber)));
             }
         }
-        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT || bDiagonalAxes)
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT || bDiagonalAxes)
         {
             int iPointColumnNumber = Mathf.RoundToInt(point.x);
             int iPointLineNumber = Mathf.RoundToInt(point.y);
@@ -261,7 +286,7 @@ public class GridBuilder : MonoBehaviour
                 }
             }
         }
-        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_TOP_LEFT || bDiagonalAxes)
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT || bDiagonalAxes)
         {
             int iPointColumnNumber = Mathf.RoundToInt(point.x);
             int iPointLineNumber = Mathf.RoundToInt(point.y);
@@ -308,17 +333,14 @@ public class GridBuilder : MonoBehaviour
         return anchors;
     }
 
-    protected void Update()
+    public void Update()
     {
-        if (m_gridSpacing != m_prevGridSpacing)
+        if (m_prevMinNumColumns != m_minNumColumns || m_prevMinNumLines != m_minNumLines)
         {
-            m_prevGridSpacing = m_gridSpacing;
-
             Build();
-        }
-        if (m_gridAnchorUniformScaling != m_prevGridAnchorUniformScaling)
-        {
-            m_prevGridAnchorUniformScaling = m_gridAnchorUniformScaling;
+
+            m_prevMinNumColumns = m_minNumColumns;
+            m_prevMinNumLines = m_minNumLines;
         }
     }
 }

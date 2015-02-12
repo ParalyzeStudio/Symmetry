@@ -118,10 +118,10 @@ public class ShapeRenderer : MonoBehaviour
         for (int iTriangleIndex = 0; iTriangleIndex != m_shape.m_gridTriangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = m_shape.m_gridTriangles[iTriangleIndex];
-            Vector2[] triangePoints = triangle.m_points;
+            Vector2[] trianglePoints = triangle.m_points;
             for (int iPointIndex = 0; iPointIndex != 3; iPointIndex++)
             {
-                triangePoints[iPointIndex] += shift;
+                trianglePoints[iPointIndex] += shift;
             }
         }
     }

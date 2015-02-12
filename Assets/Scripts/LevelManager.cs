@@ -21,13 +21,17 @@ public class LevelManager : MonoBehaviour
         XMLNode rootNode = xmlParser.Parse(levelsFile.text);
 
         XMLNodeList levelsNodeList = rootNode.GetNodeList("levels>0>level");
+       
         foreach (XMLNode levelNode in levelsNodeList)
         {
             Level level = new Level();
             string levelName = levelNode.GetValue("@name");
+            string levelNumber = levelNode.GetValue("@number");
+            level.m_number = int.Parse(levelNumber);
 
             //Parse contours
             XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
+            level.m_contours.Capacity = contoursNodeList.Count;
             foreach (XMLNode contourNode in contoursNodeList)
             {
                 Contour contour = new Contour();
@@ -49,6 +53,7 @@ public class LevelManager : MonoBehaviour
 
             //Parse shapes
             XMLNodeList shapesNodeList = levelNode.GetNodeList("shapes>0>shape");
+            level.m_initialShapes.Capacity = shapesNodeList.Count;
             foreach (XMLNode shapeNode in shapesNodeList)
             {
                 Shape shape = new Shape();
@@ -75,6 +80,15 @@ public class LevelManager : MonoBehaviour
                 }
 
                 level.m_initialShapes.Add(shape);
+            }
+
+            //Parse action buttons tags
+            XMLNodeList actionsNodeList = levelNode.GetNodeList("actions>0>action");
+            level.m_actionButtonsTags.Capacity = actionsNodeList.Count;
+            foreach (XMLNode actionNode in actionsNodeList)
+            {
+                string actionTag = actionNode.GetValue("@tag");
+                level.m_actionButtonsTags.Add(actionTag);
             }
 
             m_levels.Add(level);
