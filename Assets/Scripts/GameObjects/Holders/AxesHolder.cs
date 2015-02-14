@@ -44,4 +44,16 @@ public class AxesHolder : MonoBehaviour
     {
         m_axes.Clear();
     }
+
+    public GameObject GetAxisBeingBuilt()
+    {
+        for (int iAxisIndex = 0; iAxisIndex != m_axes.Count; iAxisIndex++)
+        {
+            GameObject axis = m_axes[iAxisIndex];
+            if (axis.GetComponent<AxisRenderer>().m_buildStatus == AxisRenderer.BuildStatus.FIRST_ENDPOINT_SET)
+                return axis;
+        }
+
+        return null;
+    }
 }

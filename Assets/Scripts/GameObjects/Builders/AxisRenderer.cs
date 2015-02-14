@@ -44,6 +44,13 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint1.transform.localPosition = GeometryUtils.BuildVector3FromVector2(worldPosition, 0);
             m_endpoint1GridPosition = gridPosition;
             m_buildStatus = BuildStatus.FIRST_ENDPOINT_SET;
+
+            GameHUD gameHUD = GameObject.FindGameObjectWithTag("GameHUD").GetComponent<GameHUD>();
+            if (gameHUD.m_selectedActionButton != null)
+            {
+                Symmetrizer.SymmetryType symmetryType = this.gameObject.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(gameHUD.m_activeActionTag);
+                gridBuilder.RenderConstraintAnchors(m_endpoint1GridPosition, symmetryType);
+            }
         }
         else
         {
@@ -55,6 +62,8 @@ public class AxisRenderer : MonoBehaviour
                 m_endpoint2GridPosition = gridPosition;
                 m_buildStatus = BuildStatus.SECOND_ENDPOINT_SET;
                 BuildAxisSegment();
+
+                gridBuilder.RemoveConstraintAnchors();
             }
         }
     }

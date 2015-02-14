@@ -59,12 +59,4 @@ public class GridTouchHandler : TouchHandler
 
         return null;
     }
-
-    /**
-     * 
-     * **/
-    public void adz()
-    {
-    }
-
 }

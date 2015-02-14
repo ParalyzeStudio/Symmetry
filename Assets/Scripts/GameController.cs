@@ -17,15 +17,6 @@ public class GameController : MonoBehaviour
 
     public SceneMode m_sceneMode;
 
-    public enum ActionMode
-    {
-        SHAPES,
-        SYMMETRY_AXIS,
-        SYMMETRY_POINT
-    };
-
-    public ActionMode m_actionMode = ActionMode.SYMMETRY_AXIS;
-
     public enum GameStatus
     {
         RUNNING,
@@ -64,10 +55,8 @@ public class GameController : MonoBehaviour
             m_levelManager.ParseLevelsFile();
             BuildAndShowLevel(1);
 
-            GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
-
-
             ///*** DEBUG TMP ***/
+            ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
             ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
             ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
             ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
@@ -158,9 +147,9 @@ public class GameController : MonoBehaviour
      * **/
     private void BuildGUI()
     {
-        GameObject guiTopBannerObject = GameObject.FindGameObjectWithTag("GUITopBanner");
+        GameObject guiTopBannerObject = GameObject.FindGameObjectWithTag("GameHUD");
         GameHUD interfaceHolder = guiTopBannerObject.GetComponent<GameHUD>();
-        interfaceHolder.BuildActionButtonsForLevel(m_levelManager.m_currentLevel.m_number);
+        interfaceHolder.BuildForLevel(m_levelManager.m_currentLevel.m_number);
     }
 
     /**

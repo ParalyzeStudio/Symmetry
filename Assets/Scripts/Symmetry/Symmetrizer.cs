@@ -6,6 +6,7 @@ public class Symmetrizer : MonoBehaviour
 {
     public enum SymmetryType
     {
+        NONE,
         SYMMETRY_AXIS_HORIZONTAL, //axis are horizontal
         SYMMETRY_AXIS_VERTICAL, //axis are vertical
         SYMMETRY_AXES_STRAIGHT, //axis are either horizontal or vertical
@@ -333,5 +334,25 @@ public class Symmetrizer : MonoBehaviour
         }
 
         return reflectedTriangles;
+    }
+
+    public SymmetryType GetSymmetryTypeForActionTag(string strActionTag)
+    {
+        if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXES_ALL))
+            return SymmetryType.SYMMETRY_AXES_ALL;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
+            return SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
+            return SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
+            return SymmetryType.SYMMETRY_AXIS_HORIZONTAL;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
+            return SymmetryType.SYMMETRY_AXIS_VERTICAL;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
+            return SymmetryType.SYMMETRY_AXES_STRAIGHT;
+        else if (strActionTag.Equals(GameHUD.ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
+            return SymmetryType.SYMMETRY_AXES_DIAGONALS;
+        else
+            return SymmetryType.NONE;
     }
 }

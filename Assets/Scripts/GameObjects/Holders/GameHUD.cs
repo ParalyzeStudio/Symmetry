@@ -15,7 +15,7 @@ public class GameHUD : MonoBehaviour
     public GameObject m_diagonalsAxesPfb;
     public GameObject m_allAxesPfb;
 
-    //Actions tags
+    //Action tags
     public const string ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL = "SYMMETRY_AXIS_HORIZONTAL";
     public const string ACTION_TAG_SYMMETRY_AXIS_VERTICAL = "SYMMETRY_AXIS_VERTICAL";
     public const string ACTION_TAG_SYMMETRY_AXES_STRAIGHT = "SYMMETRY_AXES_STRAIGHT";
@@ -23,7 +23,18 @@ public class GameHUD : MonoBehaviour
     public const string ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT = "SYMMETRY_AXIS_DIAGONAL_RIGHT";
     public const string ACTION_TAG_SYMMETRY_AXES_DIAGONALS = "SYMMETRY_AXES_DIAGONALS";
     public const string ACTION_TAG_SYMMETRY_AXES_ALL = "SYMMETRY_AXES_ALL";
-    
+
+    public string m_activeActionTag { get; set; }    
+
+    /**
+     * Build the GUI top banner
+     * **/
+    public void BuildForLevel(int iLevelNumber)
+    {
+        m_activeActionTag = null;
+        BuildActionButtonsForLevel(iLevelNumber);
+        BuildInterfaceButtons();
+    }
 
     /**
      * Creates the buttons for drawing/moving elements onto grid
@@ -61,6 +72,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
                 hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
+                hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
             {
@@ -69,6 +81,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
                 hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
+                hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
             {
@@ -77,6 +90,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
                 hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
+                hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
 
             if (clonedButton != null)

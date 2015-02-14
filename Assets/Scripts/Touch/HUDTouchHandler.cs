@@ -13,10 +13,10 @@ public class HUDTouchHandler : TouchHandler
 
     private HUDButton FindButtonContainingPointerLocation(Vector2 pointerLocation)
     {
-        List<HUDButton> buttons = this.gameObject.GetComponent<GameHUD>().m_actionButtons;
-        for (int iButtonIndex = 0; iButtonIndex != buttons.Count; iButtonIndex++)
+        List<HUDButton> actionButtons = this.gameObject.GetComponent<GameHUD>().m_actionButtons;
+        for (int iButtonIndex = 0; iButtonIndex != actionButtons.Count; iButtonIndex++)
         {
-            HUDButton button = buttons[iButtonIndex];
+            HUDButton button = actionButtons[iButtonIndex];
             Vector2 buttonPosition = button.gameObject.transform.position;
             Vector2 buttonSize = button.gameObject.transform.localScale;
             Rect buttonRect = new Rect(-0.5f * buttonSize.x,

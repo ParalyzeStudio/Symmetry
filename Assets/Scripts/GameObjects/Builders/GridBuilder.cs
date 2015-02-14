@@ -6,8 +6,7 @@ using System;
 public class GridBuilder : MonoBehaviour
 {
     public List<GameObject> m_gridAnchors { get; set; }
-    //public int m_minNumLines { get; set; } //minimal number of lines in the grid
-    //public int m_minNumColumns { get; set; } //minimal number of columns in the grid
+    public List<GameObject> m_constraintGridAnchors { get; set; } //the grid anchors the players can use to draw axes
     public Vector2 m_gridSize { get; set; }
     public int m_minNumLines; //minimal number of lines in the grid
     public int m_minNumColumns; //minimal number of columns in the grid
@@ -17,10 +16,12 @@ public class GridBuilder : MonoBehaviour
     public int m_numColumns { get; set; }
     public float m_gridSpacing { get; set; }
     public GameObject m_gridAnchorPfb;
+    public GameObject m_gridConstraintAnchorPfb;
 
     public void Awake()
     {
         m_gridAnchors = new List<GameObject>();
+        m_constraintGridAnchors = new List<GameObject>();
     }
 
     public void Build()
@@ -211,9 +212,15 @@ public class GridBuilder : MonoBehaviour
      * Returns the list of anchors the player can draw an axis on knowing the position of the axis start point
      * For example on a vertical axis return the anchors on the same column as the start point
      * **/
-    public List<GameObject> GetAnchorsConstrainedBySymmetryType(Vector2 point, Symmetrizer.SymmetryType symmetryType)
+    private void InvalidateConstraintAnchors(Vector2 gridPoint, Symmetrizer.SymmetryType symmetryType)
     {
-        List<GameObject> anchors = new List<GameObject>();
+        RemoveConstraintAnchors();
+
+        GameObject constraintAnchorsHolder = new GameObject();
+        constraintAnchorsHolder.name = "ConstraintAnchorsHolder";
+        constraintAnchorsHolder.tag = "ConstraintAnchorsHolder";
+        constraintAnchorsHolder.transform.parent = this.transform;
+        constraintAnchorsHolder.transform.localPosition = Vector3.zero;
 
         bool bStraightAxes = false;
         bool bDiagonalAxes = false;
@@ -233,20 +240,20 @@ public class GridBuilder : MonoBehaviour
         {
             for (int iColumnNumber = 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
             {
-                anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, point.y)));
+                m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, gridPoint.y)));
             }
         }
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL || bStraightAxes)
         {
             for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
             {
-                anchors.Add(GetAnchorAtGridPosition(new Vector2(point.x, iLineNumber)));
+                m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(gridPoint.x, iLineNumber)));
             }
         }
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT || bDiagonalAxes)
         {
-            int iPointColumnNumber = Mathf.RoundToInt(point.x);
-            int iPointLineNumber = Mathf.RoundToInt(point.y);
+            int iPointColumnNumber = Mathf.RoundToInt(gridPoint.x);
+            int iPointLineNumber = Mathf.RoundToInt(gridPoint.y);
 
             //find anchors on the left of the reference anchor
             int belowLinesCount = iPointLineNumber - 1;
@@ -256,14 +263,14 @@ public class GridBuilder : MonoBehaviour
             {
                 for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iPointLineNumber - iLineNumber), iLineNumber)));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iPointLineNumber - iLineNumber), iLineNumber)));
                 }
             }
             else
             {
                 for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iPointColumnNumber - iColumnNumber))));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iPointColumnNumber - iColumnNumber))));
                 }
             }
 
@@ -275,21 +282,21 @@ public class GridBuilder : MonoBehaviour
             {
                 for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iLineNumber - iPointLineNumber), iLineNumber)));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iLineNumber - iPointLineNumber), iLineNumber)));
                 }
             }
             else
             {
                 for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iColumnNumber - iPointColumnNumber))));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iColumnNumber - iPointColumnNumber))));
                 }
             }
         }
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT || bDiagonalAxes)
         {
-            int iPointColumnNumber = Mathf.RoundToInt(point.x);
-            int iPointLineNumber = Mathf.RoundToInt(point.y);
+            int iPointColumnNumber = Mathf.RoundToInt(gridPoint.x);
+            int iPointLineNumber = Mathf.RoundToInt(gridPoint.y);
 
             //find anchors on the right of the reference anchor
             int belowLinesCount = iPointLineNumber - 1;
@@ -299,14 +306,14 @@ public class GridBuilder : MonoBehaviour
             {
                 for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iPointLineNumber - iLineNumber), iLineNumber)));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iPointLineNumber - iLineNumber), iLineNumber)));
                 }
             }
             else
             {
                 for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iColumnNumber - iPointColumnNumber))));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iColumnNumber - iPointColumnNumber))));
                 }
             }
 
@@ -318,19 +325,47 @@ public class GridBuilder : MonoBehaviour
             {
                 for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iLineNumber - iPointLineNumber), iLineNumber)));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iLineNumber - iPointLineNumber), iLineNumber)));
                 }
             }
             else
             {
                 for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
                 {
-                    anchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iPointColumnNumber - iColumnNumber))));
+                    m_constraintGridAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iPointColumnNumber - iColumnNumber))));
                 }
             }
         }
+    }
 
-        return anchors;
+    /**
+     * Render the constraint anchors when user witch axis mode for instance
+     * **/
+    public void RenderConstraintAnchors(Vector2 gridPoint, Symmetrizer.SymmetryType symmetryType)
+    {
+        InvalidateConstraintAnchors(gridPoint, symmetryType);
+
+        GameObject constraintAnchorsHolder = GameObject.FindGameObjectWithTag("ConstraintAnchorsHolder");
+        for (int iAnchorIndex = 0; iAnchorIndex != m_constraintGridAnchors.Count; iAnchorIndex++)
+        {
+            GameObject anchor = m_constraintGridAnchors[iAnchorIndex];
+            Vector2 gridPos = GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
+            Vector3 anchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
+            GameObject clonedConstraintAnchor = (GameObject) Instantiate(m_gridConstraintAnchorPfb, anchorPosition, Quaternion.identity);
+
+            clonedConstraintAnchor.transform.parent = constraintAnchorsHolder.transform;
+        }
+    }
+
+    /**
+     * Remove all constraint anchors from scene
+     * **/
+    public void RemoveConstraintAnchors()
+    {
+        GameObject constraintAnchorsHolder = GameObject.FindGameObjectWithTag("ConstraintAnchorsHolder");
+        if (constraintAnchorsHolder != null)
+            DestroyImmediate(constraintAnchorsHolder);
+        m_constraintGridAnchors.Clear();
     }
 
     public void Update()
