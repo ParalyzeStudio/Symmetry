@@ -1,4 +1,4 @@
-﻿Shader "Custom/Unlit/Transparent/PositionTintColor" {
+﻿Shader "Custom/Unlit/Transparent/PositionReplacementColor" {
 Properties {
 	_Color ("Repl. Color (RGBA)", Color) = (1,1,1,1)
 }

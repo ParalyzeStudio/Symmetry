@@ -12,11 +12,6 @@ public class LevelManager : MonoBehaviour
     public void Awake()
     {
         m_levels = new Level[LEVELS_COUNT];
-        //nullify elements in this array
-        for (int i = 0; i != LEVELS_COUNT; i++)
-        {
-            m_levels[i] = null;
-        }
         m_currentLevel = null;
     }
 

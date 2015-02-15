@@ -5,6 +5,8 @@ public class MenuTouchHandler : TouchHandler
     public float m_circleButtonsTouchAreaRadius;
     private GameController m_gameController;
 
+    public GameObject m_veilPfb;
+
     public override void Start()
     {
         m_gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
@@ -65,8 +67,11 @@ public class MenuTouchHandler : TouchHandler
 
     public void OnClickTapToPlay()
     {
-        Application.LoadLevel("test_scene");
-        m_gameController.BuildAndShowLevelsMenu();
+        //Application.LoadLevel("test_scene");
+        //m_gameController.BuildAndShowLevelsMenu();
+
+        GameObject veil = (GameObject) Instantiate(m_veilPfb);
+        veil.GetComponent<VeilOpacityAnimator>().TransitionOverScenes(2.0f);
     }
 
     public void OnClickOptions()

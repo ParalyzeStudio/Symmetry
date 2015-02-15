@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class QuadAnimator : MonoBehaviour 
+public class ValueAnimator : MonoBehaviour 
 {
     //Variables to handle fading
     private bool m_fading;
@@ -32,7 +32,7 @@ public class QuadAnimator : MonoBehaviour
 
     //TODO rotation
 
-    public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay)
+    public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f)
     {
         if (fromOpacity == toOpacity)
             return;
@@ -68,7 +68,7 @@ public class QuadAnimator : MonoBehaviour
         m_translatingElapsedTime = 0;
     }
 
-	protected void Update () 
+	protected virtual void Update () 
     {
         float dt = Time.deltaTime;
 
@@ -84,6 +84,7 @@ public class QuadAnimator : MonoBehaviour
                 {
                     m_opacity = m_toOpacity;
                     m_fading = false;
+                    OnFinishFading();
                 }
                 else
                     m_opacity += deltaOpacity;
@@ -104,6 +105,7 @@ public class QuadAnimator : MonoBehaviour
                 {
                     m_position = m_toPosition;
                     m_translating = false;
+                    OnFinishTranslating();
                 }
 
                 OnPositionChanged(m_position);
@@ -122,6 +124,7 @@ public class QuadAnimator : MonoBehaviour
                 {
                     m_scale = m_toScale;
                     m_scaling = false;
+                    OnFinishScaling();
                 }
 
                 OnScaleChanged(m_scale);
@@ -145,5 +148,20 @@ public class QuadAnimator : MonoBehaviour
     public virtual void OnScaleChanged(Vector2 newScale)
     {
         this.transform.localScale = newScale;
+    }
+
+    public virtual void OnFinishFading()
+    {
+        
+    }
+
+    public virtual void OnFinishTranslating()
+    {
+
+    }
+
+    public virtual void OnFinishScaling()
+    {
+
     }
 }

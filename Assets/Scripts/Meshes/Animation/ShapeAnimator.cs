@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ShapeAnimator : QuadAnimator
+public class ShapeAnimator : ValueAnimator
 {
     public override void OnOpacityChanged(float fNewOpacity)
     {
