@@ -52,7 +52,7 @@ public class GameController : MonoBehaviour
         {
             GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
             m_levelManager = levelManagerObject.GetComponent<LevelManager>();
-            m_levelManager.ParseLevelsFile();
+            m_levelManager.ParseAllLevels();
             BuildAndShowLevel(1);
 
             ///*** DEBUG TMP ***/
