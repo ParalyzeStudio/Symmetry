@@ -3,13 +3,14 @@
 public class MenuTouchHandler : TouchHandler
 {
     public float m_circleButtonsTouchAreaRadius;
-    private GameController m_gameController;
 
-    public GameObject m_veilPfb;
+    private GameController m_gameController;
+    private GUIManager m_guiManager;
 
     public override void Start()
     {
         m_gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
     }
 
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
@@ -20,67 +21,80 @@ public class MenuTouchHandler : TouchHandler
     protected override void OnClick()
     {
         Vector2 clickLocation = m_prevPointerLocation;
-
         Vector2 m_designScreenSize = m_gameController.m_designScreenSize;
 
-        ////Check if we clicked a button first to swallow touch
-        //Options Button
-        GameObject optionsBtn = GameObject.FindGameObjectWithTag("OptionsButton");
-        if (optionsBtn != null)
+        if (m_guiManager.IsOptionsWindowShown())
         {
-            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(optionsBtn.transform.position) - clickLocation).magnitude;
-            if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+            GUIInterfaceButton musicBtn = GameObject.FindGameObjectWithTag("MusicButton").GetComponent<GUIInterfaceButton>();
+            if (musicBtn != null)
             {
-                OnClickOptions();
-                return; //swallow the touch by returning
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(musicBtn.transform.position) - clickLocation).magnitude;
+                if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+                {
+                    musicBtn.OnClick();
+                    return; //swallow the touch by returning
+                }
+            }
+
+            GUIInterfaceButton soundBtn = GameObject.FindGameObjectWithTag("SoundButton").GetComponent<GUIInterfaceButton>();
+            if (soundBtn != null)
+            {
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(soundBtn.transform.position) - clickLocation).magnitude;
+                if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+                {
+                    soundBtn.OnClick();
+                    return; //swallow the touch by returning
+                }
             }
         }
-
-        //Credits Button
-        GameObject creditsBtn = GameObject.FindGameObjectWithTag("CreditsButton");
-        if (creditsBtn != null)
+        else
         {
-            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(creditsBtn.transform.position) - clickLocation).magnitude;
-            if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+            ////Check if we clicked a button first to swallow touch
+            //Options Button
+            GUIInterfaceButton optionsBtn = GameObject.FindGameObjectWithTag("OptionsButton").GetComponent<GUIInterfaceButton>();
+            if (optionsBtn != null)
             {
-                OnClickCredits();
-                return; //swallow the touch by returning
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(optionsBtn.transform.position) - clickLocation).magnitude;
+                if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+                {
+                    optionsBtn.OnClick();
+                    return; //swallow the touch by returning
+                }
             }
-        }
 
-        //transform the click location in screen rect coordinates
-        clickLocation += new Vector2(0.5f * m_designScreenSize.x, 0.5f * m_designScreenSize.y);
-        clickLocation.y = -clickLocation.y + m_designScreenSize.y;
+            //Credits Button
+            GUIInterfaceButton creditsBtn = GameObject.FindGameObjectWithTag("CreditsButton").GetComponent<GUIInterfaceButton>();
+            if (creditsBtn != null)
+            {
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(creditsBtn.transform.position) - clickLocation).magnitude;
+                if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+                {
+                    creditsBtn.OnClick();
+                    return; //swallow the touch by returning
+                }
+            }
 
-        Rect tapToPlayAreaRect = new Rect();
-        Vector2 position = transform.position;
+            //transform the click location in screen rect coordinates
+            clickLocation += new Vector2(0.5f * m_designScreenSize.x, 0.5f * m_designScreenSize.y);
+            clickLocation.y = -clickLocation.y + m_designScreenSize.y;
 
-        tapToPlayAreaRect.width = m_designScreenSize.x;
-        tapToPlayAreaRect.height = 0.78f * m_designScreenSize.y;
-        tapToPlayAreaRect.position = Vector3.zero;
+            Rect tapToPlayAreaRect = new Rect();
+            Vector2 position = transform.position;
 
-        if (tapToPlayAreaRect.Contains(clickLocation))
-        {
-            OnClickTapToPlay();
+            tapToPlayAreaRect.width = m_designScreenSize.x;
+            tapToPlayAreaRect.height = 0.78f * m_designScreenSize.y;
+            tapToPlayAreaRect.position = Vector3.zero;
+
+            if (tapToPlayAreaRect.Contains(clickLocation))
+            {
+                OnClickTapToPlay();
+            }
         }
     }
 
     public void OnClickTapToPlay()
     {
-        //Application.LoadLevel("test_scene");
-        //m_gameController.BuildAndShowLevelsMenu();
-
-        GameObject veil = (GameObject) Instantiate(m_veilPfb);
-        veil.GetComponent<VeilOpacityAnimator>().TransitionOverScenes(2.0f);
-    }
-
-    public void OnClickOptions()
-    {
-        Debug.Log("Click Options");
-    }
-
-    public void OnClickCredits()
-    {
-        Debug.Log("Click Credits");
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.ShowTransitionVeil(2.0f, 0.5f);
     }
 }

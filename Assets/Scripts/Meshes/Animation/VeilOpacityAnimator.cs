@@ -3,8 +3,10 @@
 public class VeilOpacityAnimator : ValueAnimator
 {
     private bool m_transitioningOverScenes;
-    private float m_transitioningOverScenesDuration;
+    private float m_transitioningOverScenesPhaseDuration;
+    private float m_transitioningOverScenesPeakDuration;
     public bool m_destroyVeilOnFinishTransitioning { get; set; }
+    
 
     protected void Awake()
     {
@@ -23,12 +25,13 @@ public class VeilOpacityAnimator : ValueAnimator
     /**
      * Makes the veil fade in and then fade out for a total duration of fDuration after fDelay seconds
      * **/
-    public void TransitionOverScenes(float fDuration, float fDelay = 0.0f)
+    public void TransitionOverScenes(float fPhaseDuration, float fPeakDuration, float fDelay = 0.0f)
     {
         m_transitioningOverScenes = true;
-        m_transitioningOverScenesDuration = fDuration;
+        m_transitioningOverScenesPhaseDuration = fPhaseDuration;
+        m_transitioningOverScenesPeakDuration = fPeakDuration;
         OnOpacityChanged(0);
-        FadeFromTo(0, 1, 0.5f * fDuration, fDelay);
+        FadeFromTo(0, 1, 0.5f * fPhaseDuration, fDelay);
     }
 
     public override void OnFinishFading()
@@ -37,7 +40,7 @@ public class VeilOpacityAnimator : ValueAnimator
         {
             if (m_opacity == 1) //we reached the peak of the transition, now fade out
             {
-                FadeFromTo(1, 0, 0.5f * m_transitioningOverScenesDuration);
+                FadeFromTo(1, 0, m_transitioningOverScenesPhaseDuration, m_transitioningOverScenesPeakDuration);
             }
             else //we're done transitioning
             {
@@ -47,10 +50,4 @@ public class VeilOpacityAnimator : ValueAnimator
             }
         }
     }
-
-    //protected override void Update()
-    //{
-    //    base.Update();
-    //    Debug.Log("Update");
-    //}
 }
