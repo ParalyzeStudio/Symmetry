@@ -9,4 +9,9 @@ public class ContourSegment : GridSegment
         float texWidth = tex.width;
         this.m_textureRange = new Vector4(0, 0, m_length / texWidth, 1);
     }
+
+    protected override void UpdateTextureWrapMode()
+    {
+        renderer.sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
+    }
 }

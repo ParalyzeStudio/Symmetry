@@ -70,7 +70,7 @@ public class UVQuad : MonoBehaviour
     /**
      * Switch between CLAMP and REPEAT wrap modes
      * **/
-    private void UpdateWrapMode(bool bForceUpdate)
+    protected void UpdateWrapMode(bool bForceUpdate)
     {
         if (!bForceUpdate && m_textureWrapMode.Equals(m_prevTextureWrapMode)) //same value do not update
             return;

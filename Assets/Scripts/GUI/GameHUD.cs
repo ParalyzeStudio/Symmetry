@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 public class GameHUD : MonoBehaviour
 {
-    public List<HUDButton> m_actionButtons;
+    public List<HUDButton> m_actionButtons { get; set; }
     public HUDButton m_selectedActionButton { get; set; } //the button the player has selected, null if none is selected
-    public List<HUDButton> m_interfaceButtons;
+    public List<HUDButton> m_interfaceButtons { get; set; }
 
     public GameObject m_horAxisPfb;
     public GameObject m_vertAxisPfb;
@@ -41,6 +41,8 @@ public class GameHUD : MonoBehaviour
      * **/
     public void BuildActionButtonsForLevel(int iLevelNumber)
     {
+        m_actionButtons = new List<HUDButton>();
+
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
         Vector2 screenSize = backgroundObject.GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
@@ -103,6 +105,6 @@ public class GameHUD : MonoBehaviour
      * **/
     public void BuildInterfaceButtons()
     {
-
+        m_interfaceButtons = new List<HUDButton>();
     }
 }

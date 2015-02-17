@@ -147,9 +147,9 @@ public class GameController : MonoBehaviour
      * **/
     private void BuildGUI()
     {
-        GameObject guiTopBannerObject = GameObject.FindGameObjectWithTag("GameHUD");
-        GameHUD interfaceHolder = guiTopBannerObject.GetComponent<GameHUD>();
-        interfaceHolder.BuildForLevel(m_levelManager.m_currentLevel.m_number);
+        GameObject gameHUDObject = GameObject.FindGameObjectWithTag("GameHUD");
+        GameHUD gameHUD = gameHUDObject.GetComponent<GameHUD>();
+        gameHUD.BuildForLevel(m_levelManager.m_currentLevel.m_number);
     }
 
     /**
