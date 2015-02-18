@@ -52,7 +52,7 @@ public class Segment : UVQuad
 
     protected virtual void UpdateTextureWrapMode()
     {
-        renderer.sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
+        m_textureWrapMode = TextureWrapMode.Clamp;
     }
 
     protected override void Update()
