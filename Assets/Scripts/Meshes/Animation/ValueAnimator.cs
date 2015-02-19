@@ -4,31 +4,31 @@ using System.Collections;
 public class ValueAnimator : MonoBehaviour 
 {
     //Variables to handle fading
-    private bool m_fading;
+    protected bool m_fading;
     protected float m_opacity;
-    private float m_fromOpacity;
-    private float m_toOpacity;
-    private float m_fadingDuration;
-    private float m_fadingDelay;
-    private float m_fadingElapsedTime;
+    protected float m_fromOpacity;
+    protected float m_toOpacity;
+    protected float m_fadingDuration;
+    protected float m_fadingDelay;
+    protected float m_fadingElapsedTime;
 
     //Variables to handle scaling
-    private bool m_scaling;
+    protected bool m_scaling;
     protected Vector2 m_scale;
-    private Vector2 m_fromScale;
-    private Vector2 m_toScale;
-    private float m_scalingDuration;
-    private float m_scalingDelay;
-    private float m_scalingElapsedTime;
+    protected Vector2 m_fromScale;
+    protected Vector2 m_toScale;
+    protected float m_scalingDuration;
+    protected float m_scalingDelay;
+    protected float m_scalingElapsedTime;
 
     //Variables to handle translating
-    private bool m_translating;
-    protected Vector2 m_position;
-    private Vector2 m_fromPosition;
-    private Vector2 m_toPosition;
-    private float m_translatingDuration;
-    private float m_translatingDelay;
-    private float m_translatingElapsedTime;
+    protected bool m_translating;
+    protected Vector3 m_position;
+    protected Vector3 m_fromPosition;
+    protected Vector3 m_toPosition;
+    protected float m_translatingDuration;
+    protected float m_translatingDelay;
+    protected float m_translatingElapsedTime;
 
     //TODO rotation
 
@@ -57,7 +57,7 @@ public class ValueAnimator : MonoBehaviour
         m_scalingElapsedTime = 0;
     }
 
-    public void TranslateFromTo(Vector2 fromPosition, Vector2 toPosition, float duration, float delay)
+    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay)
     {
         m_translating = true;
         m_position = fromPosition;
@@ -98,9 +98,11 @@ public class ValueAnimator : MonoBehaviour
             m_translatingElapsedTime += dt;
             if (m_translatingElapsedTime > m_translatingDelay)
             {
-                Vector2 deltaPosition = dt / m_translatingDuration * (m_toPosition - m_fromPosition);
-                float sqrCoveredDistance = (m_position + deltaPosition - m_fromPosition).sqrMagnitude;
+                Vector3 deltaPosition = dt / m_translatingDuration * (m_toPosition - m_fromPosition);
+                m_position += deltaPosition;
+                float sqrCoveredDistance = (m_position - m_fromPosition).sqrMagnitude;
                 float sqrTotalDistance = (m_toPosition - m_fromPosition).sqrMagnitude;
+
                 if (sqrCoveredDistance > sqrTotalDistance)
                 {
                     m_position = m_toPosition;
@@ -118,7 +120,8 @@ public class ValueAnimator : MonoBehaviour
             if (m_scalingElapsedTime > m_scalingDelay)
             {
                 Vector2 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
-                float sqrCoveredScale = (m_scale + deltaScale - m_fromScale).sqrMagnitude;
+                m_scale += deltaScale;
+                float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
                 float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
                 if (sqrCoveredScale > sqrTotalScale)
                 {
@@ -137,17 +140,14 @@ public class ValueAnimator : MonoBehaviour
 
     }
 
-    public virtual void OnPositionChanged(Vector2 newPosition)
+    public virtual void OnPositionChanged(Vector3 newPosition)
     {
-        if (this.transform.parent != null)
-            this.transform.localPosition = newPosition;
-        else
-            this.transform.position = newPosition;
+        
     }
 
     public virtual void OnScaleChanged(Vector2 newScale)
     {
-        this.transform.localScale = newScale;
+        
     }
 
     public virtual void OnFinishFading()

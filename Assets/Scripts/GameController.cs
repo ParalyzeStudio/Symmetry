@@ -69,6 +69,10 @@ public class GameController : MonoBehaviour
             //}
             ///*** DEBUG TMP ***/
         }
+        else
+        {
+            BuildAndShowMainMenu();
+        }
 
         TouchHandler.s_touchDeactivated = false;
     }
@@ -90,7 +94,8 @@ public class GameController : MonoBehaviour
      * **/
     public void BuildAndShowMainMenu()
     {
-        
+        MainMenu mainMenu = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<MainMenu>();
+        mainMenu.Show(true);
     }
 
     /**

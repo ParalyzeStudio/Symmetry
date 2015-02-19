@@ -5,12 +5,11 @@ public class UVQuad : MonoBehaviour
 {
     public Vector4 m_textureRange;
     public TextureWrapMode m_textureWrapMode;
+    private bool m_isTextured; //is this quad textured. If not we don't need to update UVs and wrap mode
 
     //private variables to prevent unity from calling update functions for nothing
     private Vector4 m_prevTextureRange;
     private TextureWrapMode m_prevTextureWrapMode;
-
-    private bool m_isTextured; //is this quad textured. If not we don't need to update UVs and wrap mode
 
     protected virtual void Awake()
     {
@@ -51,6 +50,19 @@ public class UVQuad : MonoBehaviour
         Vector3[] normals = new Vector3[4] { Vector3.forward, Vector3.forward, Vector3.forward, Vector3.forward };
         mesh.normals = normals;
     }
+
+    ///**
+    // * Set the world position of this quad anchor point and the quad world position accordingly
+    // * **/
+    //public void SetPosition(Vector2 position)
+    //{
+    //    m_position = position;
+    //    Vector2 quadSize = this.transform.localScale;
+    //    Vector2 anchorPointToQuadCenter = new Vector2(0.5f, 0.5f) - m_anchorPoint;
+    //    anchorPointToQuadCenter.Scale(quadSize);
+
+    //    this.transform.localPosition = position + anchorPointToQuadCenter;
+    //}
 
     /**
      * Simply update the UVs array
