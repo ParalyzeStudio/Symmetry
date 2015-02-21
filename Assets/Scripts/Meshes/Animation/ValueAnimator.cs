@@ -14,9 +14,9 @@ public class ValueAnimator : MonoBehaviour
 
     //Variables to handle scaling
     protected bool m_scaling;
-    protected Vector2 m_scale;
-    protected Vector2 m_fromScale;
-    protected Vector2 m_toScale;
+    protected Vector3 m_scale;
+    protected Vector3 m_fromScale;
+    protected Vector3 m_toScale;
     protected float m_scalingDuration;
     protected float m_scalingDelay;
     protected float m_scalingElapsedTime;
@@ -30,7 +30,15 @@ public class ValueAnimator : MonoBehaviour
     protected float m_translatingDelay;
     protected float m_translatingElapsedTime;
 
-    //TODO rotation
+    //Variables to handle rotating
+    protected bool m_rotating;
+    protected Vector3 m_rotationAxis;
+    protected float m_angle;
+    protected float m_fromAngle;
+    protected float m_toAngle;
+    protected float m_rotatingDuration;
+    protected float m_rotatingDelay;
+    protected float m_rotatingElapsedTime;
 
     public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f)
     {
@@ -46,7 +54,7 @@ public class ValueAnimator : MonoBehaviour
         m_fadingElapsedTime = 0;
     }
 
-    public void ScaleFromTo(Vector2 fromScale, Vector2 toScale, float duration, float delay)
+    public void ScaleFromTo(Vector3 fromScale, Vector3 toScale, float duration, float delay = 0.0f)
     {
         m_scaling = true;
         m_scale = fromScale;
@@ -57,7 +65,7 @@ public class ValueAnimator : MonoBehaviour
         m_scalingElapsedTime = 0;
     }
 
-    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay)
+    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay = 0.0f)
     {
         m_translating = true;
         m_position = fromPosition;
@@ -66,6 +74,18 @@ public class ValueAnimator : MonoBehaviour
         m_translatingDuration = duration;
         m_translatingDelay = delay;
         m_translatingElapsedTime = 0;
+    }
+
+    public void RotateFromToAroundAxis(float fromAngle, float toAngle, Vector3 axis, float duration, float delay = 0.0f)
+    {
+        m_rotating = true;
+        m_angle = fromAngle;
+        m_fromAngle = fromAngle;
+        m_toAngle = toAngle;
+        m_rotationAxis = axis;
+        m_rotatingDuration = duration;
+        m_rotatingDelay = delay;
+        m_rotatingElapsedTime = 0;
     }
 
 	protected virtual void Update () 
@@ -119,7 +139,7 @@ public class ValueAnimator : MonoBehaviour
             m_scalingElapsedTime += dt;
             if (m_scalingElapsedTime > m_scalingDelay)
             {
-                Vector2 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
+                Vector3 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
                 m_scale += deltaScale;
                 float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
                 float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
@@ -131,6 +151,26 @@ public class ValueAnimator : MonoBehaviour
                 }
 
                 OnScaleChanged(m_scale);
+            }
+        }
+
+        if (m_rotating)
+        {
+            m_rotatingElapsedTime += dt;
+            if (m_rotatingElapsedTime > m_rotatingDelay)
+            {
+                float deltaAngle = dt / m_rotatingDuration * (m_toAngle - m_fromAngle);
+                m_angle += deltaAngle;
+                if (deltaAngle < 0 && (m_angle + deltaAngle) < m_toAngle
+                    ||
+                    deltaAngle > 0 && (m_angle + deltaAngle) > m_toAngle)
+                {
+                    m_angle = m_toAngle;
+                    m_rotating = false;
+                    OnFinishRotating();
+                }
+
+                OnRotationChanged(m_angle, m_rotationAxis);
             }
         }
 	}
@@ -145,9 +185,14 @@ public class ValueAnimator : MonoBehaviour
         
     }
 
-    public virtual void OnScaleChanged(Vector2 newScale)
+    public virtual void OnScaleChanged(Vector3 newScale)
     {
         
+    }
+
+    public virtual void OnRotationChanged(float newAngle, Vector3 axis)
+    {
+
     }
 
     public virtual void OnFinishFading()
@@ -161,6 +206,11 @@ public class ValueAnimator : MonoBehaviour
     }
 
     public virtual void OnFinishScaling()
+    {
+
+    }
+
+    public virtual void OnFinishRotating()
     {
 
     }

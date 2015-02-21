@@ -15,15 +15,11 @@ public class Triangulable
 
     public void Triangulate()
     {
-        m_area = 0;
-
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
-
         List<Vector2> triangles = new List<Vector2>();
 
         Triangulation.Process(m_contour, ref triangles);
 
+        m_area = 0;
         for (int iVertexIndex = 0; iVertexIndex != triangles.Count; iVertexIndex += 3)
         {
             GridTriangle gridTriangle = new GridTriangle();

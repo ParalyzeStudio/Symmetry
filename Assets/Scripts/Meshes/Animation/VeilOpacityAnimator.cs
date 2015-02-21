@@ -6,7 +6,6 @@ public class VeilOpacityAnimator : ValueAnimator
     private float m_transitioningOverScenesPhaseDuration;
     private float m_transitioningOverScenesPeakDuration;
     public bool m_destroyVeilOnFinishTransitioning { get; set; }
-    
 
     protected void Awake()
     {
@@ -40,6 +39,7 @@ public class VeilOpacityAnimator : ValueAnimator
         {
             if (m_opacity == 1) //we reached the peak of the transition, now fade out
             {
+                OnTransitionPeakReached();
                 FadeFromTo(1, 0, m_transitioningOverScenesPhaseDuration, m_transitioningOverScenesPeakDuration);
             }
             else //we're done transitioning
@@ -49,5 +49,11 @@ public class VeilOpacityAnimator : ValueAnimator
                     Destroy(this.gameObject);
             }
         }
+    }
+
+    public virtual void OnTransitionPeakReached()
+    {
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.OnTransitionVeilPeakReached();
     }
 }

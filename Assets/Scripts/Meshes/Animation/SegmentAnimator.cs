@@ -12,7 +12,7 @@ public class SegmentAnimator : GameObjectAnimator
         ScaleFromTo(segmentFromScale, new Vector2(fNewLength, segment.m_thickness), 1.0f, 1.0f);
     }
 
-    public override void OnScaleChanged(Vector2 newScale)
+    public override void OnScaleChanged(Vector3 newScale)
     {
         base.OnScaleChanged(newScale);
 

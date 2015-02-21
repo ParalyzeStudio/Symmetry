@@ -71,7 +71,8 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            BuildAndShowMainMenu();
+            //BuildAndShowMainMenu();
+            GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.CHAPTERS, true);
         }
 
         TouchHandler.s_touchDeactivated = false;
@@ -94,8 +95,7 @@ public class GameController : MonoBehaviour
      * **/
     public void BuildAndShowMainMenu()
     {
-        MainMenu mainMenu = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<MainMenu>();
-        mainMenu.Show(true);
+        GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
     }
 
     /**

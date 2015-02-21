@@ -42,6 +42,7 @@ public class LevelManager : MonoBehaviour
         string levelName = levelNode.GetValue("@name");
         string levelNumber = levelNode.GetValue("@number");
         level.m_number = int.Parse(levelNumber);
+        level.m_name = levelName;
 
         //Parse contours
         XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");

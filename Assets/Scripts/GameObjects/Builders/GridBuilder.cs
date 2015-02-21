@@ -38,9 +38,6 @@ public class GridBuilder : MonoBehaviour
         anchorsHolder.transform.parent = this.transform;
         anchorsHolder.transform.localPosition = Vector3.zero;
 
-        GameObject gameControllerObject = GameObject.FindGameObjectWithTag("GameController");
-        GameController gameController = gameControllerObject.GetComponent<GameController>();
-
         //get the screen viewport dimensions
         float fCameraSize = Camera.main.orthographicSize;
         float fScreenWidth = (float)Screen.width;
@@ -60,12 +57,6 @@ public class GridBuilder : MonoBehaviour
         //set the position for the grid
         Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
         this.gameObject.transform.position = gridPosition;
-
-        //Debug.Log(">>>DEBUG GRID");
-        //Debug.Log("grid width:" + gridSize.x + " height:" + gridSize.y);
-        //Debug.Log("gridSpacing:" + m_gridSpacing);
-        //Debug.Log("m_numColumns:" + m_numColumns);
-        //Debug.Log("m_numLines:" + m_numLines);
 
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {
@@ -349,7 +340,6 @@ public class GridBuilder : MonoBehaviour
         for (int iAnchorIndex = 0; iAnchorIndex != m_constraintGridAnchors.Count; iAnchorIndex++)
         {
             GameObject anchor = m_constraintGridAnchors[iAnchorIndex];
-            Vector2 gridPos = GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
             Vector3 anchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
             GameObject clonedConstraintAnchor = (GameObject) Instantiate(m_gridConstraintAnchorPfb, anchorPosition, Quaternion.identity);
 

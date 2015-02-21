@@ -79,7 +79,6 @@ public class MenuTouchHandler : TouchHandler
             clickLocation.y = -clickLocation.y + m_designScreenSize.y;
 
             Rect tapToPlayAreaRect = new Rect();
-            Vector2 position = transform.position;
 
             tapToPlayAreaRect.width = m_designScreenSize.x;
             tapToPlayAreaRect.height = 0.78f * m_designScreenSize.y;
@@ -95,6 +94,6 @@ public class MenuTouchHandler : TouchHandler
     public void OnClickTapToPlay()
     {
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.ShowTransitionVeil(2.0f, 0.5f);
+        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.LEVELS);
     }
 }

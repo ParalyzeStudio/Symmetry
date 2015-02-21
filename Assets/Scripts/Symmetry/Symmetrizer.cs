@@ -28,12 +28,12 @@ public class Symmetrizer : MonoBehaviour
 
     public SymmetryType m_type;
 
-    private LevelManager m_levelManager;
+    //private LevelManager m_levelManager;
 
     public void Start()
     {
-        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
-        m_levelManager = levelManagerObject.GetComponent<LevelManager>();
+        //GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
+        //m_levelManager = levelManagerObject.GetComponent<LevelManager>();
     }
 
     public void Symmetrize()
@@ -76,7 +76,7 @@ public class Symmetrizer : MonoBehaviour
             Shape shapeData = new Shape();
             shapeData.m_gridTriangles = reflectedTriangles;
             shapeData.m_color = new Color(1, 0, 0, 0.8f);
-            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+            shapeBuilder.CreateFromShapeData(shapeData);
         }
         if (rightTriangles.Count > 0)
         {
@@ -84,7 +84,7 @@ public class Symmetrizer : MonoBehaviour
             Shape shapeData = new Shape();
             shapeData.m_gridTriangles = reflectedTriangles;
             shapeData.m_color = new Color(1, 0, 0, 0.8f);
-            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+            shapeBuilder.CreateFromShapeData(shapeData);
         }
     }
 
@@ -109,10 +109,6 @@ public class Symmetrizer : MonoBehaviour
      * **/
     private void ExtractTrianglesOnBothSidesOfAxis(out List<GridTriangle> leftTriangles, out List<GridTriangle> rightTriangles)
     {
-        ////Build the 2 shapes that will acquire the newly created triangles
-        Shape newShape1 = new Shape();
-        Shape newShape2 = new Shape();
-
         AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
         Vector2 axisStartPoint = axisRenderer.m_endpoint1GridPosition;
         Vector2 axisEndPoint = axisRenderer.m_endpoint2GridPosition;

@@ -16,6 +16,12 @@ public class MainMenu : MonoBehaviour
         ShowButtons(bAnimated, 2.0f);
     }
 
+    public void Dismiss()
+    {
+        GameObject rootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
+        rootNode.SetActive(false);
+    }
+
     public void ShowFrames(bool bAnimated, float fDelay = 0.0f)
     {
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
@@ -61,8 +67,8 @@ public class MainMenu : MonoBehaviour
         SegmentAnimator horizontalAxisAnimator = horizontalAxisObject.GetComponent<SegmentAnimator>();
         SegmentAnimator verticalAxisAnimator = verticalAxisObject.GetComponent<SegmentAnimator>();
 
-        horizontalAxisAnimator.m_pivotPoint = new Vector2(0.5f, 0.5f);
-        verticalAxisAnimator.m_pivotPoint = new Vector2(0.5f, 0.5f);
+        horizontalAxisAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.5f, 0.5f));
+        verticalAxisAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.5f, 0.5f));
 
         //add axes to parent holder and set correct local positions
         horizontalAxis.transform.parent = axesHolder.transform;
@@ -100,24 +106,27 @@ public class MainMenu : MonoBehaviour
             GameObject optionsPanel = GameObject.FindGameObjectWithTag("OptionsPanel");
             GameObject creditsPanel = GameObject.FindGameObjectWithTag("CreditsPanel");
 
-            ValueAnimator optionsPanelAnimator = optionsPanel.GetComponent<ValueAnimator>();
-            ValueAnimator creditsPanelAnimator = creditsPanel.GetComponent<ValueAnimator>();
+            GameObjectAnimator optionsPanelAnimator = optionsPanel.GetComponent<GameObjectAnimator>();
+            GameObjectAnimator creditsPanelAnimator = creditsPanel.GetComponent<GameObjectAnimator>();
 
             Vector3 optionsPanelFromPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, optionsPanel.transform.position.z);
             Vector3 creditsPanelFromPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, creditsPanel.transform.position.z);
-            Vector3 optionsPanelToPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, optionsPanel.transform.position.z);
+            Vector3 optionsPanelToPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, -200);
             Vector3 creditsPanelToPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, creditsPanel.transform.position.z);
 
             optionsPanel.transform.localPosition = optionsPanelFromPosition;
             creditsPanel.transform.localPosition = creditsPanelFromPosition;
             optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelToPosition, 0.4f, fDelay);
             creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelToPosition, 0.4f, fDelay + 0.15f);
+
+            optionsPanelAnimator.UpdatePivotPoint(new Vector3(0,0,0.5f));
+            optionsPanelAnimator.RotateFromToAroundAxis(0, 360, new Vector3(0,0,1), 5.0f, 2 * fDelay);
         }
     }
 
     public void ShowTapToPlay()
     {
-        GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
+        //GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
     }
 }
 
