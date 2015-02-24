@@ -26,7 +26,7 @@ public class Symmetrizer : MonoBehaviour
     //public const int SYMMETRY_AXIS_DIAGONALS            = 0x00001100; //SYMMETRY_AXIS_DIAGONAL_TOP_LEFT && SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT
     //public const int SYMMETRY_AXIS_ALL                  = 0x00001111; //SYMMETRY_AXIS_STRAIGHT && SYMMETRY_AXIS_DIAGONALS
 
-    public SymmetryType m_type;
+    //public SymmetryType m_type;
 
     //private LevelManager m_levelManager;
 
@@ -34,30 +34,6 @@ public class Symmetrizer : MonoBehaviour
     {
         //GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
         //m_levelManager = levelManagerObject.GetComponent<LevelManager>();
-    }
-
-    public void Symmetrize()
-    {
-        switch (m_type)
-        {
-            case SymmetryType.SYMMETRY_AXIS_HORIZONTAL:
-            case SymmetryType.SYMMETRY_AXIS_VERTICAL:
-            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT:
-            case SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT:
-                SymmetrizeByAxis();
-                break;
-            case SymmetryType.SYMMETRY_POINT:
-                SymmetrizeByPoint();
-                break;
-            case SymmetryType.SUBTRACTION_AXIS:
-                SymmetrizeSubtractionByAxis();
-                break;
-            case SymmetryType.SUBTRACTION_POINT:
-                SymmetrizeSubtractionByPoint();
-                break;
-            default:
-                break;
-        }
     }
 
     public void SymmetrizeByAxis()
@@ -70,21 +46,38 @@ public class Symmetrizer : MonoBehaviour
         ExtractTrianglesOnBothSidesOfAxis(out leftTriangles, out rightTriangles);
 
         //Rebuild shapes from those lists of triangles
+        AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
+        Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
+        Vector3 axisDirection = axisRenderer.GetAxisDirection();
+        
         if (leftTriangles.Count > 0)
         {
+            Debug.Log("LEFT");
+
             List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles, true);
             Shape shapeData = new Shape();
             shapeData.m_gridTriangles = reflectedTriangles;
-            shapeData.m_color = new Color(1, 0, 0, 0.8f);
-            shapeBuilder.CreateFromShapeData(shapeData);
+            shapeData.m_color = new Color(1, 0, 0, 1);
+            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+            GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
+            shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+            shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+            shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
         }
+
         if (rightTriangles.Count > 0)
         {
+            Debug.Log("RIGHT");
+
             List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles, false);
             Shape shapeData = new Shape();
             shapeData.m_gridTriangles = reflectedTriangles;
-            shapeData.m_color = new Color(1, 0, 0, 0.8f);
-            shapeBuilder.CreateFromShapeData(shapeData);
+            shapeData.m_color = new Color(1, 0, 0, 1);
+            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+            GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
+            shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+            shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+            shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
         }
     }
 

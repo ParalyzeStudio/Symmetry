@@ -94,6 +94,6 @@ public class MenuTouchHandler : TouchHandler
     public void OnClickTapToPlay()
     {
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.LEVELS);
+        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS);
     }
 }

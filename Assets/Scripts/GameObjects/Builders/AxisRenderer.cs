@@ -91,6 +91,23 @@ public class AxisRenderer : MonoBehaviour
     public void OnFinishBuildAxisSegment()
     {
         Symmetrizer symmetrizer = this.gameObject.GetComponent<Symmetrizer>();
-        symmetrizer.Symmetrize();
+        symmetrizer.SymmetrizeByAxis();
+    }
+
+    public Vector2 GetAxisCenterInWorldCoordinates()
+    {
+        GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
+
+        Vector2 gridAxisCenter = 0.5f * (m_endpoint1GridPosition + m_endpoint2GridPosition);
+        Vector2 worldAxisCenter = gridBuilder.GetWorldCoordinatesFromGridCoordinates(gridAxisCenter);
+
+        return worldAxisCenter;
+    }
+
+    public Vector2 GetAxisDirection()
+    {
+        Vector2 axisDirection = m_endpoint2GridPosition - m_endpoint1GridPosition;
+        axisDirection.Normalize();
+        return axisDirection;
     }
 }

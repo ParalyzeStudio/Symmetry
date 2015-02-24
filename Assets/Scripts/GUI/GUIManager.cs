@@ -31,7 +31,7 @@ public class GUIManager : MonoBehaviour
     {
         GameObject contentRootNode = null;
         if (contentToDisplay == DisplayContent.MENU)
-        {
+        {           
             contentRootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
             contentRootNode.GetComponent<MainMenu>().Show(bAnimated);
         }
@@ -40,6 +40,8 @@ public class GUIManager : MonoBehaviour
             contentRootNode = GameObject.FindGameObjectWithTag("GUIChapters");
             contentRootNode.GetComponent<Chapters>().Show(bAnimated);
         }
+
+        m_displayedContent = contentToDisplay;
     }
 
     public void HideContent(DisplayContent contentToHide)
@@ -49,6 +51,11 @@ public class GUIManager : MonoBehaviour
         {
             contentRootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
             contentRootNode.GetComponent<MainMenu>().Dismiss();
+        }
+        else if (contentToHide == DisplayContent.CHAPTERS)
+        {
+            contentRootNode = GameObject.FindGameObjectWithTag("GUIChapters");
+            contentRootNode.GetComponent<Chapters>().Dismiss();
         }
     }
 

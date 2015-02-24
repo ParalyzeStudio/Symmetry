@@ -63,10 +63,6 @@ public class ShapeTouchHandler : TouchHandler
     protected override void OnClick()
     {
         base.OnClick();
-
-        float currentOpacity = this.gameObject.GetComponent<ShapeRenderer>().m_color.a;
-        float targetOpacity = 0.25f;
-        this.gameObject.GetComponent<ShapeAnimator>().FadeFromTo(currentOpacity, targetOpacity, 2.0f, 0.0f);
     }
 }
 

@@ -71,8 +71,8 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            //BuildAndShowMainMenu();
-            GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.CHAPTERS, true);
+            GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
+            //GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.CHAPTERS, true);
         }
 
         TouchHandler.s_touchDeactivated = false;
@@ -90,21 +90,21 @@ public class GameController : MonoBehaviour
         }
     }
 
-    /**
-     * Builds and shows main menu (play button, options...)
-     * **/
-    public void BuildAndShowMainMenu()
-    {
-        GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
-    }
+    ///**
+    // * Builds and shows main menu (play button, options...)
+    // * **/
+    //public void BuildAndShowMainMenu()
+    //{
+    //    GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
+    //}
 
-    /**
-     * Builds and shows main menu (play button, options...)
-     * **/
-    public void BuildAndShowLevelsMenu()
-    {
+    ///**
+    // * Builds and shows main menu (play button, options...)
+    // * **/
+    //public void BuildAndShowLevelsMenu()
+    //{
 
-    }
+    //}
 
     public void LoadAndStartLevel(int iLevelNumber)
     {

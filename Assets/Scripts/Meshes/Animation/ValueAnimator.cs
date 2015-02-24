@@ -88,10 +88,8 @@ public class ValueAnimator : MonoBehaviour
         m_rotatingElapsedTime = 0;
     }
 
-	protected virtual void Update () 
+    protected virtual void UpdateOpacity(float dt)
     {
-        float dt = Time.deltaTime;
-
         if (m_fading)
         {
             m_fadingElapsedTime += dt;
@@ -99,8 +97,8 @@ public class ValueAnimator : MonoBehaviour
             {
                 float deltaOpacity = dt / m_fadingDuration * (m_toOpacity - m_fromOpacity);
                 if (deltaOpacity < 0 && (m_opacity + deltaOpacity) < m_toOpacity
-                    ||
-                    deltaOpacity > 0 && (m_opacity + deltaOpacity) > m_toOpacity)
+                ||
+                deltaOpacity > 0 && (m_opacity + deltaOpacity) > m_toOpacity)
                 {
                     m_opacity = m_toOpacity;
                     m_fading = false;
@@ -108,11 +106,13 @@ public class ValueAnimator : MonoBehaviour
                 }
                 else
                     m_opacity += deltaOpacity;
-
                 OnOpacityChanged(m_opacity);
             }
         }
+    }
 
+    protected virtual void UpdatePosition(float dt)
+    {      
         if (m_translating)
         {
             m_translatingElapsedTime += dt;
@@ -133,27 +133,10 @@ public class ValueAnimator : MonoBehaviour
                 OnPositionChanged(m_position);
             }
         }
+    }
 
-        if (m_scaling)
-        {
-            m_scalingElapsedTime += dt;
-            if (m_scalingElapsedTime > m_scalingDelay)
-            {
-                Vector3 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
-                m_scale += deltaScale;
-                float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
-                float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
-                if (sqrCoveredScale > sqrTotalScale)
-                {
-                    m_scale = m_toScale;
-                    m_scaling = false;
-                    OnFinishScaling();
-                }
-
-                OnScaleChanged(m_scale);
-            }
-        }
-
+    protected void UpdateRotation(float dt)
+    {
         if (m_rotating)
         {
             m_rotatingElapsedTime += dt;
@@ -173,6 +156,39 @@ public class ValueAnimator : MonoBehaviour
                 OnRotationChanged(m_angle, m_rotationAxis);
             }
         }
+    }
+
+    protected virtual void UpdateScale(float dt)
+    {
+        if (m_scaling)
+        {
+            m_scalingElapsedTime += dt;
+            if (m_scalingElapsedTime > m_scalingDelay)
+            {
+                Vector3 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
+                m_scale += deltaScale;
+                float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
+                float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
+                if (sqrCoveredScale > sqrTotalScale)
+                {
+                    m_scale = m_toScale;
+                    m_scaling = false;
+                    OnFinishScaling();
+                }
+
+                OnScaleChanged(m_scale);
+            }
+        }
+    }
+
+	protected virtual void Update () 
+    {
+        float dt = Time.deltaTime;
+
+        UpdateOpacity(dt);
+        UpdatePosition(dt);
+        UpdateRotation(dt);
+        UpdateScale(dt);
 	}
 
     public virtual void OnOpacityChanged(float fNewOpacity)

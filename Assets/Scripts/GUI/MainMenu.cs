@@ -18,8 +18,7 @@ public class MainMenu : MonoBehaviour
 
     public void Dismiss()
     {
-        GameObject rootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
-        rootNode.SetActive(false);
+        this.gameObject.transform.localPosition = new Vector3(0, 0, 100);
     }
 
     public void ShowFrames(bool bAnimated, float fDelay = 0.0f)
@@ -111,16 +110,13 @@ public class MainMenu : MonoBehaviour
 
             Vector3 optionsPanelFromPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, optionsPanel.transform.position.z);
             Vector3 creditsPanelFromPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, creditsPanel.transform.position.z);
-            Vector3 optionsPanelToPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, -200);
+            Vector3 optionsPanelToPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, optionsPanel.transform.position.z);
             Vector3 creditsPanelToPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, creditsPanel.transform.position.z);
 
             optionsPanel.transform.localPosition = optionsPanelFromPosition;
             creditsPanel.transform.localPosition = creditsPanelFromPosition;
             optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelToPosition, 0.4f, fDelay);
             creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelToPosition, 0.4f, fDelay + 0.15f);
-
-            optionsPanelAnimator.UpdatePivotPoint(new Vector3(0,0,0.5f));
-            optionsPanelAnimator.RotateFromToAroundAxis(0, 360, new Vector3(0,0,1), 5.0f, 2 * fDelay);
         }
     }
 

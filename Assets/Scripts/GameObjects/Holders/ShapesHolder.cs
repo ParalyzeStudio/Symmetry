@@ -5,12 +5,10 @@ using System.Collections.Generic;
 public class ShapesHolder : MonoBehaviour
 {
     public List<GameObject> m_shapesObj { get; set; }
-    //public List<Shape> m_shapes { get; set; }
 
     public void Awake()
     {
         m_shapesObj = new List<GameObject>();
-        //m_shapes = new List<Shape>();
     }
 
     public void AddShapeObject(GameObject shape)
