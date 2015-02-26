@@ -39,6 +39,9 @@ public class ShapeTouchHandler : TouchHandler
 
     protected override void OnPointerUp()
     {
+        if (!m_selected)
+            return;
+
         base.OnPointerUp();
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
@@ -57,6 +60,7 @@ public class ShapeTouchHandler : TouchHandler
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
+        shapeRenderer.m_shape.Fusion();
         shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
     }
 

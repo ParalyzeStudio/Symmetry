@@ -247,12 +247,12 @@ public class GeometryUtils
     }
 
     /**
-     * Checks if a point is contained in the segment [pointA ; pointB]
+     * Checks if a point is contained in the segment [pointA ; pointB] or ]pointA; pointB[ if we chose to exclude endpoints
      * **/
-    static public bool IsPointContainedInSegment(Vector2 point, Vector2 segmentPointA, Vector2 segmentPointB)
+    static public bool IsPointContainedInSegment(Vector2 point, Vector2 segmentPointA, Vector2 segmentPointB, bool bIncludeEndpoints = true)
     {
         if (MathUtils.AreVec2PointsEqual(point, segmentPointA) || MathUtils.AreVec2PointsEqual(point, segmentPointB))
-            return true;
+            return bIncludeEndpoints;
 
         float det = MathUtils.Determinant(segmentPointA, segmentPointB, point, false);
         if (!MathUtils.AreFloatsEqual(det, 0)) //points are not aligned, thus point can never be on the segment AB
@@ -309,5 +309,35 @@ public class GeometryUtils
 
         float distance = Mathf.Abs(a * point.x + b * point.y + c) / Mathf.Sqrt(a * a + b * b);
         return distance;
+    }
+
+    /**
+     * Tells if two segment overlap
+     * **/
+    static public bool TwoSegmentsOverlap(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    {
+        //same segments
+        if ((MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point1) && MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point2))
+            ||
+            (MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point1) && MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point2)))
+        {
+            return true;
+        }
+
+        Vector2 segment1Direction = segment1Point2 - segment1Point1;
+        Vector2 segment2Direction = segment2Point2 - segment2Point1;
+        bool bCollinearVectors = Mathf.Abs(MathUtils.Determinant(segment1Direction, segment2Direction, true)) < MathUtils.DEFAULT_EPSILON;
+
+        if (bCollinearVectors)
+        {
+            if (IsPointContainedInSegment(segment1Point1, segment2Point1, segment2Point2, false)
+                ||
+                IsPointContainedInSegment(segment1Point2, segment2Point1, segment2Point2, false))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

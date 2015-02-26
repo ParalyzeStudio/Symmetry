@@ -20,7 +20,7 @@ public class ShapeBuilder : MonoBehaviour
         clonedShapeObject.transform.parent = this.gameObject.transform;
         clonedShapeObject.transform.localPosition = Vector3.zero;
 
-        shapesHolder.AddShapeObject(clonedShapeObject);
+        //shapesHolder.AddShapeObject(clonedShapeObject);
 
         return clonedShapeObject;
     }

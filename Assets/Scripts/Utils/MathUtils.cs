@@ -39,15 +39,32 @@ public class MathUtils
      * **/
     static public float Determinant(Vector2 u, Vector2 v, Vector2 w, bool normalize)
     {
+        Vector2 vec1 = u - w;
+        Vector2 vec2 = v - w;
+
+        return Determinant(vec1, vec2, normalize);
+
+        //if (normalize)
+        //{
+        //    Vector2 vec1 = u - w;
+        //    Vector2 vec2 = v - w;
+        //    float determinant = u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+        //    return determinant / (vec1.magnitude * vec2.magnitude);
+        //}
+        //else
+        //    return u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+    }
+
+    /**
+     * Calculates the determinant of 2 vectors
+     * **/
+    static public float Determinant(Vector2 u, Vector2 v, bool normalize)
+    {
+        float determinant = u.x * v.y - u.y * v.x;
         if (normalize)
-        {
-            Vector2 vec1 = u - w;
-            Vector2 vec2 = v - w;
-            float determinant = u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
-            return determinant / (vec1.magnitude * vec2.magnitude);
-        }
-        else
-            return u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+            determinant /= (u.magnitude * v.magnitude);
+
+        return determinant;
     }
 
     /**

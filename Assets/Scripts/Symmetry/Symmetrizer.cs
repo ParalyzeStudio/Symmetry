@@ -112,19 +112,20 @@ public class Symmetrizer : MonoBehaviour
         ////First get all triangles
         GameObject shapesObj = GameObject.FindGameObjectWithTag("Shapes");
         ShapesHolder shapesHolder = shapesObj.GetComponent<ShapesHolder>();
-        List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
+        //List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
+        ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
         List<GridTriangle> allTriangles = new List<GridTriangle>();
         int trianglesListCapacity = 0;
-        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
         {
-            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = shapeRenderers[iShapeIndex].m_shape;
             trianglesListCapacity += shape.m_gridTriangles.Count;
         }
         allTriangles.Capacity = trianglesListCapacity;
 
-        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
         {
-            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = shapeRenderers[iShapeIndex].m_shape;
             List<GridTriangle> shapeTriangles = shape.m_gridTriangles;
             allTriangles.AddRange(shapeTriangles);
         }

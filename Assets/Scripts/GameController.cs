@@ -214,12 +214,13 @@ public class GameController : MonoBehaviour
         //First we check if one of the shapes intersects a contour
         GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
         ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
-        List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
+        //List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
+        ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
         List<Contour> allContours = m_levelManager.m_currentLevel.m_contours;
         float shapesArea = 0;
-        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
         {
-            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = shapeRenderers[iShapeIndex].m_shape;
             bool shapeInsideContour = false;
             for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
             {
