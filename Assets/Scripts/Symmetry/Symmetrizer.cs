@@ -42,7 +42,7 @@ public class Symmetrizer : MonoBehaviour
         ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
 
         //Extract, triangles
-        List<GridTriangle> leftTriangles, rightTriangles;
+        List<List<GridTriangle> > leftTriangles, rightTriangles;
         ExtractTrianglesOnBothSidesOfAxis(out leftTriangles, out rightTriangles);
 
         //Rebuild shapes from those lists of triangles
@@ -52,32 +52,39 @@ public class Symmetrizer : MonoBehaviour
         
         if (leftTriangles.Count > 0)
         {
-            Debug.Log("LEFT");
+            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
+            {
+                List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles[iTrianglesVecIdx], true);
 
-            List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles, true);
-            Shape shapeData = new Shape();
-            shapeData.m_gridTriangles = reflectedTriangles;
-            shapeData.m_color = new Color(1, 0, 0, 1);
-            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
-            GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
-            shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-            shapeObjectAnimator.OnRotationChanged(90, axisDirection);
-            shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+                Shape shapeData = new Shape();
+                shapeData.m_gridTriangles = reflectedTriangles;
+                shapeData.m_color = new Color(1, 0, 0, 1);
+                shapeData.CalculateContour();
+                shapeData.CalculateArea();
+                GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+                GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
+                shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+                shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+                shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+            }
         }
 
         if (rightTriangles.Count > 0)
         {
-            Debug.Log("RIGHT");
-
-            List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles, false);
-            Shape shapeData = new Shape();
-            shapeData.m_gridTriangles = reflectedTriangles;
-            shapeData.m_color = new Color(1, 0, 0, 1);
-            GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
-            GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
-            shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-            shapeObjectAnimator.OnRotationChanged(90, axisDirection);
-            shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
+            {
+                List<GridTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles[iTrianglesVecIdx], false);
+                Shape shapeData = new Shape();
+                shapeData.m_gridTriangles = reflectedTriangles;
+                shapeData.m_color = new Color(1, 0, 0, 1);
+                shapeData.CalculateContour();
+                shapeData.CalculateArea();
+                GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+                GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
+                shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+                shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+                shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+            }
         }
     }
 
@@ -100,7 +107,7 @@ public class Symmetrizer : MonoBehaviour
      * Creates a copy of all shape triangles on both sides of the axis of symmetry axis into 2 newly created shapes 
      * that will be symmetrized.
      * **/
-    private void ExtractTrianglesOnBothSidesOfAxis(out List<GridTriangle> leftTriangles, out List<GridTriangle> rightTriangles)
+    private void ExtractTrianglesOnBothSidesOfAxis(out List<List<GridTriangle> > leftTriangles, out List<List<GridTriangle> > rightTriangles)
     {
         AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
         Vector2 axisStartPoint = axisRenderer.m_endpoint1GridPosition;
@@ -112,22 +119,15 @@ public class Symmetrizer : MonoBehaviour
         ////First get all triangles
         GameObject shapesObj = GameObject.FindGameObjectWithTag("Shapes");
         ShapesHolder shapesHolder = shapesObj.GetComponent<ShapesHolder>();
-        //List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
         ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
-        List<GridTriangle> allTriangles = new List<GridTriangle>();
-        int trianglesListCapacity = 0;
-        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
-        {
-            Shape shape = shapeRenderers[iShapeIndex].m_shape;
-            trianglesListCapacity += shape.m_gridTriangles.Count;
-        }
-        allTriangles.Capacity = trianglesListCapacity;
+        List<List<GridTriangle>> allShapeTriangles = new List<List<GridTriangle>>(); //the vector containing all triangles in the scene per shape
+        allShapeTriangles.Capacity = shapeRenderers.Length;
 
         for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
         {
             Shape shape = shapeRenderers[iShapeIndex].m_shape;
             List<GridTriangle> shapeTriangles = shape.m_gridTriangles;
-            allTriangles.AddRange(shapeTriangles);
+            allShapeTriangles.Add(shapeTriangles);
         }
 
         //Find intersections of lines starting from axis endpoint directed by axisNormal with the grid box
@@ -136,9 +136,9 @@ public class Symmetrizer : MonoBehaviour
 
         ////Extract triangles that are in the ribbon of the axis...
         //... on the left side of the line that passes by the axisStartPoint
-        List<GridTriangle> extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[0], 
-                                                                           line1GridBoxIntersections[1], 
-                                                                           allTriangles,
+        List<List<GridTriangle>> extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[0], 
+                                                                           line1GridBoxIntersections[1],
+                                                                           allShapeTriangles,
                                                                            true);
 
         //... on the right side of the line that passes by the axisStartPoint
@@ -164,24 +164,45 @@ public class Symmetrizer : MonoBehaviour
      * The side of the line is determined when looking from the line start point to axis endpoint
      * If a triangle intersects the line, split it into smaller triangles
      * **/
-    private List<GridTriangle> ExtractTrianglesOnLineSide(Vector2 lineStartPoint, Vector2 lineEndPoint, List<GridTriangle> triangles, bool bLeftSide)
+    private List<List<GridTriangle> > ExtractTrianglesOnLineSide(Vector2 lineStartPoint, Vector2 lineEndPoint, List<List<GridTriangle> > triangles, bool bLeftSide)
     {
-        List<GridTriangle> extractedTriangles = new List<GridTriangle>();
+        List<List<GridTriangle> > extractedTriangles = new List<List<GridTriangle>>();
 
-        for (int iTriangleIndex = 0; iTriangleIndex != triangles.Count; iTriangleIndex++)
+        for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != triangles.Count; iTrianglesVecIdx++)
         {
-            GridTriangle triangle = triangles[iTriangleIndex];
-            if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //find the intersection points and split the triangle accordingly
+            List<GridTriangle> trianglesVec = triangles[iTrianglesVecIdx];
+            List<GridTriangle> extractedTrianglesVec = null;
+            for (int iTriangleIndex = 0; iTriangleIndex != trianglesVec.Count; iTriangleIndex++)
             {
-                if (triangle.m_points[0] == new Vector2(8, 5) && MathUtils.AreVec2PointsEqual(triangle.m_points[1], new Vector2(7,6)))
-                    Debug.Log("SPLIT");
-                GridTriangle[] splitTriangles;
-                int splitTrianglesCount;
-                triangle.Split(lineStartPoint, lineEndPoint, out splitTriangles, out splitTrianglesCount);
-
-                for (int i = 0; i != splitTrianglesCount; i++)
+                GridTriangle triangle = trianglesVec[iTriangleIndex];
+                if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //find the intersection points and split the triangle accordingly
                 {
-                    Vector2 triangleBarycentre = splitTriangles[i].GetBarycentre();
+                    GridTriangle[] splitTriangles;
+                    int splitTrianglesCount;
+                    triangle.Split(lineStartPoint, lineEndPoint, out splitTriangles, out splitTrianglesCount);
+
+                    for (int i = 0; i != splitTrianglesCount; i++)
+                    {
+                        Vector2 triangleBarycentre = splitTriangles[i].GetBarycentre();
+                        float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
+
+                        //the triangle barycentre is on the side of the line we want
+                        if (barycentreDet > 0 && bLeftSide
+                            ||
+                            barycentreDet < 0 && !bLeftSide)
+                        {
+                            if (extractedTrianglesVec == null)
+                            {
+                                extractedTrianglesVec = new List<GridTriangle>();
+                                extractedTriangles.Add(extractedTrianglesVec);
+                            }
+                            extractedTrianglesVec.Add(splitTriangles[i]);
+                        }
+                    }
+                }
+                else
+                {
+                    Vector2 triangleBarycentre = triangle.GetBarycentre();
                     float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
 
                     //the triangle barycentre is on the side of the line we want
@@ -189,21 +210,13 @@ public class Symmetrizer : MonoBehaviour
                         ||
                         barycentreDet < 0 && !bLeftSide)
                     {
-                        extractedTriangles.Add(splitTriangles[i]);
+                        if (extractedTrianglesVec == null)
+                        {
+                            extractedTrianglesVec = new List<GridTriangle>();
+                            extractedTriangles.Add(extractedTrianglesVec);
+                        }
+                        extractedTrianglesVec.Add(triangle);
                     }
-                }
-            }
-            else
-            {
-                Vector2 triangleBarycentre = triangle.GetBarycentre();
-                float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
-
-                //the triangle barycentre is on the side of the line we want
-                if (barycentreDet > 0 && bLeftSide
-                    ||
-                    barycentreDet < 0 && !bLeftSide)
-                {
-                    extractedTriangles.Add(triangle);
                 }
             }
         }

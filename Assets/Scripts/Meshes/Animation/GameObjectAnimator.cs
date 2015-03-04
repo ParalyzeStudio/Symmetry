@@ -2,8 +2,8 @@
 
 public class GameObjectAnimator : ValueAnimator
 {
-    private Vector3 m_pivotPoint; //the pivot point of this game object
-    private Vector3 m_pivotPointPosition;
+    protected Vector3 m_pivotPoint; //the pivot point of this game object
+    protected Vector3 m_pivotPointPosition;
 
     public virtual void Awake()
     {
@@ -20,6 +20,10 @@ public class GameObjectAnimator : ValueAnimator
             return this.transform.localScale;
     }
 
+    /**
+     * Update the pivot point without changing the object position
+     * With this operation only the pivot point and its position are updated
+     * **/
     public void UpdatePivotPoint(Vector3 pivotPoint)
     {
         m_pivotPoint = pivotPoint;
@@ -31,6 +35,10 @@ public class GameObjectAnimator : ValueAnimator
         m_pivotPointPosition = objectLocalPosition + objectCenterToPivotPoint;
     }
 
+    /**
+     * Update the pivot point position without changing the object position
+     * With this operation only the pivot point and its position are updated
+     * **/
     public void UpdatePivotPointPosition(Vector3 pivotPointPosition)
     {
         m_pivotPointPosition = pivotPointPosition;
@@ -44,11 +52,21 @@ public class GameObjectAnimator : ValueAnimator
         m_pivotPoint = new Vector3(0.5f, 0.5f, 0.5f) + objectCenterToPivotPoint;
     }
 
+    /**
+     * Set the position of the object by translating it by the difference between old pivot point position and new pivot point position
+     * **/
+    public void MoveObjectBySettingPivotPointPosition(Vector3 newPivotPointPosition)
+    {
+        Vector3 deltaPosition = newPivotPointPosition - m_pivotPointPosition;
+        m_pivotPointPosition = newPivotPointPosition;
+        this.transform.localPosition += deltaPosition;
+    }
+
     public override void OnPositionChanged(Vector3 newPosition)
     {
-        Vector3 deltaPosition = newPosition - this.transform.localPosition;
-        this.transform.localPosition = newPosition;
+        Vector3 deltaPosition = newPosition - m_pivotPointPosition;
         m_pivotPointPosition += deltaPosition;
+        this.transform.localPosition += deltaPosition;
     }
 
     public override void OnScaleChanged(Vector3 newScale)

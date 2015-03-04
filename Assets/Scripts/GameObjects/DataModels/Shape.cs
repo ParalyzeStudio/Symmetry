@@ -5,30 +5,82 @@ public class Shape : Triangulable
 {
     public Color m_color { get; set; }
 
-    public Shape()
+    public Shape() : base()
     {
-        m_gridTriangles = new List<GridTriangle>();
+
     }
 
+    public Shape(List<Vector2> contour, Color color) : base(contour)
+    {
+        m_color = color;
+    }
+
+    public Shape(List<Vector2> contour, List<GridTriangle> triangles, Color color) : base(contour, triangles)
+    {
+        m_color = color;
+    }
+
+    /**
+     * Fusion this shape with every shape that overlaps it. 
+     * Every shape except 'this' is destroyed and their triangle are added to 'this' shape
+     * **/
     public void Fusion()
     {
         GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
         ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
-        ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
-        ShapeRenderer[] allShapes = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
+        ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
 
-        for (int iShapeIndex = 0; iShapeIndex != allShapes.Length; iShapeIndex++)
+        //Find the shapes that overlaps this shape
+        List<Shape> shapesToUnion = new List<Shape>();
+        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
         {
-            Shape shapeData = allShapes[iShapeIndex].m_shape;
-            if (shapeData == this)
-                continue;
-
+            Shape shapeData = shapeRenderers[iShapeIndex].m_shape;
             if (this.OverlapsShape(shapeData))
             {
-                this.m_gridTriangles.AddRange(shapeData.m_gridTriangles); //add triangles from second shape to the first one
-                shapesHolder.DestroyShape(allShapes[iShapeIndex].gameObject); //destroy the second shape     
+                shapesToUnion.Add(shapeData);
             }
         }
+
+
+        //Pass these shapes to the union clipper
+        if (shapesToUnion.Count <= 1)
+            return;
+
+        Shape resultingShape = ClippingBooleanOperations.ShapesUnion(shapesToUnion);
+        if (resultingShape != null)
+        {
+            ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
+            shapeBuilder.CreateFromShapeData(resultingShape);
+
+            //Destroy all previous shapes
+            for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
+            {
+                shapesHolder.DestroyShape(shapeRenderers[iShapeIndex].gameObject);
+            }
+        }
+
+
+        //GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
+        //ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
+        //ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
+        //ShapeRenderer[] allShapes = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
+
+        //for (int iShapeIndex = 0; iShapeIndex != allShapes.Length; iShapeIndex++)
+        //{
+        //    Shape shapeData = allShapes[iShapeIndex].m_shape;
+        //    if (shapeData == this)
+        //        continue;
+
+        //    if (this.OverlapsShape(shapeData))
+        //    {
+        //        this.m_gridTriangles.AddRange(shapeData.m_gridTriangles); //add triangles from second shape to the first one
+        //        shapesHolder.DestroyShape(allShapes[iShapeIndex].gameObject); //destroy the second shape
+        //    }
+        //}
+
+        //CalculateContour();
+        //Triangulate();
+        //CalculateArea(); //recalculate the area of this shape after triangles have been added to it
     }
 
     public bool IntersectsContour(Contour contour)
@@ -49,6 +101,9 @@ public class Shape : Triangulable
      * **/
     public bool OverlapsShape(Shape shape)
     {
+        if (shape == this)
+            return true;
+
         //Check if one of the triangle edges intersects triangle edges of the second shape
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
         {

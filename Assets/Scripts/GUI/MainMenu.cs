@@ -4,21 +4,92 @@ public class MainMenu : MonoBehaviour
 {
     public GameObject m_segmentPfb;
     public GameObject m_GUIFramePfb;
+    public GameObject m_titlePartPfb;
     public Material[] m_framesMaterials;
+    public Material[] m_titlePartsMaterials;
 
     /**
      * Shows MainMenu with or without animation
      * **/
     public void Show(bool bAnimated)
     {
-        ShowFrames(bAnimated, 0.0f);
+        ShowTitle(bAnimated);
+        ShowFrames(bAnimated);
         ShowAxes(bAnimated, 1.5f);
-        ShowButtons(bAnimated, 2.0f);
+        //ShowButtons(bAnimated, 2.0f);
     }
 
     public void Dismiss()
     {
         this.gameObject.transform.localPosition = new Vector3(0, 0, 100);
+    }
+
+    public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
+    {
+        GameObject titleObject = GameObject.FindGameObjectWithTag("Title");
+
+        float titlePartWidth = 512.0f;
+        float titlePartHeight = 128.0f;
+
+        Vector3 topLeftPartLocalPosition = new Vector3(-283, 0, 0);
+        Vector3 topRightPartLocalPosition = new Vector3(284, 0, 0);
+        Vector3 bottomRightPartLocalPosition = new Vector3(256, 0, 0);
+        Vector3 bottomLeftPartLocalPosition = new Vector3(-256, 0, 0);
+
+        GameObject clonedTopLeft = (GameObject) Instantiate(m_titlePartPfb);
+        GameObject clonedTopRight = (GameObject)Instantiate(m_titlePartPfb);
+        GameObject clonedBottomRight = (GameObject)Instantiate(m_titlePartPfb);
+        GameObject clonedBottomLeft = (GameObject)Instantiate(m_titlePartPfb);
+
+        //Assign titles holder as their parent
+        clonedTopLeft.transform.parent = titleObject.transform;
+        clonedTopRight.transform.parent = titleObject.transform;
+        clonedBottomRight.transform.parent = titleObject.transform;
+        clonedBottomLeft.transform.parent = titleObject.transform;
+
+        //Assign correct material for each part
+        clonedTopLeft.GetComponent<MeshRenderer>().material = m_titlePartsMaterials[0];
+        clonedTopRight.GetComponent<MeshRenderer>().material = m_titlePartsMaterials[1];
+        clonedBottomRight.GetComponent<MeshRenderer>().material = m_titlePartsMaterials[2];
+        clonedBottomLeft.GetComponent<MeshRenderer>().material = m_titlePartsMaterials[3];
+
+        //Set zero scale so they are invisible at start
+        clonedTopLeft.transform.localScale = Vector3.zero;
+        clonedTopRight.transform.localScale = Vector3.zero;
+        clonedBottomRight.transform.localScale = Vector3.zero;
+        clonedBottomLeft.transform.localScale = Vector3.zero;
+
+        //Animate top left part
+        FixedTextureSizeAnimator topLeftAnimator = clonedTopLeft.GetComponent<FixedTextureSizeAnimator>();
+        topLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+        topLeftAnimator.MoveObjectBySettingPivotPointPosition(topLeftPartLocalPosition);
+        topLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
+        topLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.5f);
+        topLeftAnimator.TranslateFromTo(topLeftPartLocalPosition, topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, 1.5f);
+
+        //Animate top right part
+        FixedTextureSizeAnimator topRightAnimator = clonedTopRight.GetComponent<FixedTextureSizeAnimator>();
+        topRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+        topRightAnimator.MoveObjectBySettingPivotPointPosition(topRightPartLocalPosition);
+        topRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
+        topRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.8f);
+        topRightAnimator.TranslateFromTo(topRightPartLocalPosition, topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, 1.8f);
+
+        //Animate bottom right part
+        FixedTextureSizeAnimator bottomRightAnimator = clonedBottomRight.GetComponent<FixedTextureSizeAnimator>();
+        bottomRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
+        bottomRightAnimator.MoveObjectBySettingPivotPointPosition(bottomRightPartLocalPosition);
+        bottomRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
+        bottomRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.5f);
+        bottomRightAnimator.TranslateFromTo(bottomRightPartLocalPosition, bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, 1.5f);
+
+        //Animate bottom left part
+        FixedTextureSizeAnimator bottomLeftAnimator = clonedBottomLeft.GetComponent<FixedTextureSizeAnimator>();
+        bottomLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
+        bottomLeftAnimator.MoveObjectBySettingPivotPointPosition(bottomLeftPartLocalPosition);
+        bottomLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
+        bottomLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.8f);
+        bottomLeftAnimator.TranslateFromTo(bottomLeftPartLocalPosition, bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, 1.8f);
     }
 
     public void ShowFrames(bool bAnimated, float fDelay = 0.0f)

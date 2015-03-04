@@ -48,4 +48,13 @@ public class ShapeAnimator : GameObjectAnimator
         Vector2 objectSize = gridBuilder.GetWorldCoordinatesFromGridCoordinates(maxCoords) - gridBuilder.GetWorldCoordinatesFromGridCoordinates(minCoords);
         return GeometryUtils.BuildVector3FromVector2(objectSize, 1);
     }
+
+    public override void OnFinishRotating()
+    {
+        Debug.Log("Shape ended rot");
+        ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
+        shapeRenderer.m_shape.Fusion();
+        MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
+        shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
+    }
 }

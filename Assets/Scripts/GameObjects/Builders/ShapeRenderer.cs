@@ -124,6 +124,11 @@ public class ShapeRenderer : MonoBehaviour
                 trianglePoints[iPointIndex] += shift;
             }
         }
+
+        for (int iContourPointIdx = 0; iContourPointIdx != m_shape.m_contour.Count; iContourPointIdx++)
+        {
+            m_shape.m_contour[iContourPointIdx] += shift;
+        }
     }
 
     public void Update()

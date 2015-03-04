@@ -1,6 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+public class TriangleEdge
+{
+    public Vector2 m_pointA { get; set; }
+    public Vector2 m_pointB { get; set; }
+
+    public TriangleEdge(Vector2 pointA, Vector2 pointB)
+    {
+        m_pointA = pointA;
+        m_pointB = pointB;
+    }
+
+    public bool Equals(TriangleEdge other)
+    {
+        return GeometryUtils.AreSegmentsEqual(this.m_pointA, this.m_pointB, other.m_pointA, other.m_pointB);
+    }
+}
+
 /**
  * Class that holds data for a triangle in grid coordinates (column, line)
  * **/

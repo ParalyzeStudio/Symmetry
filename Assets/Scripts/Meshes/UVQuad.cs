@@ -76,10 +76,10 @@ public class UVQuad : MonoBehaviour
             return;
 
         Vector2[] uvs = new Vector2[4];
-        uvs[0] = new Vector2(m_textureRange.x, m_textureRange.w); //top-left
-        uvs[1] = new Vector2(m_textureRange.z, m_textureRange.w); //top-right
+        uvs[0] = new Vector2(m_textureRange.x, m_textureRange.y + m_textureRange.w); //top-left
+        uvs[1] = new Vector2(m_textureRange.x + m_textureRange.z, m_textureRange.y + m_textureRange.w); //top-right
         uvs[2] = new Vector2(m_textureRange.x, m_textureRange.y); //bottom-left
-        uvs[3] = new Vector2(m_textureRange.z, m_textureRange.y); //bottom-right
+        uvs[3] = new Vector2(m_textureRange.x + m_textureRange.z, m_textureRange.y); //bottom-right
 
         GetComponent<MeshFilter>().sharedMesh.uv = uvs;
 

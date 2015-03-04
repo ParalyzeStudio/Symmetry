@@ -245,29 +245,6 @@ public class GameController : MonoBehaviour
 
         //Debug.Log("1: NO SHAPE/CONTOUR INTERSECTION");
 
-        //if not we check if every shape is inside a contour
-        //for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
-        //{
-        //    Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
-        //    bool shapeInsideContour = false;
-        //    for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
-        //    {
-        //        Contour contour = allContours[iContourIndex];
-        //        if (contour.ContainsGridPoint(shape.m_gridTriangles[0].GetBarycentre()))
-        //        {
-        //            shapeInsideContour = true;
-        //            break;
-        //        }
-        //    }
-
-        //    if (!shapeInsideContour)
-        //        return false;
-
-        //    shapesArea += shape.m_area;
-        //}
-
-        //Debug.Log("2: ALL SHAPES INSIDE CONTOUR");
-
         //finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
         float contoursArea = 0;
         for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
@@ -276,8 +253,11 @@ public class GameController : MonoBehaviour
             contoursArea += contour.m_area;
         }
 
-        if (contoursArea == shapesArea)
-            Debug.Log("3: SAME AREA");
+        //Debug.Log("contoursArea:" + contoursArea);
+        //Debug.Log("shapesArea:" + shapesArea);
+
+        //if (contoursArea == shapesArea)
+        //    Debug.Log("3: SAME AREA");
 
         return (contoursArea == shapesArea);
     }
@@ -289,6 +269,6 @@ public class GameController : MonoBehaviour
      * **/
     public void EndLevel()
     {
-
+        Debug.Log("EndLevel");
     }
 }

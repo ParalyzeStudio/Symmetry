@@ -247,6 +247,16 @@ public class GeometryUtils
     }
 
     /**
+     * Tells if 2 segments are equal
+     * **/
+    static public bool AreSegmentsEqual(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    {
+        return (MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point1) && MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point2))
+               ||
+               (MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point2) && MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point1));
+    }
+
+    /**
      * Checks if a point is contained in the segment [pointA ; pointB] or ]pointA; pointB[ if we chose to exclude endpoints
      * **/
     static public bool IsPointContainedInSegment(Vector2 point, Vector2 segmentPointA, Vector2 segmentPointB, bool bIncludeEndpoints = true)
