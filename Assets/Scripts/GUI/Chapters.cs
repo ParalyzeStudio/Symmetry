@@ -8,6 +8,7 @@ public class Chapters : MonoBehaviour
     public Color CHAPTER_GROUP_3_BASE_COLOR { get { return new Color(0, 1, 0, 1); } }
 
     public GameObject m_chapterSlotPfb;
+    private GameObject[] m_chapterSlots;
 
     private int m_chapterGroup;
 
@@ -28,7 +29,7 @@ public class Chapters : MonoBehaviour
         m_showTitleCallRunning = false;
         m_showChaptersCallRunning = false;
         ShowTitle(bAnimated, 5.0f);
-        ShowChapterSlots(bAnimated, 5.0f);
+        ShowChapterSlots(bAnimated, 1.0f);
     }
 
     public void Dismiss()
@@ -58,15 +59,15 @@ public class Chapters : MonoBehaviour
     }
 
     public void ShowChapterSlots(bool bAnimated, float fDelay = 0.0f)
-    {     
+    {
         GameObject chaptersHolder = GameObject.FindGameObjectWithTag("ChaptersHolder");
 
-        GameObject[] chapterSlots = new GameObject[4];
+        m_chapterSlots = new GameObject[4];
         Vector3 slotSize = Vector3.zero;
         for (int iChapterSlotIndex = 0; iChapterSlotIndex != CHAPTERS_PER_GROUP; iChapterSlotIndex++)
         {
             GameObject clonedChapterSlot = (GameObject) Instantiate(m_chapterSlotPfb);
-            chapterSlots[iChapterSlotIndex] = clonedChapterSlot;
+            m_chapterSlots[iChapterSlotIndex] = clonedChapterSlot;
 
             //Find the position of each slot
             BoundingBoxCalculator bboxCalculator = clonedChapterSlot.GetComponent<BoundingBoxCalculator>();
@@ -99,70 +100,65 @@ public class Chapters : MonoBehaviour
             else
                 baseColor = CHAPTER_GROUP_3_BASE_COLOR;
 
-            slotProperties.m_color = ColorUtils.DarkenColor(baseColor, 0.18f * iChapterSlotIndex);
+            slotProperties.m_color = ColorUtils.DarkenColor(baseColor, 0.18f * iChapterSlotIndex);   
         }
 
-
-        //handle animation
         if (bAnimated)
         {
-            if (!m_showChaptersCallRunning)
-            {
-                m_showChaptersCallRunning = true;
-                m_showChaptersDelay = fDelay;
+            m_showChaptersCallRunning = true;
+            m_showChaptersDelay = fDelay;
 
-                //TintColorMaterialAssignment slotSkinTintColor = chapterSlots[0].GetComponentInChildren<TintColorMaterialAssignment>();
-                //TextMeshAnimator numberTextAnimator = chapterSlots[0].GetComponentInChildren<TextMeshAnimator>();
-                //slotSkinTintColor.m_tintColor = 
+            //TintColorMaterialAssignment slotSkinTintColor = chapterSlots[0].GetComponentInChildren<TintColorMaterialAssignment>();
+            //TextMeshAnimator numberTextAnimator = chapterSlots[0].GetComponentInChildren<TextMeshAnimator>();
+            //slotSkinTintColor.m_tintColor = 
 
-                GameObjectAnimator slotAnimatorTest = chapterSlots[1].GetComponent<GameObjectAnimator>();
-                slotAnimatorTest.OnOpacityChanged(0);
+            GameObjectAnimator slotAnimatorTest = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
+            slotAnimatorTest.OnOpacityChanged(0);
 
-                GameObjectAnimator slotAnimator = chapterSlots[1].GetComponent<GameObjectAnimator>();
-                slotAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
-                slotAnimator.OnPositionChanged(new Vector3(0, 0.5f * slotSize.y, 0));
-                slotAnimator.OnRotationChanged(180, new Vector3(0, 1, 0));
+            GameObjectAnimator slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
+            slotAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
+            slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * slotSize.y, 0));
+            slotAnimator.OnRotationChanged(180, new Vector3(0, 1, 0));
 
-                slotAnimator = chapterSlots[2].GetComponent<GameObjectAnimator>();
-                slotAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
-                slotAnimator.OnPositionChanged(new Vector3(0, -0.5f * slotSize.y, 0));
-                slotAnimator.OnRotationChanged(180, new Vector3(0, -1, 0));
+            slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
+            slotAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
+            slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, -0.5f * slotSize.y, 0));
+            slotAnimator.OnRotationChanged(180, new Vector3(0, -1, 0));
 
-                slotAnimator = chapterSlots[3].GetComponent<GameObjectAnimator>();
-                slotAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-                slotAnimator.OnPositionChanged(new Vector3(0.5f * slotSize.x, 0, 0));
-                slotAnimator.OnRotationChanged(180, new Vector3(1, 0, 0));
-            }
-            else
-            {
-                m_showChaptersCallRunning = true;
+            slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
+            slotAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0.5f * slotSize.y, 0, 0));
+            slotAnimator.OnRotationChanged(180, new Vector3(1, 0, 0));
+        }        
+    }
 
-                //Animate slot 2
-                GameObjectAnimator slotAnimator = chapterSlots[1].GetComponent<GameObjectAnimator>();
-                slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, 1, 0), 0.3f);
+    public void ShowChapterSlotsWithAnimation()
+    {
+        m_showChaptersCallRunning = false;
 
-                TextMeshAnimator numberTextAnimator = chapterSlots[1].GetComponentInChildren<TextMeshAnimator>();
-                numberTextAnimator.OnOpacityChanged(0);
-                numberTextAnimator.FadeFromTo(0, 1, 0.5f, 2.3f);
+        //Animate slot 2
+        GameObjectAnimator slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
+        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, 1, 0), 0.3f);
 
-                //Animate slot 3
-                slotAnimator = chapterSlots[2].GetComponent<GameObjectAnimator>();
-                slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, -1, 0), 0.3f, 0.3f);
+        TextMeshAnimator numberTextAnimator = m_chapterSlots[1].GetComponentInChildren<TextMeshAnimator>();
+        numberTextAnimator.OnOpacityChanged(0);
+        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.3f);
 
-                numberTextAnimator = chapterSlots[2].GetComponentInChildren<TextMeshAnimator>();
-                numberTextAnimator.OnOpacityChanged(0);
-                numberTextAnimator.FadeFromTo(0, 1, 0.5f, 2.9f);
+        //Animate slot 3
+        slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
+        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, -1, 0), 0.3f, 0.4f);
 
-                //Animate slot 4
-                slotAnimator = chapterSlots[3].GetComponent<GameObjectAnimator>();
-                slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(1, 0, 0), 0.3f, 0.6f);
+        numberTextAnimator = m_chapterSlots[2].GetComponentInChildren<TextMeshAnimator>();
+        numberTextAnimator.OnOpacityChanged(0);
+        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.4f);
 
-                numberTextAnimator = chapterSlots[3].GetComponentInChildren<TextMeshAnimator>();
-                numberTextAnimator.OnOpacityChanged(0);
-                numberTextAnimator.FadeFromTo(0, 1, 0.5f, 2.6f);
-            }
-        }
+        //Animate slot 4
+        slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
+        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(1, 0, 0), 0.3f, 0.2f);
 
+        numberTextAnimator = m_chapterSlots[3].GetComponentInChildren<TextMeshAnimator>();
+        numberTextAnimator.OnOpacityChanged(0);
+        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.2f);
     }
 
     public void Update()
@@ -183,7 +179,7 @@ public class Chapters : MonoBehaviour
             m_showChaptersElpasedTime += dt;
             if (m_showChaptersElpasedTime >= m_showChaptersDelay)
             {
-                ShowChapterSlots(true);
+                ShowChapterSlotsWithAnimation();
             }
         }
     }

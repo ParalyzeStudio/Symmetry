@@ -17,6 +17,7 @@ public class MainMenu : MonoBehaviour
         ShowFrames(bAnimated);
         ShowAxes(bAnimated, 1.5f);
         //ShowButtons(bAnimated, 2.0f);
+        ShowTapToPlay(2.0f);
     }
 
     public void Dismiss()
@@ -191,9 +192,12 @@ public class MainMenu : MonoBehaviour
         }
     }
 
-    public void ShowTapToPlay()
+    public void ShowTapToPlay(float fDelay = 0.0f)
     {
-        //GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
+        GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
+        TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
+        tapToPlayAnimator.OnOpacityChanged(0);
+        tapToPlayAnimator.SetTextMeshOpacityCycling(2.0f, true, fDelay);
     }
 }
 

@@ -8,6 +8,7 @@ public class TextMeshAnimator : GameObjectAnimator
     private bool m_opacityCycling;
     public float m_cycleDuration; //The duration of one cycle (e.g going from opacity 1 to opacity 0 and going back to opacity 1)
     private bool m_ascending; //is the opacity in an ascending phase (0->1)
+    private float m_cyclingDelay;
     private bool m_cyclingPaused;
 
     public override void Awake()
@@ -15,6 +16,7 @@ public class TextMeshAnimator : GameObjectAnimator
         base.Awake();
         m_textMesh = null;
         m_opacityCycling = false;
+        m_cyclingDelay = 0.0f;
         m_cyclingPaused = false;
     }
 
@@ -23,6 +25,8 @@ public class TextMeshAnimator : GameObjectAnimator
         m_opacityCycling = true;
         m_cycleDuration = fCycleDuration;
         m_ascending = bAscending;
+        m_fadingElapsedTime = 0;
+        m_cyclingDelay = fDelay;
         m_cyclingPaused = paused;
     }
 
@@ -48,6 +52,10 @@ public class TextMeshAnimator : GameObjectAnimator
         if (m_opacityCycling)
         {
             if (m_cyclingPaused)
+                return;
+
+            m_fadingElapsedTime += dt;
+            if (m_fadingElapsedTime <= m_cyclingDelay)
                 return;
 
             float phaseDuration = 0.5f * m_cycleDuration;
