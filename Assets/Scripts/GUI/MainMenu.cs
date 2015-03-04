@@ -185,8 +185,8 @@ public class MainMenu : MonoBehaviour
             Vector3 optionsPanelToPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, optionsPanel.transform.position.z);
             Vector3 creditsPanelToPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, creditsPanel.transform.position.z);
 
-            optionsPanel.transform.localPosition = optionsPanelFromPosition;
-            creditsPanel.transform.localPosition = creditsPanelFromPosition;
+            optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFromPosition);
+            creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFromPosition);
             optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelToPosition, 0.4f, fDelay);
             creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelToPosition, 0.4f, fDelay + 0.15f);
         }
