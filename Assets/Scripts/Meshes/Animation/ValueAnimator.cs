@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[ExecuteInEditMode]
 public class ValueAnimator : MonoBehaviour 
 {
     //Variables to handle fading
     protected bool m_fading;
-    protected float m_opacity;
+    public float m_opacity;
     protected float m_fromOpacity;
     protected float m_toOpacity;
     protected float m_fadingDuration;
@@ -39,6 +40,10 @@ public class ValueAnimator : MonoBehaviour
     protected float m_rotatingDuration;
     protected float m_rotatingDelay;
     protected float m_rotatingElapsedTime;
+
+    //Store previous values to change them dynamically in inspector
+    private float m_prevOpacity;
+
 
     public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f)
     {
@@ -185,6 +190,9 @@ public class ValueAnimator : MonoBehaviour
     {
         float dt = Time.deltaTime;
 
+        if (m_prevOpacity != m_opacity)
+            OnOpacityChanged(m_opacity);
+
         UpdateOpacity(dt);
         UpdatePosition(dt);
         UpdateRotation(dt);
@@ -193,7 +201,13 @@ public class ValueAnimator : MonoBehaviour
 
     public virtual void OnOpacityChanged(float fNewOpacity)
     {
+        if (fNewOpacity > 1)
+            fNewOpacity = 1;
+        else if (fNewOpacity < 0)
+            fNewOpacity = 0;
 
+        m_opacity = fNewOpacity;
+        m_prevOpacity = fNewOpacity;
     }
 
     public virtual void OnPositionChanged(Vector3 newPosition)

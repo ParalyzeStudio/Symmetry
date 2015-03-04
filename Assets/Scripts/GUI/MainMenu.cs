@@ -16,13 +16,13 @@ public class MainMenu : MonoBehaviour
         ShowTitle(bAnimated);
         ShowFrames(bAnimated);
         ShowAxes(bAnimated, 1.5f);
-        //ShowButtons(bAnimated, 2.0f);
+        ShowButtons(bAnimated, 2.0f);
         ShowTapToPlay(2.0f);
     }
 
     public void Dismiss()
     {
-        this.gameObject.transform.localPosition = new Vector3(0, 0, 100);
+        this.gameObject.SetActive(false);
     }
 
     public void ShowTitle(bool bAnimated, float fDelay = 0.0f)

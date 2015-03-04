@@ -96,6 +96,8 @@ public class GameObjectAnimator : ValueAnimator
 
     public override void OnOpacityChanged(float fNewOpacity)
     {
+        base.OnOpacityChanged(fNewOpacity);
+
         ValueAnimator[] childAnimators = this.gameObject.GetComponentsInChildren<ValueAnimator>();
         for (int i = 0; i != childAnimators.Length; i++)
         {

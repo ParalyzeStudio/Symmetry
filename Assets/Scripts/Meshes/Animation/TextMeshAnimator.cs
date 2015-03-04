@@ -37,6 +37,8 @@ public class TextMeshAnimator : GameObjectAnimator
 
     public override void OnOpacityChanged(float fNewOpacity)
     {
+        base.OnOpacityChanged(fNewOpacity);
+
         if (m_textMesh == null)
             m_textMesh = this.gameObject.GetComponent<TextMesh>();
 
