@@ -187,8 +187,8 @@ public class MainMenu : MonoBehaviour
 
             optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFromPosition);
             creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFromPosition);
-            optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelToPosition, 0.4f, fDelay);
-            creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelToPosition, 0.4f, fDelay + 0.15f);
+            optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelToPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelToPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
     }
 

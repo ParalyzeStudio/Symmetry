@@ -4,6 +4,12 @@ using System.Collections;
 [ExecuteInEditMode]
 public class ValueAnimator : MonoBehaviour 
 {
+    public enum InterpolationType
+    {
+        LINEAR = 1,
+        SINUSOIDAL = 2
+    }
+
     //Variables to handle fading
     protected bool m_fading;
     public float m_opacity;
@@ -12,6 +18,7 @@ public class ValueAnimator : MonoBehaviour
     protected float m_fadingDuration;
     protected float m_fadingDelay;
     protected float m_fadingElapsedTime;
+    protected InterpolationType m_fadingInterpolationType;
 
     //Variables to handle scaling
     protected bool m_scaling;
@@ -21,6 +28,7 @@ public class ValueAnimator : MonoBehaviour
     protected float m_scalingDuration;
     protected float m_scalingDelay;
     protected float m_scalingElapsedTime;
+    protected InterpolationType m_scalingInterpolationType;
 
     //Variables to handle translating
     protected bool m_translating;
@@ -30,6 +38,8 @@ public class ValueAnimator : MonoBehaviour
     protected float m_translatingDuration;
     protected float m_translatingDelay;
     protected float m_translatingElapsedTime;
+    protected float m_translatingTimeOffset;
+    protected InterpolationType m_translatingInterpolationType;
 
     //Variables to handle rotating
     protected bool m_rotating;
@@ -40,12 +50,13 @@ public class ValueAnimator : MonoBehaviour
     protected float m_rotatingDuration;
     protected float m_rotatingDelay;
     protected float m_rotatingElapsedTime;
+    protected InterpolationType m_rotatingInterpolationType;
 
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity;
 
 
-    public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f)
+    public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         if (fromOpacity == toOpacity)
             return;
@@ -57,9 +68,10 @@ public class ValueAnimator : MonoBehaviour
         m_fadingDuration = duration;
         m_fadingDelay = delay;
         m_fadingElapsedTime = 0;
+        m_fadingInterpolationType = interpolType;
     }
 
-    public void ScaleFromTo(Vector3 fromScale, Vector3 toScale, float duration, float delay = 0.0f)
+    public void ScaleFromTo(Vector3 fromScale, Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_scaling = true;
         m_scale = fromScale;
@@ -68,9 +80,10 @@ public class ValueAnimator : MonoBehaviour
         m_scalingDuration = duration;
         m_scalingDelay = delay;
         m_scalingElapsedTime = 0;
+        m_scalingInterpolationType = interpolType;
     }
 
-    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay = 0.0f)
+    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_translating = true;
         m_position = fromPosition;
@@ -79,9 +92,10 @@ public class ValueAnimator : MonoBehaviour
         m_translatingDuration = duration;
         m_translatingDelay = delay;
         m_translatingElapsedTime = 0;
+        m_translatingInterpolationType = interpolType;
     }
 
-    public void RotateFromToAroundAxis(float fromAngle, float toAngle, Vector3 axis, float duration, float delay = 0.0f)
+    public void RotateFromToAroundAxis(float fromAngle, float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_rotating = true;
         m_angle = fromAngle;
@@ -91,19 +105,31 @@ public class ValueAnimator : MonoBehaviour
         m_rotatingDuration = duration;
         m_rotatingDelay = delay;
         m_rotatingElapsedTime = 0;
+        m_rotatingInterpolationType = interpolType;
     }
 
     protected virtual void UpdateOpacity(float dt)
     {
         if (m_fading)
         {
+            bool inDelay = (m_fadingElapsedTime < m_fadingDelay);
             m_fadingElapsedTime += dt;
-            if (m_fadingElapsedTime > m_fadingDelay)
+            if (m_fadingElapsedTime >= m_fadingDelay)
             {
-                float deltaOpacity = dt / m_fadingDuration * (m_toOpacity - m_fromOpacity);
-                if (deltaOpacity < 0 && (m_opacity + deltaOpacity) < m_toOpacity
-                ||
-                deltaOpacity > 0 && (m_opacity + deltaOpacity) > m_toOpacity)
+                if (inDelay) //we were in delay previously
+                    m_fadingElapsedTime = m_fadingDelay;
+                float effectiveElapsedTime = m_fadingElapsedTime - m_fadingDelay;
+                float deltaOpacity = 0;
+                float opacityVariation = m_toOpacity - m_fromOpacity;
+                if (m_fadingInterpolationType == InterpolationType.LINEAR)
+                    deltaOpacity = dt / m_fadingDuration * opacityVariation;
+                else if (m_fadingInterpolationType == InterpolationType.SINUSOIDAL)
+                    deltaOpacity = opacityVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_fadingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_fadingDuration)));
+                //if (deltaOpacity < 0 && (m_opacity + deltaOpacity) < m_toOpacity
+                //||
+                //deltaOpacity > 0 && (m_opacity + deltaOpacity) > m_toOpacity)
+
+                if (effectiveElapsedTime > m_fadingDuration)
                 {
                     m_opacity = m_toOpacity;
                     m_fading = false;
@@ -120,20 +146,29 @@ public class ValueAnimator : MonoBehaviour
     {      
         if (m_translating)
         {
+            bool inDelay = (m_translatingElapsedTime < m_translatingDelay);
             m_translatingElapsedTime += dt;
-            if (m_translatingElapsedTime > m_translatingDelay)
+            if (m_translatingElapsedTime >= m_translatingDelay)
             {
-                Vector3 deltaPosition = dt / m_translatingDuration * (m_toPosition - m_fromPosition);
-                m_position += deltaPosition;
-                float sqrCoveredDistance = (m_position - m_fromPosition).sqrMagnitude;
-                float sqrTotalDistance = (m_toPosition - m_fromPosition).sqrMagnitude;
+                if (inDelay) //we were in delay previously
+                    m_translatingElapsedTime = m_translatingDelay;
+                m_translatingTimeOffset = m_translatingElapsedTime - m_translatingDelay;
+                float effectiveElapsedTime = m_translatingElapsedTime - m_translatingDelay;
+                Vector3 deltaPosition = Vector3.zero;
+                Vector3 positionVariation = m_toPosition - m_fromPosition;
+                if (m_translatingInterpolationType == InterpolationType.LINEAR)
+                    deltaPosition = dt / m_translatingDuration * positionVariation;
+                else if (m_translatingInterpolationType == InterpolationType.SINUSOIDAL)
+                    deltaPosition = positionVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_translatingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_translatingDuration)));
 
-                if (sqrCoveredDistance > sqrTotalDistance)
+                if (effectiveElapsedTime > m_translatingDuration)
                 {
                     m_position = m_toPosition;
                     m_translating = false;
                     OnFinishTranslating();
                 }
+                else
+                    m_position += deltaPosition;
 
                 OnPositionChanged(m_position);
             }
@@ -144,19 +179,32 @@ public class ValueAnimator : MonoBehaviour
     {
         if (m_rotating)
         {
+            bool inDelay = (m_rotatingElapsedTime < m_rotatingDelay);
             m_rotatingElapsedTime += dt;
             if (m_rotatingElapsedTime > m_rotatingDelay)
             {
-                float deltaAngle = dt / m_rotatingDuration * (m_toAngle - m_fromAngle);
-                m_angle += deltaAngle;
-                if (deltaAngle < 0 && (m_angle + deltaAngle) < m_toAngle
-                    ||
-                    deltaAngle > 0 && (m_angle + deltaAngle) > m_toAngle)
+                if (inDelay) //we were in delay previously
+                    m_rotatingElapsedTime = m_rotatingDelay;
+                float effectiveElapsedTime = m_rotatingElapsedTime - m_rotatingDelay;
+                float deltaAngle = 0;
+                float angleVariation = m_toAngle - m_fromAngle;
+                if (m_rotatingInterpolationType == InterpolationType.LINEAR)
+                    deltaAngle = dt / m_rotatingDuration * angleVariation;
+                else if (m_rotatingInterpolationType == InterpolationType.SINUSOIDAL)
+                    deltaAngle = angleVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_rotatingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_rotatingDuration)));
+
+                //if (deltaAngle < 0 && (m_angle + deltaAngle) < m_toAngle
+                //    ||
+                //    deltaAngle > 0 && (m_angle + deltaAngle) > m_toAngle)
+
+                if (effectiveElapsedTime > m_rotatingDuration)
                 {
                     m_angle = m_toAngle;
                     m_rotating = false;
                     OnFinishRotating();
                 }
+                else
+                    m_angle += deltaAngle;
 
                 OnRotationChanged(m_angle, m_rotationAxis);
             }
@@ -167,19 +215,31 @@ public class ValueAnimator : MonoBehaviour
     {
         if (m_scaling)
         {
+            bool inDelay = (m_scalingElapsedTime < m_scalingDelay);
             m_scalingElapsedTime += dt;
             if (m_scalingElapsedTime > m_scalingDelay)
             {
-                Vector3 deltaScale = dt / m_scalingDuration * (m_toScale - m_fromScale);
-                m_scale += deltaScale;
-                float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
-                float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
-                if (sqrCoveredScale > sqrTotalScale)
+                if (inDelay) //we were in delay previously
+                    m_scalingElapsedTime = m_scalingDelay;
+                float effectiveElapsedTime = m_scalingElapsedTime - m_scalingDelay;
+                Vector3 deltaScale = Vector3.zero;
+                Vector3 scaleVariation = m_toScale - m_fromScale;
+                if (m_scalingInterpolationType == InterpolationType.LINEAR)
+                    deltaScale = dt / m_scalingDuration * scaleVariation;
+                else if (m_scalingInterpolationType == InterpolationType.SINUSOIDAL)
+                    deltaScale = scaleVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_scalingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_scalingDuration)));
+
+                
+                //float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
+                //float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
+                if (effectiveElapsedTime > m_scalingDuration)
                 {
                     m_scale = m_toScale;
                     m_scaling = false;
                     OnFinishScaling();
                 }
+                else
+                    m_scale += deltaScale;
 
                 OnScaleChanged(m_scale);
             }
