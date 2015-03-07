@@ -11,7 +11,7 @@ public class GameObjectAnimator : ValueAnimator
         m_pivotPointPosition = this.transform.localPosition;
     }
 
-    protected virtual Vector3 GetGameObjectSize()
+    public virtual Vector3 GetGameObjectSize()
     {
         BoundingBoxCalculator optionsPanelBBoxCalculator = this.gameObject.GetComponent<BoundingBoxCalculator>();
         if (optionsPanelBBoxCalculator != null)
@@ -30,7 +30,8 @@ public class GameObjectAnimator : ValueAnimator
 
         Vector3 objectLocalPosition = this.transform.localPosition;
         Vector3 objectCenterToPivotPoint = new Vector3(m_pivotPoint.x - 0.5f, m_pivotPoint.y - 0.5f, m_pivotPoint.z - 0.5f);
-        objectCenterToPivotPoint.Scale(GetGameObjectSize());
+        Vector3 objectSize = GetGameObjectSize();
+        objectCenterToPivotPoint.Scale(objectSize);
         objectCenterToPivotPoint = this.transform.rotation * objectCenterToPivotPoint;
         m_pivotPointPosition = objectLocalPosition + objectCenterToPivotPoint;
     }
@@ -57,9 +58,12 @@ public class GameObjectAnimator : ValueAnimator
      * **/
     public void MoveObjectBySettingPivotPointPosition(Vector3 newPivotPointPosition)
     {
-        Vector3 deltaPosition = newPivotPointPosition - m_pivotPointPosition;
         m_pivotPointPosition = newPivotPointPosition;
-        this.transform.localPosition += deltaPosition;
+        Vector3 pivotPointToObjectCenter = new Vector3(0.5f, 0.5f, 0.5f) - m_pivotPoint;
+        Vector3 objectSize = GetGameObjectSize();
+        pivotPointToObjectCenter.Scale(objectSize);
+        pivotPointToObjectCenter = this.transform.rotation * pivotPointToObjectCenter;
+        this.transform.localPosition = m_pivotPointPosition + pivotPointToObjectCenter;
     }
 
     public override void OnPositionChanged(Vector3 newPosition)

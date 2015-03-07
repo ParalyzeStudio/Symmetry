@@ -12,7 +12,7 @@ public class ValueAnimator : MonoBehaviour
 
     //Variables to handle fading
     protected bool m_fading;
-    public float m_opacity;
+    public float m_opacity = 1;
     protected float m_fromOpacity;
     protected float m_toOpacity;
     protected float m_fadingDuration;
@@ -53,7 +53,7 @@ public class ValueAnimator : MonoBehaviour
     protected InterpolationType m_rotatingInterpolationType;
 
     //Store previous values to change them dynamically in inspector
-    private float m_prevOpacity;
+    private float m_prevOpacity = -1;
 
 
     public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
@@ -251,7 +251,10 @@ public class ValueAnimator : MonoBehaviour
         float dt = Time.deltaTime;
 
         if (m_prevOpacity != m_opacity)
+        {
+            m_prevOpacity = m_opacity;
             OnOpacityChanged(m_opacity);
+        }
 
         UpdateOpacity(dt);
         UpdatePosition(dt);

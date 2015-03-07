@@ -11,8 +11,12 @@ public class TintColorMaterialAssignment : MaterialAssignment
         base.Update();
         if (m_tintColor != m_prevTintColor)
         {
-            m_prevTintColor = m_tintColor;
+            Debug.Log("update tintcolor");
+            ValueAnimator animator = this.GetComponent<ValueAnimator>();
+            if (animator)
+                m_tintColor.a = animator.m_opacity;
             this.GetComponent<MeshRenderer>().sharedMaterial.SetColor("_Color", m_tintColor);
+            m_prevTintColor = m_tintColor;
         }
     }
 }

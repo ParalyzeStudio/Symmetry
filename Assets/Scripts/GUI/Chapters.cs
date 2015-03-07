@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Chapters : MonoBehaviour
+public class Chapters : GUIScene
 {
     public const int CHAPTERS_PER_GROUP = 4;
     public Color CHAPTER_GROUP_1_BASE_COLOR { get { return new Color(1, 0, 0, 1); } }
@@ -22,19 +22,25 @@ public class Chapters : MonoBehaviour
     /**
      * Shows Chapters screen with or without animation
      * **/
-    public void Show(bool bAnimated)
+    public override void Show(bool bAnimated, float fDelay = 0.0f)
     {
+        base.Show(bAnimated, fDelay);
         int reachedChapterNumber = 1;
         m_chapterGroup = ((reachedChapterNumber - 1) / CHAPTERS_PER_GROUP) + 1;
         m_showTitleCallRunning = false;
         m_showChaptersCallRunning = false;
-        ShowTitle(bAnimated, 5.0f);
-        ShowChapterSlots(bAnimated, 1.0f);
+        ShowTitle(bAnimated, fDelay);
+        ShowChapterSlots(bAnimated, fDelay);
     }
 
-    public void Dismiss()
+    public override void Dismiss(bool bAnimated, float fDuration, float fDelay = 0.0f)
     {
-        this.gameObject.transform.localPosition = new Vector3(0, 0, 100);
+        base.Dismiss(bAnimated, fDuration, fDelay);
+    }
+
+    public override void OnSceneDismissed()
+    {
+        this.gameObject.SetActive(false);
     }
 
     public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
@@ -100,7 +106,14 @@ public class Chapters : MonoBehaviour
             else
                 baseColor = CHAPTER_GROUP_3_BASE_COLOR;
 
-            slotProperties.m_color = ColorUtils.DarkenColor(baseColor, 0.18f * iChapterSlotIndex);   
+            Color slotColor = ColorUtils.DarkenColor(baseColor, 0.18f * iChapterSlotIndex);
+            if (bAnimated)
+            {
+                GameObjectAnimator slotAnimator = m_chapterSlots[iChapterSlotIndex].GetComponent<GameObjectAnimator>();
+                slotAnimator.OnOpacityChanged(0);
+                slotColor.a = 0;
+            }
+            slotProperties.m_color = slotColor;
         }
 
         if (bAnimated)
@@ -108,27 +121,22 @@ public class Chapters : MonoBehaviour
             m_showChaptersCallRunning = true;
             m_showChaptersDelay = fDelay;
 
-            //TintColorMaterialAssignment slotSkinTintColor = chapterSlots[0].GetComponentInChildren<TintColorMaterialAssignment>();
-            //TextMeshAnimator numberTextAnimator = chapterSlots[0].GetComponentInChildren<TextMeshAnimator>();
-            //slotSkinTintColor.m_tintColor = 
-
-            GameObjectAnimator slotAnimatorTest = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
-            slotAnimatorTest.OnOpacityChanged(0);
+            //GameObjectAnimator slotAnimator = m_chapterSlots[0].GetComponent<GameObjectAnimator>();
 
             GameObjectAnimator slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
             slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * slotSize.y, 0));
-            slotAnimator.OnRotationChanged(180, new Vector3(0, 1, 0));
+            slotAnimator.OnRotationChanged(90, new Vector3(0, 1, 0));
 
             slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
             slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, -0.5f * slotSize.y, 0));
-            slotAnimator.OnRotationChanged(180, new Vector3(0, -1, 0));
+            slotAnimator.OnRotationChanged(90, new Vector3(0, -1, 0));
 
             slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0.5f * slotSize.y, 0, 0));
-            slotAnimator.OnRotationChanged(180, new Vector3(1, 0, 0));
+            slotAnimator.OnRotationChanged(90, new Vector3(1, 0, 0));
         }        
     }
 
@@ -136,33 +144,32 @@ public class Chapters : MonoBehaviour
     {
         m_showChaptersCallRunning = false;
 
-        //Animate slot 2
-        GameObjectAnimator slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
-        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, 1, 0), 0.3f);
+        float slotAnimationDuration = 0.3f;
 
-        TextMeshAnimator numberTextAnimator = m_chapterSlots[1].GetComponentInChildren<TextMeshAnimator>();
-        numberTextAnimator.OnOpacityChanged(0);
-        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.3f);
+        //Animate slot 1
+        GameObjectAnimator slotAnimator = m_chapterSlots[0].GetComponent<GameObjectAnimator>();
+        slotAnimator.FadeFromTo(0, 1, slotAnimationDuration);
+
+        //Animate slot 2
+        slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
+        slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(0, 1, 0), slotAnimationDuration, slotAnimationDuration);
+        slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, slotAnimationDuration);
 
         //Animate slot 3
         slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
-        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(0, -1, 0), 0.3f, 0.4f);
-
-        numberTextAnimator = m_chapterSlots[2].GetComponentInChildren<TextMeshAnimator>();
-        numberTextAnimator.OnOpacityChanged(0);
-        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.4f);
+        slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(0, -1, 0), slotAnimationDuration, 3 * slotAnimationDuration);
+        slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, 3 * slotAnimationDuration);
 
         //Animate slot 4
         slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
-        slotAnimator.RotateFromToAroundAxis(180, 0, new Vector3(1, 0, 0), 0.3f, 0.2f);
-
-        numberTextAnimator = m_chapterSlots[3].GetComponentInChildren<TextMeshAnimator>();
-        numberTextAnimator.OnOpacityChanged(0);
-        numberTextAnimator.FadeFromTo(0, 1, 0.5f, 0.2f);
+        slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(1, 0, 0), slotAnimationDuration, 2 * slotAnimationDuration);
+        slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, 2 * slotAnimationDuration);
     }
 
-    public void Update()
+    public override void Update()
     {
+        base.Update();
+
         float dt = Time.deltaTime;
 
         if (m_showTitleCallRunning)

@@ -1,26 +1,37 @@
 ﻿using UnityEngine;
 
-public class MainMenu : MonoBehaviour
+public class MainMenu : GUIScene
 {
     public GameObject m_segmentPfb;
-    public GameObject m_GUIFramePfb;
     public GameObject m_titlePartPfb;
-    public Material[] m_framesMaterials;
     public Material[] m_titlePartsMaterials;
 
     /**
      * Shows MainMenu with or without animation
      * **/
-    public void Show(bool bAnimated)
+    public override void Show(bool bAnimated, float fDelay = 0.0f)
     {
-        ShowTitle(bAnimated);
-        ShowFrames(bAnimated);
-        ShowAxes(bAnimated, 1.5f);
-        ShowButtons(bAnimated, 2.0f);
-        ShowTapToPlay(2.0f);
+        base.Show(bAnimated, fDelay);
+        ShowTitle(bAnimated, fDelay);
+        ShowAxes(bAnimated, 1.5f + fDelay);
+        ShowButtons(bAnimated, 2.0f + fDelay);
+        ShowTapToPlay(2.0f + fDelay);
     }
 
-    public void Dismiss()
+    public override void Dismiss(bool bAnimated, float fDuration, float fDelay = 0.0f)
+    {
+        base.Dismiss(bAnimated, fDuration, fDelay);
+        if (bAnimated)
+        {
+            TextMeshAnimator tapToPlayAnimator = GameObject.FindGameObjectWithTag("TapToPlay").GetComponent<TextMeshAnimator>();
+            tapToPlayAnimator.SetCyclingPaused(true);
+            this.gameObject.GetComponent<GameObjectAnimator>().FadeFromTo(1, 0, fDuration, fDelay);
+        }
+        else
+            this.gameObject.SetActive(false);
+    }
+
+    public override void OnSceneDismissed()
     {
         this.gameObject.SetActive(false);
     }
@@ -65,65 +76,32 @@ public class MainMenu : MonoBehaviour
         topLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
         topLeftAnimator.MoveObjectBySettingPivotPointPosition(topLeftPartLocalPosition);
         topLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
-        topLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.5f);
-        topLeftAnimator.TranslateFromTo(topLeftPartLocalPosition, topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, 1.5f);
+        topLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+        topLeftAnimator.TranslateFromTo(topLeftPartLocalPosition, topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
 
         //Animate top right part
         FixedTextureSizeAnimator topRightAnimator = clonedTopRight.GetComponent<FixedTextureSizeAnimator>();
         topRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
         topRightAnimator.MoveObjectBySettingPivotPointPosition(topRightPartLocalPosition);
         topRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
-        topRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.8f);
-        topRightAnimator.TranslateFromTo(topRightPartLocalPosition, topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, 1.8f);
+        topRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+        topRightAnimator.TranslateFromTo(topRightPartLocalPosition, topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
 
         //Animate bottom right part
         FixedTextureSizeAnimator bottomRightAnimator = clonedBottomRight.GetComponent<FixedTextureSizeAnimator>();
         bottomRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
         bottomRightAnimator.MoveObjectBySettingPivotPointPosition(bottomRightPartLocalPosition);
         bottomRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
-        bottomRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.5f);
-        bottomRightAnimator.TranslateFromTo(bottomRightPartLocalPosition, bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, 1.5f);
+        bottomRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+        bottomRightAnimator.TranslateFromTo(bottomRightPartLocalPosition, bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
 
         //Animate bottom left part
         FixedTextureSizeAnimator bottomLeftAnimator = clonedBottomLeft.GetComponent<FixedTextureSizeAnimator>();
         bottomLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
         bottomLeftAnimator.MoveObjectBySettingPivotPointPosition(bottomLeftPartLocalPosition);
         bottomLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
-        bottomLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, 1.8f);
-        bottomLeftAnimator.TranslateFromTo(bottomLeftPartLocalPosition, bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, 1.8f);
-    }
-
-    public void ShowFrames(bool bAnimated, float fDelay = 0.0f)
-    {
-        GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
-        framesHolder.transform.position = new Vector3(0, 0, -5);
-
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
-        GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
-        float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
-        float topFrameHeight = 2 * distanceToScreenTopBorder;
-
-        GameObject topFrame = (GameObject) Instantiate(m_GUIFramePfb);
-        topFrame.transform.parent = framesHolder.transform;
-        topFrame.transform.localScale = new Vector3(screenSize.x, topFrameHeight, 1);
-        topFrame.transform.localPosition = new Vector3(0, 0.5f * (screenSize.y - topFrameHeight), 0);
-        topFrame.GetComponent<MeshRenderer>().material = m_framesMaterials[0];
-
-        float middleFrameRatio = 0.5f; //the ratio of middle frame relatively to bottom frame
-        float bottomFrameRatio = 1 - middleFrameRatio;
-        GameObject middleFrame = (GameObject)Instantiate(m_GUIFramePfb);
-        middleFrame.transform.parent = framesHolder.transform;
-        float middleFrameHeight = middleFrameRatio * (screenSize.y - topFrameHeight);
-        middleFrame.transform.localScale = new Vector3(screenSize.x, middleFrameHeight, 1);
-        middleFrame.transform.localPosition = new Vector3(0, 0.5f * screenSize.y - topFrameHeight - 0.5f * middleFrameHeight, 0);
-        middleFrame.GetComponent<MeshRenderer>().material = m_framesMaterials[1];
-
-        GameObject bottomFrame = (GameObject)Instantiate(m_GUIFramePfb);
-        bottomFrame.transform.parent = framesHolder.transform;
-        float bottomFrameHeight = bottomFrameRatio * (screenSize.y - topFrameHeight);
-        bottomFrame.transform.localScale = new Vector3(screenSize.x, bottomFrameHeight, 1);
-        bottomFrame.transform.localPosition = new Vector3(0, 0.5f * screenSize.y - topFrameHeight - middleFrameHeight - 0.5f * bottomFrameHeight, 0);
-        bottomFrame.GetComponent<MeshRenderer>().material = m_framesMaterials[2];
+        bottomLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+        bottomLeftAnimator.TranslateFromTo(bottomLeftPartLocalPosition, bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
     }
 
     public void ShowAxes(bool bAnimated, float fDelay = 0.0f)

@@ -10,6 +10,7 @@ public class MaterialAssignment : MonoBehaviour
     {
         if (m_material != m_oldMaterial)
         {
+            DestroyImmediate(m_oldMaterial);
             m_oldMaterial = m_material;
             Material clonedMaterial = (Material) Instantiate(m_material);
             MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();

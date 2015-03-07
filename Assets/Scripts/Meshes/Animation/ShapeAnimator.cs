@@ -13,7 +13,7 @@ public class ShapeAnimator : GameObjectAnimator
         shapeRenderer.m_color = newColor;
     }
 
-    protected override Vector3 GetGameObjectSize()
+    public override Vector3 GetGameObjectSize()
     {
         Shape shapeData = this.gameObject.GetComponent<ShapeRenderer>().m_shape;
         List<GridTriangle> triangles = shapeData.m_gridTriangles;

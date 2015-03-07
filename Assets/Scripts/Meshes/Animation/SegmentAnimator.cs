@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SegmentAnimator : GameObjectAnimator
+public class SegmentAnimator : TranspQuadOpacityAnimator
 {
     /**
      * Resizes the segment to the new length passed as parameter
@@ -9,7 +9,7 @@ public class SegmentAnimator : GameObjectAnimator
     {
         Segment segment = this.gameObject.GetComponent<Segment>();
         Vector2 segmentFromScale = new Vector2(segment.m_length, segment.m_thickness);
-        ScaleFromTo(segmentFromScale, new Vector2(fNewLength, segment.m_thickness), 1.0f, 1.0f);
+        ScaleFromTo(segmentFromScale, new Vector2(fNewLength, segment.m_thickness), 1.0f, fDelay);
     }
 
     public override void OnScaleChanged(Vector3 newScale)

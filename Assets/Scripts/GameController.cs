@@ -71,7 +71,11 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
+            Debug.Log("Animate frames");
+            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            guiManager.BuildFrames();
+            guiManager.ShowContent(GUIManager.DisplayContent.MENU, true, 2.0f);
+            guiManager.AnimateFrames(GUIManager.DisplayContent.MENU, 2.3f);
             //GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.CHAPTERS, true);
         }
 
