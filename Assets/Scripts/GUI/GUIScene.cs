@@ -17,26 +17,27 @@ public class GUIScene : MonoBehaviour
      * **/
     public virtual void Show(bool bAnimated, float fDelay = 0.0f)
     {
-
+        
     }
 
     /**
      * Dismisses this scene
      * **/
-    public virtual void Dismiss(bool bAnimated, float fDuration, float fDelay = 0.0f)
+    public virtual void Dismiss(float fDuration, float fDelay = 0.0f)
     {
-        if (bAnimated)
-        {
-            m_dismissSceneRunning = true;
-            m_dismissSceneElapsedTime = 0;
-            m_dismissSceneDuration = fDuration;
-            m_dismissSceneDelay = fDelay;
-        }
+        m_dismissSceneRunning = true;
+        m_dismissSceneElapsedTime = 0;
+        m_dismissSceneDuration = fDuration;
+        m_dismissSceneDelay = fDelay;
+
+        //fade out the scene
+        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
+        sceneAnimator.FadeFromTo(sceneAnimator.m_opacity, 0, fDuration, fDelay);
     }
 
     public virtual void OnSceneDismissed()
     {
-
+        Destroy(this.gameObject);
     }
 
     public virtual void Update()

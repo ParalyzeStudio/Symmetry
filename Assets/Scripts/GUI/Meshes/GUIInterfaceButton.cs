@@ -49,5 +49,14 @@ public class GUIInterfaceButton : GUIQuadButton
             Material offMaterial = m_materials[1];
             meshRenderer.material = soundManager.m_soundActive ? onMaterial : offMaterial;
         }
+        else if (tag.Equals("BackButton"))
+        {
+            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            GUIManager.DisplayContent displayedContent = guiManager.m_displayedContent;
+            if (displayedContent == GUIManager.DisplayContent.CHAPTERS)
+            {
+                guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.MENU, false);
+            }
+        }
     }
 }

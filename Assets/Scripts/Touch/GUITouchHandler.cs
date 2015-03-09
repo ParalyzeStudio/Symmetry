@@ -1,16 +1,13 @@
 ﻿using UnityEngine;
 
-public class MenuTouchHandler : TouchHandler
+public class GUITouchHandler : TouchHandler
 {
     public float m_circleButtonsTouchAreaRadius;
-
     private GameController m_gameController;
-    private GUIManager m_guiManager;
 
     public override void Start()
     {
         m_gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
-        m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
     }
 
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
@@ -18,12 +15,41 @@ public class MenuTouchHandler : TouchHandler
         return true;
     }
 
+    /**
+     * Callback when user clicked the screen
+     * **/
     protected override void OnClick()
     {
         Vector2 clickLocation = m_prevPointerLocation;
-        Vector2 m_designScreenSize = m_gameController.m_designScreenSize;
+        GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
+        if (guiManager.m_displayedContent == GUIManager.DisplayContent.MENU)
+        {
+            HandleClickOnMainMenu(clickLocation);
+        }
+        else if (guiManager.m_displayedContent == GUIManager.DisplayContent.CHAPTERS)
+        {
+            HandleClickOnChapters(clickLocation);
+        }
+    }
 
-        if (m_guiManager.IsOptionsWindowShown())
+    /**
+     * The user clicked on the tap to play area
+     * **/
+    public void OnClickTapToPlay()
+    {
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS);
+    }
+
+    /**
+     * Processes click on main menu scene
+     * **/
+    public void HandleClickOnMainMenu(Vector2 clickLocation)
+    {
+        GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
+        if (guiManager.IsOptionsWindowShown())
         {
             GUIInterfaceButton musicBtn = GameObject.FindGameObjectWithTag("MusicButton").GetComponent<GUIInterfaceButton>();
             if (musicBtn != null)
@@ -75,25 +101,34 @@ public class MenuTouchHandler : TouchHandler
             }
 
             //transform the click location in screen rect coordinates
-            clickLocation += new Vector2(0.5f * m_designScreenSize.x, 0.5f * m_designScreenSize.y);
-            clickLocation.y = -clickLocation.y + m_designScreenSize.y;
+            clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
+            clickLocation.y = -clickLocation.y + screenSize.y;
 
             Rect tapToPlayAreaRect = new Rect();
 
-            tapToPlayAreaRect.width = m_designScreenSize.x;
-            tapToPlayAreaRect.height = 0.78f * m_designScreenSize.y;
-            tapToPlayAreaRect.position = Vector3.zero;
+            tapToPlayAreaRect.width = screenSize.x;
+            tapToPlayAreaRect.height = 0.25f * screenSize.y;
+            tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y);
 
             if (tapToPlayAreaRect.Contains(clickLocation))
-            {
                 OnClickTapToPlay();
-            }
         }
     }
 
-    public void OnClickTapToPlay()
+    /**
+     * Processes click on chapters scene
+     * **/
+    public void HandleClickOnChapters(Vector2 clickLocation)
     {
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS, 0.0f);
+        GUIInterfaceButton backBtn = GameObject.FindGameObjectWithTag("BackButton").GetComponent<GUIInterfaceButton>();
+        if (backBtn != null)
+        {
+            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(backBtn.transform.position) - clickLocation).magnitude;
+            if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+            {
+                backBtn.OnClick();
+                return; //swallow the touch by returning
+            }
+        }
     }
 }

@@ -25,22 +25,25 @@ public class Chapters : GUIScene
     public override void Show(bool bAnimated, float fDelay = 0.0f)
     {
         base.Show(bAnimated, fDelay);
+        GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
+        chaptersAnimator.OnOpacityChanged(0);
         int reachedChapterNumber = 1;
         m_chapterGroup = ((reachedChapterNumber - 1) / CHAPTERS_PER_GROUP) + 1;
         m_showTitleCallRunning = false;
         m_showChaptersCallRunning = false;
         ShowTitle(bAnimated, fDelay);
         ShowChapterSlots(bAnimated, fDelay);
+        ShowBackButton(bAnimated, fDelay);
     }
 
-    public override void Dismiss(bool bAnimated, float fDuration, float fDelay = 0.0f)
+    public override void Dismiss(float fDuration, float fDelay = 0.0f)
     {
-        base.Dismiss(bAnimated, fDuration, fDelay);
+        base.Dismiss(fDuration, fDelay);
     }
 
     public override void OnSceneDismissed()
     {
-        this.gameObject.SetActive(false);
+        base.OnSceneDismissed();
     }
 
     public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
@@ -121,8 +124,6 @@ public class Chapters : GUIScene
             m_showChaptersCallRunning = true;
             m_showChaptersDelay = fDelay;
 
-            //GameObjectAnimator slotAnimator = m_chapterSlots[0].GetComponent<GameObjectAnimator>();
-
             GameObjectAnimator slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
             slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * slotSize.y, 0));
@@ -138,6 +139,19 @@ public class Chapters : GUIScene
             slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0.5f * slotSize.y, 0, 0));
             slotAnimator.OnRotationChanged(90, new Vector3(1, 0, 0));
         }        
+    }
+
+    public void ShowBackButton(bool bAnimated, float fDelay)
+    {
+        GameObject showButtonObject = GameObject.FindGameObjectWithTag("BackButton");
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        showButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
+        GameObjectAnimator showButtonAnimator = showButtonObject.GetComponent<GameObjectAnimator>();
+        showButtonAnimator.OnOpacityChanged(0);
+        if (bAnimated)
+            showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        else
+            showButtonAnimator.OnOpacityChanged(1);
     }
 
     public void ShowChapterSlotsWithAnimation()

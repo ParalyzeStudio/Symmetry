@@ -5,6 +5,11 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
+    public MainMenu m_mainMenuScene { get; set; }
+    public Chapters m_chaptersScene { get; set; }
+
+    public GameObject m_mainMenuPfb; //the prefab containing all information on main menu
+    public GameObject m_chaptersPfb; //the prefab containing all information on chapters
     public GameObject m_veilPfb; //the prefab to instantiate a veil that covers whole screen
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
     public GameObject m_GUIFramePfb; //the prefab to show a fram
@@ -20,46 +25,55 @@ public class GUIManager : MonoBehaviour
         LEVELS
     }
 
-    private DisplayContent m_displayedContent;
+    public DisplayContent m_displayedContent { get; set; }
     private DisplayContent m_contentToDisplay;
 
-    public void Awake()
+    public void Init()
     {
         m_optionsWindow = null;
         m_displayedContent = DisplayContent.NONE;
         m_contentToDisplay = DisplayContent.NONE;
+        BuildFrames();
     }
 
     public void ShowContent(DisplayContent contentToDisplay, bool bAnimated = true, float fDelay = 0.0f)
     {
-        GameObject contentRootNode = null;
         if (contentToDisplay == DisplayContent.MENU)
-        {           
-            contentRootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
-            contentRootNode.GetComponent<MainMenu>().Show(bAnimated, fDelay);
+        {
+            //build the content
+            GameObject clonedMainMenuScene = (GameObject) Instantiate(m_mainMenuPfb);
+            clonedMainMenuScene.transform.parent = this.gameObject.transform;
+            //show it
+            m_mainMenuScene = clonedMainMenuScene.GetComponent<MainMenu>();
+            m_mainMenuScene.Show(bAnimated, fDelay);
         }
         else if (contentToDisplay == DisplayContent.CHAPTERS)
         {
-            contentRootNode = GameObject.FindGameObjectWithTag("GUIChapters");
-            contentRootNode.GetComponent<Chapters>().Show(bAnimated, fDelay);
+            //build the content
+            GameObject clonedChaptersScene = (GameObject)Instantiate(m_chaptersPfb);
+            clonedChaptersScene.transform.parent = this.gameObject.transform;
+            //show it
+            m_chaptersScene = clonedChaptersScene.GetComponent<Chapters>();
+            m_chaptersScene.Show(bAnimated, fDelay);
         }
 
         m_displayedContent = contentToDisplay;
     }
 
-    public void HideContent(DisplayContent contentToHide, float fDuration, bool bAnimated = true, float fDelay = 0.0f)
+    public void HideContent(DisplayContent contentToHide, float fDuration, float fDelay = 0.0f)
     {
-        GameObject contentRootNode = null;
         if (contentToHide == DisplayContent.MENU)
         {
-            contentRootNode = GameObject.FindGameObjectWithTag("GUIMainMenu");
-            contentRootNode.GetComponent<MainMenu>().Dismiss(bAnimated, fDuration, fDelay);
+            m_mainMenuScene.Dismiss(fDuration, fDelay);
+            m_mainMenuScene = null;
         }
         else if (contentToHide == DisplayContent.CHAPTERS)
         {
-            contentRootNode = GameObject.FindGameObjectWithTag("GUIChapters");
-            contentRootNode.GetComponent<Chapters>().Dismiss(bAnimated, fDuration, fDelay);
+            m_chaptersScene.Dismiss(fDuration, fDelay);
+            m_chaptersScene = null;
         }
+
+        m_displayedContent = DisplayContent.NONE;
     }
 
     public void ShowOptionsWindow()
@@ -84,12 +98,12 @@ public class GUIManager : MonoBehaviour
         return m_optionsWindow != null;
     }
 
-    public void SwitchDisplayedContent(DisplayContent contentToDisplay, float fDelay = 0.0f)
+    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fDelay = 0.0f)
     {
         //ShowTransitionVeil(2.0f, 0.5f);
         m_contentToDisplay = contentToDisplay;
-        HideContent(m_displayedContent, 0.5f, true, fDelay);
-        ShowContent(m_contentToDisplay, true, fDelay + 2.0f); //show next content 1 second after hiding the previous one
+        HideContent(m_displayedContent, 0.5f, fDelay);
+        ShowContent(m_contentToDisplay, bShowWithAnimation, fDelay + 2.0f); //show next content 1 second after hiding the previous one
 
         //animate frames between scenes
         AnimateFrames(contentToDisplay, 0.3f);

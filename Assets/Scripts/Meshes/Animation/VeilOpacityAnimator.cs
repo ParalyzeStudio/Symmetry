@@ -15,6 +15,8 @@ public class VeilOpacityAnimator : ValueAnimator
 
     public override void OnOpacityChanged(float fNewOpacity)
     {
+        base.OnOpacityChanged(fNewOpacity);
+
         Material veilMaterial = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
         Color color = veilMaterial.GetColor("_Color");
         color.a = fNewOpacity;
