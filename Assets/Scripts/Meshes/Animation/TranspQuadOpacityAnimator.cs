@@ -7,9 +7,12 @@ public class TranspQuadOpacityAnimator : GameObjectAnimator
         base.OnOpacityChanged(fNewOpacity);
 
         Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
-        Color color = material.GetColor("_Color");
-        color.a = fNewOpacity;
-        material.SetColor("_Color", color);
+        if (material != null)
+        {
+            Color color = material.GetColor("_Color");
+            color.a = fNewOpacity;
+            material.SetColor("_Color", color);
+        }
     }
 }
 

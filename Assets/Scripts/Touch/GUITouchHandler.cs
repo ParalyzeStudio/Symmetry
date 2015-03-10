@@ -130,5 +130,27 @@ public class GUITouchHandler : TouchHandler
                 return; //swallow the touch by returning
             }
         }
+
+        Chapters chapters = this.gameObject.GetComponentInChildren<Chapters>();
+        GameObject[] chaptersSlots = chapters.m_chapterSlots;
+        for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)
+        {
+            Vector2 slotSize = chaptersSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
+            Vector2 slotPosition = chaptersSlots[iSlotIndex].transform.position;
+            if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
+                &&
+                clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
+            {
+                chapters.OnClickChapterSlot(iSlotIndex);
+            }
+        }
+    }
+
+    /**
+     * Processes click on levels scene
+     * **/
+    public void HandleClickOnLevels(Vector2 clickLocation)
+    {
+
     }
 }

@@ -100,13 +100,12 @@ public class GUIManager : MonoBehaviour
 
     public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fDelay = 0.0f)
     {
-        //ShowTransitionVeil(2.0f, 0.5f);
         m_contentToDisplay = contentToDisplay;
         HideContent(m_displayedContent, 0.5f, fDelay);
-        ShowContent(m_contentToDisplay, bShowWithAnimation, fDelay + 2.0f); //show next content 1 second after hiding the previous one
+        ShowContent(m_contentToDisplay, bShowWithAnimation, fDelay + 1.3f); //show next content 1 second after hiding the previous one
 
         //animate frames between scenes
-        AnimateFrames(contentToDisplay, 0.3f);
+        AnimateFrames(contentToDisplay, 0.5f);
     }
 
     /**

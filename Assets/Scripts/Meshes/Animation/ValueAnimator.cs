@@ -55,7 +55,6 @@ public class ValueAnimator : MonoBehaviour
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity = -1;
 
-
     public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         if (fromOpacity == toOpacity)
@@ -117,17 +116,14 @@ public class ValueAnimator : MonoBehaviour
             if (m_fadingElapsedTime >= m_fadingDelay)
             {
                 if (inDelay) //we were in delay previously
-                    m_fadingElapsedTime = m_fadingDelay;
+                    dt = m_fadingElapsedTime - m_fadingDelay;
                 float effectiveElapsedTime = m_fadingElapsedTime - m_fadingDelay;
                 float deltaOpacity = 0;
                 float opacityVariation = m_toOpacity - m_fromOpacity;
                 if (m_fadingInterpolationType == InterpolationType.LINEAR)
                     deltaOpacity = dt / m_fadingDuration * opacityVariation;
                 else if (m_fadingInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaOpacity = opacityVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_fadingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_fadingDuration)));
-                //if (deltaOpacity < 0 && (m_opacity + deltaOpacity) < m_toOpacity
-                //||
-                //deltaOpacity > 0 && (m_opacity + deltaOpacity) > m_toOpacity)
+                    deltaOpacity = opacityVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_fadingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_fadingDuration)));
 
                 if (effectiveElapsedTime > m_fadingDuration)
                 {
@@ -151,7 +147,7 @@ public class ValueAnimator : MonoBehaviour
             if (m_translatingElapsedTime >= m_translatingDelay)
             {
                 if (inDelay) //we were in delay previously
-                    m_translatingElapsedTime = m_translatingDelay;
+                    dt = m_translatingElapsedTime - m_translatingDelay;
                 m_translatingTimeOffset = m_translatingElapsedTime - m_translatingDelay;
                 float effectiveElapsedTime = m_translatingElapsedTime - m_translatingDelay;
                 Vector3 deltaPosition = Vector3.zero;
@@ -159,7 +155,7 @@ public class ValueAnimator : MonoBehaviour
                 if (m_translatingInterpolationType == InterpolationType.LINEAR)
                     deltaPosition = dt / m_translatingDuration * positionVariation;
                 else if (m_translatingInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaPosition = positionVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_translatingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_translatingDuration)));
+                    deltaPosition = positionVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_translatingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_translatingDuration)));
 
                 if (effectiveElapsedTime > m_translatingDuration)
                 {
@@ -184,18 +180,14 @@ public class ValueAnimator : MonoBehaviour
             if (m_rotatingElapsedTime > m_rotatingDelay)
             {
                 if (inDelay) //we were in delay previously
-                    m_rotatingElapsedTime = m_rotatingDelay;
+                    dt = m_rotatingElapsedTime - m_rotatingDelay;
                 float effectiveElapsedTime = m_rotatingElapsedTime - m_rotatingDelay;
                 float deltaAngle = 0;
                 float angleVariation = m_toAngle - m_fromAngle;
                 if (m_rotatingInterpolationType == InterpolationType.LINEAR)
                     deltaAngle = dt / m_rotatingDuration * angleVariation;
                 else if (m_rotatingInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaAngle = angleVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_rotatingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_rotatingDuration)));
-
-                //if (deltaAngle < 0 && (m_angle + deltaAngle) < m_toAngle
-                //    ||
-                //    deltaAngle > 0 && (m_angle + deltaAngle) > m_toAngle)
+                    deltaAngle = angleVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_rotatingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_rotatingDuration)));
 
                 if (effectiveElapsedTime > m_rotatingDuration)
                 {
@@ -220,18 +212,16 @@ public class ValueAnimator : MonoBehaviour
             if (m_scalingElapsedTime > m_scalingDelay)
             {
                 if (inDelay) //we were in delay previously
-                    m_scalingElapsedTime = m_scalingDelay;
+                    dt = m_scalingElapsedTime - m_scalingDelay;
                 float effectiveElapsedTime = m_scalingElapsedTime - m_scalingDelay;
                 Vector3 deltaScale = Vector3.zero;
                 Vector3 scaleVariation = m_toScale - m_fromScale;
                 if (m_scalingInterpolationType == InterpolationType.LINEAR)
                     deltaScale = dt / m_scalingDuration * scaleVariation;
                 else if (m_scalingInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaScale = scaleVariation * (Mathf.Sin((effectiveElapsedTime + dt) * Mathf.PI / (2 * m_scalingDuration)) - Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_scalingDuration)));
+                    deltaScale = scaleVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_scalingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_scalingDuration)));
 
                 
-                //float sqrCoveredScale = (m_scale - m_fromScale).sqrMagnitude;
-                //float sqrTotalScale = (m_toScale - m_fromScale).sqrMagnitude;
                 if (effectiveElapsedTime > m_scalingDuration)
                 {
                     m_scale = m_toScale;

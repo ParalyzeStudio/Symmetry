@@ -11,25 +11,39 @@ public class ChapterSlot : MonoBehaviour
     private TintColorMaterialAssignment m_skin;
     private TextMesh m_numberText;
 
-    public void Start()
+    public void Init()
     {
         m_skin = this.gameObject.GetComponentInChildren<TintColorMaterialAssignment>();
+        m_skin.InitMeshRendererMaterial();
+
         m_numberText = this.gameObject.GetComponentInChildren<TextMesh>();
+    }
+
+    public void SetColor(Color color)
+    {
+        m_color = color;
+        m_prevColor = color;
+        m_skin.SetTintColor(color);
+    }
+
+    public void SetNumber(int number)
+    {
+        m_number = number;
+        m_prevNumber = m_number;
+        m_numberText.text = m_number.ToString();
     }
 
     public void Update()
     {
-        if (m_color != m_prevColor)
-        {
-            m_prevColor = m_color;
-            m_skin.m_tintColor = m_color;
-        }
+        //if (m_color != m_prevColor)
+        //{
+        //    SetColor(m_color);
+        //}
 
-        if (m_number != m_prevNumber)
-        {
-            m_prevNumber = m_number;
-            m_numberText.text = m_number.ToString();
-        }
+        //if (m_number != m_prevNumber)
+        //{
+        //    SetNumber(m_number);
+        //}
     }
 }
 
