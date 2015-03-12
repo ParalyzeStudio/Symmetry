@@ -5,6 +5,20 @@
  * **/
 public class GUIInterfaceButton : GUIQuadButton
 {
+    public enum GUIInterfaceButtonID
+    {
+        ID_OPTIONS_BUTTON = 1,
+        ID_CREDITS_BUTTON,
+        ID_MUSIC_BUTTON,
+        ID_SOUND_BUTTON,
+        ID_BACK_BUTTON,
+        ID_PAUSE_BUTTON,
+        ID_RETRY_BUTTON,
+        ID_HINTS_BUTTON
+    }
+
+    public GUIInterfaceButtonID m_iID; /* { get; set; } */
+
     public Material[] m_materials;
 
     public override bool OnPress()
@@ -19,17 +33,16 @@ public class GUIInterfaceButton : GUIQuadButton
 
     public override void OnClick()
     {
-        string tag = this.gameObject.tag;
-        if (tag.Equals("OptionsButton"))
+        if (m_iID == GUIInterfaceButtonID.ID_OPTIONS_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             guiManager.ShowOptionsWindow();
         }
-        else if (tag.Equals("CreditsButton"))
+        else if (m_iID == GUIInterfaceButtonID.ID_CREDITS_BUTTON)
         {
             Debug.Log("OnClick Credits");
         }
-        else if (tag.Equals("MusicButton"))
+        else if (m_iID == GUIInterfaceButtonID.ID_MUSIC_BUTTON)
         {
             SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
             soundManager.ToggleMusic();
@@ -39,7 +52,7 @@ public class GUIInterfaceButton : GUIQuadButton
             Material offMaterial = m_materials[1];
             meshRenderer.material = soundManager.m_musicActive ? onMaterial : offMaterial;
         }
-        else if (tag.Equals("SoundButton"))
+        else if (m_iID == GUIInterfaceButtonID.ID_SOUND_BUTTON)
         {
             SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
             soundManager.ToggleSound();
@@ -49,7 +62,7 @@ public class GUIInterfaceButton : GUIQuadButton
             Material offMaterial = m_materials[1];
             meshRenderer.material = soundManager.m_soundActive ? onMaterial : offMaterial;
         }
-        else if (tag.Equals("BackButton"))
+        else if (m_iID == GUIInterfaceButtonID.ID_BACK_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             GUIManager.DisplayContent displayedContent = guiManager.m_displayedContent;

@@ -12,6 +12,6 @@ public class ContourSegment : GridSegment
 
     protected override void UpdateTextureWrapMode()
     {
-        renderer.sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
+        GetComponent<Renderer>().sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
     }
 }

@@ -55,6 +55,7 @@ public class GameController : MonoBehaviour
             m_levelManager.ParseAllLevels();
             BuildAndShowLevel(1);
 
+
             ///*** DEBUG TMP ***/
             ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
             ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);

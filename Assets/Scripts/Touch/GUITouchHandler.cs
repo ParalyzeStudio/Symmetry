@@ -77,7 +77,7 @@ public class GUITouchHandler : TouchHandler
         {
             ////Check if we clicked a button first to swallow touch
             //Options Button
-            GUIInterfaceButton optionsBtn = GameObject.FindGameObjectWithTag("OptionsButton").GetComponent<GUIInterfaceButton>();
+            GUIInterfaceButton optionsBtn = GameObject.FindGameObjectWithTag("OptionsPanel").GetComponentInChildren<GUIInterfaceButton>();
             if (optionsBtn != null)
             {
                 float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(optionsBtn.transform.position) - clickLocation).magnitude;
@@ -89,7 +89,7 @@ public class GUITouchHandler : TouchHandler
             }
 
             //Credits Button
-            GUIInterfaceButton creditsBtn = GameObject.FindGameObjectWithTag("CreditsButton").GetComponent<GUIInterfaceButton>();
+            GUIInterfaceButton creditsBtn = GameObject.FindGameObjectWithTag("CreditsPanel").GetComponentInChildren<GUIInterfaceButton>();
             if (creditsBtn != null)
             {
                 float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(creditsBtn.transform.position) - clickLocation).magnitude;
