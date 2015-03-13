@@ -13,7 +13,7 @@ public class GUIManager : MonoBehaviour
     public GameObject m_veilPfb; //the prefab to instantiate a veil that covers whole screen
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
     public GameObject m_GUIFramePfb; //the prefab to show a fram
-    private GameObject m_optionsWindow; //the actual options window
+    public GameObject m_optionsWindow { get; set; } //the actual options window
 
     public Color[] m_framesColors;
 
@@ -81,6 +81,7 @@ public class GUIManager : MonoBehaviour
         if (m_optionsWindow == null)
         {
             m_optionsWindow = (GameObject)Instantiate(m_optionsWindowPfb);
+            m_optionsWindow.transform.parent = m_mainMenuScene.gameObject.transform;
         }
     }
 
@@ -138,9 +139,9 @@ public class GUIManager : MonoBehaviour
     {
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
         GameObjectAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GameObjectAnimator>();
-
+        
         if (contentToDisplay == DisplayContent.MENU)
-        {            
+        {
             framesHolder.transform.position = new Vector3(0, 0, -5);
 
             Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;

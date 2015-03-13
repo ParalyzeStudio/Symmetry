@@ -11,6 +11,9 @@ public class Chapters : GUIScene
     public GameObject m_chapterSlotPfb;
     public GameObject m_levelSlotPfb;
 
+    private GameObject m_chaptersHolder;
+    private GameObject m_levelsHolder;
+
     public GameObject[] m_chapterSlots { get; set; }
     public GameObject[] m_levelSlots { get; set; }
 
@@ -19,6 +22,21 @@ public class Chapters : GUIScene
     private float m_showChaptersDelay;
     private float m_showChaptersElpasedTime;
     private bool m_showChaptersCallRunning;
+
+    public void CreateChaptersHolder()
+    {
+        m_chaptersHolder = new GameObject("ChaptersHolder");
+        m_chaptersHolder.transform.parent = this.gameObject.transform;
+        m_chaptersHolder.transform.localPosition = new Vector3(0, 0, -20);
+
+    }
+
+    public void CreateLevelsHolder()
+    {
+        m_levelsHolder = new GameObject("LevelsHolder");
+        m_levelsHolder.transform.parent = this.gameObject.transform;
+        m_levelsHolder.transform.localPosition = new Vector3(0, 0, -20);
+    }
 
     /**
      * Shows Chapters screen with or without animation
@@ -59,7 +77,7 @@ public class Chapters : GUIScene
 
     public void ShowChapterSlots(bool bAnimated, float fDelay = 0.0f)
     {
-        GameObject chaptersHolder = GameObject.FindGameObjectWithTag("ChaptersHolder");
+        CreateChaptersHolder();
 
         m_chapterSlots = new GameObject[4];
         Vector3 slotSize = Vector3.zero;
@@ -83,11 +101,11 @@ public class Chapters : GUIScene
             else
                 slotLocalPosition = new Vector3(0.5f * slotSize.x, -0.5f * slotSize.y, 0);
 
-            clonedChapterSlot.transform.parent = chaptersHolder.transform;
+            clonedChapterSlot.transform.parent = m_chaptersHolder.transform;
             clonedChapterSlot.transform.localPosition = slotLocalPosition;
 
             //Set the correct number on child text mesh and correct color on skin
-            ChapterSlot slotProperties = clonedChapterSlot.GetComponent<ChapterSlot>();
+            ColorNumberSlot slotProperties = clonedChapterSlot.GetComponent<ColorNumberSlot>();
             slotProperties.Init();
             slotProperties.SetNumber((m_chapterGroup - 1) * CHAPTERS_PER_GROUP + iChapterSlotIndex + 1);
 
@@ -134,10 +152,10 @@ public class Chapters : GUIScene
 
     public void ShowBackButton(bool bAnimated, float fDelay)
     {
-        GameObject showButtonObject = GameObject.FindGameObjectWithTag("BackButton");
+        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
-        showButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
-        GameObjectAnimator showButtonAnimator = showButtonObject.GetComponent<GameObjectAnimator>();
+        backButton.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
+        GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
         showButtonAnimator.OnOpacityChanged(0);
         if (bAnimated)
             showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
@@ -173,31 +191,64 @@ public class Chapters : GUIScene
 
     public void ShowLevelsForChapter(int iChapterNumber)
     {
-        GameObject levelsHolder = GameObject.FindGameObjectWithTag("LevelsHolder");
+        Destroy(m_chaptersHolder);
+        CreateLevelsHolder();
 
-        for (int iChapterSlotIdx = 0; iChapterSlotIdx != CHAPTERS_PER_GROUP; iChapterSlotIdx++)
+        //Create levels slots
+        //for (int iChapterSlotIdx = 0; iChapterSlotIdx != CHAPTERS_PER_GROUP; iChapterSlotIdx++)
+        //{
+        //    GameObject chapterSlot = m_chapterSlots[iChapterSlotIdx];
+        //    Vector3 chapterSlotPosition = chapterSlot.transform.localPosition;
+        //    ColorNumberSlot chapterSlotData = chapterSlot.GetComponent<ColorNumberSlot>();
+
+        //    for (int iLevelSlotIdx = 0; iLevelSlotIdx != 4; iLevelSlotIdx++)
+        //    {
+        //        GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
+        //        clonedLevelSlot.transform.parent = m_levelsHolder.transform;
+        //        clonedLevelSlot.GetComponent<BoundingBoxCalculator>().InvalidateBounds();
+        //        Vector2 levelSlotSize = clonedLevelSlot.GetComponent<GameObjectAnimator>().GetGameObjectSize();
+
+        //        Vector3 levelSlotPosition;
+        //        if (iLevelSlotIdx == 0)
+        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(-levelSlotSize.x, levelSlotSize.y, 0);
+        //        else if (iLevelSlotIdx == 1)
+        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(levelSlotSize.x, levelSlotSize.y, 0);
+        //         else if (iLevelSlotIdx == 2)
+        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(-levelSlotSize.x, -levelSlotSize.y, 0);
+        //         else
+        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(levelSlotSize.x, -levelSlotSize.y, 0);
+        //        levelSlotPosition.z = chapterSlotPosition.z;
+        //        clonedLevelSlot.transform.localPosition = levelSlotPosition;
+
+        //        ColorNumberSlot slotData = clonedLevelSlot.GetComponent<ColorNumberSlot>();
+        //        slotData.Init();
+        //        slotData.SetColor(chapterSlotData.m_color);
+        //        slotData.SetNumber(iChapterSlotIdx * 4 + iLevelSlotIdx + 1);
+        //    }
+        //}
+
+        float horizontalDistanceBetweenLevelSlots = 340.0f;
+        float verticalDistanceBetweenLevelSlots = 240.0f;
+        for (int iLevelSlotIdx = 0; iLevelSlotIdx != 16; iLevelSlotIdx++)
         {
-            GameObject chapterSlot = m_chapterSlots[iChapterSlotIdx];
-            Vector3 chapterSlotPosition = chapterSlot.transform.localPosition;
+            GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
+            clonedLevelSlot.transform.parent = m_levelsHolder.transform;
+            //clonedLevelSlot.GetComponent<BoundingBoxCalculator>().InvalidateBounds();
+            //Vector2 levelSlotSize = clonedLevelSlot.GetComponent<GameObjectAnimator>().GetGameObjectSize();
 
-            for (int iLevelSlotIdx = 0; iLevelSlotIdx != 4; iLevelSlotIdx++)
-            {
-                GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
-                clonedLevelSlot.transform.parent = levelsHolder.transform;
-                Vector2 levelSlotSize = this.GetComponent<GameObjectAnimator>().GetGameObjectSize();
+            int column = iLevelSlotIdx % 4 + 1;
+            int line = 4 - iLevelSlotIdx / 4;
 
-                Vector3 levelSlotPosition;
-                if (iLevelSlotIdx == 0)
-                    levelSlotPosition = chapterSlotPosition + new Vector3(-levelSlotSize.x, levelSlotSize.y, 0);
-                else if (iLevelSlotIdx == 1)
-                    levelSlotPosition = chapterSlotPosition + new Vector3(levelSlotSize.x, levelSlotSize.y, 0);
-                 else if (iLevelSlotIdx == 2)
-                    levelSlotPosition = chapterSlotPosition + new Vector3(-levelSlotSize.x, -levelSlotSize.y, 0);
-                 else
-                    levelSlotPosition = chapterSlotPosition + new Vector3(levelSlotSize.x, levelSlotSize.y, 0);
-                levelSlotPosition.z = chapterSlotPosition.z;
-                clonedLevelSlot.transform.localPosition = levelSlotPosition;
-            }
+            Vector3 levelSlotPosition = new Vector3((column - 2.5f) * horizontalDistanceBetweenLevelSlots,
+                                                    (line - 2.5f) * verticalDistanceBetweenLevelSlots,
+                                                    0);
+
+            clonedLevelSlot.transform.localPosition = levelSlotPosition;
+
+            ColorNumberSlot slotData = clonedLevelSlot.GetComponent<ColorNumberSlot>();
+            slotData.Init();
+            slotData.SetColor(new Color(1, 0, 0, 1));
+            slotData.SetNumber(iLevelSlotIdx + 1);
         }
     }
 

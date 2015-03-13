@@ -51,10 +51,10 @@ public class GUITouchHandler : TouchHandler
 
         if (guiManager.IsOptionsWindowShown())
         {
-            GUIInterfaceButton musicBtn = GameObject.FindGameObjectWithTag("MusicButton").GetComponent<GUIInterfaceButton>();
+            GUIInterfaceButton musicBtn = GUIInterfaceButton.FindInObjectChildrenForID(guiManager.m_optionsWindow, GUIInterfaceButton.GUIInterfaceButtonID.ID_MUSIC_BUTTON);
             if (musicBtn != null)
             {
-                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(musicBtn.transform.position) - clickLocation).magnitude;
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(musicBtn.gameObject.transform.position) - clickLocation).magnitude;
                 if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
                 {
                     musicBtn.OnClick();
@@ -62,13 +62,24 @@ public class GUITouchHandler : TouchHandler
                 }
             }
 
-            GUIInterfaceButton soundBtn = GameObject.FindGameObjectWithTag("SoundButton").GetComponent<GUIInterfaceButton>();
+            GUIInterfaceButton soundBtn = GUIInterfaceButton.FindInObjectChildrenForID(guiManager.m_optionsWindow, GUIInterfaceButton.GUIInterfaceButtonID.ID_SOUND_BUTTON);
             if (soundBtn != null)
             {
-                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(soundBtn.transform.position) - clickLocation).magnitude;
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(soundBtn.gameObject.transform.position) - clickLocation).magnitude;
                 if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
                 {
                     soundBtn.OnClick();
+                    return; //swallow the touch by returning
+                }
+            }
+
+            GUIInterfaceButton closeBtn = GUIInterfaceButton.FindInObjectChildrenForID(guiManager.m_optionsWindow, GUIInterfaceButton.GUIInterfaceButtonID.ID_CLOSE_BUTTON);
+            if (closeBtn != null)
+            {
+                float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(closeBtn.gameObject.transform.position) - clickLocation).magnitude;
+                if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+                {
+                    closeBtn.OnClick();
                     return; //swallow the touch by returning
                 }
             }
@@ -77,7 +88,8 @@ public class GUITouchHandler : TouchHandler
         {
             ////Check if we clicked a button first to swallow touch
             //Options Button
-            GUIInterfaceButton optionsBtn = GameObject.FindGameObjectWithTag("OptionsPanel").GetComponentInChildren<GUIInterfaceButton>();
+            GameObject mainMenuObject = guiManager.m_mainMenuScene.gameObject;
+            GUIInterfaceButton optionsBtn = GUIInterfaceButton.FindInObjectChildrenForID(mainMenuObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_OPTIONS_BUTTON);
             if (optionsBtn != null)
             {
                 float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(optionsBtn.transform.position) - clickLocation).magnitude;
@@ -89,7 +101,7 @@ public class GUITouchHandler : TouchHandler
             }
 
             //Credits Button
-            GUIInterfaceButton creditsBtn = GameObject.FindGameObjectWithTag("CreditsPanel").GetComponentInChildren<GUIInterfaceButton>();
+            GUIInterfaceButton creditsBtn = GUIInterfaceButton.FindInObjectChildrenForID(mainMenuObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_CREDITS_BUTTON);
             if (creditsBtn != null)
             {
                 float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(creditsBtn.transform.position) - clickLocation).magnitude;
@@ -120,7 +132,9 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnChapters(Vector2 clickLocation)
     {
-        GUIInterfaceButton backBtn = GameObject.FindGameObjectWithTag("BackButton").GetComponent<GUIInterfaceButton>();
+        Chapters chapters = this.gameObject.GetComponentInChildren<Chapters>();
+
+        GUIInterfaceButton backBtn = GUIInterfaceButton.FindInObjectChildrenForID(chapters.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
         if (backBtn != null)
         {
             float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(backBtn.transform.position) - clickLocation).magnitude;
@@ -131,7 +145,6 @@ public class GUITouchHandler : TouchHandler
             }
         }
 
-        Chapters chapters = this.gameObject.GetComponentInChildren<Chapters>();
         GameObject[] chaptersSlots = chapters.m_chapterSlots;
         for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)
         {

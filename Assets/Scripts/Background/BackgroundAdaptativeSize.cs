@@ -50,13 +50,12 @@ public class BackgroundAdaptativeSize : MonoBehaviour
                 fBackgroundHeightInUnits = fBackgroundWidthInUnits / fDesignScreenRatio; //we scale the height (borders are cropped)
             }
 
-            m_screenSizeInUnits = new Vector2(fBackgroundWidthInUnits, fBackgroundHeightInUnits);
+            m_screenSizeInUnits = new Vector2(fScreenWidthInUnits, fScreenHeightInUnits);
             this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
         }
     }
 
-    
-	void Update () 
+	public void Update() 
     {
         InvalidateSize();
 	}

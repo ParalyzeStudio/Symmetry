@@ -17,7 +17,7 @@ public class HUDButton : GUIQuadButton
         ID_SYMMETRY_ALL_AXES
     }
 
-    public HUDButtonID m_iID { get; set; }
+    public HUDButtonID m_ID { get; set; }
 
     public enum HUDButtonType
     {
@@ -61,7 +61,7 @@ public class HUDButton : GUIQuadButton
     {
         base.OnClick();
 
-        switch (m_iID)
+        switch (m_ID)
         {
             case HUDButtonID.ID_SYMMETRY_ALL_AXES:
                 OnClickAllAxes();
@@ -90,7 +90,7 @@ public class HUDButton : GUIQuadButton
 
         if (m_type == HUDButtonType.ACTION)
         {
-            string actionTag = GetActionTagForButtonID(m_iID);
+            string actionTag = GetActionTagForButtonID(m_ID);
 
             GameObject axesObject = GameObject.FindGameObjectWithTag("Axes");
             AxesHolder axesHolder = axesObject.GetComponent<AxesHolder>();

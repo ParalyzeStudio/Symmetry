@@ -73,7 +73,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.parent = this.gameObject.transform;
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
-                hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
                 hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
@@ -82,7 +82,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.parent = this.gameObject.transform;
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
-                hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
                 hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
@@ -91,7 +91,7 @@ public class GameHUD : MonoBehaviour
                 clonedButton.transform.parent = this.gameObject.transform;
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 HUDButton hudButton = clonedButton.GetComponentInChildren<HUDButton>();
-                hudButton.m_iID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
                 hudButton.m_type = HUDButton.HUDButtonType.ACTION;
             }
 
