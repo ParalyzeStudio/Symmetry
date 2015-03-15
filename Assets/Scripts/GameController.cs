@@ -8,6 +8,9 @@ public class GameController : MonoBehaviour
     private bool m_levelBuilt;
     private LevelManager m_levelManager;
 
+    public int m_currentChapter;
+    public int m_currentLevel;
+
     public enum SceneMode
     {
         MENU,
@@ -45,14 +48,17 @@ public class GameController : MonoBehaviour
 
     protected void Start()
     {
+        //set correct size for background
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
         backgroundObject.GetComponent<BackgroundAdaptativeSize>().InvalidateSize();
 
+        //parse xml levels files
+        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
+        m_levelManager = levelManagerObject.GetComponent<LevelManager>();
+        m_levelManager.ParseAllLevels();
+
         if (m_sceneMode == SceneMode.GAME)
-        {
-            GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
-            m_levelManager = levelManagerObject.GetComponent<LevelManager>();
-            m_levelManager.ParseAllLevels();
+        {            
             BuildAndShowLevel(1);
 
 

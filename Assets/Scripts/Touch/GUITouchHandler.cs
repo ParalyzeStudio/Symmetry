@@ -88,7 +88,7 @@ public class GUITouchHandler : TouchHandler
         {
             ////Check if we clicked a button first to swallow touch
             //Options Button
-            GameObject mainMenuObject = guiManager.m_mainMenuScene.gameObject;
+            GameObject mainMenuObject = guiManager.m_currentScene.gameObject;
             GUIInterfaceButton optionsBtn = GUIInterfaceButton.FindInObjectChildrenForID(mainMenuObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_OPTIONS_BUTTON);
             if (optionsBtn != null)
             {

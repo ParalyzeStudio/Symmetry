@@ -2,25 +2,17 @@
 
 public class Chapters : GUIScene
 {
-    public const int CHAPTERS_PER_GROUP = 4;
-    public Color CHAPTER_GROUP_1_BASE_COLOR { get { return new Color(1, 0, 0, 1); } }
-    public Color CHAPTER_GROUP_2_BASE_COLOR { get { return new Color(0, 0, 1, 1); } }
-    public Color CHAPTER_GROUP_3_BASE_COLOR { get { return new Color(0, 1, 0, 1); } }
-
     public GameObject m_chaptersTitlePfb;
     public GameObject m_chapterSlotPfb;
-    public GameObject m_levelSlotPfb;
 
     private GameObject m_chaptersHolder;
-    private GameObject m_levelsHolder;
+
+    public int m_currentChapterGroup { get; set; }
 
     public GameObject[] m_chapterSlots { get; set; }
-    public GameObject[] m_levelSlots { get; set; }
-
-    private int m_chapterGroup;
 
     private float m_showChaptersDelay;
-    private float m_showChaptersElpasedTime;
+    private float m_showChaptersElapsedTime;
     private bool m_showChaptersCallRunning;
 
     public void CreateChaptersHolder()
@@ -28,14 +20,6 @@ public class Chapters : GUIScene
         m_chaptersHolder = new GameObject("ChaptersHolder");
         m_chaptersHolder.transform.parent = this.gameObject.transform;
         m_chaptersHolder.transform.localPosition = new Vector3(0, 0, -20);
-
-    }
-
-    public void CreateLevelsHolder()
-    {
-        m_levelsHolder = new GameObject("LevelsHolder");
-        m_levelsHolder.transform.parent = this.gameObject.transform;
-        m_levelsHolder.transform.localPosition = new Vector3(0, 0, -20);
     }
 
     /**
@@ -47,11 +31,13 @@ public class Chapters : GUIScene
         GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
         chaptersAnimator.OnOpacityChanged(1);
         int reachedChapterNumber = 1;
-        m_chapterGroup = ((reachedChapterNumber - 1) / CHAPTERS_PER_GROUP) + 1;
+        int iReachedChapterGroup = ((reachedChapterNumber - 1) / LevelManager.CHAPTERS_PER_GROUP) + 1;
         m_showChaptersCallRunning = false;
         ShowTitle(bAnimated, fDelay);
-        ShowChapterSlots(bAnimated, fDelay);
-        ShowBackButton(bAnimated, fDelay);
+        ShowChapterSlots(iReachedChapterGroup, bAnimated, fDelay);
+
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.ShowBackButton();
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)
@@ -75,13 +61,17 @@ public class Chapters : GUIScene
         titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
     }
 
-    public void ShowChapterSlots(bool bAnimated, float fDelay = 0.0f)
+    public void ShowChapterSlots(int iChapterGroup, bool bAnimated, float fDelay = 0.0f)
     {
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        m_currentChapterGroup = iChapterGroup;
+
         CreateChaptersHolder();
 
         m_chapterSlots = new GameObject[4];
         Vector3 slotSize = Vector3.zero;
-        for (int iChapterSlotIndex = 0; iChapterSlotIndex != CHAPTERS_PER_GROUP; iChapterSlotIndex++)
+        for (int iChapterSlotIndex = 0; iChapterSlotIndex != LevelManager.CHAPTERS_PER_GROUP; iChapterSlotIndex++)
         {
             GameObject clonedChapterSlot = (GameObject) Instantiate(m_chapterSlotPfb);
             m_chapterSlots[iChapterSlotIndex] = clonedChapterSlot;
@@ -107,16 +97,10 @@ public class Chapters : GUIScene
             //Set the correct number on child text mesh and correct color on skin
             ColorNumberSlot slotProperties = clonedChapterSlot.GetComponent<ColorNumberSlot>();
             slotProperties.Init();
-            slotProperties.SetNumber((m_chapterGroup - 1) * CHAPTERS_PER_GROUP + iChapterSlotIndex + 1);
+            slotProperties.SetNumber((iChapterGroup - 1) * LevelManager.CHAPTERS_PER_GROUP + iChapterSlotIndex + 1);
 
             //Set the correct color
-            Color baseColor;
-            if (m_chapterGroup == 1)
-                baseColor = CHAPTER_GROUP_1_BASE_COLOR;
-            else if (m_chapterGroup == 2)
-                baseColor = CHAPTER_GROUP_2_BASE_COLOR;
-            else
-                baseColor = CHAPTER_GROUP_3_BASE_COLOR;
+            Color baseColor = levelManager.GetChapterGroupBaseColor(iChapterGroup);
 
             Color slotColor = ColorUtils.DarkenColor(baseColor, 0.18f * iChapterSlotIndex);
             if (bAnimated)
@@ -150,19 +134,6 @@ public class Chapters : GUIScene
         }        
     }
 
-    public void ShowBackButton(bool bAnimated, float fDelay)
-    {
-        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
-        backButton.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
-        GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
-        showButtonAnimator.OnOpacityChanged(0);
-        if (bAnimated)
-            showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
-        else
-            showButtonAnimator.OnOpacityChanged(1);
-    }
-
     public void ShowChapterSlotsWithAnimation()
     {
         m_showChaptersCallRunning = false;
@@ -189,69 +160,6 @@ public class Chapters : GUIScene
         slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, 2 * slotAnimationDuration);
     }
 
-    public void ShowLevelsForChapter(int iChapterNumber)
-    {
-        Destroy(m_chaptersHolder);
-        CreateLevelsHolder();
-
-        //Create levels slots
-        //for (int iChapterSlotIdx = 0; iChapterSlotIdx != CHAPTERS_PER_GROUP; iChapterSlotIdx++)
-        //{
-        //    GameObject chapterSlot = m_chapterSlots[iChapterSlotIdx];
-        //    Vector3 chapterSlotPosition = chapterSlot.transform.localPosition;
-        //    ColorNumberSlot chapterSlotData = chapterSlot.GetComponent<ColorNumberSlot>();
-
-        //    for (int iLevelSlotIdx = 0; iLevelSlotIdx != 4; iLevelSlotIdx++)
-        //    {
-        //        GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
-        //        clonedLevelSlot.transform.parent = m_levelsHolder.transform;
-        //        clonedLevelSlot.GetComponent<BoundingBoxCalculator>().InvalidateBounds();
-        //        Vector2 levelSlotSize = clonedLevelSlot.GetComponent<GameObjectAnimator>().GetGameObjectSize();
-
-        //        Vector3 levelSlotPosition;
-        //        if (iLevelSlotIdx == 0)
-        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(-levelSlotSize.x, levelSlotSize.y, 0);
-        //        else if (iLevelSlotIdx == 1)
-        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(levelSlotSize.x, levelSlotSize.y, 0);
-        //         else if (iLevelSlotIdx == 2)
-        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(-levelSlotSize.x, -levelSlotSize.y, 0);
-        //         else
-        //            levelSlotPosition = chapterSlotPosition + 0.5f * new Vector3(levelSlotSize.x, -levelSlotSize.y, 0);
-        //        levelSlotPosition.z = chapterSlotPosition.z;
-        //        clonedLevelSlot.transform.localPosition = levelSlotPosition;
-
-        //        ColorNumberSlot slotData = clonedLevelSlot.GetComponent<ColorNumberSlot>();
-        //        slotData.Init();
-        //        slotData.SetColor(chapterSlotData.m_color);
-        //        slotData.SetNumber(iChapterSlotIdx * 4 + iLevelSlotIdx + 1);
-        //    }
-        //}
-
-        float horizontalDistanceBetweenLevelSlots = 340.0f;
-        float verticalDistanceBetweenLevelSlots = 240.0f;
-        for (int iLevelSlotIdx = 0; iLevelSlotIdx != 16; iLevelSlotIdx++)
-        {
-            GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
-            clonedLevelSlot.transform.parent = m_levelsHolder.transform;
-            //clonedLevelSlot.GetComponent<BoundingBoxCalculator>().InvalidateBounds();
-            //Vector2 levelSlotSize = clonedLevelSlot.GetComponent<GameObjectAnimator>().GetGameObjectSize();
-
-            int column = iLevelSlotIdx % 4 + 1;
-            int line = 4 - iLevelSlotIdx / 4;
-
-            Vector3 levelSlotPosition = new Vector3((column - 2.5f) * horizontalDistanceBetweenLevelSlots,
-                                                    (line - 2.5f) * verticalDistanceBetweenLevelSlots,
-                                                    0);
-
-            clonedLevelSlot.transform.localPosition = levelSlotPosition;
-
-            ColorNumberSlot slotData = clonedLevelSlot.GetComponent<ColorNumberSlot>();
-            slotData.Init();
-            slotData.SetColor(new Color(1, 0, 0, 1));
-            slotData.SetNumber(iLevelSlotIdx + 1);
-        }
-    }
-
     public override void Update()
     {
         base.Update();
@@ -260,8 +168,8 @@ public class Chapters : GUIScene
 
         if (m_showChaptersCallRunning)
         {
-            m_showChaptersElpasedTime += dt;
-            if (m_showChaptersElpasedTime >= m_showChaptersDelay)
+            m_showChaptersElapsedTime += dt;
+            if (m_showChaptersElapsedTime >= m_showChaptersDelay)
             {
                 ShowChapterSlotsWithAnimation();
             }
@@ -270,9 +178,12 @@ public class Chapters : GUIScene
 
     public void OnClickChapterSlot(int iChapterSlotIndex)
     {
-        int iChapterNumber = (m_chapterGroup - 1) * CHAPTERS_PER_GROUP + iChapterSlotIndex + 1;
+        int iChapterNumber = (m_currentChapterGroup - 1) * LevelManager.CHAPTERS_PER_GROUP + iChapterSlotIndex + 1;
 
-        ShowLevelsForChapter(iChapterNumber);
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        levelManager.SetCurrentChapterByNumber(iChapterNumber);
+
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.LEVELS);
     }
 }
-

@@ -5,17 +5,24 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
-    public MainMenu m_mainMenuScene { get; set; }
-    public Chapters m_chaptersScene { get; set; }
+    //public MainMenu m_mainMenuScene { get; set; }
+    //public Chapters m_chaptersScene { get; set; }
+    //public Chapters m_levelsScene { get; set; }
+
+    public GUIScene m_currentScene { get; set; }
 
     public GameObject m_mainMenuPfb; //the prefab containing all information on main menu
     public GameObject m_chaptersPfb; //the prefab containing all information on chapters
+    public GameObject m_levelsPfb; //the prefab containing all information on chapters
     public GameObject m_veilPfb; //the prefab to instantiate a veil that covers whole screen
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
-    public GameObject m_GUIFramePfb; //the prefab to show a fram
+    public GameObject m_GUIFramePfb; //the prefab containing a background frame
+    public GameObject m_backButtonPfb; //the prefab for the back button
     public GameObject m_optionsWindow { get; set; } //the actual options window
 
     public Color[] m_framesColors;
+
+    public int m_currentChapter { get; set; }
 
     public enum DisplayContent
     {
@@ -43,36 +50,57 @@ public class GUIManager : MonoBehaviour
             //build the content
             GameObject clonedMainMenuScene = (GameObject) Instantiate(m_mainMenuPfb);
             clonedMainMenuScene.transform.parent = this.gameObject.transform;
-            //show it
-            m_mainMenuScene = clonedMainMenuScene.GetComponent<MainMenu>();
-            m_mainMenuScene.Show(bAnimated, fDelay);
+
+            m_currentScene = clonedMainMenuScene.GetComponent<MainMenu>();
+            ////show it
+            //m_mainMenuScene = clonedMainMenuScene.GetComponent<MainMenu>();
+            //m_mainMenuScene.Show(bAnimated, fDelay);
         }
         else if (contentToDisplay == DisplayContent.CHAPTERS)
         {
             //build the content
             GameObject clonedChaptersScene = (GameObject)Instantiate(m_chaptersPfb);
             clonedChaptersScene.transform.parent = this.gameObject.transform;
-            //show it
-            m_chaptersScene = clonedChaptersScene.GetComponent<Chapters>();
-            m_chaptersScene.Show(bAnimated, fDelay);
+
+            m_currentScene = clonedChaptersScene.GetComponent<Chapters>();
+
+            ////show it
+            //m_chaptersScene = clonedChaptersScene.GetComponent<Chapters>();
+            //m_chaptersScene.Show(bAnimated, fDelay);
+        }
+        else if (contentToDisplay == DisplayContent.LEVELS)
+        {
+            //build the content
+            GameObject clonedLevelsScene = (GameObject)Instantiate(m_levelsPfb);
+            clonedLevelsScene.transform.parent = this.gameObject.transform;
+
+            m_currentScene = clonedLevelsScene.GetComponent<Levels>();
         }
 
+        m_currentScene.Show(bAnimated, fDelay);
         m_displayedContent = contentToDisplay;
     }
 
     public void HideContent(DisplayContent contentToHide, float fDuration, float fDelay = 0.0f)
     {
-        if (contentToHide == DisplayContent.MENU)
-        {
-            m_mainMenuScene.Dismiss(fDuration, fDelay);
-            m_mainMenuScene = null;
-        }
-        else if (contentToHide == DisplayContent.CHAPTERS)
-        {
-            m_chaptersScene.Dismiss(fDuration, fDelay);
-            m_chaptersScene = null;
-        }
+        //if (contentToHide == DisplayContent.MENU)
+        //{
+        //    m_mainMenuScene.Dismiss(fDuration, fDelay);
+        //    m_mainMenuScene = null;
+        //}
+        //else if (contentToHide == DisplayContent.CHAPTERS)
+        //{
+        //    m_chaptersScene.Dismiss(fDuration, fDelay);
+        //    m_chaptersScene = null;
+        //}
+        //else if (contentToHide == DisplayContent.LEVELS)
+        //{
+        //    m_levelsScene.Dismiss(fDuration, fDelay);
+        //    m_levelsScene = null;
+        //}
 
+        m_currentScene.Dismiss(fDuration, fDelay);
+        m_currentScene = null;
         m_displayedContent = DisplayContent.NONE;
     }
 
@@ -81,7 +109,7 @@ public class GUIManager : MonoBehaviour
         if (m_optionsWindow == null)
         {
             m_optionsWindow = (GameObject)Instantiate(m_optionsWindowPfb);
-            m_optionsWindow.transform.parent = m_mainMenuScene.gameObject.transform;
+            m_optionsWindow.transform.parent = m_currentScene.gameObject.transform;
         }
     }
 
@@ -192,5 +220,33 @@ public class GUIManager : MonoBehaviour
     {        
         ShowContent(m_contentToDisplay, true);
         m_displayedContent = m_contentToDisplay;
+    }
+
+    /**
+     * Shows the back button that is shared across scenes
+     * If it's already shown do nothing
+     * **/
+    public void ShowBackButton(float fDelay = 0.0f)
+    {
+        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        if (backButton == null)
+        {
+            Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
+            GameObject clonedBackButtonObject = (GameObject)Instantiate(m_backButtonPfb);
+            clonedBackButtonObject.transform.parent = this.gameObject.transform;
+            clonedBackButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
+
+            //backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
+            GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
+            showButtonAnimator.OnOpacityChanged(0);
+            showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        }
+    }
+
+    public void DismissBackButton()
+    {
+        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        Destroy(backButton.gameObject);
     }
 }

@@ -84,6 +84,11 @@ public class GUIInterfaceButton : GUIQuadButton
             {
                 guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.MENU, false);
             }
+            else if (displayedContent == GUIManager.DisplayContent.LEVELS)
+            {
+                Chapters chapters = guiManager.GetComponentInChildren<Chapters>();
+                chapters.ShowChapterSlots(chapters.m_currentChapterGroup, false);
+            }
         }
         else if (m_ID == GUIInterfaceButtonID.ID_CLOSE_BUTTON)
         {
