@@ -127,11 +127,11 @@ public class GUIManager : MonoBehaviour
         return m_optionsWindow != null;
     }
 
-    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fDelay = 0.0f)
+    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fHideDelay = 0.0f, float fShowDelay = 0.0f)
     {
         m_contentToDisplay = contentToDisplay;
-        HideContent(m_displayedContent, 0.5f, fDelay);
-        ShowContent(m_contentToDisplay, bShowWithAnimation, fDelay + 1.3f); //show next content 1 second after hiding the previous one
+        HideContent(m_displayedContent, 0.5f, fHideDelay);
+        ShowContent(m_contentToDisplay, bShowWithAnimation, fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one
 
         //animate frames between scenes
         AnimateFrames(contentToDisplay, 0.5f);
@@ -167,12 +167,12 @@ public class GUIManager : MonoBehaviour
     {
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
         GameObjectAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GameObjectAnimator>();
-        
+
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
         if (contentToDisplay == DisplayContent.MENU)
         {
             framesHolder.transform.position = new Vector3(0, 0, -5);
-
-            Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+           
             GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
             float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
             float topFrameHeight = 2 * distanceToScreenTopBorder;
@@ -200,7 +200,7 @@ public class GUIManager : MonoBehaviour
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-            topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, 185.0f, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             //animate middle frame
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
@@ -237,7 +237,7 @@ public class GUIManager : MonoBehaviour
             clonedBackButtonObject.transform.parent = this.gameObject.transform;
             clonedBackButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
 
-            //backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
+            backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
             GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
             showButtonAnimator.OnOpacityChanged(0);
             showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);

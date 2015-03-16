@@ -22,13 +22,21 @@ public class GUITouchHandler : TouchHandler
     {
         Vector2 clickLocation = m_prevPointerLocation;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-        if (guiManager.m_displayedContent == GUIManager.DisplayContent.MENU)
+
+        if (!HandleClickOnGlobalGUI(clickLocation))
         {
-            HandleClickOnMainMenu(clickLocation);
-        }
-        else if (guiManager.m_displayedContent == GUIManager.DisplayContent.CHAPTERS)
-        {
-            HandleClickOnChapters(clickLocation);
+            if (guiManager.m_displayedContent == GUIManager.DisplayContent.MENU)
+            {
+                HandleClickOnMainMenu(clickLocation);
+            }
+            else if (guiManager.m_displayedContent == GUIManager.DisplayContent.CHAPTERS)
+            {
+                HandleClickOnChapters(clickLocation);
+            }
+            else if (guiManager.m_displayedContent == GUIManager.DisplayContent.LEVELS)
+            {
+                HandleClickOnLevels(clickLocation);
+            }
         }
     }
 
@@ -38,7 +46,27 @@ public class GUITouchHandler : TouchHandler
     public void OnClickTapToPlay()
     {
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS);
+        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f);
+    }
+
+    /**
+     * Processes click on gui elements that repeat over scenes (like back button)
+     * Returns true if click has been processed so further handlers (that process click on scenes) are not taken into account
+     * **/
+    public bool HandleClickOnGlobalGUI(Vector2 clickLocation)
+    {
+        GUIInterfaceButton backBtn = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        if (backBtn != null)
+        {
+            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(backBtn.gameObject.transform.position) - clickLocation).magnitude;
+            if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+            {
+                backBtn.OnClick();
+                return true; //swallow the touch by returning
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -164,6 +192,19 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnLevels(Vector2 clickLocation)
     {
+        Levels levels = this.gameObject.GetComponentInChildren<Levels>();
 
+        GameObject[] levelsSlots = levels.m_levelSlots;
+        for (int iSlotIndex = 0; iSlotIndex != levelsSlots.Length; iSlotIndex++)
+        {
+            Vector2 slotSize = levelsSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
+            Vector2 slotPosition = levelsSlots[iSlotIndex].transform.position;
+            if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
+                &&
+                clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
+            {
+                levels.OnClickLevelSlot(iSlotIndex);
+            }
+        }
     }
 }
