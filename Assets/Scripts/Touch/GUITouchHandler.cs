@@ -21,19 +21,19 @@ public class GUITouchHandler : TouchHandler
     protected override void OnClick()
     {
         Vector2 clickLocation = m_prevPointerLocation;
-        GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
 
         if (!HandleClickOnGlobalGUI(clickLocation))
         {
-            if (guiManager.m_displayedContent == GUIManager.DisplayContent.MENU)
+            if (sceneManager.m_displayedContent == SceneManager.DisplayContent.MENU)
             {
                 HandleClickOnMainMenu(clickLocation);
             }
-            else if (guiManager.m_displayedContent == GUIManager.DisplayContent.CHAPTERS)
+            else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.CHAPTERS)
             {
                 HandleClickOnChapters(clickLocation);
             }
-            else if (guiManager.m_displayedContent == GUIManager.DisplayContent.LEVELS)
+            else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.LEVELS)
             {
                 HandleClickOnLevels(clickLocation);
             }
@@ -45,8 +45,8 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickTapToPlay()
     {
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f);
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f);
     }
 
     /**
@@ -75,6 +75,7 @@ public class GUITouchHandler : TouchHandler
     public void HandleClickOnMainMenu(Vector2 clickLocation)
     {
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
         if (guiManager.IsOptionsWindowShown())
@@ -116,7 +117,7 @@ public class GUITouchHandler : TouchHandler
         {
             ////Check if we clicked a button first to swallow touch
             //Options Button
-            GameObject mainMenuObject = guiManager.m_currentScene.gameObject;
+            GameObject mainMenuObject = sceneManager.m_currentScene.gameObject;
             GUIInterfaceButton optionsBtn = GUIInterfaceButton.FindInObjectChildrenForID(mainMenuObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_OPTIONS_BUTTON);
             if (optionsBtn != null)
             {
@@ -159,10 +160,11 @@ public class GUITouchHandler : TouchHandler
      * Processes click on chapters scene
      * **/
     public void HandleClickOnChapters(Vector2 clickLocation)
-    {
-        Chapters chapters = this.gameObject.GetComponentInChildren<Chapters>();
+    {        
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        Chapters chapters = (Chapters) sceneManager.m_currentScene;
 
-        GUIInterfaceButton backBtn = GUIInterfaceButton.FindInObjectChildrenForID(chapters.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        GUIInterfaceButton backBtn = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
         if (backBtn != null)
         {
             float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(backBtn.transform.position) - clickLocation).magnitude;

@@ -77,11 +77,13 @@ public class GameController : MonoBehaviour
             ///*** DEBUG TMP ***/
         }
         else
-        {
+        {            
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
+
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             guiManager.Init();
-            guiManager.ShowContent(GUIManager.DisplayContent.MENU, true, 2.0f);
-            guiManager.AnimateFrames(GUIManager.DisplayContent.MENU, 2.3f);
+            guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
         }
 
         TouchHandler.s_touchDeactivated = false;

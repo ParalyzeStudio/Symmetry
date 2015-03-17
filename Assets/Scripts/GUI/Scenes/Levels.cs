@@ -6,6 +6,7 @@ public class Levels : GUIScene
 
     public GameObject m_levelsTitlePfb;
     public GameObject m_levelSlotPfb;
+    public GameObject m_chapterInfoPfb;
 
     public GameObject[] m_levelSlots { get; set; }
 
@@ -25,6 +26,7 @@ public class Levels : GUIScene
         levelsAnimator.OnOpacityChanged(1);
 
         ShowTitle(fDelay);
+        ShowChapterInfo(fDelay);
         ShowLevelsSlots(fDelay);
     }
 
@@ -63,7 +65,7 @@ public class Levels : GUIScene
     }
 
     /**
-    * Shows titles
+    * Shows title
     **/
     public void ShowTitle(float fDelay = 0.0f)
     {
@@ -77,6 +79,24 @@ public class Levels : GUIScene
 
         titleAnimator.OnOpacityChanged(0);
         titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+    }
+
+    /**
+    * Shows information about the selected chapter
+    **/
+    public void ShowChapterInfo(float fDelay = 0.0f)
+    {
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        GameObject chapterObject = (GameObject)Instantiate(m_chapterInfoPfb);
+        chapterObject.transform.parent = this.gameObject.transform;
+        chapterObject.transform.localPosition = new Vector3(0, -0.5f * screenSize.y + 118.0f, -20);
+
+        TextMesh[] childTextMeshes = chapterObject.GetComponentsInChildren<TextMesh>();
+
+        TextMesh chapterNumberTextMesh = childTextMeshes[0];
+        chapterNumberTextMesh.text = levelManager.m_currentChapter.m_number.ToString();
     }
 
     /**

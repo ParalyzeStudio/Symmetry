@@ -195,7 +195,7 @@ public class Chapters : GUIScene
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         levelManager.SetCurrentChapterByNumber(iChapterNumber);
 
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
     }
 }

@@ -78,16 +78,17 @@ public class GUIInterfaceButton : GUIQuadButton
         }
         else if (m_ID == GUIInterfaceButtonID.ID_BACK_BUTTON)
         {
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            GUIManager.DisplayContent displayedContent = guiManager.m_displayedContent;
-            if (displayedContent == GUIManager.DisplayContent.CHAPTERS)
+            SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
+            if (displayedContent == SceneManager.DisplayContent.CHAPTERS)
             {
-                guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.MENU, false, 0.0f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f);
                 guiManager.DismissBackButton();
             }
-            else if (displayedContent == GUIManager.DisplayContent.LEVELS)
+            else if (displayedContent == SceneManager.DisplayContent.LEVELS)
             {
-                guiManager.SwitchDisplayedContent(GUIManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f);
             }
         }
         else if (m_ID == GUIInterfaceButtonID.ID_CLOSE_BUTTON)
