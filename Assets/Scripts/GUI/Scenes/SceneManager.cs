@@ -14,7 +14,9 @@ public class SceneManager : MonoBehaviour
         NONE = 0,
         MENU,
         CHAPTERS,
-        LEVELS
+        LEVELS,
+        LEVEL_INTRO,
+        GAME
     }
 
     public DisplayContent m_displayedContent { get; set; }

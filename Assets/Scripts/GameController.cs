@@ -4,21 +4,10 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
-    public Vector2 m_designScreenSize;
-    private bool m_levelBuilt;
-    private LevelManager m_levelManager;
+    private LevelManager m_levelManager; //variable to store the levelManager that is used in the update loop
+    private SceneManager m_sceneManager; //same thing for the scene manager
 
-    public int m_currentChapter;
-    public int m_currentLevel;
-
-    public enum SceneMode
-    {
-        MENU,
-        LEVELS,
-        GAME
-    }
-
-    public SceneMode m_sceneMode;
+    public Vector2 m_designScreenSize; //the design screen size that can be set in the inspector
 
     public enum GameStatus
     {
@@ -30,68 +19,35 @@ public class GameController : MonoBehaviour
 
     private GameStatus m_gameStatus;
 
-    public const float GRID_Z_VALUE = -10.0f;
-    public const float CONTOURS_Z_VALUE = -20.0f;
-    public const float SHAPES_Z_VALUE = -30.0f;
-
     protected void Awake()
     {
-        if (m_sceneMode == SceneMode.GAME)
-        {
-            m_levelBuilt = false;
-            m_levelManager = null;
-        }
+        m_levelManager = null;
     }
-
-    //TMP DEBUG
-    //public GameObject m_gridAnchorSelectedPfb;
 
     protected void Start()
     {
+        m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        m_sceneManager = GameObject.FindGameObjectWithTag("SceneManager").GetComponent<SceneManager>();
+
         //set correct size for background
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
         backgroundObject.GetComponent<BackgroundAdaptativeSize>().InvalidateSize();
 
         //parse xml levels files
-        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
-        m_levelManager = levelManagerObject.GetComponent<LevelManager>();
         m_levelManager.ParseAllLevels();
 
-        if (m_sceneMode == SceneMode.GAME)
-        {            
-            BuildAndShowLevel(1);
+        m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
 
-
-            ///*** DEBUG TMP ***/
-            ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
-            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
-            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
-            ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
-            //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
-            //foreach (GameObject anchor in anchors)
-            //{
-            //    Vector2 gridPos = gridBuilder.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
-            //    Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
-            //    Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
-            //}
-            ///*** DEBUG TMP ***/
-        }
-        else
-        {            
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
-
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            guiManager.Init();
-            guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
-        }
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.Init();
+        guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
 
         TouchHandler.s_touchDeactivated = false;
     }
 
     protected void Update()
     {
-        if (m_sceneMode == SceneMode.GAME)
+        if (m_sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
         {
             GameStatus gameStatus = GetGameStatus();
             if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
@@ -99,105 +55,7 @@ public class GameController : MonoBehaviour
                 EndLevel();
             }
         }
-    }
-
-    ///**
-    // * Builds and shows main menu (play button, options...)
-    // * **/
-    //public void BuildAndShowMainMenu()
-    //{
-    //    GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>().ShowContent(GUIManager.DisplayContent.MENU, true);
-    //}
-
-    ///**
-    // * Builds and shows main menu (play button, options...)
-    // * **/
-    //public void BuildAndShowLevelsMenu()
-    //{
-
-    //}
-
-    public void LoadAndStartLevel(int iLevelNumber)
-    {
-        BuildAndShowLevel(iLevelNumber);
-    }
-
-    /**
-     * Builds everything that appears on a screen for a certain level (GUI, grid, contours, shapes)
-     * **/
-    public void BuildAndShowLevel(int iLevelNumber)
-    {
-        if (!m_levelBuilt)
-        {
-            m_levelManager.SetCurrentLevelByNumber(iLevelNumber);
-            BuildGrid();
-            BuildGUI();
-            BuildContours();
-            BuildShapes();
-
-            m_levelBuilt = true;
-
-            ShowLevel();
-        }
-    }
-
-    public void ShowLevel()
-    {
-
-
-    }
-
-    /**
-     * We build the grid of anchors that is displayed on the screen and that will help the player positionning shapes and axis...
-     * Two anchors are separated from each other of a distance of m_gridSpacing that can be set in the editor
-     * **/
-    private void BuildGrid()
-    {
-        GameObject grid = GameObject.FindGameObjectWithTag("Grid");
-        grid.transform.position = new Vector3(0, 0, GRID_Z_VALUE);
-        grid.GetComponent<GridBuilder>().Build();
-    }
-
-    /**
-     * GUI elements such as pause button, help button, retry button and other stuff
-     * **/
-    private void BuildGUI()
-    {
-        GameObject gameHUDObject = GameObject.FindGameObjectWithTag("GameHUD");
-        GameHUD gameHUD = gameHUDObject.GetComponent<GameHUD>();
-        gameHUD.BuildForLevel(m_levelManager.m_currentLevel.m_number);
-    }
-
-    /**
-     * Here we build the contour of the shape the player has to reproduce
-     * **/
-    private void BuildContours()
-    {
-        GameObject contours = GameObject.FindGameObjectWithTag("Contours");
-        contours.transform.position = new Vector3(0, 0, CONTOURS_Z_VALUE);
-        contours.GetComponent<ContoursBuilder>().Build();
-    }
-
-    /**
-     * We set the shapes the player initally starts with
-     * **/
-    private void BuildShapes()
-    {
-        GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
-        ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
-        List<Shape> initialShapes = m_levelManager.m_currentLevel.m_initialShapes;
-        for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
-        {
-            Shape shape = initialShapes[iShapeIndex];
-
-            //First triangulate the shape
-            shape.Triangulate();
-
-            shapeBuilder.CreateFromShapeData(shape);
-        }
-
-        shapesObject.transform.position = new Vector3(0, 0, SHAPES_Z_VALUE);
-    }
+    }    
 
     /**
      * Returns the current status of the game
