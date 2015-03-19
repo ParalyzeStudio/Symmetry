@@ -194,7 +194,8 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnLevels(Vector2 clickLocation)
     {
-        Levels levels = this.gameObject.GetComponentInChildren<Levels>();
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        Levels levels = (Levels)sceneManager.m_currentScene;
 
         GameObject[] levelsSlots = levels.m_levelSlots;
         for (int iSlotIndex = 0; iSlotIndex != levelsSlots.Length; iSlotIndex++)

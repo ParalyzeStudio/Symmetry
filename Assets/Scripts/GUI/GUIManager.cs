@@ -124,6 +124,14 @@ public class GUIManager : MonoBehaviour
             Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
             middleFrameAnimator.ScaleFromTo(middleFrameSize, new Vector3(middleFrameSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
+        else if (contentToDisplay == SceneManager.DisplayContent.GAME)
+        {
+            //animate top frame
+            GameObjectAnimator topFrameAnimator = framesAnimators[0];
+            topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
+            topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+        }
     }
 
     /**

@@ -89,14 +89,18 @@ public class Levels : GUIScene
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 
-        GameObject chapterObject = (GameObject)Instantiate(m_chapterInfoPfb);
-        chapterObject.transform.parent = this.gameObject.transform;
-        chapterObject.transform.localPosition = new Vector3(0, -0.5f * screenSize.y + 118.0f, -20);
+        GameObject chapterInfoObject = (GameObject)Instantiate(m_chapterInfoPfb);
+        chapterInfoObject.transform.parent = this.gameObject.transform;
+        chapterInfoObject.transform.localPosition = new Vector3(0, -0.5f * screenSize.y + 108.0f, -20);
 
-        TextMesh[] childTextMeshes = chapterObject.GetComponentsInChildren<TextMesh>();
+        TextMesh[] childTextMeshes = chapterInfoObject.GetComponentsInChildren<TextMesh>();
 
         TextMesh chapterNumberTextMesh = childTextMeshes[0];
         chapterNumberTextMesh.text = levelManager.m_currentChapter.m_number.ToString();
+
+        GameObjectAnimator chapterInfoAnimator = chapterInfoObject.GetComponent<GameObjectAnimator>();
+        chapterInfoAnimator.OnOpacityChanged(0);
+        chapterInfoAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
     }
 
     /**
@@ -140,6 +144,14 @@ public class Levels : GUIScene
 
     public void OnClickLevelSlot(int iLevelSlotIndex)
     {
-        Debug.Log("OnClickLevelSlot " + (iLevelSlotIndex + 1));
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.DismissBackButton();
+        guiManager.AnimateFrames(SceneManager.DisplayContent.GAME);
+
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        levelManager.SetCurrentLevelByNumber(iLevelSlotIndex + 1);
+
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
     }
 }

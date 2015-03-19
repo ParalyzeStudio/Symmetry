@@ -7,7 +7,8 @@ public class SceneManager : MonoBehaviour
     public GameObject m_mainMenuPfb; //the prefab containing the main menu scene
     public GameObject m_chaptersPfb; //the prefab containing the chapters scene
     public GameObject m_levelsPfb; //the prefab containing the levels scene
-    public GameObject m_gamePfb; //the prefab containing the game scene
+    public GameObject m_levelIntroPfb; //the prefab containing the level intro scene
+    public GameObject m_gameScenePfb; //the prefab containing the game scene
 
     public enum DisplayContent
     {
@@ -73,6 +74,22 @@ public class SceneManager : MonoBehaviour
             clonedLevelsScene.transform.parent = this.gameObject.transform;
 
             m_currentScene = clonedLevelsScene.GetComponent<Levels>();
+        }
+        else if (contentToDisplay == DisplayContent.LEVEL_INTRO)
+        {
+            //build the content
+            GameObject clonedLevelIntroScene = (GameObject)Instantiate(m_levelIntroPfb);
+            clonedLevelIntroScene.transform.parent = this.gameObject.transform;
+
+            m_currentScene = clonedLevelIntroScene.GetComponent<LevelIntro>();
+        }
+        else if (contentToDisplay == DisplayContent.GAME)
+        {
+            //build the content
+            GameObject clonedGameScene = (GameObject)Instantiate(m_gameScenePfb);
+            clonedGameScene.transform.parent = this.gameObject.transform;
+
+            m_currentScene = clonedGameScene.GetComponent<GameScene>();
         }
 
         m_currentScene.Show(bAnimated, fDelay);

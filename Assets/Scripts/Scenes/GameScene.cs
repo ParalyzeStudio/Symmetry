@@ -13,10 +13,17 @@ public class GameScene : GUIScene
     {
         base.Show(bAnimated, fDelay);
 
-        ShowGrid(fDelay);
-        ShowGUI(fDelay);
-        ShowContours(fDelay);
-        ShowShapes(fDelay);
+        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
+        sceneAnimator.OnOpacityChanged(1);
+
+        TextMeshAnimator debugTextMesh = this.gameObject.GetComponentInChildren<TextMeshAnimator>();
+        debugTextMesh.OnOpacityChanged(0);
+        debugTextMesh.FadeFromTo(0, 1, 0.5f, fDelay);
+
+        //ShowGrid(fDelay);
+        //ShowGUI(fDelay);
+        //ShowContours(fDelay);
+        //ShowShapes(fDelay);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)

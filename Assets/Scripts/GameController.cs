@@ -27,7 +27,7 @@ public class GameController : MonoBehaviour
     protected void Start()
     {
         m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        m_sceneManager = GameObject.FindGameObjectWithTag("SceneManager").GetComponent<SceneManager>();
+        m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
 
         //set correct size for background
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
