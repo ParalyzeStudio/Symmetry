@@ -23,7 +23,6 @@ public class GameScene : GUIScene
         //ShowShapes(fDelay);
 
         GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        //sceneAnimator.OnOpacityChanged(0);
         sceneAnimator.SetOpacity(0);
     }
 
@@ -45,10 +44,8 @@ public class GameScene : GUIScene
         clonedGrid.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, gridLocalPosition.z);
 
         GameObjectAnimator gridAnimator = clonedGrid.GetComponent<GameObjectAnimator>();
-        //gridAnimator.OnOpacityChanged(0);
         gridAnimator.SetOpacity(0);
-        //gridAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
-        gridAnimator.FadeTo(1, 0.5f, fDelay);
+        //gridAnimator.FadeTo(1, 0.5f, fDelay);
 
         ///*** DEBUG TMP ***/
         ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();

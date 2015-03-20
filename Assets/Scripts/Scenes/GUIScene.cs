@@ -32,7 +32,6 @@ public class GUIScene : MonoBehaviour
 
         //fade out the scene
         GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        //sceneAnimator.FadeFromTo(sceneAnimator.m_opacity, 0, fDuration, fDelay);
         sceneAnimator.FadeTo(0, fDuration, fDelay);
     }
 

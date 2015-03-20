@@ -35,17 +35,6 @@ public class TextMeshAnimator : GameObjectAnimator
         m_cyclingPaused = bPaused;
     }
 
-    //public override void OnOpacityChanged(float fNewOpacity)
-    //{
-    //    base.OnOpacityChanged(fNewOpacity);
-
-    //    if (m_textMesh == null)
-    //        m_textMesh = this.gameObject.GetComponent<TextMesh>();
-
-    //    Color newTextColor = new Color(m_textMesh.color.r, m_textMesh.color.g, m_textMesh.color.b, fNewOpacity);
-    //    m_textMesh.color = newTextColor;
-    //}
-
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);

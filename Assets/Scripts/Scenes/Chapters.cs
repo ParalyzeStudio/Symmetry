@@ -32,7 +32,6 @@ public class Chapters : GUIScene
     {
         base.Show(bAnimated, fDelay);
         GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
-        //chaptersAnimator.OnOpacityChanged(1);
         chaptersAnimator.SetOpacity(1);
         int reachedChapterNumber = 1;
         int iReachedChapterGroup = ((reachedChapterNumber - 1) / LevelManager.CHAPTERS_PER_GROUP) + 1;
@@ -64,8 +63,6 @@ public class Chapters : GUIScene
         //TextMesh titleTextMesh = titleObject.GetComponent<TextMesh>();
 
         GameObjectAnimator titleAnimator = titleObject.GetComponent<GameObjectAnimator>();
-        //titleAnimator.OnOpacityChanged(0);
-        //titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
         titleAnimator.SetOpacity(0);
         titleAnimator.FadeTo(1, 0.5f, fDelay);
     }
@@ -129,8 +126,6 @@ public class Chapters : GUIScene
 
             slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
-            //slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * slotSize.y, 0));
-            //slotAnimator.OnRotationChanged(90, new Vector3(0, 1, 0));
             slotAnimator.SetPosition(new Vector3(0, 0.5f * slotSize.y, 0));
             slotAnimator.SetRotationAxis(new Vector3(0, 1, 0));
             slotAnimator.SetRotationAngle(90);
@@ -138,8 +133,6 @@ public class Chapters : GUIScene
 
             slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
-            //slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, -0.5f * slotSize.y, 0));
-            //slotAnimator.OnRotationChanged(90, new Vector3(0, -1, 0));
             slotAnimator.SetPosition(new Vector3(0, -0.5f * slotSize.y, 0));
             slotAnimator.SetRotationAxis(new Vector3(0, -1, 0));
             slotAnimator.SetRotationAngle(90);
@@ -147,8 +140,6 @@ public class Chapters : GUIScene
 
             slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
             slotAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            //slotAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0.5f * slotSize.y, 0, 0));
-            //slotAnimator.OnRotationChanged(90, new Vector3(1, 0, 0));
             slotAnimator.SetPosition(new Vector3(0.5f * slotSize.y, 0, 0));
             slotAnimator.SetRotationAxis(new Vector3(1, 0, 0));
             slotAnimator.SetRotationAngle(90);
@@ -157,7 +148,6 @@ public class Chapters : GUIScene
         else
         {
             chaptersHolderAnimator.SetOpacity(0);
-            //chaptersHolderAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
             chaptersHolderAnimator.FadeTo(1, 0.5f, fDelay);
         }
     }
@@ -170,27 +160,20 @@ public class Chapters : GUIScene
 
         //Animate slot 1
         GameObjectAnimator slotAnimator = m_chapterSlots[0].GetComponent<GameObjectAnimator>();
-        //slotAnimator.FadeFromTo(0, 1, slotAnimationDuration);
         slotAnimator.FadeTo(1, slotAnimationDuration);
 
         //Animate slot 2
         slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
-        //slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(0, 1, 0), slotAnimationDuration, slotAnimationDuration);
-        //slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, slotAnimationDuration);
         slotAnimator.RotateTo(0, slotAnimationDuration, slotAnimationDuration);
         slotAnimator.FadeTo(1, slotAnimationDuration, slotAnimationDuration);
 
         //Animate slot 3
         slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
-        //slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(0, -1, 0), slotAnimationDuration, 3 * slotAnimationDuration);
-        //slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, 3 * slotAnimationDuration);
         slotAnimator.RotateTo(0, slotAnimationDuration, 3 * slotAnimationDuration);
         slotAnimator.FadeTo(1, slotAnimationDuration, 3 * slotAnimationDuration);
 
         //Animate slot 4
         slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
-        //slotAnimator.RotateFromToAroundAxis(90, 0, new Vector3(1, 0, 0), slotAnimationDuration, 2 * slotAnimationDuration);
-        //slotAnimator.FadeFromTo(0, 1, slotAnimationDuration, 2 * slotAnimationDuration);
         slotAnimator.RotateTo(0, slotAnimationDuration, 2 * slotAnimationDuration);
         slotAnimator.FadeTo(1, slotAnimationDuration, 2 * slotAnimationDuration);
     }

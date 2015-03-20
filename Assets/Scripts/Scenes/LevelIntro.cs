@@ -8,7 +8,6 @@ public class LevelIntro : GUIScene
     {
         base.Show(bAnimated, fDelay);
         GameObjectAnimator sceneAnimator = this.GetComponent<GameObjectAnimator>();
-        //sceneAnimator.OnOpacityChanged(1);
         sceneAnimator.SetOpacity(1);
         ShowChapterAndLevel(fDelay);
 
@@ -32,8 +31,6 @@ public class LevelIntro : GUIScene
         clonedLevelIntroTitle.GetComponent<TextMesh>().text = currentChapterNumber.ToString() + " - " + currentLevelNumber.ToString();
 
         TextMeshAnimator titleAnimator = clonedLevelIntroTitle.GetComponent<TextMeshAnimator>();
-        //titleAnimator.OnOpacityChanged(0);
-        //titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
         titleAnimator.SetOpacity(0);
         titleAnimator.FadeTo(1, 0.5f, fDelay);
     }
