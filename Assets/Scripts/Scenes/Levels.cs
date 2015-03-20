@@ -23,7 +23,8 @@ public class Levels : GUIScene
         InitLevelsGridHeight();
 
         GameObjectAnimator levelsAnimator = this.GetComponent<GameObjectAnimator>();
-        levelsAnimator.OnOpacityChanged(1);
+        //levelsAnimator.OnOpacityChanged(1);
+        levelsAnimator.SetOpacity(1);
 
         ShowTitle(fDelay);
         ShowChapterInfo(fDelay);
@@ -77,8 +78,10 @@ public class Levels : GUIScene
         //TextMesh titleTextMesh = titleObject.GetComponent<TextMesh>();
         GameObjectAnimator titleAnimator = titleObject.GetComponent<GameObjectAnimator>();
 
-        titleAnimator.OnOpacityChanged(0);
-        titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        //titleAnimator.OnOpacityChanged(0);
+        //titleAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        titleAnimator.SetOpacity(0);
+        titleAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     /**
@@ -99,8 +102,10 @@ public class Levels : GUIScene
         chapterNumberTextMesh.text = levelManager.m_currentChapter.m_number.ToString();
 
         GameObjectAnimator chapterInfoAnimator = chapterInfoObject.GetComponent<GameObjectAnimator>();
-        chapterInfoAnimator.OnOpacityChanged(0);
-        chapterInfoAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        //chapterInfoAnimator.OnOpacityChanged(0);
+        //chapterInfoAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        chapterInfoAnimator.SetOpacity(0);
+        chapterInfoAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     /**
@@ -138,8 +143,10 @@ public class Levels : GUIScene
         }
 
         GameObjectAnimator levelsHolderAnimator = m_levelsHolder.GetComponent<GameObjectAnimator>();
-        levelsHolderAnimator.OnOpacityChanged(0);
-        levelsHolderAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        //levelsHolderAnimator.OnOpacityChanged(0);
+        //levelsHolderAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        levelsHolderAnimator.SetOpacity(0);
+        levelsHolderAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     public void OnClickLevelSlot(int iLevelSlotIndex)

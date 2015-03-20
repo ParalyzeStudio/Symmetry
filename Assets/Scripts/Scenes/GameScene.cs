@@ -9,21 +9,22 @@ public class GameScene : GUIScene
 
     //public GameObject m_gridAnchorSelectedPfb;
 
+    public GameObject m_gridPfb;
+    public GameObject m_contoursHolderPfb;
+    public GameObject m_axesHolderPfb;
+
     public override void Show(bool bAnimated, float fDelay = 0.0f)
     {
         base.Show(bAnimated, fDelay);
 
-        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        sceneAnimator.OnOpacityChanged(1);
-
-        TextMeshAnimator debugTextMesh = this.gameObject.GetComponentInChildren<TextMeshAnimator>();
-        debugTextMesh.OnOpacityChanged(0);
-        debugTextMesh.FadeFromTo(0, 1, 0.5f, fDelay);
-
-        //ShowGrid(fDelay);
+        ShowGrid(fDelay);
         //ShowGUI(fDelay);
-        //ShowContours(fDelay);
+        ShowContours(fDelay);
         //ShowShapes(fDelay);
+
+        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
+        //sceneAnimator.OnOpacityChanged(0);
+        sceneAnimator.SetOpacity(0);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)
@@ -37,9 +38,17 @@ public class GameScene : GUIScene
      * **/
     private void ShowGrid(float fDelay)
     {
-        GameObject grid = GameObject.FindGameObjectWithTag("Grid");
-        grid.transform.position = new Vector3(0, 0, GRID_Z_VALUE);
-        grid.GetComponent<GridBuilder>().Build();
+        GameObject clonedGrid = (GameObject) Instantiate(m_gridPfb);
+        clonedGrid.transform.parent = this.gameObject.transform;
+        clonedGrid.GetComponent<GridBuilder>().Build();
+        Vector3 gridLocalPosition = clonedGrid.transform.localPosition;
+        clonedGrid.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, gridLocalPosition.z);
+
+        GameObjectAnimator gridAnimator = clonedGrid.GetComponent<GameObjectAnimator>();
+        //gridAnimator.OnOpacityChanged(0);
+        gridAnimator.SetOpacity(0);
+        //gridAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+        gridAnimator.FadeTo(1, 0.5f, fDelay);
 
         ///*** DEBUG TMP ***/
         ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
@@ -73,9 +82,10 @@ public class GameScene : GUIScene
      * **/
     private void ShowContours(float fDelay)
     {
-        GameObject contours = GameObject.FindGameObjectWithTag("Contours");
-        contours.transform.position = new Vector3(0, 0, CONTOURS_Z_VALUE);
-        contours.GetComponent<ContoursBuilder>().Build();
+        GameObject clonedContours = (GameObject)Instantiate(m_contoursHolderPfb);
+        clonedContours.transform.parent = this.gameObject.transform;
+        clonedContours.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
+        clonedContours.GetComponent<ContoursBuilder>().Build();
     }
 
     /**
@@ -98,6 +108,6 @@ public class GameScene : GUIScene
             shapeBuilder.CreateFromShapeData(shape);
         }
 
-        shapesObject.transform.position = new Vector3(0, 0, SHAPES_Z_VALUE);
+        shapesObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
     }
 }

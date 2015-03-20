@@ -55,14 +55,258 @@ public class ValueAnimator : MonoBehaviour
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity = -1;
 
-    public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //public void FadeFromTo(float fromOpacity, float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    if (fromOpacity == toOpacity)
+    //        return;
+
+    //    m_fading = true;
+    //    m_opacity = fromOpacity;
+    //    m_fromOpacity = fromOpacity;
+    //    m_toOpacity = toOpacity;
+    //    m_fadingDuration = duration;
+    //    m_fadingDelay = delay;
+    //    m_fadingElapsedTime = 0;
+    //    m_fadingInterpolationType = interpolType;
+    //}
+
+    //public void ScaleFromTo(Vector3 fromScale, Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    m_scaling = true;
+    //    m_scale = fromScale;
+    //    m_fromScale = fromScale;
+    //    m_toScale = toScale;
+    //    m_scalingDuration = duration;
+    //    m_scalingDelay = delay;
+    //    m_scalingElapsedTime = 0;
+    //    m_scalingInterpolationType = interpolType;
+    //}
+
+    //public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    m_translating = true;
+    //    m_position = fromPosition;
+    //    m_fromPosition = fromPosition;
+    //    m_toPosition = toPosition;
+    //    m_translatingDuration = duration;
+    //    m_translatingDelay = delay;
+    //    m_translatingElapsedTime = 0;
+    //    m_translatingInterpolationType = interpolType;
+    //}
+
+    //public void RotateFromToAroundAxis(float fromAngle, float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    m_rotating = true;
+    //    m_angle = fromAngle;
+    //    m_fromAngle = fromAngle;
+    //    m_toAngle = toAngle;
+    //    m_rotationAxis = axis;
+    //    m_rotatingDuration = duration;
+    //    m_rotatingDelay = delay;
+    //    m_rotatingElapsedTime = 0;
+    //    m_rotatingInterpolationType = interpolType;
+    //}
+
+    //protected virtual void UpdateOpacity(float dt)
+    //{
+    //    if (m_fading)
+    //    {
+    //        bool inDelay = (m_fadingElapsedTime < m_fadingDelay);
+    //        m_fadingElapsedTime += dt;
+    //        if (m_fadingElapsedTime >= m_fadingDelay)
+    //        {
+    //            if (inDelay) //we were in delay previously
+    //                dt = m_fadingElapsedTime - m_fadingDelay;
+    //            float effectiveElapsedTime = m_fadingElapsedTime - m_fadingDelay;
+    //            float deltaOpacity = 0;
+    //            float opacityVariation = m_toOpacity - m_fromOpacity;
+    //            if (m_fadingInterpolationType == InterpolationType.LINEAR)
+    //                deltaOpacity = dt / m_fadingDuration * opacityVariation;
+    //            else if (m_fadingInterpolationType == InterpolationType.SINUSOIDAL)
+    //                deltaOpacity = opacityVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_fadingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_fadingDuration)));
+
+    //            if (effectiveElapsedTime > m_fadingDuration)
+    //            {
+    //                m_opacity = m_toOpacity;
+    //                m_fading = false;
+    //                OnFinishFading();
+    //            }
+    //            else
+    //                m_opacity += deltaOpacity;
+    //            OnOpacityChanged(m_opacity);
+    //        }
+    //    }
+    //}
+
+    //protected virtual void UpdatePosition(float dt)
+    //{      
+    //    if (m_translating)
+    //    {
+    //        bool inDelay = (m_translatingElapsedTime < m_translatingDelay);
+    //        m_translatingElapsedTime += dt;
+    //        if (m_translatingElapsedTime >= m_translatingDelay)
+    //        {
+    //            if (inDelay) //we were in delay previously
+    //                dt = m_translatingElapsedTime - m_translatingDelay;
+    //            m_translatingTimeOffset = m_translatingElapsedTime - m_translatingDelay;
+    //            float effectiveElapsedTime = m_translatingElapsedTime - m_translatingDelay;
+    //            Vector3 deltaPosition = Vector3.zero;
+    //            Vector3 positionVariation = m_toPosition - m_fromPosition;
+    //            if (m_translatingInterpolationType == InterpolationType.LINEAR)
+    //                deltaPosition = dt / m_translatingDuration * positionVariation;
+    //            else if (m_translatingInterpolationType == InterpolationType.SINUSOIDAL)
+    //                deltaPosition = positionVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_translatingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_translatingDuration)));
+
+    //            if (effectiveElapsedTime > m_translatingDuration)
+    //            {
+    //                m_position = m_toPosition;
+    //                m_translating = false;
+    //                OnFinishTranslating();
+    //            }
+    //            else
+    //                m_position += deltaPosition;
+
+    //            OnPositionChanged(m_position);
+    //        }
+    //    }
+    //}
+
+    //protected void UpdateRotation(float dt)
+    //{
+    //    if (m_rotating)
+    //    {
+    //        bool inDelay = (m_rotatingElapsedTime < m_rotatingDelay);
+    //        m_rotatingElapsedTime += dt;
+    //        if (m_rotatingElapsedTime > m_rotatingDelay)
+    //        {
+    //            if (inDelay) //we were in delay previously
+    //                dt = m_rotatingElapsedTime - m_rotatingDelay;
+    //            float effectiveElapsedTime = m_rotatingElapsedTime - m_rotatingDelay;
+    //            float deltaAngle = 0;
+    //            float angleVariation = m_toAngle - m_fromAngle;
+    //            if (m_rotatingInterpolationType == InterpolationType.LINEAR)
+    //                deltaAngle = dt / m_rotatingDuration * angleVariation;
+    //            else if (m_rotatingInterpolationType == InterpolationType.SINUSOIDAL)
+    //                deltaAngle = angleVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_rotatingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_rotatingDuration)));
+
+    //            if (effectiveElapsedTime > m_rotatingDuration)
+    //            {
+    //                m_angle = m_toAngle;
+    //                m_rotating = false;
+    //                OnFinishRotating();
+    //            }
+    //            else
+    //                m_angle += deltaAngle;
+
+    //            OnRotationChanged(m_angle, m_rotationAxis);
+    //        }
+    //    }
+    //}
+
+    //protected virtual void UpdateScale(float dt)
+    //{
+    //    if (m_scaling)
+    //    {
+    //        bool inDelay = (m_scalingElapsedTime < m_scalingDelay);
+    //        m_scalingElapsedTime += dt;
+    //        if (m_scalingElapsedTime > m_scalingDelay)
+    //        {
+    //            if (inDelay) //we were in delay previously
+    //                dt = m_scalingElapsedTime - m_scalingDelay;
+    //            float effectiveElapsedTime = m_scalingElapsedTime - m_scalingDelay;
+    //            Vector3 deltaScale = Vector3.zero;
+    //            Vector3 scaleVariation = m_toScale - m_fromScale;
+    //            if (m_scalingInterpolationType == InterpolationType.LINEAR)
+    //                deltaScale = dt / m_scalingDuration * scaleVariation;
+    //            else if (m_scalingInterpolationType == InterpolationType.SINUSOIDAL)
+    //                deltaScale = scaleVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_scalingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_scalingDuration)));
+
+                
+    //            if (effectiveElapsedTime > m_scalingDuration)
+    //            {
+    //                m_scale = m_toScale;
+    //                m_scaling = false;
+    //                OnFinishScaling();
+    //            }
+    //            else
+    //                m_scale += deltaScale;
+
+    //            OnScaleChanged(m_scale);
+    //        }
+    //    }
+    //}
+
+    //protected virtual void Update () 
+    //{
+    //    float dt = Time.deltaTime;
+
+    //    if (m_prevOpacity != m_opacity)
+    //    {
+    //        m_prevOpacity = m_opacity;
+    //        OnOpacityChanged(m_opacity);
+    //    }
+
+    //    UpdateOpacity(dt);
+    //    UpdatePosition(dt);
+    //    UpdateRotation(dt);
+    //    UpdateScale(dt);
+    //}
+
+    //public virtual void OnOpacityChanged(float fNewOpacity)
+    //{
+    //    if (fNewOpacity > 1)
+    //        fNewOpacity = 1;
+    //    else if (fNewOpacity < 0)
+    //        fNewOpacity = 0;
+
+    //    m_opacity = fNewOpacity;
+    //    m_prevOpacity = fNewOpacity;
+    //}
+
+    //public virtual void OnPositionChanged(Vector3 newPosition)
+    //{
+        
+    //}
+
+    //public virtual void OnScaleChanged(Vector3 newScale)
+    //{
+        
+    //}
+
+    //public virtual void OnRotationChanged(float newAngle, Vector3 axis)
+    //{
+
+    //}
+
+    //public virtual void OnFinishFading()
+    //{
+        
+    //}
+
+    //public virtual void OnFinishTranslating()
+    //{
+
+    //}
+
+    //public virtual void OnFinishScaling()
+    //{
+
+    //}
+
+    //public virtual void OnFinishRotating()
+    //{
+
+    //}
+
+
+    /*******************************/
+    public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
-        if (fromOpacity == toOpacity)
+        if (m_opacity == toOpacity)
             return;
 
         m_fading = true;
-        m_opacity = fromOpacity;
-        m_fromOpacity = fromOpacity;
+        m_fromOpacity = m_opacity;
         m_toOpacity = toOpacity;
         m_fadingDuration = duration;
         m_fadingDelay = delay;
@@ -70,11 +314,10 @@ public class ValueAnimator : MonoBehaviour
         m_fadingInterpolationType = interpolType;
     }
 
-    public void ScaleFromTo(Vector3 fromScale, Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void ScaleTo(Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_scaling = true;
-        m_scale = fromScale;
-        m_fromScale = fromScale;
+        m_fromScale = m_scale;
         m_toScale = toScale;
         m_scalingDuration = duration;
         m_scalingDelay = delay;
@@ -82,11 +325,10 @@ public class ValueAnimator : MonoBehaviour
         m_scalingInterpolationType = interpolType;
     }
 
-    public void TranslateFromTo(Vector3 fromPosition, Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void TranslateTo(Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_translating = true;
-        m_position = fromPosition;
-        m_fromPosition = fromPosition;
+        m_fromPosition = m_position;
         m_toPosition = toPosition;
         m_translatingDuration = duration;
         m_translatingDelay = delay;
@@ -94,17 +336,133 @@ public class ValueAnimator : MonoBehaviour
         m_translatingInterpolationType = interpolType;
     }
 
-    public void RotateFromToAroundAxis(float fromAngle, float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void RotateTo(float toAngle, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_rotating = true;
-        m_angle = fromAngle;
-        m_fromAngle = fromAngle;
+        m_fromAngle = m_angle;
         m_toAngle = toAngle;
-        m_rotationAxis = axis;
         m_rotatingDuration = duration;
         m_rotatingDelay = delay;
         m_rotatingElapsedTime = 0;
         m_rotatingInterpolationType = interpolType;
+    }
+
+    public void RotateToAroundAxis(float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    {
+        m_rotationAxis = axis;
+        RotateTo(toAngle, duration, delay, interpolType);
+    }
+
+    public virtual void SetOpacity(float fOpacity, bool bPassOnChildren = true)
+    {
+        if (fOpacity > 1)
+            fOpacity = 1;
+        else if (fOpacity < 0)
+            fOpacity = 0;
+
+        m_opacity = fOpacity;
+        m_prevOpacity = fOpacity;
+        OnOpacityChanged();
+
+        if (bPassOnChildren)
+        {
+            ValueAnimator[] childAnimators = this.gameObject.GetComponentsInChildren<ValueAnimator>();
+            for (int i = 0; i != childAnimators.Length; i++)
+            {
+                ValueAnimator childAnimator = childAnimators[i];
+                if (childAnimator != this)
+                {
+                    childAnimator.SetOpacity(fOpacity, false); //do not pass to this object's children because they are already in the list of childAnimators
+                }
+            }
+        }
+    }
+
+    public virtual void SetScale(Vector3 scale)
+    {
+        m_scale = scale;
+        OnScaleChanged();
+    }
+
+    public virtual void SetPosition(Vector3 position)
+    {
+        m_position = position;
+        OnPositionChanged();
+    }
+
+    public virtual void SetRotationAngle(float angle)
+    {
+        m_angle = angle;
+        OnRotationChanged();
+    }
+
+    public virtual void SetRotationAxis(Vector3 axis)
+    {
+        m_rotationAxis = axis;
+    }
+
+    public virtual void IncOpacity(float deltaOpacity)
+    {
+        float fOpacity = m_opacity + deltaOpacity;
+        SetOpacity(fOpacity);
+    }
+
+    public virtual void IncScale(Vector3 deltaScale)
+    {
+        Vector3 fScale = m_scale + deltaScale;
+        SetScale(fScale);
+    }
+
+    public virtual void IncPosition(Vector3 deltaPosition)
+    {
+        Vector3 fPosition = m_position + deltaPosition;
+        SetPosition(fPosition);
+    }
+
+    public virtual void IncRotationAngle(float deltaAngle)
+    {
+        float fAngle = m_angle + deltaAngle;
+        SetRotationAngle(fAngle);
+    }
+
+    public virtual void OnOpacityChanged()
+    {
+        
+    }
+
+    public virtual void OnPositionChanged()
+    {
+
+    }
+
+    public virtual void OnScaleChanged()
+    {
+
+    }
+
+    public virtual void OnRotationChanged()
+    {
+
+    }
+
+    public virtual void OnFinishFading()
+    {
+
+    }
+
+    public virtual void OnFinishTranslating()
+    {
+
+    }
+
+    public virtual void OnFinishScaling()
+    {
+
+    }
+
+    public virtual void OnFinishRotating()
+    {
+
     }
 
     protected virtual void UpdateOpacity(float dt)
@@ -127,19 +485,18 @@ public class ValueAnimator : MonoBehaviour
 
                 if (effectiveElapsedTime > m_fadingDuration)
                 {
-                    m_opacity = m_toOpacity;
+                    SetOpacity(m_toOpacity);
                     m_fading = false;
                     OnFinishFading();
                 }
                 else
-                    m_opacity += deltaOpacity;
-                OnOpacityChanged(m_opacity);
+                    IncOpacity(deltaOpacity);
             }
         }
     }
 
     protected virtual void UpdatePosition(float dt)
-    {      
+    {
         if (m_translating)
         {
             bool inDelay = (m_translatingElapsedTime < m_translatingDelay);
@@ -159,14 +516,12 @@ public class ValueAnimator : MonoBehaviour
 
                 if (effectiveElapsedTime > m_translatingDuration)
                 {
-                    m_position = m_toPosition;
+                    SetPosition(m_toPosition);
                     m_translating = false;
                     OnFinishTranslating();
                 }
                 else
-                    m_position += deltaPosition;
-
-                OnPositionChanged(m_position);
+                    IncPosition(deltaPosition);
             }
         }
     }
@@ -191,14 +546,12 @@ public class ValueAnimator : MonoBehaviour
 
                 if (effectiveElapsedTime > m_rotatingDuration)
                 {
-                    m_angle = m_toAngle;
+                    SetRotationAngle(m_toAngle);
                     m_rotating = false;
                     OnFinishRotating();
                 }
                 else
-                    m_angle += deltaAngle;
-
-                OnRotationChanged(m_angle, m_rotationAxis);
+                    IncRotationAngle(deltaAngle);
             }
         }
     }
@@ -221,80 +574,31 @@ public class ValueAnimator : MonoBehaviour
                 else if (m_scalingInterpolationType == InterpolationType.SINUSOIDAL)
                     deltaScale = scaleVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_scalingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_scalingDuration)));
 
-                
                 if (effectiveElapsedTime > m_scalingDuration)
                 {
-                    m_scale = m_toScale;
+                    SetScale(m_toScale);
                     m_scaling = false;
                     OnFinishScaling();
                 }
                 else
-                    m_scale += deltaScale;
-
-                OnScaleChanged(m_scale);
+                    IncScale(deltaScale);
             }
         }
     }
 
-	protected virtual void Update () 
+    protected virtual void Update()
     {
         float dt = Time.deltaTime;
 
-        if (m_prevOpacity != m_opacity)
+        if (m_prevOpacity != m_opacity) //when we modify the opacity value directly in the inspector in edit mode
         {
-            m_prevOpacity = m_opacity;
-            OnOpacityChanged(m_opacity);
+            SetOpacity(m_opacity);
+            return;
         }
 
         UpdateOpacity(dt);
         UpdatePosition(dt);
         UpdateRotation(dt);
         UpdateScale(dt);
-	}
-
-    public virtual void OnOpacityChanged(float fNewOpacity)
-    {
-        if (fNewOpacity > 1)
-            fNewOpacity = 1;
-        else if (fNewOpacity < 0)
-            fNewOpacity = 0;
-
-        m_opacity = fNewOpacity;
-        m_prevOpacity = fNewOpacity;
-    }
-
-    public virtual void OnPositionChanged(Vector3 newPosition)
-    {
-        
-    }
-
-    public virtual void OnScaleChanged(Vector3 newScale)
-    {
-        
-    }
-
-    public virtual void OnRotationChanged(float newAngle, Vector3 axis)
-    {
-
-    }
-
-    public virtual void OnFinishFading()
-    {
-        
-    }
-
-    public virtual void OnFinishTranslating()
-    {
-
-    }
-
-    public virtual void OnFinishScaling()
-    {
-
-    }
-
-    public virtual void OnFinishRotating()
-    {
-
     }
 }

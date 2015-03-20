@@ -38,6 +38,8 @@ public class GridBuilder : MonoBehaviour
         anchorsHolder.transform.parent = this.transform;
         anchorsHolder.transform.localPosition = Vector3.zero;
 
+        anchorsHolder.AddComponent<GameObjectAnimator>();
+
         //get the screen viewport dimensions
         float fCameraSize = Camera.main.orthographicSize;
         float fScreenWidth = (float)Screen.width;
@@ -56,7 +58,7 @@ public class GridBuilder : MonoBehaviour
 
         //set the position for the grid
         Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
-        this.gameObject.transform.position = gridPosition;
+        this.gameObject.transform.localPosition = gridPosition;
 
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {

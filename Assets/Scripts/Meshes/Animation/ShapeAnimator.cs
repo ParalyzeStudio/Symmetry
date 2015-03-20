@@ -3,13 +3,23 @@ using System.Collections.Generic;
 
 public class ShapeAnimator : GameObjectAnimator
 {
-    public override void OnOpacityChanged(float fNewOpacity)
+    //public override void OnOpacityChanged(float fNewOpacity)
+    //{
+    //    base.OnOpacityChanged(fNewOpacity);
+
+    //    ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
+    //    Color oldColor = shapeRenderer.m_color;
+    //    Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, fNewOpacity);
+    //    shapeRenderer.m_color = newColor;
+    //}
+
+    public override void SetOpacity(float opacity, bool bPassOnChildren = true)
     {
-        base.OnOpacityChanged(fNewOpacity);
+        base.SetOpacity(opacity, bPassOnChildren);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         Color oldColor = shapeRenderer.m_color;
-        Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, fNewOpacity);
+        Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, opacity);
         shapeRenderer.m_color = newColor;
     }
 
@@ -51,7 +61,6 @@ public class ShapeAnimator : GameObjectAnimator
 
     public override void OnFinishRotating()
     {
-        Debug.Log("Shape ended rot");
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         shapeRenderer.m_shape.Fusion();
         MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();

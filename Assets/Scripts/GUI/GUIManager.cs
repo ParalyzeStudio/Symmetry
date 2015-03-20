@@ -72,8 +72,10 @@ public class GUIManager : MonoBehaviour
         //set the height of those frames to zero
         GameObjectAnimator topFrameAnimator = topFrame.GetComponent<GameObjectAnimator>();
         GameObjectAnimator middleFrameAnimator = middleFrame.GetComponent<GameObjectAnimator>();
-        topFrameAnimator.OnScaleChanged(Vector3.zero);
-        middleFrameAnimator.OnScaleChanged(Vector3.zero);
+        //topFrameAnimator.OnScaleChanged(Vector3.zero);
+        //middleFrameAnimator.OnScaleChanged(Vector3.zero);
+        topFrameAnimator.SetScale(Vector3.zero);
+        middleFrameAnimator.SetScale(Vector3.zero);
     }
 
     /**
@@ -95,20 +97,26 @@ public class GUIManager : MonoBehaviour
 
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            topFrameAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * screenSize.y, -1));
+            //topFrameAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * screenSize.y, -1));
+            topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 fromScale = new Vector3(screenSize.x, 0, 1);
             Vector3 toScale = new Vector3(screenSize.x, topFrameHeight, 1);
-            topFrameAnimator.OnScaleChanged(new Vector3(screenSize.x, 0, 1));
-            topFrameAnimator.ScaleFromTo(fromScale, toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //topFrameAnimator.OnScaleChanged(new Vector3(screenSize.x, 0, 1));
+            //topFrameAnimator.ScaleFromTo(fromScale, toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.SetScale(fromScale);
+            topFrameAnimator.ScaleTo(toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             float middleFrameHeight = topFrameHeight + 0.23f * screenSize.y;
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            middleFrameAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * screenSize.y, 0));
+            //middleFrameAnimator.MoveObjectBySettingPivotPointPosition(new Vector3(0, 0.5f * screenSize.y, 0));
+            middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
             fromScale = new Vector3(screenSize.x, 0, 1);
             toScale = new Vector3(screenSize.x, middleFrameHeight, 1);
-            middleFrameAnimator.OnScaleChanged(new Vector3(screenSize.x, 0, 1));
-            middleFrameAnimator.ScaleFromTo(fromScale, toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //middleFrameAnimator.OnScaleChanged(new Vector3(screenSize.x, 0, 1));
+            //middleFrameAnimator.ScaleFromTo(fromScale, toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            middleFrameAnimator.SetScale(fromScale);
+            middleFrameAnimator.ScaleTo(toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else if (contentToDisplay == SceneManager.DisplayContent.CHAPTERS || contentToDisplay == SceneManager.DisplayContent.LEVELS)
         {
@@ -116,13 +124,15 @@ public class GUIManager : MonoBehaviour
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-            topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ScaleTo(new Vector3(topFrameSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             //animate middle frame
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
-            middleFrameAnimator.ScaleFromTo(middleFrameSize, new Vector3(middleFrameSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //middleFrameAnimator.ScaleFromTo(middleFrameSize, new Vector3(middleFrameSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            middleFrameAnimator.ScaleTo(new Vector3(middleFrameSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else if (contentToDisplay == SceneManager.DisplayContent.GAME)
         {
@@ -130,7 +140,8 @@ public class GUIManager : MonoBehaviour
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-            topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //topFrameAnimator.ScaleFromTo(topFrameSize, new Vector3(topFrameSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ScaleTo(new Vector3(topFrameSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
     }
 
@@ -151,8 +162,10 @@ public class GUIManager : MonoBehaviour
 
             backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
             GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
-            showButtonAnimator.OnOpacityChanged(0);
-            showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+            //showButtonAnimator.OnOpacityChanged(0);
+            //showButtonAnimator.FadeFromTo(0, 1, 0.5f, fDelay);
+            showButtonAnimator.SetOpacity(0);
+            showButtonAnimator.FadeTo(1, 0.5f, fDelay);
         }
     }
 

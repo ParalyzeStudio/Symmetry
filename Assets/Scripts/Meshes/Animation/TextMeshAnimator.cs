@@ -35,14 +35,25 @@ public class TextMeshAnimator : GameObjectAnimator
         m_cyclingPaused = bPaused;
     }
 
-    public override void OnOpacityChanged(float fNewOpacity)
+    //public override void OnOpacityChanged(float fNewOpacity)
+    //{
+    //    base.OnOpacityChanged(fNewOpacity);
+
+    //    if (m_textMesh == null)
+    //        m_textMesh = this.gameObject.GetComponent<TextMesh>();
+
+    //    Color newTextColor = new Color(m_textMesh.color.r, m_textMesh.color.g, m_textMesh.color.b, fNewOpacity);
+    //    m_textMesh.color = newTextColor;
+    //}
+
+    public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
-        base.OnOpacityChanged(fNewOpacity);
+        base.SetOpacity(fOpacity, bPassOnChildren);
 
         if (m_textMesh == null)
             m_textMesh = this.gameObject.GetComponent<TextMesh>();
 
-        Color newTextColor = new Color(m_textMesh.color.r, m_textMesh.color.g, m_textMesh.color.b, fNewOpacity);
+        Color newTextColor = new Color(m_textMesh.color.r, m_textMesh.color.g, m_textMesh.color.b, fOpacity);
         m_textMesh.color = newTextColor;
     }
 
@@ -66,25 +77,21 @@ public class TextMeshAnimator : GameObjectAnimator
             if (m_ascending)
             {
                 dOpacity = absDiffOpacity;
-                m_opacity += dOpacity;
-                if (m_opacity > 1)
+                IncOpacity(dOpacity);
+                if (m_opacity >= 1)
                 {
-                    m_opacity = 1;
                     m_ascending = false;
                 }
             }
             else
             {
                 dOpacity = -absDiffOpacity;
-                m_opacity += dOpacity;
-                if (m_opacity < 0)
+                IncOpacity(dOpacity);
+                if (m_opacity <= 0)
                 {
-                    m_opacity = 0;
                     m_ascending = true;
                 }
             }
-
-            OnOpacityChanged(m_opacity);
         }
         else
             base.UpdateOpacity(dt);

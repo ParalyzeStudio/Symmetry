@@ -13,7 +13,8 @@ public class MainMenu : GUIScene
     {
         base.Show(bAnimated, fDelay);
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
-        menuAnimator.OnOpacityChanged(1);
+        //menuAnimator.OnOpacityChanged(1);
+        menuAnimator.SetOpacity(1);
         ShowTitle(bAnimated, fDelay);
         ShowAxes(bAnimated, 1.5f + fDelay);
         ShowButtons(bAnimated, 2.0f + fDelay);
@@ -21,8 +22,10 @@ public class MainMenu : GUIScene
 
         if (!bAnimated)
         {
-            menuAnimator.OnOpacityChanged(0);
-            menuAnimator.FadeFromTo(0, 1, 0.5f, 1.0f);
+            //menuAnimator.OnOpacityChanged(0);
+            //menuAnimator.FadeFromTo(0, 1, 0.5f, 1.0f);
+            menuAnimator.SetOpacity(0);
+            menuAnimator.FadeTo(1, 0.5f, 1.0f);
             GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
             TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
             tapToPlayAnimator.SetCyclingPaused(true);
@@ -75,47 +78,67 @@ public class MainMenu : GUIScene
         //set position for each part
         FixedTextureSizeAnimator topLeftAnimator = clonedTopLeft.GetComponent<FixedTextureSizeAnimator>();
         topLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-        topLeftAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? topLeftPartLocalPosition : topLeftPartLocalPosition  + new Vector3(0, 128, 0));
+        //topLeftAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? topLeftPartLocalPosition : topLeftPartLocalPosition  + new Vector3(0, 128, 0));
+        topLeftAnimator.SetPosition(bAnimated ? topLeftPartLocalPosition : topLeftPartLocalPosition + new Vector3(0, 128, 0));
         topLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
 
         FixedTextureSizeAnimator topRightAnimator = clonedTopRight.GetComponent<FixedTextureSizeAnimator>();
         topRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-        topRightAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? topRightPartLocalPosition : topRightPartLocalPosition + new Vector3(0, 128, 0));
+        //topRightAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? topRightPartLocalPosition : topRightPartLocalPosition + new Vector3(0, 128, 0));
+        topRightAnimator.SetPosition(bAnimated ? topRightPartLocalPosition : topRightPartLocalPosition + new Vector3(0, 128, 0));
         topRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
 
         FixedTextureSizeAnimator bottomRightAnimator = clonedBottomRight.GetComponent<FixedTextureSizeAnimator>();
         bottomRightAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
-        bottomRightAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? bottomRightPartLocalPosition : bottomRightPartLocalPosition - new Vector3(0, 128, 0));
+        //bottomRightAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? bottomRightPartLocalPosition : bottomRightPartLocalPosition - new Vector3(0, 128, 0));
+        bottomRightAnimator.SetPosition(bAnimated ? bottomRightPartLocalPosition : bottomRightPartLocalPosition - new Vector3(0, 128, 0));
         bottomRightAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
 
         FixedTextureSizeAnimator bottomLeftAnimator = clonedBottomLeft.GetComponent<FixedTextureSizeAnimator>();
         bottomLeftAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.0f, 0.5f));
-        bottomLeftAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? bottomLeftPartLocalPosition : bottomLeftPartLocalPosition - new Vector3(0, 128, 0));
+        //bottomLeftAnimator.MoveObjectBySettingPivotPointPosition(bAnimated ? bottomLeftPartLocalPosition : bottomLeftPartLocalPosition - new Vector3(0, 128, 0));
+        bottomLeftAnimator.SetPosition(bAnimated ? bottomLeftPartLocalPosition : bottomLeftPartLocalPosition - new Vector3(0, 128, 0));
         bottomLeftAnimator.m_textureSize = new Vector2(titlePartWidth, titlePartHeight);
 
         if (bAnimated)
         {
             //Set zero scale so they are invisible at start
-            clonedTopLeft.transform.localScale = Vector3.zero;
-            clonedTopRight.transform.localScale = Vector3.zero;
-            clonedBottomRight.transform.localScale = Vector3.zero;
-            clonedBottomLeft.transform.localScale = Vector3.zero;
+            //clonedTopLeft.transform.localScale = Vector3.zero;
+            //clonedTopRight.transform.localScale = Vector3.zero;
+            //clonedBottomRight.transform.localScale = Vector3.zero;
+            //clonedBottomLeft.transform.localScale = Vector3.zero;
 
             //Animate top left part
-            topLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
-            topLeftAnimator.TranslateFromTo(topLeftPartLocalPosition, topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
+            //topLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+            //topLeftAnimator.TranslateFromTo(topLeftPartLocalPosition, topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
+            topLeftAnimator.SetScale(new Vector3(titlePartWidth, 0, 1.0f));
+            topLeftAnimator.SetPosition(topLeftPartLocalPosition);
+            topLeftAnimator.ScaleTo(new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+            topLeftAnimator.TranslateTo(topLeftPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
 
             //Animate top right part            
-            topRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
-            topRightAnimator.TranslateFromTo(topRightPartLocalPosition, topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
+            //topRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+            //topRightAnimator.TranslateFromTo(topRightPartLocalPosition, topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
+            topRightAnimator.SetScale(new Vector3(titlePartWidth, 0, 1.0f));
+            topRightAnimator.SetPosition(topRightPartLocalPosition);
+            topRightAnimator.ScaleTo(new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+            topRightAnimator.TranslateTo(topRightPartLocalPosition + new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
 
             //Animate bottom right part
-            bottomRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
-            bottomRightAnimator.TranslateFromTo(bottomRightPartLocalPosition, bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
+            //bottomRightAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+            //bottomRightAnimator.TranslateFromTo(bottomRightPartLocalPosition, bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
+            bottomRightAnimator.SetScale(new Vector3(titlePartWidth, 0, 1.0f));
+            bottomRightAnimator.SetPosition(bottomRightPartLocalPosition);
+            bottomRightAnimator.ScaleTo(new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.5f);
+            bottomRightAnimator.TranslateTo(bottomRightPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.5f);
 
             //Animate bottom left part
-            bottomLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
-            bottomLeftAnimator.TranslateFromTo(bottomLeftPartLocalPosition, bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
+            //bottomLeftAnimator.ScaleFromTo(new Vector3(titlePartWidth, 0, 1.0f), new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+            //bottomLeftAnimator.TranslateFromTo(bottomLeftPartLocalPosition, bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
+            bottomLeftAnimator.SetScale(new Vector3(titlePartWidth, 0, 1.0f));
+            bottomLeftAnimator.SetPosition(bottomLeftPartLocalPosition);
+            bottomLeftAnimator.ScaleTo(new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
+            bottomLeftAnimator.TranslateTo(bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
         }
     }
 
@@ -178,15 +201,21 @@ public class MainMenu : GUIScene
             Vector3 optionsPanelFromPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, optionsPanel.transform.position.z);
             Vector3 creditsPanelFromPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, creditsPanel.transform.position.z);
 
-            optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFromPosition);
-            creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFromPosition);
-            optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelFinalPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-            creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelFinalPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFromPosition);
+            //creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFromPosition);
+            //optionsPanelAnimator.TranslateFromTo(optionsPanelFromPosition, optionsPanelFinalPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //creditsPanelAnimator.TranslateFromTo(creditsPanelFromPosition, creditsPanelFinalPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
+            optionsPanelAnimator.SetPosition(optionsPanelFromPosition);
+            creditsPanelAnimator.SetPosition(creditsPanelFromPosition);
+            optionsPanelAnimator.TranslateTo(optionsPanelFinalPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            creditsPanelAnimator.TranslateTo(creditsPanelFinalPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else
         {
-            optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFinalPosition);
-            creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFinalPosition);
+            //optionsPanelAnimator.MoveObjectBySettingPivotPointPosition(optionsPanelFinalPosition);
+            //creditsPanelAnimator.MoveObjectBySettingPivotPointPosition(creditsPanelFinalPosition);
+            optionsPanelAnimator.SetPosition(optionsPanelFinalPosition);
+            creditsPanelAnimator.SetPosition(creditsPanelFinalPosition);
         }
     }
 
@@ -194,7 +223,8 @@ public class MainMenu : GUIScene
     {
         GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
         TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
-        tapToPlayAnimator.OnOpacityChanged(0);
+        //tapToPlayAnimator.OnOpacityChanged(0);
+        tapToPlayAnimator.SetOpacity(0);
         tapToPlayAnimator.SetTextMeshOpacityCycling(2.0f, true, fDelay);
     }
 }

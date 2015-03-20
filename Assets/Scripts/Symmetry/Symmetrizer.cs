@@ -64,8 +64,11 @@ public class Symmetrizer : MonoBehaviour
                 GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
                 GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
                 shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                shapeObjectAnimator.OnRotationChanged(90, axisDirection);
-                shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+                //shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+                //shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+                shapeObjectAnimator.SetRotationAngle(90);
+                shapeObjectAnimator.SetRotationAxis(axisDirection);
+                shapeObjectAnimator.RotateTo(0, 0.5f);
             }
         }
 
@@ -82,8 +85,11 @@ public class Symmetrizer : MonoBehaviour
                 GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
                 GameObjectAnimator shapeObjectAnimator = newShapeObject.GetComponent<GameObjectAnimator>();
                 shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                shapeObjectAnimator.OnRotationChanged(90, axisDirection);
-                shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+                //shapeObjectAnimator.OnRotationChanged(90, axisDirection);
+                //shapeObjectAnimator.RotateFromToAroundAxis(90, 0, axisDirection, 0.5f);
+                shapeObjectAnimator.SetRotationAngle(90);
+                shapeObjectAnimator.SetRotationAxis(axisDirection);
+                shapeObjectAnimator.RotateTo(0, 0.5f);
             }
         }
     }
