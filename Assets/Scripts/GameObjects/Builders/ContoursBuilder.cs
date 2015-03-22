@@ -34,6 +34,8 @@ public class ContoursBuilder : MonoBehaviour
             contourObject.transform.parent = this.gameObject.transform;
             contourObject.transform.localPosition = Vector3.zero;
 
+            contourObject.AddComponent<GameObjectAnimator>();
+
             contoursHolder.AddContour(contourObject);
         }
     }

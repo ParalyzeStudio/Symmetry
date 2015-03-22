@@ -66,6 +66,26 @@ public class LevelManager : MonoBehaviour
         level.m_number = int.Parse(levelNumber);
         level.m_name = levelName;
 
+        //Parse grid information
+        XMLNode gridNode = levelNode.GetNode("grid>0");
+
+        string strExactNumLines = gridNode.GetValue("@exactNumLines");
+        string strExactNumColumns = gridNode.GetValue("@exactNumColumns");
+        level.m_gridExactNumLines = (strExactNumLines == null) ? 0 : int.Parse(strExactNumLines);
+        level.m_gridExactNumColumns = (strExactNumColumns == null) ? 0 : int.Parse(strExactNumColumns);
+
+        if (level.m_gridExactNumLines == 0)
+        {
+            string strMinNumLines = gridNode.GetValue("@minNumLines");
+            level.m_gridMinNumLines = (strMinNumLines == null) ? 0 : int.Parse(strMinNumLines);
+        }
+
+        if (level.m_gridExactNumColumns == 0)
+        {
+            string strMinNumColumns = gridNode.GetValue("@minNumColumns");
+            level.m_gridMinNumColumns = (strMinNumColumns == null) ? 0 : int.Parse(strMinNumColumns);
+        }
+
         //Parse contours
         XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
         level.m_contours.Capacity = contoursNodeList.Count;

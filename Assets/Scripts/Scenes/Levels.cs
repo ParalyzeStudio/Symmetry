@@ -146,7 +146,6 @@ public class Levels : GUIScene
     {
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         guiManager.DismissBackButton();
-        guiManager.AnimateFrames(SceneManager.DisplayContent.GAME);
 
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         levelManager.SetCurrentLevelByNumber(iLevelSlotIndex + 1);

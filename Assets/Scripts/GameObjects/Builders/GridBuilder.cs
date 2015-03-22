@@ -8,10 +8,6 @@ public class GridBuilder : MonoBehaviour
     public List<GameObject> m_gridAnchors { get; set; }
     public List<GameObject> m_constraintGridAnchors { get; set; } //the grid anchors the players can use to draw axes
     public Vector2 m_gridSize { get; set; }
-    public int m_minNumLines; //minimal number of lines in the grid
-    public int m_minNumColumns; //minimal number of columns in the grid
-    private int m_prevMinNumLines;
-    private int m_prevMinNumColumns;
     public int m_numLines { get; set; }
     public int m_numColumns { get; set; }
     public float m_gridSpacing { get; set; }
@@ -24,21 +20,34 @@ public class GridBuilder : MonoBehaviour
         m_constraintGridAnchors = new List<GameObject>();
     }
 
-    public void Build()
+    public void Build(bool bDestroyPreviousGrid = true)
     {
         //fresh build destroy a previously created anchorsHolder and clear the vector of gridAnchors
         GameObject anchorsHolder = GameObject.FindGameObjectWithTag("AnchorsHolder");
-        if (anchorsHolder != null)
-            DestroyImmediate(anchorsHolder);
+        if (bDestroyPreviousGrid)
+        {
+            if (anchorsHolder != null)
+                DestroyImmediate(anchorsHolder);
+
+            anchorsHolder = new GameObject();
+            anchorsHolder.name = "AnchorsHolder";
+            anchorsHolder.tag = "AnchorsHolder";
+            anchorsHolder.transform.parent = this.transform;
+            anchorsHolder.transform.localPosition = Vector3.zero;
+
+            anchorsHolder.AddComponent<GameObjectAnimator>();
+        }
+
+        //clear the vector of anchors
         m_gridAnchors.Clear();
 
-        anchorsHolder = new GameObject();
-        anchorsHolder.name = "AnchorsHolder";
-        anchorsHolder.tag = "AnchorsHolder";
-        anchorsHolder.transform.parent = this.transform;
-        anchorsHolder.transform.localPosition = Vector3.zero;
-
-        anchorsHolder.AddComponent<GameObjectAnimator>();
+        //Get the number of min lines and min columns we want for this level
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        Level currentLevel = levelManager.m_currentLevel;
+        int minNumLines = currentLevel.m_gridMinNumLines;
+        int minNumColumns = currentLevel.m_gridMinNumColumns;
+        int exactNumLines = currentLevel.m_gridExactNumLines;
+        int exactNumColumns = currentLevel.m_gridExactNumColumns;
 
         //get the screen viewport dimensions
         float fCameraSize = Camera.main.orthographicSize;
@@ -50,11 +59,20 @@ public class GridBuilder : MonoBehaviour
 
         //The grid occupies 85% of the screen height and 90% of the screen width
         m_gridSize = new Vector2(0.9f * fScreenWidthInUnits, 0.78f * fScreenHeightInUnits);
-        float columnGridSpacing = m_gridSize.x / (float) (m_minNumColumns - 1);
-        float lineGridSpacing = m_gridSize.y / (float) (m_minNumLines - 1);
+        float lineGridSpacing, columnGridSpacing;
+        if (exactNumLines > 0)
+            lineGridSpacing = m_gridSize.y / (float)(exactNumLines - 1);
+        else
+            lineGridSpacing = m_gridSize.y / (float)(minNumLines - 1);
+
+        if (exactNumColumns > 0)
+            columnGridSpacing = m_gridSize.x / (float)(exactNumColumns - 1);
+        else
+            columnGridSpacing = m_gridSize.x / (float)(minNumColumns - 1);
         m_gridSpacing = Mathf.Min(columnGridSpacing, lineGridSpacing);
-        m_numColumns = Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
-        m_numLines = Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
+
+        m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
+        m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
         //set the position for the grid
         Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
@@ -358,16 +376,5 @@ public class GridBuilder : MonoBehaviour
         if (constraintAnchorsHolder != null)
             DestroyImmediate(constraintAnchorsHolder);
         m_constraintGridAnchors.Clear();
-    }
-
-    public void Update()
-    {
-        if (m_prevMinNumColumns != m_minNumColumns || m_prevMinNumLines != m_minNumLines)
-        {
-            Build();
-
-            m_prevMinNumColumns = m_minNumColumns;
-            m_prevMinNumLines = m_minNumLines;
-        }
     }
 }

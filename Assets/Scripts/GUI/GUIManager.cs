@@ -118,13 +118,21 @@ public class GUIManager : MonoBehaviour
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-            topFrameAnimator.ScaleTo(new Vector3(topFrameSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             //animate middle frame
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
-            middleFrameAnimator.ScaleTo(new Vector3(middleFrameSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+        }
+        else if (contentToDisplay == SceneManager.DisplayContent.LEVEL_INTRO)
+        {
+            //animate middle frame
+            GameObjectAnimator middleFrameAnimator = framesAnimators[1];
+            middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            Vector3 topFrameSize = middleFrameAnimator.GetGameObjectSize();
+            middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else if (contentToDisplay == SceneManager.DisplayContent.GAME)
         {
@@ -132,7 +140,7 @@ public class GUIManager : MonoBehaviour
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-            topFrameAnimator.ScaleTo(new Vector3(topFrameSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
     }
 
@@ -164,6 +172,7 @@ public class GUIManager : MonoBehaviour
     public void DismissBackButton()
     {
         GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
-        Destroy(backButton.gameObject);
+        if (backButton != null)
+            Destroy(backButton.gameObject);
     }
 }

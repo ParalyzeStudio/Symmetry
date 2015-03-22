@@ -131,21 +131,27 @@ public class ShapeRenderer : MonoBehaviour
         }
     }
 
+    public void SetColor(Color color)
+    {
+        m_color = color;
+        m_prevColor = color;
+        m_shape.m_color = m_color;
+
+        Color[] prevColors = GetComponent<MeshFilter>().sharedMesh.colors;
+        Color[] newColors = new Color[prevColors.Length];
+        for (int colorIndex = 0; colorIndex != newColors.Length; colorIndex++)
+        {
+            newColors[colorIndex] = m_color;
+        }
+
+        GetComponent<MeshFilter>().sharedMesh.colors = newColors;
+    }
+
     public void Update()
     {
         if (!m_color.Equals(m_prevColor))
         {
-            m_prevColor = m_color;
-            m_shape.m_color = m_color;
-
-            Color[] prevColors = GetComponent<MeshFilter>().sharedMesh.colors;
-            Color[] newColors = new Color[prevColors.Length];
-            for (int colorIndex = 0; colorIndex != newColors.Length; colorIndex++)
-            {
-                newColors[colorIndex] = m_color;
-            }
-
-            GetComponent<MeshFilter>().sharedMesh.colors = newColors;
+            SetColor(m_color);
         }
     }
 }

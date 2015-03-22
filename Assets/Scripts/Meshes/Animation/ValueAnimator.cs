@@ -53,9 +53,8 @@ public class ValueAnimator : MonoBehaviour
     protected InterpolationType m_rotatingInterpolationType;
 
     //Store previous values to change them dynamically in inspector
-    private float m_prevOpacity = -1;
+    private float m_prevOpacity;
 
-    /*******************************/
     public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         if (m_opacity == toOpacity)
