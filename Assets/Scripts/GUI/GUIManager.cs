@@ -58,6 +58,8 @@ public class GUIManager : MonoBehaviour
      * **/
     public void BuildFrames()
     {
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
         GameObject topFrame = (GameObject)Instantiate(m_GUIFramePfb);
         GameObject middleFrame = (GameObject)Instantiate(m_GUIFramePfb);
@@ -72,10 +74,8 @@ public class GUIManager : MonoBehaviour
         //set the height of those frames to zero
         GameObjectAnimator topFrameAnimator = topFrame.GetComponent<GameObjectAnimator>();
         GameObjectAnimator middleFrameAnimator = middleFrame.GetComponent<GameObjectAnimator>();
-        //topFrameAnimator.OnScaleChanged(Vector3.zero);
-        //middleFrameAnimator.OnScaleChanged(Vector3.zero);
-        topFrameAnimator.SetScale(Vector3.zero);
-        middleFrameAnimator.SetScale(Vector3.zero);
+        topFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
+        middleFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
     }
 
     /**
@@ -87,6 +87,7 @@ public class GUIManager : MonoBehaviour
         GameObjectAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GameObjectAnimator>();
 
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
         if (contentToDisplay == SceneManager.DisplayContent.MENU)
         {
             framesHolder.transform.position = new Vector3(0, 0, -5);
@@ -117,12 +118,14 @@ public class GUIManager : MonoBehaviour
             //animate top frame
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
             topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             //animate middle frame
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
             middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
@@ -131,6 +134,7 @@ public class GUIManager : MonoBehaviour
             //animate middle frame
             GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
             Vector3 topFrameSize = middleFrameAnimator.GetGameObjectSize();
             middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
@@ -139,6 +143,7 @@ public class GUIManager : MonoBehaviour
             //animate top frame
             GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
             topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
