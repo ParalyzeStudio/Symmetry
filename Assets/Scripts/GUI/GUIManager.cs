@@ -132,11 +132,11 @@ public class GUIManager : MonoBehaviour
         else if (contentToDisplay == SceneManager.DisplayContent.LEVEL_INTRO)
         {
             //animate middle frame
-            GameObjectAnimator middleFrameAnimator = framesAnimators[1];
-            middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
-            Vector3 topFrameSize = middleFrameAnimator.GetGameObjectSize();
-            middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            GameObjectAnimator topFrameAnimator = framesAnimators[0];
+            topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
+            Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
+            topFrameAnimator.ScaleTo(new Vector3(screenSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else if (contentToDisplay == SceneManager.DisplayContent.GAME)
         {

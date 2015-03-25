@@ -35,13 +35,13 @@ public class SceneManager : MonoBehaviour
     /**
      * Replace a scene with another
      * **/
-    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fHideDelay = 0.0f, float fShowDelay = 0.0f)
+    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fHideDelay = 0.0f, float fShowDelay = 0.0f, float fAnimateFramesDelay = 0.0f)
     {
         m_contentToDisplay = contentToDisplay;
 
         //animate frames between scenes
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.AnimateFrames(contentToDisplay, 0.5f);
+        guiManager.AnimateFrames(contentToDisplay, fAnimateFramesDelay);
 
         HideContent(m_displayedContent, 0.5f, fHideDelay);
         ShowContent(m_contentToDisplay, bShowWithAnimation, fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one

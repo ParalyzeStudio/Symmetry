@@ -13,6 +13,7 @@ public class Level
     public int m_gridMinNumColumns { get; set; }
     public int m_gridExactNumLines { get; set; }
     public int m_gridExactNumColumns { get; set; }
+    public float m_maxGridSpacing { get; set; }
 
     public Level()
     {

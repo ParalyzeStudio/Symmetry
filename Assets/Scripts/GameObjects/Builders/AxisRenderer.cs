@@ -45,10 +45,11 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint1GridPosition = gridPosition;
             m_buildStatus = BuildStatus.FIRST_ENDPOINT_SET;
 
-            GameHUD gameHUD = GameObject.FindGameObjectWithTag("GameHUD").GetComponent<GameHUD>();
-            if (gameHUD.m_selectedActionButton != null)
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            GameScene gameScene = (GameScene)sceneManager.m_currentScene;
+            if (gameScene.m_selectedActionButton != null)
             {
-                Symmetrizer.SymmetryType symmetryType = this.gameObject.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(gameHUD.m_activeActionTag);
+                Symmetrizer.SymmetryType symmetryType = this.gameObject.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(gameScene.m_activeActionTag);
                 gridBuilder.RenderConstraintAnchors(m_endpoint1GridPosition, symmetryType);
             }
         }

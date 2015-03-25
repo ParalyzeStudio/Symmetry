@@ -30,6 +30,9 @@ public class Triangulable
     {
         List<Vector2> triangles = new List<Vector2>();
 
+        if (this is Shape)
+            Debug.Log("shape");
+
         Triangulation.Process(m_contour, ref triangles);
 
         m_area = 0;

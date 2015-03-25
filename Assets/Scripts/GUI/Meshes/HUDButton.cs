@@ -2,8 +2,6 @@
 
 public class HUDButton : GUIQuadButton
 {
-    private GameHUD m_gameHUD;
-
     //Ids for HUD buttons
     //Action buttons
     public enum HUDButtonID
@@ -30,7 +28,16 @@ public class HUDButton : GUIQuadButton
     protected override void Start()
     {
         base.Start();
-        m_gameHUD = GameObject.FindGameObjectWithTag("GameHUD").GetComponent<GameHUD>();
+    }
+
+    public void SetSize(Vector2 size)
+    {
+        Transform[] childTransforms = this.transform.parent.gameObject.GetComponentsInChildren<Transform>();
+        for (int i = 0; i != childTransforms.Length; i++)
+        {
+            if (childTransforms[i] != this.transform.parent)
+                childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
+        }
     }
 
     public override bool OnPress()
@@ -92,8 +99,7 @@ public class HUDButton : GUIQuadButton
         {
             string actionTag = GetActionTagForButtonID(m_ID);
 
-            GameObject axesObject = GameObject.FindGameObjectWithTag("Axes");
-            AxesHolder axesHolder = axesObject.GetComponent<AxesHolder>();
+            AxesHolder axesHolder = GetGameScene().GetComponentInChildren<AxesHolder>();
             GameObject axisUnderConstruction = axesHolder.GetAxisBeingBuilt();
             if (axisUnderConstruction != null)
             {
@@ -108,37 +114,37 @@ public class HUDButton : GUIQuadButton
 
     private void OnClickVerticalAxis()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXIS_VERTICAL;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXIS_VERTICAL;
     }
 
     private void OnClickHorizontalAxis()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL;
     }
 
     private void OnClickStraightAxes()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXES_STRAIGHT;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXES_STRAIGHT;
     }
 
     private void OnClickLeftDiagonalAxis()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT;
     }
 
     private void OnClickRightDiagonalAxis()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT;
     }
 
     private void OnClickDiagonalAxes()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXES_DIAGONALS;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXES_DIAGONALS;
     }
 
     private void OnClickAllAxes()
     {
-        m_gameHUD.m_activeActionTag = GameHUD.ACTION_TAG_SYMMETRY_AXES_ALL;
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXES_ALL;
     }
 
     private void OnClickShapesButton()
@@ -149,20 +155,26 @@ public class HUDButton : GUIQuadButton
     private string GetActionTagForButtonID(HUDButtonID iID)
     {
         if (iID == HUDButtonID.ID_SYMMETRY_ALL_AXES)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXES_ALL;
+            return GameScene.ACTION_TAG_SYMMETRY_AXES_ALL;
         else if (iID == HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT;
+            return GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT;
         else if (iID == HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT;
+            return GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT;
         else if (iID == HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL;
+            return GameScene.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL;
         else if (iID == HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXIS_VERTICAL;
+            return GameScene.ACTION_TAG_SYMMETRY_AXIS_VERTICAL;
         else if (iID == HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXES_STRAIGHT;
+            return GameScene.ACTION_TAG_SYMMETRY_AXES_STRAIGHT;
         else if (iID == HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES)
-            return GameHUD.ACTION_TAG_SYMMETRY_AXES_DIAGONALS;
+            return GameScene.ACTION_TAG_SYMMETRY_AXES_DIAGONALS;
         else
             return string.Empty;
+    }
+
+    private GameScene GetGameScene()
+    {
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        return (GameScene)sceneManager.m_currentScene;
     }
 }

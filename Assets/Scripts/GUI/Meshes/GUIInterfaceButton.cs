@@ -83,12 +83,12 @@ public class GUIInterfaceButton : GUIQuadButton
             SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
             if (displayedContent == SceneManager.DisplayContent.CHAPTERS)
             {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f, 0.5f);
                 guiManager.DismissBackButton();
             }
             else if (displayedContent == SceneManager.DisplayContent.LEVELS)
             {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f, 0.5f);
             }
         }
         else if (m_ID == GUIInterfaceButtonID.ID_CLOSE_BUTTON)

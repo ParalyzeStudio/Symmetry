@@ -12,7 +12,7 @@ public class LevelIntro : GUIScene
         ShowChapterAndLevel(fDelay);
 
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 5.0f, 0.7f);
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 5.0f, 0.7f, 5.0f);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)

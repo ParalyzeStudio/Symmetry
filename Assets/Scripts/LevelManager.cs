@@ -86,6 +86,9 @@ public class LevelManager : MonoBehaviour
             level.m_gridMinNumColumns = (strMinNumColumns == null) ? 0 : int.Parse(strMinNumColumns);
         }
 
+        string strMaxGridSpacing = gridNode.GetValue("@maxGridSpacing");
+        level.m_maxGridSpacing = (strMaxGridSpacing == null) ? -1 : float.Parse(strMaxGridSpacing);
+
         //Parse contours
         XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
         level.m_contours.Capacity = contoursNodeList.Count;

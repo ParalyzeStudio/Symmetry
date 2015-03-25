@@ -13,7 +13,7 @@ public class HUDTouchHandler : TouchHandler
 
     private HUDButton FindButtonContainingPointerLocation(Vector2 pointerLocation)
     {
-        List<HUDButton> actionButtons = this.gameObject.GetComponent<GameHUD>().m_actionButtons;
+        List<HUDButton> actionButtons = this.gameObject.GetComponent<GameScene>().m_actionButtons;
         for (int iButtonIndex = 0; iButtonIndex != actionButtons.Count; iButtonIndex++)
         {
             HUDButton button = actionButtons[iButtonIndex];
@@ -37,7 +37,7 @@ public class HUDTouchHandler : TouchHandler
 
     private void ReleaseAllActionButtons(List<HUDButton> exceptButtons)
     {
-        List<HUDButton> buttons = this.gameObject.GetComponent<GameHUD>().m_actionButtons;
+        List<HUDButton> buttons = this.gameObject.GetComponent<GameScene>().m_actionButtons;
         if (exceptButtons.Count == 0)
         {
             for (int iButtonIndex = 0; iButtonIndex != buttons.Count; iButtonIndex++)
@@ -80,7 +80,7 @@ public class HUDTouchHandler : TouchHandler
         else
         {
             //Release previously pressed button by releasing everything except the selected actionButton
-            HUDButton selectedActionButton = this.gameObject.GetComponent<GameHUD>().m_selectedActionButton;
+            HUDButton selectedActionButton = this.gameObject.GetComponent<GameScene>().m_selectedActionButton;
             if (selectedActionButton != null)
             {
                 List<HUDButton> releaseExceptButtons = new List<HUDButton>();
@@ -97,25 +97,25 @@ public class HUDTouchHandler : TouchHandler
         base.OnPointerUp();
 
         //Check if OnPointerUp() has been called on an action button
-        GameHUD gameHUD = this.gameObject.GetComponent<GameHUD>();
-        List<HUDButton> buttons = this.gameObject.GetComponent<GameHUD>().m_actionButtons;
+        GameScene gameScene = this.gameObject.GetComponent<GameScene>();
+        List<HUDButton> buttons = gameScene.m_actionButtons;
         for (int iButtonIndex = 0; iButtonIndex != buttons.Count; iButtonIndex++)
         {
             HUDButton button = buttons[iButtonIndex];
             if (button.m_state == GUIQuadButton.ButtonState.PRESSED) //this button has been pressed
             {
-                if (gameHUD.m_selectedActionButton == null) //no action button was selected previously 
+                if (gameScene.m_selectedActionButton == null) //no action button was selected previously 
                 {
                     button.OnClick();
-                    gameHUD.m_selectedActionButton = button;
+                    gameScene.m_selectedActionButton = button;
                 }
                 else
                 {
-                    if (gameHUD.m_selectedActionButton != button)
+                    if (gameScene.m_selectedActionButton != button)
                     {
-                        gameHUD.m_selectedActionButton.OnRelease(); //release the previously selected button
+                        gameScene.m_selectedActionButton.OnRelease(); //release the previously selected button
                         button.OnClick();
-                        gameHUD.m_selectedActionButton = button;
+                        gameScene.m_selectedActionButton = button;
                     }
                 }
             }
