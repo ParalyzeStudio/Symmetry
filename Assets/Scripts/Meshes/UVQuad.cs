@@ -5,7 +5,7 @@ public class UVQuad : MonoBehaviour
 {
     public Vector4 m_textureRange;
     public TextureWrapMode m_textureWrapMode;
-    private bool m_isTextured; //is this quad textured. If not we don't need to update UVs and wrap mode
+    protected bool m_isTextured; //is this quad textured. If not we don't need to update UVs and wrap mode
 
     //private variables to prevent unity from calling update functions for nothing
     private Vector4 m_prevTextureRange;
@@ -19,8 +19,18 @@ public class UVQuad : MonoBehaviour
 
     protected virtual void Start()
     {
-        Texture quadMainTexture = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
-        m_isTextured = (quadMainTexture != null);
+        MeshRenderer quadRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        if (quadRenderer == null)
+        {
+            m_isTextured = false;
+            return;
+        } 
+        Texture quadMainTexture = quadRenderer.sharedMaterial.mainTexture;
+        if (quadMainTexture == null)
+        {
+            m_isTextured = false;
+            return;
+        }
         InitQuadMesh();
     }
 

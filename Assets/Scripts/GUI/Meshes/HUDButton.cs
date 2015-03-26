@@ -17,25 +17,20 @@ public class HUDButton : GUIQuadButton
 
     public HUDButtonID m_ID { get; set; }
 
-    public enum HUDButtonType
-    {
-        ACTION,
-        INTERFACE
-    }
-
-    public HUDButtonType m_type { get; set; }
-
     protected override void Start()
     {
-        base.Start();
+        //MeshRenderer skinRenderer = this.gameObject.GetComponentsInChildren<MeshRenderer>()[0];
+        //Texture quadMainTexture = skinRenderer.sharedMaterial.mainTexture;
+        //m_isTextured = (quadMainTexture != null);
+        //InitQuadMesh();
     }
 
     public void SetSize(Vector2 size)
     {
-        Transform[] childTransforms = this.transform.parent.gameObject.GetComponentsInChildren<Transform>();
+        Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();
         for (int i = 0; i != childTransforms.Length; i++)
         {
-            if (childTransforms[i] != this.transform.parent)
+            if (childTransforms[i] != this.transform)
                 childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
         }
     }
@@ -46,8 +41,8 @@ public class HUDButton : GUIQuadButton
             return false;
 
         //Move the skin by 6 pixels right and bottom
-        GameObject buttonSkin = this.gameObject;
-        buttonSkin.transform.localPosition += new Vector3(6, -6, 0);
+        Transform skinTransform = this.gameObject.GetComponentsInChildren<Transform>()[1];
+        skinTransform.localPosition += new Vector3(6, -6, 0);
 
         return true;
     }
@@ -58,8 +53,8 @@ public class HUDButton : GUIQuadButton
             return false;
 
         //Move the skin by 6 pixels left and top
-        GameObject buttonSkin = this.gameObject;
-        buttonSkin.transform.localPosition -= new Vector3(6, -6, 0);
+        Transform skinTransform = this.gameObject.GetComponentsInChildren<Transform>()[1];
+        skinTransform.localPosition -= new Vector3(6, -6, 0);
 
         return true;
     }
@@ -95,20 +90,17 @@ public class HUDButton : GUIQuadButton
                 break;
         }
 
-        if (m_type == HUDButtonType.ACTION)
+        string actionTag = GetActionTagForButtonID(m_ID);
+
+        AxesHolder axesHolder = GetGameScene().GetComponentInChildren<AxesHolder>();
+        GameObject axisUnderConstruction = axesHolder.GetAxisBeingBuilt();
+        if (axisUnderConstruction != null)
         {
-            string actionTag = GetActionTagForButtonID(m_ID);
+            Vector2 axisFirstEndpointGridPosition = axisUnderConstruction.GetComponent<AxisRenderer>().m_endpoint1GridPosition;
 
-            AxesHolder axesHolder = GetGameScene().GetComponentInChildren<AxesHolder>();
-            GameObject axisUnderConstruction = axesHolder.GetAxisBeingBuilt();
-            if (axisUnderConstruction != null)
-            {
-                Vector2 axisFirstEndpointGridPosition = axisUnderConstruction.GetComponent<AxisRenderer>().m_endpoint1GridPosition;
-
-                GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
-                Symmetrizer.SymmetryType symmetryType = axisUnderConstruction.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(actionTag);
-                gridBuilder.RenderConstraintAnchors(axisFirstEndpointGridPosition, symmetryType);
-            }
+            GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
+            Symmetrizer.SymmetryType symmetryType = axisUnderConstruction.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(actionTag);
+            gridBuilder.RenderConstraintAnchors(axisFirstEndpointGridPosition, symmetryType);
         }
     }
 

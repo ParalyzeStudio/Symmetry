@@ -18,7 +18,8 @@ public class HUDTouchHandler : TouchHandler
         {
             HUDButton button = actionButtons[iButtonIndex];
             Vector2 buttonPosition = button.gameObject.transform.position;
-            Vector2 buttonSize = button.gameObject.transform.localScale;
+            Transform skinTransform = button.gameObject.GetComponentsInChildren<Transform>()[1];
+            Vector2 buttonSize = skinTransform.localScale;
             Rect buttonRect = new Rect(-0.5f * buttonSize.x,
                                        -0.5f * buttonSize.y,
                                        buttonSize.x,
