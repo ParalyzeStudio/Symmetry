@@ -15,10 +15,8 @@ public class AxesHolder : MonoBehaviour
     public void BuildAxis(Vector2 gridStartPosition)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
-        newAxis.tag = "SymmetryAxis";
         newAxis.GetComponent<AxisRenderer>().BuildEndpointAtGridPosition(gridStartPosition);
-        GameObject axesObject = GameObject.FindGameObjectWithTag("Axes");
-        newAxis.transform.parent = axesObject.transform;
+        newAxis.transform.parent = this.gameObject.transform;
         newAxis.transform.localPosition = Vector3.zero;
         AddAxis(newAxis);
     }

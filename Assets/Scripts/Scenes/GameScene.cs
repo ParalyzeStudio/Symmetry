@@ -10,7 +10,6 @@ public class GameScene : GUIScene
     public const float CONTOURS_Z_VALUE = -20.0f;
     public const float SHAPES_Z_VALUE = -30.0f;
 
-
     //public GameObject m_gridAnchorSelectedPfb;
 
     public GameObject m_gridPfb;
@@ -60,7 +59,7 @@ public class GameScene : GUIScene
         ShowCounter(fDelay);
         //ShowGUI(fDelay);
         ShowContours(fDelay);
-        ShowShapes(fDelay);
+        ShowInitialShapes(fDelay);
 
         //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         //guiManager.AnimateFrames(SceneManager.DisplayContent.GAME, fDelay);
@@ -223,7 +222,8 @@ public class GameScene : GUIScene
      * **/
     private void ShowCounter(float fDelay)
     {
-
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        int maxActions = levelManager.m_currentLevel.m_maxActions;
     }
 
     /**
@@ -244,7 +244,7 @@ public class GameScene : GUIScene
     /**
      * We set the shapes the player initally starts with
      * **/
-    private void ShowShapes(float fDelay)
+    private void ShowInitialShapes(float fDelay)
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 

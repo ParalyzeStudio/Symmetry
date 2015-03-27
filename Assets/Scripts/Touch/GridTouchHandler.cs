@@ -31,6 +31,7 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnClick()
     {
+        Debug.Log("OnClick");
         Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<GridBuilder>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
         AxisRenderer axisBuilder = IsSettingEndpoints();
         if (axisBuilder) //we build the second endpoint
@@ -49,10 +50,10 @@ public class GridTouchHandler : TouchHandler
      * **/
     private AxisRenderer IsSettingEndpoints()
     {
-        GameObject[] allAxis = GameObject.FindGameObjectsWithTag("SymmetryAxis");
-        for (int axisIndex = 0; axisIndex != allAxis.Length; axisIndex++)
+        AxesHolder axesHolder = GameObject.FindGameObjectWithTag("Axes").GetComponent<AxesHolder>();
+        for (int axisIndex = 0; axisIndex != axesHolder.m_axes.Count; axisIndex++)
         {
-            AxisRenderer axisRenderer = allAxis[axisIndex].GetComponent<AxisRenderer>();
+            AxisRenderer axisRenderer = axesHolder.m_axes[axisIndex].GetComponent<AxisRenderer>();
             if (axisRenderer.m_buildStatus == AxisRenderer.BuildStatus.FIRST_ENDPOINT_SET)
                 return axisRenderer;
         }

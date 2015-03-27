@@ -37,6 +37,10 @@ public class GUITouchHandler : TouchHandler
             {
                 HandleClickOnLevels(clickLocation);
             }
+            else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
+            {
+                HandleClickOnGame(clickLocation);
+            }
         }
     }
 
@@ -207,6 +211,26 @@ public class GUITouchHandler : TouchHandler
                 clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
             {
                 levels.OnClickLevelSlot(iSlotIndex);
+            }
+        }
+    }
+
+    /**
+     * Processes click on game scene
+     * **/
+    public void HandleClickOnGame(Vector2 clickLocation)
+    {
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        GameScene game = (GameScene)sceneManager.m_currentScene;
+
+        GUIInterfaceButton pauseBtn = GUIInterfaceButton.FindInObjectChildrenForID(game.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_PAUSE_BUTTON);
+        if (pauseBtn != null)
+        {
+            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(pauseBtn.transform.position) - clickLocation).magnitude;
+            if (clickLocationToButtonDistance <= m_circleButtonsTouchAreaRadius)
+            {
+                pauseBtn.OnClick();
+                return; //swallow the touch by returning
             }
         }
     }

@@ -10,7 +10,6 @@ public class ContoursBuilder : MonoBehaviour
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
         LevelManager levelManager = levelManagerObject.GetComponent<LevelManager>();
 
-        ContoursHolder contoursHolder = this.gameObject.GetComponent<ContoursHolder>();
         List<Contour> contours = levelManager.m_currentLevel.m_contours;
         foreach (Contour contour in contours)
         {
@@ -35,8 +34,6 @@ public class ContoursBuilder : MonoBehaviour
             contourObject.transform.localPosition = Vector3.zero;
 
             contourObject.AddComponent<GameObjectAnimator>();
-
-            contoursHolder.AddContour(contourObject);
         }
     }
 }

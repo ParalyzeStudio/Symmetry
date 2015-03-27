@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 /**
  * Button used in menus or in game when player has clicked a HUDButton such as options
@@ -64,7 +65,7 @@ public class GUIInterfaceButton : GUIQuadButton
         }
         else if (m_ID == GUIInterfaceButtonID.ID_CREDITS_BUTTON)
         {
-            Debug.Log("OnClick Credits");
+            UnityEngine.Debug.Log("OnClick Credits");
         }
         else if (m_ID == GUIInterfaceButtonID.ID_MUSIC_BUTTON)
         {
@@ -108,6 +109,18 @@ public class GUIInterfaceButton : GUIQuadButton
             {
                 guiManager.DismissOptionsWindow();
             }
+        }
+        else if (m_ID == GUIInterfaceButtonID.ID_PAUSE_BUTTON)
+        {
+
+        }
+        else if (m_ID == GUIInterfaceButtonID.ID_RETRY_BUTTON)
+        {
+
+        }
+        else if (m_ID == GUIInterfaceButtonID.ID_HINTS_BUTTON)
+        {
+
         }
     }
 }

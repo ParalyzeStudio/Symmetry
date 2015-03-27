@@ -66,6 +66,11 @@ public class LevelManager : MonoBehaviour
         level.m_number = int.Parse(levelNumber);
         level.m_name = levelName;
 
+        //Parse counter information
+        XMLNode counterNode = levelNode.GetNode("counter>0");
+        string strMaxActions = counterNode.GetValue("@maxActions");
+        level.m_maxActions = int.Parse(strMaxActions);
+
         //Parse grid information
         XMLNode gridNode = levelNode.GetNode("grid>0");
 

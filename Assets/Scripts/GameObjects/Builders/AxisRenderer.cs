@@ -85,7 +85,6 @@ public class AxisRenderer : MonoBehaviour
         OnFinishBuildAxisSegment();
     }
 
-
     /**
      * Callback that is called when axis segment has being drawn
      * **/

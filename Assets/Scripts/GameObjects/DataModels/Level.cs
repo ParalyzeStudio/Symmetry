@@ -9,6 +9,7 @@ public class Level
     public List<Contour> m_contours { get; set; }
     public List<Shape> m_initialShapes { get; set; }
     public List<string> m_actionButtonsTags { get; set; }
+    public int m_maxActions { get; set; }
     public int m_gridMinNumLines { get; set; }
     public int m_gridMinNumColumns { get; set; }
     public int m_gridExactNumLines { get; set; }

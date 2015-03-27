@@ -10,8 +10,6 @@ public class ShapeBuilder : MonoBehaviour
      * **/
     public GameObject CreateFromShapeData(Shape shapeData)
     {
-        ShapesHolder shapesHolder = this.gameObject.GetComponent<ShapesHolder>();
-
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
         shapeRenderer.m_shape = shapeData;
@@ -19,6 +17,9 @@ public class ShapeBuilder : MonoBehaviour
 
         clonedShapeObject.transform.parent = this.gameObject.transform;
         clonedShapeObject.transform.localPosition = Vector3.zero;
+
+        ShapesHolder shapesHolder = this.gameObject.GetComponent<ShapesHolder>();
+        shapesHolder.AddShapeObject(clonedShapeObject);
 
         return clonedShapeObject;
     }
@@ -28,9 +29,6 @@ public class ShapeBuilder : MonoBehaviour
      * **/
     public GameObject CreateFromContourAndColor(List<Vector2> contour, Color color)
     {
-        //Create two new shapes from the left and right triangles
-        ShapesHolder shapesHolder = this.gameObject.GetComponent<ShapesHolder>();
-
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
         Shape shapeData = new Shape();
@@ -42,6 +40,9 @@ public class ShapeBuilder : MonoBehaviour
 
         clonedShapeObject.transform.parent = this.gameObject.transform;
         clonedShapeObject.transform.localPosition = Vector3.zero;
+
+        ShapesHolder shapesHolder = this.gameObject.GetComponent<ShapesHolder>();
+        shapesHolder.AddShapeObject(clonedShapeObject);
 
         return clonedShapeObject;
     }
