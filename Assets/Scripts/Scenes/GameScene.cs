@@ -29,7 +29,7 @@ public class GameScene : GUIScene
     //interface buttons prefabs
     public GameObject m_menuBtnPfb;
     public GameObject m_retryBtnPfb;
-    public GameObject m_hintBtnPfb;
+    public GameObject m_hintsBtnPfb;
 
     //Action tags
     public const string ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL = "SYMMETRY_AXIS_HORIZONTAL";
@@ -201,7 +201,7 @@ public class GameScene : GUIScene
         interfaceButton.SetSize(interfaceButtonSize);
 
         //retry button
-        GameObject clonedRetryBtn = (GameObject)Instantiate(m_menuBtnPfb);
+        GameObject clonedRetryBtn = (GameObject)Instantiate(m_retryBtnPfb);
         clonedRetryBtn.transform.parent = interfaceButtonsHolder.transform;
         float retryBtnXPosition = menuBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedRetryBtn.transform.localPosition = new Vector3(retryBtnXPosition, 0, 0);
@@ -209,7 +209,7 @@ public class GameScene : GUIScene
         interfaceButton.SetSize(interfaceButtonSize);
 
         //hints button
-        GameObject clonedHintsBtn = (GameObject)Instantiate(m_menuBtnPfb);
+        GameObject clonedHintsBtn = (GameObject)Instantiate(m_hintsBtnPfb);
         clonedHintsBtn.transform.parent = interfaceButtonsHolder.transform;
         float hintsBtnXPosition = retryBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedHintsBtn.transform.localPosition = new Vector3(hintsBtnXPosition, 0, 0);

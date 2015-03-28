@@ -38,12 +38,13 @@ public class GameController : MonoBehaviour
 
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
-        m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
+        m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
+        //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         guiManager.Init();
-        //guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
-        guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
+        guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
+        //guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
 
         TouchHandler.s_touchDeactivated = false;
     }

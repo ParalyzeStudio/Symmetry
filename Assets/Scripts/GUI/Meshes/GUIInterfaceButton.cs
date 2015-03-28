@@ -6,6 +6,8 @@ using System;
  * **/
 public class GUIInterfaceButton : GUIQuadButton
 {
+    public float m_touchAreaRadius = 65.0f;
+
     public enum GUIInterfaceButtonID
     {
         ID_OPTIONS_BUTTON = 1,
@@ -58,6 +60,8 @@ public class GUIInterfaceButton : GUIQuadButton
 
     public override void OnClick()
     {
+        Debug.Log("m_ID: " + m_ID);
+
         if (m_ID == GUIInterfaceButtonID.ID_OPTIONS_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
@@ -112,15 +116,15 @@ public class GUIInterfaceButton : GUIQuadButton
         }
         else if (m_ID == GUIInterfaceButtonID.ID_PAUSE_BUTTON)
         {
-
+            Debug.Log("PAUSE");
         }
         else if (m_ID == GUIInterfaceButtonID.ID_RETRY_BUTTON)
         {
-
+            Debug.Log("RETRY");
         }
         else if (m_ID == GUIInterfaceButtonID.ID_HINTS_BUTTON)
         {
-
+            Debug.Log("HINTS");
         }
     }
 }
