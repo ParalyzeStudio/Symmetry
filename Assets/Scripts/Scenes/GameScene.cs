@@ -126,6 +126,10 @@ public class GameScene : GUIScene
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         List<string> actionTags = levelManager.m_currentLevel.m_actionButtonsTags;
 
+        GameObject actionButtonsHolder = new GameObject("ActionButtonsHolder");
+        actionButtonsHolder.transform.parent = this.gameObject.transform;
+        actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, ACTION_BUTTONS_Z_VALUE);
+
         float gapBetweenButtons = 20.0f;
         float distanceToScreenLeftSide = 60.0f;
         Vector2 actionButtonSize = new Vector2(96.0f, 96.0f);
@@ -138,8 +142,7 @@ public class GameScene : GUIScene
                               numberOfActionButtons * actionButtonSize.x +
                               numberOfActionButtons * gapBetweenButtons +
                               0.5f * actionButtonSize.x;
-            float yPosition = 0.428f * screenSize.y;
-            Vector2 buttonLocalPosition = new Vector2(xPosition, yPosition);
+            Vector2 buttonLocalPosition = new Vector2(xPosition, 0);
 
             string tag = actionTags[iTagIndex];
             GameObject clonedButton = null;
@@ -147,30 +150,28 @@ public class GameScene : GUIScene
             if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
             {
                 clonedButton = (GameObject)Instantiate(m_allAxesPfb);
-                clonedButton.transform.parent = this.gameObject.transform;
-                clonedButton.transform.localPosition = buttonLocalPosition;
                 hudButton = clonedButton.GetComponent<HUDButton>();
                 hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
             {
                 clonedButton = (GameObject)Instantiate(m_horAxisPfb);
-                clonedButton.transform.parent = this.gameObject.transform;
-                clonedButton.transform.localPosition = buttonLocalPosition;
                 hudButton = clonedButton.GetComponent<HUDButton>();
                 hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
             {
-                clonedButton = (GameObject)Instantiate(m_vertAxisPfb);
-                clonedButton.transform.parent = this.gameObject.transform;
-                clonedButton.transform.localPosition = buttonLocalPosition;
+                clonedButton = (GameObject)Instantiate(m_vertAxisPfb);                
                 hudButton = clonedButton.GetComponent<HUDButton>();
                 hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
             }
 
             if (clonedButton != null)
+            {
+                clonedButton.transform.parent = actionButtonsHolder.transform;
+                clonedButton.transform.localPosition = buttonLocalPosition;
                 m_actionButtons.Add(clonedButton.GetComponentInChildren<HUDButton>());
+            }
 
             if (hudButton != null)
                 hudButton.SetSize(actionButtonSize);

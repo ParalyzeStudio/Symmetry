@@ -18,7 +18,8 @@ public class GUIInterfaceButton : GUIQuadButton
         ID_CLOSE_BUTTON,
         ID_PAUSE_BUTTON,
         ID_RETRY_BUTTON,
-        ID_HINTS_BUTTON
+        ID_HINTS_BUTTON,
+        ID_BACK_TO_LEVELS_BUTTON
     }
 
     public GUIInterfaceButtonID m_ID;
@@ -113,10 +114,15 @@ public class GUIInterfaceButton : GUIQuadButton
             {
                 guiManager.DismissOptionsWindow();
             }
+            else if (guiManager.IsPauseWindowShown())
+            {
+                guiManager.DismissPauseWindow();
+            }
         }
         else if (m_ID == GUIInterfaceButtonID.ID_PAUSE_BUTTON)
         {
-            Debug.Log("PAUSE");
+            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            guiManager.ShowPauseWindow();
         }
         else if (m_ID == GUIInterfaceButtonID.ID_RETRY_BUTTON)
         {

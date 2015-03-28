@@ -31,7 +31,7 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnClick()
     {
-        Debug.Log("OnClick");
+        Debug.Log("OnClick grid");
         Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<GridBuilder>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
         AxisRenderer axisBuilder = IsSettingEndpoints();
         if (axisBuilder) //we build the second endpoint

@@ -27,7 +27,9 @@ public class GUITouchHandler : TouchHandler
         bool bClickProcessed = false;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
         if (guiManager.IsOptionsWindowShown()) //an options window is displayed, process it on the window and swallow the click
-            bClickProcessed = HandleClickOnChildrenInterfaceButtons(guiManager.m_optionsWindow, clickLocation);
+            HandleClickOnChildrenInterfaceButtons(guiManager.m_optionsWindow, clickLocation);
+        else if (guiManager.IsPauseWindowShown()) //a pause window is displayed, process it on the window and swallow the click
+            HandleClickOnChildrenInterfaceButtons(guiManager.m_pauseWindow, clickLocation);
         else
         {
             bClickProcessed = HandleClickOnChildrenInterfaceButtons(currentScene.gameObject, clickLocation);

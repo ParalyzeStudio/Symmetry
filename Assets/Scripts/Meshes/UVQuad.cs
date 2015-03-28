@@ -20,6 +20,8 @@ public class UVQuad : MonoBehaviour
     protected virtual void Start()
     {
         MeshRenderer quadRenderer = this.gameObject.GetComponent<MeshRenderer>();
+
+        m_isTextured = true;
         if (quadRenderer == null)
         {
             m_isTextured = false;
@@ -29,8 +31,8 @@ public class UVQuad : MonoBehaviour
         if (quadMainTexture == null)
         {
             m_isTextured = false;
-            return;
         }
+        
         InitQuadMesh();
     }
 

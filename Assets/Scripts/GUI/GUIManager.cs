@@ -6,9 +6,11 @@
 public class GUIManager : MonoBehaviour
 {
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
+    public GameObject m_pauseWindowPfb; //the prefab needed to instantiate the pause window
     public GameObject m_GUIFramePfb; //the prefab containing a background frame
     public GameObject m_backButtonPfb; //the prefab for the back button
     public GameObject m_optionsWindow { get; set; } //the actual options window
+    public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
 
     public Color[] m_framesColors;
 
@@ -46,11 +48,43 @@ public class GUIManager : MonoBehaviour
     }
 
     /**
+     * Shows the pause window on top of the current scene
+     * **/
+    public void ShowPauseWindow()
+    {
+        if (m_pauseWindow == null)
+        {
+            m_pauseWindow = (GameObject)Instantiate(m_pauseWindowPfb);
+            m_pauseWindow.transform.parent = this.gameObject.transform;
+        }
+    }
+
+    /**
+     * Dismisses the pause window
+     * **/
+    public void DismissPauseWindow()
+    {
+        if (m_pauseWindow != null)
+        {
+            Destroy(m_pauseWindow);
+            m_pauseWindow = null;
+        }
+    }
+
+    /**
      * Tells if the options window is displayed
      * **/
     public bool IsOptionsWindowShown()
     {
         return m_optionsWindow != null;
+    }
+
+    /**
+     * Tells if the pause window is displayed
+     * **/
+    public bool IsPauseWindowShown()
+    {
+        return m_pauseWindow != null;
     }
 
     /**
