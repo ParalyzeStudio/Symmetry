@@ -7,8 +7,8 @@ public class GameScene : GUIScene
     public const float ACTION_BUTTONS_Z_VALUE = -30.0f;
 
     public const float GRID_Z_VALUE = -10.0f;
-    public const float CONTOURS_Z_VALUE = -20.0f;
-    public const float SHAPES_Z_VALUE = -30.0f;
+    public const float CONTOURS_Z_VALUE = -200.0f;
+    public const float SHAPES_Z_VALUE = -20.0f;
 
     //public GameObject m_gridAnchorSelectedPfb;
 

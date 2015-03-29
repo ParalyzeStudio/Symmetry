@@ -101,15 +101,19 @@ public class GUIManager : MonoBehaviour
         topFrame.transform.parent = framesHolder.transform;
         middleFrame.transform.parent = framesHolder.transform;
 
-        //set the color
-        topFrame.GetComponent<TintColorMaterialAssignment>().m_tintColor = m_framesColors[0];
-        middleFrame.GetComponent<TintColorMaterialAssignment>().m_tintColor = m_framesColors[1];
-
         //set the height of those frames to zero
         GameObjectAnimator topFrameAnimator = topFrame.GetComponent<GameObjectAnimator>();
         GameObjectAnimator middleFrameAnimator = middleFrame.GetComponent<GameObjectAnimator>();
         topFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
         middleFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
+
+        //init material for both frames
+        middleFrame.GetComponent<TintColorMaterialAssignment>().InitMeshRendererMaterial();
+        topFrame.GetComponent<TintColorMaterialAssignment>().InitMeshRendererMaterial();
+
+        //set the color
+        topFrameAnimator.SetColor(m_framesColors[0]);
+        middleFrameAnimator.SetColor(m_framesColors[1]);
     }
 
     /**
@@ -118,7 +122,9 @@ public class GUIManager : MonoBehaviour
     public void AnimateFrames(SceneManager.DisplayContent contentToDisplay, float fDelay = 0.0f)
     {
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
-        GameObjectAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GameObjectAnimator>();
+        GUIFrameAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GUIFrameAnimator>();
+        GUIFrameAnimator topFrameAnimator = framesAnimators[0];
+        GUIFrameAnimator middleFrameAnimator = framesAnimators[1];
 
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
@@ -130,7 +136,7 @@ public class GUIManager : MonoBehaviour
             float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
             float topFrameHeight = 2 * distanceToScreenTopBorder;
 
-            GameObjectAnimator topFrameAnimator = framesAnimators[0];
+            
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 fromScale = new Vector3(screenSize.x, 0, 1);
@@ -139,7 +145,7 @@ public class GUIManager : MonoBehaviour
             topFrameAnimator.ScaleTo(toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             float middleFrameHeight = topFrameHeight + 0.23f * screenSize.y;
-            GameObjectAnimator middleFrameAnimator = framesAnimators[1];
+      
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
             fromScale = new Vector3(screenSize.x, 0, 1);
@@ -150,14 +156,12 @@ public class GUIManager : MonoBehaviour
         else if (contentToDisplay == SceneManager.DisplayContent.CHAPTERS || contentToDisplay == SceneManager.DisplayContent.LEVELS)
         {
             //animate top frame
-            GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
             topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
             //animate middle frame
-            GameObjectAnimator middleFrameAnimator = framesAnimators[1];
             middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
@@ -165,8 +169,7 @@ public class GUIManager : MonoBehaviour
         }
         else if (contentToDisplay == SceneManager.DisplayContent.LEVEL_INTRO)
         {
-            //animate middle frame
-            GameObjectAnimator topFrameAnimator = framesAnimators[0];
+            //animate top frame
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
@@ -174,12 +177,13 @@ public class GUIManager : MonoBehaviour
         }
         else if (contentToDisplay == SceneManager.DisplayContent.GAME)
         {
+            Debug.Log("DISPLAY GAME");
             //animate top frame
-            GameObjectAnimator topFrameAnimator = framesAnimators[0];
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
             topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            topFrameAnimator.ColorChangeTo(new Color(1, 0, 0, 1), 0.8f, fDelay); 
         }
     }
 

@@ -52,6 +52,16 @@ public class ValueAnimator : MonoBehaviour
     protected float m_rotatingElapsedTime;
     protected InterpolationType m_rotatingInterpolationType;
 
+    //Variables to handle color variation
+    protected bool m_colorChanging;
+    protected Color m_color;
+    protected Color m_fromColor;
+    protected Color m_toColor;
+    protected float m_colorChangingDuration;
+    protected float m_colorChangingDelay;
+    protected float m_colorChangingElapsedTime;
+    protected InterpolationType m_colorChangingInterpolationType;
+
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity;
 
@@ -102,6 +112,17 @@ public class ValueAnimator : MonoBehaviour
         m_rotatingInterpolationType = interpolType;
     }
 
+    public void ColorChangeTo(Color toColor, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    {
+        m_colorChanging = true;
+        m_fromColor = m_color;
+        m_toColor = toColor;
+        m_colorChangingDuration = duration;
+        m_colorChangingDelay = delay;
+        m_colorChangingElapsedTime = 0;
+        m_colorChangingInterpolationType = interpolType;
+    }
+
     public void RotateToAroundAxis(float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_rotationAxis = axis;
@@ -110,10 +131,7 @@ public class ValueAnimator : MonoBehaviour
 
     public virtual void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
-        if (fOpacity > 1)
-            fOpacity = 1;
-        else if (fOpacity < 0)
-            fOpacity = 0;
+        MathUtils.Clamp(ref fOpacity, 0, 1);
 
         m_opacity = fOpacity;
         m_prevOpacity = fOpacity;
@@ -156,6 +174,19 @@ public class ValueAnimator : MonoBehaviour
         m_rotationAxis = axis;
     }
 
+    public virtual void SetColor(Color color)
+    {
+        m_color = color;
+
+        //clamp color channels values between 0 and 1
+        MathUtils.Clamp(ref m_color.r, 0, 1);
+        MathUtils.Clamp(ref m_color.g, 0, 1);
+        MathUtils.Clamp(ref m_color.b, 0, 1);
+        MathUtils.Clamp(ref m_color.a, 0, 1);
+
+        OnColorChanged();
+    }
+
     public virtual void IncOpacity(float deltaOpacity)
     {
         float fOpacity = m_opacity + deltaOpacity;
@@ -180,6 +211,12 @@ public class ValueAnimator : MonoBehaviour
         SetRotationAngle(fAngle);
     }
 
+    public virtual void IncColor(Color deltaColor)
+    {
+        Color color = m_color + deltaColor;
+        SetColor(color);
+    }
+
     public virtual void OnOpacityChanged()
     {
         
@@ -200,6 +237,11 @@ public class ValueAnimator : MonoBehaviour
 
     }
 
+    public virtual void OnColorChanged()
+    {
+
+    }
+
     public virtual void OnFinishFading()
     {
 
@@ -216,6 +258,11 @@ public class ValueAnimator : MonoBehaviour
     }
 
     public virtual void OnFinishRotating()
+    {
+
+    }
+
+    public virtual void OnFinishColorChanging()
     {
 
     }
@@ -341,6 +388,36 @@ public class ValueAnimator : MonoBehaviour
         }
     }
 
+    protected virtual void UpdateColor(float dt)
+    {
+        if (m_colorChanging)
+        {
+            bool inDelay = (m_colorChangingElapsedTime < m_colorChangingDelay);
+            m_colorChangingElapsedTime += dt;
+            if (m_colorChangingElapsedTime > m_colorChangingDelay)
+            {
+                if (inDelay) //we were in delay previously
+                    dt = m_colorChangingElapsedTime - m_colorChangingDelay;
+                float effectiveElapsedTime = m_colorChangingElapsedTime - m_colorChangingDelay;
+                Vector4 deltaColor = Vector4.zero;
+                Vector4 colorVariation = m_toColor - m_fromColor;
+                if (m_colorChangingInterpolationType == InterpolationType.LINEAR)
+                    deltaColor = dt / m_colorChangingDuration * colorVariation;
+                else if (m_colorChangingInterpolationType == InterpolationType.SINUSOIDAL)
+                    deltaColor = colorVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_colorChangingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_colorChangingDuration)));
+
+                if (effectiveElapsedTime > m_colorChangingDuration)
+                {
+                    SetColor(m_toColor);
+                    m_colorChanging = false;
+                    OnFinishColorChanging();
+                }
+                else
+                    IncColor(deltaColor);
+            }
+        }
+    }
+
     protected virtual void Update()
     {
         float dt = Time.deltaTime;
@@ -355,5 +432,6 @@ public class ValueAnimator : MonoBehaviour
         UpdatePosition(dt);
         UpdateRotation(dt);
         UpdateScale(dt);
+        UpdateColor(dt);
     }
 }

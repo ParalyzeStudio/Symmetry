@@ -74,4 +74,22 @@ public class MathUtils
     {
         return u.x * v.x + u.y * v.y;
     }
+
+    /**
+     * Clamps float value between valueA and valueB
+     * **/
+    static public void Clamp(ref float fValue, float fValueA, float fValueB)
+    {
+        if (fValueA > fValueB) //reorder values by ascending order
+        {
+            float tmpValue = fValueB;
+            fValueB = fValueA;
+            fValueA = tmpValue;
+        }
+        
+        if (fValue > fValueB)
+            fValue = fValueB;
+        else if (fValue < fValueA)
+            fValue = fValueA;
+    }
 }
