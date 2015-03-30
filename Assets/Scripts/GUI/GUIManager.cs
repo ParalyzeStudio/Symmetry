@@ -177,13 +177,12 @@ public class GUIManager : MonoBehaviour
         }
         else if (contentToDisplay == SceneManager.DisplayContent.GAME)
         {
-            Debug.Log("DISPLAY GAME");
             //animate top frame
             topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
             topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
             Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
             topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-            topFrameAnimator.ColorChangeTo(new Color(1, 0, 0, 1), 0.8f, fDelay); 
+            topFrameAnimator.ColorChangeTo(new Color(0.69f, 0.24f, 0.24f, 1), 0.8f, fDelay); 
         }
     }
 
