@@ -2,14 +2,6 @@
 
 public class GUITouchHandler : TouchHandler
 {
-//    public float m_circleButtonsTouchAreaRadius;
-    private GameController m_gameController;
-
-    public override void Start()
-    {
-        m_gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
-    }
-
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         return true;

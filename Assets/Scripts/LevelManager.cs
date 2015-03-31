@@ -35,7 +35,6 @@ public class LevelManager : MonoBehaviour
     {
         Chapter chapter = new Chapter(iChapterNumber);
 
-        string chapterDirectoryPath = "Chapter" + iChapterNumber;
         for (int iLevelIdx = 0; iLevelIdx != chapter.m_levels.Length; iLevelIdx++)
         {
             Level parsedLevel = ParseLevelFile(iChapterNumber, iLevelIdx + 1);

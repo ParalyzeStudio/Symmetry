@@ -13,8 +13,7 @@ public class Counter : MonoBehaviour
 
     public void Build()
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Level currentLevel = levelManager.m_currentLevel;
+        //LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 
         float elementSpacing = 92.0f;
         //int maxActions = levelManager.m_currentLevel.m_maxActions;
