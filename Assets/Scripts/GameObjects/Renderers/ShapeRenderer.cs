@@ -34,9 +34,9 @@ public class ShapeRenderer : MonoBehaviour
         m_color = m_shape.m_color;
         m_prevColor = m_color;
 
-        //Obtain the GridBuilder to make transformations from grid coordinates to world coordinates
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
+        //Obtain the Grid to make transformations from grid coordinates to world coordinates
+        GameScene gameScene = (GameScene) GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Grid grid = gameScene.m_grid;
 
         //Build the mesh
         Mesh mesh;
@@ -64,7 +64,7 @@ public class ShapeRenderer : MonoBehaviour
             for (int i = 0; i != 3; i++) //loop over the 3 vertices of this triangle
             {
                 GridTriangle gridTriangle = m_shape.m_gridTriangles[iTriangleIndex];
-                vertices[iTriangleIndex * 3 + i] = gridBuilder.GetWorldCoordinatesFromGridCoordinates(gridTriangle.m_points[i]);
+                vertices[iTriangleIndex * 3 + i] = grid.GetWorldCoordinatesFromGridCoordinates(gridTriangle.m_points[i]);
                 normals[iTriangleIndex * 3 + i] = Vector3.forward;
                 colors[iTriangleIndex * 3 + i] = m_shape.m_color;
             }

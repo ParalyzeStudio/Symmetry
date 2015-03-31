@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class ContoursBuilder : MonoBehaviour
+public class Contours : MonoBehaviour
 {
     public GameObject m_contourSegmentPfb;
 

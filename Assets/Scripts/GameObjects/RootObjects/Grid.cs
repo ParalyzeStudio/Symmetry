@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 [ExecuteInEditMode]
-public class GridBuilder : MonoBehaviour
+public class Grid : MonoBehaviour
 {
     public List<GameObject> m_gridAnchors { get; set; }
     public List<GameObject> m_constraintGridAnchors { get; set; } //the grid anchors the players can use to draw axes

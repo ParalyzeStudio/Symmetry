@@ -33,9 +33,8 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildEndpointAtGridPosition(Vector2 gridPosition)
     {
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        GridBuilder gridBuilder = (GridBuilder)gridObject.GetComponent<GridBuilder>();
-        Vector2 worldPosition = gridBuilder.GetWorldCoordinatesFromGridCoordinates(gridPosition);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 worldPosition = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPosition);
 
         if (m_endpoint1 == null) //no endpoints set yet, initiate the first one
         {
@@ -45,12 +44,10 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint1GridPosition = gridPosition;
             m_buildStatus = BuildStatus.FIRST_ENDPOINT_SET;
 
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            GameScene gameScene = (GameScene)sceneManager.m_currentScene;
             if (gameScene.m_selectedActionButton != null)
             {
                 Symmetrizer.SymmetryType symmetryType = this.gameObject.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(gameScene.m_activeActionTag);
-                gridBuilder.RenderConstraintAnchors(m_endpoint1GridPosition, symmetryType);
+                gameScene.m_grid.RenderConstraintAnchors(m_endpoint1GridPosition, symmetryType);
             }
         }
         else
@@ -64,7 +61,7 @@ public class AxisRenderer : MonoBehaviour
                 m_buildStatus = BuildStatus.SECOND_ENDPOINT_SET;
                 BuildAxisSegment();
 
-                gridBuilder.RemoveConstraintAnchors();
+                gameScene.m_grid.RemoveConstraintAnchors();
             }
         }
     }
@@ -96,10 +93,10 @@ public class AxisRenderer : MonoBehaviour
 
     public Vector2 GetAxisCenterInWorldCoordinates()
     {
-        GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         Vector2 gridAxisCenter = 0.5f * (m_endpoint1GridPosition + m_endpoint2GridPosition);
-        Vector2 worldAxisCenter = gridBuilder.GetWorldCoordinatesFromGridCoordinates(gridAxisCenter);
+        Vector2 worldAxisCenter = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridAxisCenter);
 
         return worldAxisCenter;
     }

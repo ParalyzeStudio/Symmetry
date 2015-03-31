@@ -13,11 +13,11 @@ public class GameScene : GUIScene
 
     //public GameObject m_gridAnchorSelectedPfb;
 
-    public GameObject m_counterPfb;
-    public GameObject m_gridPfb;
-    public GameObject m_contoursHolderPfb;
-    public GameObject m_axesHolderPfb;
-    public GameObject m_shapesHolderPfb;
+    public Grid m_grid { get; set; }
+    public Counter m_counter { get; set; }
+    public Contours m_contours { get; set; }
+    public Shapes m_shapes { get; set; }
+    public Axes m_axes { get; set; }
 
     //action buttons prefabs
     public GameObject m_horAxisPfb;
@@ -62,6 +62,7 @@ public class GameScene : GUIScene
         //ShowGUI(fDelay);
         ShowContours(fDelay);
         ShowInitialShapes(fDelay);
+        m_axes = this.gameObject.GetComponentInChildren<Axes>();
 
         //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         //guiManager.AnimateFrames(SceneManager.DisplayContent.GAME, fDelay);
@@ -78,25 +79,25 @@ public class GameScene : GUIScene
      * **/
     private void ShowGrid(float fDelay)
     {
-        GameObject clonedGrid = (GameObject) Instantiate(m_gridPfb);
-        clonedGrid.transform.parent = this.gameObject.transform;
-        clonedGrid.GetComponent<GridBuilder>().Build(false);
-        Vector3 gridLocalPosition = clonedGrid.transform.localPosition;
-        clonedGrid.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, GRID_Z_VALUE);
+        m_grid = this.gameObject.GetComponentInChildren<Grid>();
+        m_grid.gameObject.transform.parent = this.gameObject.transform;
+        m_grid.Build(false);
+        Vector3 gridLocalPosition = m_grid.gameObject.transform.localPosition;
+        m_grid.gameObject.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, GRID_Z_VALUE);
 
-        GameObjectAnimator gridAnimator = clonedGrid.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator gridAnimator = m_grid.gameObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 0.5f, fDelay);
 
         ///*** DEBUG TMP ***/
-        ///GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
-        ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
-        ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
-        ////List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
-        //List<GameObject> anchors = gridBuilder.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
+        //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
+        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
+        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
+        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
+        //List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
         //foreach (GameObject anchor in anchors)
         //{
-        //    Vector2 gridPos = gridBuilder.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
+        //    Vector2 gridPos = grid.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
         //    Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
         //    Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
         //}
@@ -227,12 +228,12 @@ public class GameScene : GUIScene
     {
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
-        GameObject counterObject = (GameObject) Instantiate(m_counterPfb);
-        counterObject.transform.parent = this.gameObject.transform;
-        counterObject.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
-        Counter counter = counterObject.GetComponent<Counter>();
-        counter.Init();
-        counter.Build();
+        m_counter = this.gameObject.GetComponentInChildren<Counter>();
+        m_counter.gameObject.transform.parent = this.gameObject.transform;
+        m_counter.gameObject.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
+
+        m_counter.Init();
+        m_counter.Build();
     }
 
     /**
@@ -240,12 +241,12 @@ public class GameScene : GUIScene
      * **/
     private void ShowContours(float fDelay)
     {
-        GameObject clonedContours = (GameObject)Instantiate(m_contoursHolderPfb);
-        clonedContours.transform.parent = this.gameObject.transform;
-        clonedContours.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
-        clonedContours.GetComponent<ContoursBuilder>().Build();
+        m_contours = this.gameObject.GetComponentInChildren<Contours>();
+        m_contours.transform.parent = this.gameObject.transform;
+        m_contours.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
+        m_contours.Build();
 
-        GameObjectAnimator contoursAnimator = clonedContours.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator contoursAnimator = m_contours.gameObject.GetComponent<GameObjectAnimator>();
         contoursAnimator.SetOpacity(0);
         contoursAnimator.FadeTo(1, 0.5f, fDelay);
     }
@@ -257,10 +258,10 @@ public class GameScene : GUIScene
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 
-        GameObject clonedShapes = (GameObject) Instantiate(m_shapesHolderPfb);
-        clonedShapes.transform.parent = this.gameObject.transform;
-        clonedShapes.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
-        ShapeBuilder shapeBuilder = clonedShapes.GetComponent<ShapeBuilder>();
+        m_shapes = this.gameObject.GetComponentInChildren<Shapes>();
+        m_shapes.gameObject.transform.parent = this.gameObject.transform;
+        m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
+
         List<Shape> initialShapes = levelManager.m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
@@ -269,12 +270,12 @@ public class GameScene : GUIScene
             //First triangulate the shape
             shape.Triangulate();
 
-            shapeBuilder.CreateFromShapeData(shape);
+            m_shapes.CreateShapeFromData(shape);
         }
 
-        clonedShapes.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
+        m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
-        GameObjectAnimator shapesAnimator = clonedShapes.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetOpacity(0);
         shapesAnimator.FadeTo(1, 0.5f, fDelay);
     }

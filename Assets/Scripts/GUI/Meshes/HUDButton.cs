@@ -92,15 +92,15 @@ public class HUDButton : GUIQuadButton
 
         string actionTag = GetActionTagForButtonID(m_ID);
 
-        AxesHolder axesHolder = GetGameScene().GetComponentInChildren<AxesHolder>();
-        GameObject axisUnderConstruction = axesHolder.GetAxisBeingBuilt();
+        Axes axes = GetGameScene().GetComponentInChildren<Axes>();
+        GameObject axisUnderConstruction = axes.GetAxisBeingBuilt();
         if (axisUnderConstruction != null)
         {
             Vector2 axisFirstEndpointGridPosition = axisUnderConstruction.GetComponent<AxisRenderer>().m_endpoint1GridPosition;
 
-            GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
             Symmetrizer.SymmetryType symmetryType = axisUnderConstruction.GetComponent<Symmetrizer>().GetSymmetryTypeForActionTag(actionTag);
-            gridBuilder.RenderConstraintAnchors(axisFirstEndpointGridPosition, symmetryType);
+            gameScene.m_grid.RenderConstraintAnchors(axisFirstEndpointGridPosition, symmetryType);
         }
     }
 

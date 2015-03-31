@@ -5,12 +5,12 @@ public class GridTouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
-        Vector2 gridSize = gridBuilder.m_gridSize;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Grid grid = gameScene.m_grid;
+        Vector2 gridSize = grid.m_gridSize;
         Vector2 gridPosition = this.gameObject.transform.position;
 
-        float borderThickness = 0.5f * gridBuilder.m_gridSpacing;
+        float borderThickness = 0.5f * grid.m_gridSpacing;
         Vector2 gridMax = gridPosition + 0.5f * gridSize + new Vector2(borderThickness, borderThickness);
         Vector2 gridMin = gridPosition - 0.5f * gridSize - new Vector2(borderThickness, borderThickness);
 
@@ -32,7 +32,7 @@ public class GridTouchHandler : TouchHandler
     protected override void OnClick()
     {
         Debug.Log("OnClick grid");
-        Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<GridBuilder>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
+        Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
         AxisRenderer axisBuilder = IsSettingEndpoints();
         if (axisBuilder) //we build the second endpoint
         {
@@ -40,8 +40,8 @@ public class GridTouchHandler : TouchHandler
         }
         else //We can build another axis
         {
-            AxesHolder axesHolder = GameObject.FindGameObjectWithTag("Axes").GetComponent<AxesHolder>();
-            axesHolder.BuildAxis(clickedAnchorGridCoords);
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            gameScene.m_axes.BuildAxis(clickedAnchorGridCoords);
         }
     }
 
@@ -50,10 +50,10 @@ public class GridTouchHandler : TouchHandler
      * **/
     private AxisRenderer IsSettingEndpoints()
     {
-        AxesHolder axesHolder = GameObject.FindGameObjectWithTag("Axes").GetComponent<AxesHolder>();
-        for (int axisIndex = 0; axisIndex != axesHolder.m_axes.Count; axisIndex++)
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        for (int axisIndex = 0; axisIndex != gameScene.m_axes.m_childrenAxes.Count; axisIndex++)
         {
-            AxisRenderer axisRenderer = axesHolder.m_axes[axisIndex].GetComponent<AxisRenderer>();
+            AxisRenderer axisRenderer = gameScene.m_axes.m_childrenAxes[axisIndex].GetComponent<AxisRenderer>();
             if (axisRenderer.m_buildStatus == AxisRenderer.BuildStatus.FIRST_ENDPOINT_SET)
                 return axisRenderer;
         }

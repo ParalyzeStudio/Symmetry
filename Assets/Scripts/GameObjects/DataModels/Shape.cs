@@ -26,9 +26,8 @@ public class Shape : Triangulable
      * **/
     public void Fusion()
     {
-        GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
-        ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
-        ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        ShapeRenderer[] shapeRenderers = gameScene.m_shapes.GetComponentsInChildren<ShapeRenderer>();
 
         //Find the shapes that overlaps this shape
         List<Shape> shapesToUnion = new List<Shape>();
@@ -49,13 +48,12 @@ public class Shape : Triangulable
         Shape resultingShape = ClippingBooleanOperations.ShapesUnion(shapesToUnion);
         if (resultingShape != null)
         {
-            ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
-            shapeBuilder.CreateFromShapeData(resultingShape);
+            gameScene.m_shapes.CreateShapeFromData(resultingShape);
 
             //Destroy all previous shapes
             for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
             {
-                shapesHolder.DestroyShape(shapeRenderers[iShapeIndex].gameObject);
+                gameScene.m_shapes.DestroyShape(shapeRenderers[iShapeIndex].gameObject);
             }
         }
 

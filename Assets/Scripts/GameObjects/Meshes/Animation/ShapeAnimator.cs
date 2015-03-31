@@ -44,8 +44,8 @@ public class ShapeAnimator : GameObjectAnimator
             }
         }
 
-        GridBuilder gridBuilder = GameObject.FindGameObjectWithTag("Grid").GetComponent<GridBuilder>();
-        Vector2 objectSize = gridBuilder.GetWorldCoordinatesFromGridCoordinates(maxCoords) - gridBuilder.GetWorldCoordinatesFromGridCoordinates(minCoords);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 objectSize = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(maxCoords) - gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(minCoords);
         return GeometryUtils.BuildVector3FromVector2(objectSize, 1);
     }
 

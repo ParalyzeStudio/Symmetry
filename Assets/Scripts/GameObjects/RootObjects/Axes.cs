@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
-public class AxesHolder : MonoBehaviour 
+public class Axes : MonoBehaviour
 {
-    public List<GameObject> m_axes { get; set; }
+    public List<GameObject> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
 
     public void Awake()
     {
-        m_axes = new List<GameObject>();
+        m_childrenAxes = new List<GameObject>();
     }
 
     public void BuildAxis(Vector2 gridStartPosition)
@@ -23,16 +22,16 @@ public class AxesHolder : MonoBehaviour
 
     public void AddAxis(GameObject axis)
     {
-        m_axes.Add(axis);
+        m_childrenAxes.Add(axis);
     }
 
     public void RemoveAxis(GameObject axis)
     {
-        for (int axisIndex = 0; axisIndex != m_axes.Count; axisIndex++)
+        for (int axisIndex = 0; axisIndex != m_childrenAxes.Count; axisIndex++)
         {
-            if (m_axes[axisIndex] == axis)
+            if (m_childrenAxes[axisIndex] == axis)
             {
-                m_axes.Remove(axis);
+                m_childrenAxes.Remove(axis);
                 return;
             }
         }
@@ -40,14 +39,14 @@ public class AxesHolder : MonoBehaviour
 
     public void ClearAxes()
     {
-        m_axes.Clear();
+        m_childrenAxes.Clear();
     }
 
     public GameObject GetAxisBeingBuilt()
     {
-        for (int iAxisIndex = 0; iAxisIndex != m_axes.Count; iAxisIndex++)
+        for (int iAxisIndex = 0; iAxisIndex != m_childrenAxes.Count; iAxisIndex++)
         {
-            GameObject axis = m_axes[iAxisIndex];
+            GameObject axis = m_childrenAxes[iAxisIndex];
             if (axis.GetComponent<AxisRenderer>().m_buildStatus == AxisRenderer.BuildStatus.FIRST_ENDPOINT_SET)
                 return axis;
         }

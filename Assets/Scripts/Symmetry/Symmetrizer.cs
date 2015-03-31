@@ -38,8 +38,7 @@ public class Symmetrizer : MonoBehaviour
 
     public void SymmetrizeByAxis()
     {
-        GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
-        ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         //Extract, triangles
         List<List<GridTriangle> > leftTriangles, rightTriangles;
@@ -61,7 +60,7 @@ public class Symmetrizer : MonoBehaviour
                 shapeData.m_color = new Color(1, 0, 0, 1);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
-                GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+                GameObject newShapeObject = gameScene.m_shapes.CreateShapeFromData(shapeData);
                 ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                 shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
@@ -80,7 +79,7 @@ public class Symmetrizer : MonoBehaviour
                 shapeData.m_color = new Color(1, 0, 0, 1);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
-                GameObject newShapeObject = shapeBuilder.CreateFromShapeData(shapeData);
+                GameObject newShapeObject = gameScene.m_shapes.CreateShapeFromData(shapeData);
                 ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                 shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
@@ -119,15 +118,13 @@ public class Symmetrizer : MonoBehaviour
         Vector2 axisNormal = new Vector2(axisDirection.y, -axisDirection.x); //take the normal in clockwise order compared to the axisDirection
 
         ////First get all triangles
-        GameObject shapesObj = GameObject.FindGameObjectWithTag("Shapes");
-        ShapesHolder shapesHolder = shapesObj.GetComponent<ShapesHolder>();
-        ShapeRenderer[] shapeRenderers = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         List<List<GridTriangle>> allShapeTriangles = new List<List<GridTriangle>>(); //the vector containing all triangles in the scene per shape
-        allShapeTriangles.Capacity = shapeRenderers.Length;
+        allShapeTriangles.Capacity = gameScene.m_shapes.m_shapesObj.Count;
 
-        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != gameScene.m_shapes.m_shapesObj.Count; iShapeIndex++)
         {
-            Shape shape = shapeRenderers[iShapeIndex].m_shape;
+            Shape shape = gameScene.m_shapes.m_shapesObj[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
             List<GridTriangle> shapeTriangles = shape.m_gridTriangles;
             allShapeTriangles.Add(shapeTriangles);
         }
@@ -235,12 +232,11 @@ public class Symmetrizer : MonoBehaviour
         List<Vector2> intersections = new List<Vector2>();
         intersections.Capacity = 2;
 
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
-        Vector2 gridTopLeft = new Vector2(1, gridBuilder.m_numLines);
-        Vector2 gridTopRight = new Vector2(gridBuilder.m_numColumns, gridBuilder.m_numLines);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 gridTopLeft = new Vector2(1, gameScene.m_grid.m_numLines);
+        Vector2 gridTopRight = new Vector2(gameScene.m_grid.m_numColumns, gameScene.m_grid.m_numLines);
         Vector2 gridBottomLeft = new Vector2(1, 1);
-        Vector2 gridBottomRight = new Vector2(gridBuilder.m_numColumns, 1);
+        Vector2 gridBottomRight = new Vector2(gameScene.m_grid.m_numColumns, 1);
 
         bool intersects;
         Vector2 intersection;

@@ -85,9 +85,9 @@ public class GameController : MonoBehaviour
     public bool IsVictory()
     {
         //First we check if one of the shapes intersects a contour
-        GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
-        ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
-        List<GameObject> allShapeObjects = shapesHolder.m_shapesObj;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Shapes shapes = gameScene.GetComponentInChildren<Shapes>();
+        List<GameObject> allShapeObjects = shapes.m_shapesObj;
         List<Contour> allContours = m_levelManager.m_currentLevel.m_contours;
         float shapesArea = 0;
         for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)

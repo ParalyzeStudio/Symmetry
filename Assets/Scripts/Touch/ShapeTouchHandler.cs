@@ -22,8 +22,8 @@ public class ShapeTouchHandler : TouchHandler
     {
         base.OnPointerDown(pointerLocation);
 
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        gridObject.GetComponent<GridBuilder>().GetGridCoordinatesFromWorldCoordinates(pointerLocation);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(pointerLocation);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
@@ -54,8 +54,8 @@ public class ShapeTouchHandler : TouchHandler
         //calculate the world position of this vertex by adding the game object transform.position
         firstShapeVertex += GeometryUtils.BuildVector2FromVector3(this.gameObject.transform.position);
 
-        GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-        Vector2 newGridAnchorCoords = gridObject.GetComponent<GridBuilder>().GetClosestGridAnchorCoordinatesForPosition(firstShapeVertex);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 newGridAnchorCoords = gameScene.m_grid.GetClosestGridAnchorCoordinatesForPosition(firstShapeVertex);
         Vector2 shift = newGridAnchorCoords - oldGridAnchorCoords;
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices

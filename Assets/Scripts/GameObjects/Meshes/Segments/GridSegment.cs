@@ -27,10 +27,9 @@ public class GridSegment : Segment
             m_prevStartPointGrid = m_startPointGrid;
             m_prevEndPointGrid = m_endPointGrid;
 
-            GameObject gridObject = GameObject.FindGameObjectWithTag("Grid");
-            GridBuilder gridBuilder = gridObject.GetComponent<GridBuilder>();
-            m_startPoint = gridBuilder.GetWorldCoordinatesFromGridCoordinates(m_startPointGrid);
-            m_endPoint = gridBuilder.GetWorldCoordinatesFromGridCoordinates(m_endPointGrid);   
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            m_startPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_startPointGrid);
+            m_endPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_endPointGrid);   
         }
 
         base.Update();
