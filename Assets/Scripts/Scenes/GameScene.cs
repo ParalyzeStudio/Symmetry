@@ -5,6 +5,7 @@ public class GameScene : GUIScene
 {
     public const float INTERFACE_BUTTONS_Z_VALUE = -30.0f;
     public const float ACTION_BUTTONS_Z_VALUE = -30.0f;
+    public const float COUNTER_Z_VALUE = -30.0f;
 
     public const float GRID_Z_VALUE = -10.0f;
     public const float CONTOURS_Z_VALUE = -200.0f;
@@ -12,6 +13,7 @@ public class GameScene : GUIScene
 
     //public GameObject m_gridAnchorSelectedPfb;
 
+    public GameObject m_counterPfb;
     public GameObject m_gridPfb;
     public GameObject m_contoursHolderPfb;
     public GameObject m_axesHolderPfb;
@@ -128,7 +130,7 @@ public class GameScene : GUIScene
 
         GameObject actionButtonsHolder = new GameObject("ActionButtonsHolder");
         actionButtonsHolder.transform.parent = this.gameObject.transform;
-        actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, ACTION_BUTTONS_Z_VALUE);
+        actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
 
         float gapBetweenButtons = 20.0f;
         float distanceToScreenLeftSide = 60.0f;
@@ -223,8 +225,14 @@ public class GameScene : GUIScene
      * **/
     private void ShowCounter(float fDelay)
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        int maxActions = levelManager.m_currentLevel.m_maxActions;
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
+        GameObject counterObject = (GameObject) Instantiate(m_counterPfb);
+        counterObject.transform.parent = this.gameObject.transform;
+        counterObject.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
+        Counter counter = counterObject.GetComponent<Counter>();
+        counter.Init();
+        counter.Build();
     }
 
     /**
