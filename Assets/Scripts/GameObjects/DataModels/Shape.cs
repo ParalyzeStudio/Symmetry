@@ -53,7 +53,9 @@ public class Shape : Triangulable
             //Destroy all previous shapes
             for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
             {
-                gameScene.m_shapes.DestroyShape(shapeRenderers[iShapeIndex].gameObject);
+                GameObject shapeObject = shapeRenderers[iShapeIndex].gameObject;
+                gameScene.m_shapes.DestroyShape(shapeObject);
+                gameScene.m_shapes.RemoveShapeObject(shapeObject);
             }
         }
 

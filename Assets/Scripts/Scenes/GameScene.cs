@@ -133,6 +133,8 @@ public class GameScene : GUIScene
         actionButtonsHolder.transform.parent = this.gameObject.transform;
         actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
 
+        GameObjectAnimator holderAnimator = actionButtonsHolder.AddComponent<GameObjectAnimator>();
+
         float gapBetweenButtons = 20.0f;
         float distanceToScreenLeftSide = 60.0f;
         Vector2 actionButtonSize = new Vector2(96.0f, 96.0f);
@@ -179,6 +181,9 @@ public class GameScene : GUIScene
             if (hudButton != null)
                 hudButton.SetSize(actionButtonSize);
         }
+
+        holderAnimator.SetOpacity(0);
+        holderAnimator.FadeTo(1, 0.2f, fDelay);
     }
 
     /**
@@ -192,6 +197,8 @@ public class GameScene : GUIScene
         GameObject interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
         interfaceButtonsHolder.transform.parent = this.gameObject.transform;
         interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, INTERFACE_BUTTONS_Z_VALUE);
+
+        GameObjectAnimator holderAnimator = interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
 
         float distanceToRightBorder = 30.0f;
         float distanceBetweenButtons = 30.0f;
@@ -219,6 +226,9 @@ public class GameScene : GUIScene
         clonedHintsBtn.transform.localPosition = new Vector3(hintsBtnXPosition, 0, 0);
         interfaceButton = clonedHintsBtn.GetComponent<GUIInterfaceButton>();
         interfaceButton.SetSize(interfaceButtonSize);
+
+        holderAnimator.SetOpacity(0);
+        holderAnimator.FadeTo(1, 0.2f, fDelay);
     }
 
     /**
@@ -234,6 +244,10 @@ public class GameScene : GUIScene
 
         m_counter.Init();
         m_counter.Build();
+
+        GameObjectAnimator counterAnimator = m_counter.gameObject.GetComponent<GameObjectAnimator>();
+        counterAnimator.SetOpacity(0);
+        counterAnimator.FadeTo(1, 0.2f, fDelay);
     }
 
     /**

@@ -126,7 +126,8 @@ public class GUIInterfaceButton : GUIQuadButton
         }
         else if (m_ID == GUIInterfaceButtonID.ID_RETRY_BUTTON)
         {
-            Debug.Log("RETRY");
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f);
         }
         else if (m_ID == GUIInterfaceButtonID.ID_HINTS_BUTTON)
         {

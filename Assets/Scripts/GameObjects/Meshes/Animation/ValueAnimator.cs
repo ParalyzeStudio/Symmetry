@@ -242,6 +242,11 @@ public class ValueAnimator : MonoBehaviour
 
     }
 
+    public virtual void OnStartFading()
+    {
+        
+    }
+
     public virtual void OnFinishFading()
     {
 
@@ -276,7 +281,10 @@ public class ValueAnimator : MonoBehaviour
             if (m_fadingElapsedTime >= m_fadingDelay)
             {
                 if (inDelay) //we were in delay previously
+                {
                     dt = m_fadingElapsedTime - m_fadingDelay;
+                    OnStartFading();
+                }
                 float effectiveElapsedTime = m_fadingElapsedTime - m_fadingDelay;
                 float deltaOpacity = 0;
                 float opacityVariation = m_toOpacity - m_fromOpacity;
