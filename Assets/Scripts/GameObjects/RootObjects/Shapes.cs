@@ -14,7 +14,7 @@ public class Shapes : MonoBehaviour
     /**
      * Build a shape game object from shape data (contour/triangles, color)
      * **/
-    public GameObject CreateShapeFromData(Shape shapeData)
+    public GameObject CreateShapeObjectFromData(Shape shapeData)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
@@ -32,7 +32,7 @@ public class Shapes : MonoBehaviour
     /**
      * Build a shape game object from a contour and a color
      * **/
-    public GameObject CreateShapeFromContourAndColor(List<Vector2> contour, Color color)
+    public GameObject CreateShapeObjectFromContourAndColor(List<Vector2> contour, Color color)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();

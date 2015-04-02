@@ -20,6 +20,47 @@ public class Shape : Triangulable
         m_color = color;
     }
 
+    public override void Triangulate()
+    {
+        List<Vector2> triangles = new List<Vector2>();
+
+        Triangulation.Process(m_contour, ref triangles);
+
+        m_area = 0;
+        for (int iVertexIndex = 0; iVertexIndex != triangles.Count; iVertexIndex += 3)
+        {
+            ShapeTriangle shapeTriangle = new ShapeTriangle(this);
+            shapeTriangle.m_points[0] = triangles[iVertexIndex];
+            shapeTriangle.m_points[1] = triangles[iVertexIndex + 1];
+            shapeTriangle.m_points[2] = triangles[iVertexIndex + 2];
+
+            m_gridTriangles.Add(shapeTriangle);
+            m_area += shapeTriangle.GetArea();
+        }
+    }
+
+    public List<ShapeTriangle> GetShapeTriangles()
+    {
+        List<ShapeTriangle> shapeTriangles = new List<ShapeTriangle>();
+        shapeTriangles.Capacity = m_gridTriangles.Count;
+        for (int i = 0; i != m_gridTriangles.Count; i++)
+        {
+            shapeTriangles.Add((ShapeTriangle) m_gridTriangles[i]);
+        }
+
+        return shapeTriangles;
+    }
+
+    public void SetShapeTriangles(List<ShapeTriangle> shapeTriangles)
+    {
+        m_gridTriangles.Clear();
+        m_gridTriangles.Capacity = shapeTriangles.Count;
+        for (int i = 0; i != shapeTriangles.Count; i++)
+        {
+            m_gridTriangles.Add(shapeTriangles[i]);
+        }
+    }
+
     /**
      * Fusion this shape with every shape that overlaps it. 
      * Every shape except 'this' is destroyed and their triangle are added to 'this' shape
@@ -48,7 +89,7 @@ public class Shape : Triangulable
         Shape resultingShape = ClippingBooleanOperations.ShapesUnion(shapesToUnion);
         if (resultingShape != null)
         {
-            gameScene.m_shapes.CreateShapeFromData(resultingShape);
+            gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 
             //Destroy all previous shapes
             for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
@@ -58,29 +99,6 @@ public class Shape : Triangulable
                 gameScene.m_shapes.RemoveShapeObject(shapeObject);
             }
         }
-
-
-        //GameObject shapesObject = GameObject.FindGameObjectWithTag("Shapes");
-        //ShapesHolder shapesHolder = shapesObject.GetComponent<ShapesHolder>();
-        //ShapeBuilder shapeBuilder = shapesObject.GetComponent<ShapeBuilder>();
-        //ShapeRenderer[] allShapes = shapesHolder.GetComponentsInChildren<ShapeRenderer>();
-
-        //for (int iShapeIndex = 0; iShapeIndex != allShapes.Length; iShapeIndex++)
-        //{
-        //    Shape shapeData = allShapes[iShapeIndex].m_shape;
-        //    if (shapeData == this)
-        //        continue;
-
-        //    if (this.OverlapsShape(shapeData))
-        //    {
-        //        this.m_gridTriangles.AddRange(shapeData.m_gridTriangles); //add triangles from second shape to the first one
-        //        shapesHolder.DestroyShape(allShapes[iShapeIndex].gameObject); //destroy the second shape
-        //    }
-        //}
-
-        //CalculateContour();
-        //Triangulate();
-        //CalculateArea(); //recalculate the area of this shape after triangles have been added to it
     }
 
     public bool IntersectsContour(Contour contour)

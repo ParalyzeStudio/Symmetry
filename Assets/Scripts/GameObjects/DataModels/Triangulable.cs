@@ -26,7 +26,7 @@ public class Triangulable
         m_gridTriangles = triangles;
     }
 
-    public void Triangulate()
+    public virtual void Triangulate()
     {
         List<Vector2> triangles = new List<Vector2>();
 

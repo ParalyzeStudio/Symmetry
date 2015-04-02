@@ -284,7 +284,7 @@ public class GameScene : GUIScene
             //First triangulate the shape
             shape.Triangulate();
 
-            m_shapes.CreateShapeFromData(shape);
+            m_shapes.CreateShapeObjectFromData(shape);
         }
 
         m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);

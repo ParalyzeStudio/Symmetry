@@ -112,7 +112,7 @@ public class GridTriangle
     {
         return 0.5f * Mathf.Abs(MathUtils.Determinant(m_points[0], m_points[1], m_points[2], false));
     }
-    
+
     /**
      * Finds intersections between a line and the edges of this triangle
      * **/
@@ -135,9 +135,9 @@ public class GridTriangle
             if (intersections.Count == 0
                 ||
                 intersections.Count == 1 && !MathUtils.AreVec2PointsEqual(intersection, intersections[0]))
-            intersections.Add(intersection);
+                intersections.Add(intersection);
         }
-            
+
 
         if (intersections.Count < 2)
         {
@@ -149,12 +149,31 @@ public class GridTriangle
         return intersections;
     }
 
+}
+
+/**
+ * Triangle that belongs to a Shape
+ * **/
+public class ShapeTriangle : GridTriangle
+{
+    public Shape m_parentShape { get; set; }
+
+    public ShapeTriangle() : base()
+    {
+        m_parentShape = null;
+    }
+
+    public ShapeTriangle(Shape parentShape) : base()
+    {
+        m_parentShape = parentShape;
+    }
+
     /**
      * Splits this triangle intersected by a line
      * **/
-    public void Split(Vector2 linePoint1, Vector2 linePoint2, out GridTriangle[] splitTriangles, out int splitTrianglesCount)
+    public void Split(Vector2 linePoint1, Vector2 linePoint2, out ShapeTriangle[] splitTriangles, out int splitTrianglesCount)
     {
-        splitTriangles = new GridTriangle[3];
+        splitTriangles = new ShapeTriangle[3];
         splitTrianglesCount = 0;
 
         List<Vector2> intersections = FindIntersectionsWithLine(linePoint1, linePoint2);
@@ -166,8 +185,8 @@ public class GridTriangle
         int intersection2IsTriangleVertex = PointEqualsVertex(intersections[1]);
         if (intersection1IsTriangleVertex >= 0 || intersection2IsTriangleVertex >= 0) //one of the intersection is equal to a triangle vertex
         {
-            splitTriangles[0] = new GridTriangle();
-            splitTriangles[1] = new GridTriangle();
+            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
+            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
             splitTrianglesCount = 2;
 
             if (intersection1IsTriangleVertex >= 0)
@@ -239,9 +258,9 @@ public class GridTriangle
         }
         else //intersections are strictly inside edges
         {
-            splitTriangles[0] = new GridTriangle();
-            splitTriangles[1] = new GridTriangle();
-            splitTriangles[2] = new GridTriangle();
+            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
+            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
+            splitTriangles[2] = new ShapeTriangle(this.m_parentShape);
             splitTrianglesCount = 3;
 
             //find edges on which intersection points are on
