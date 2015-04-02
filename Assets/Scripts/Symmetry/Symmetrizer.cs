@@ -60,8 +60,7 @@ public class Symmetrizer : MonoBehaviour
 
                 Shape shapeData = new Shape();
                 shapeData.SetShapeTriangles(reflectedTriangles);
-                //shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
-                shapeData.m_color = shapeColor;
+                shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
                 GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
@@ -70,6 +69,7 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
+                shapeObjectAnimator.SetColor(shapeData.m_color);
                 shapeObjectAnimator.ColorChangeTo(shapeColor, 0.5f);
             }
         }
@@ -85,8 +85,7 @@ public class Symmetrizer : MonoBehaviour
 
                 Shape shapeData = new Shape();
                 shapeData.SetShapeTriangles(reflectedTriangles);
-                //shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
-                shapeData.m_color = shapeColor;
+                shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
                 GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
@@ -95,6 +94,7 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
+                shapeObjectAnimator.SetColor(shapeData.m_color);
                 shapeObjectAnimator.ColorChangeTo(shapeColor, 0.5f);
             }
         }

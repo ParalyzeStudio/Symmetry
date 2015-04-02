@@ -90,8 +90,5 @@ public class GameObjectAnimator : ValueAnimator
         pivotPointToObjectCenter.Scale(GetGameObjectSize());
         pivotPointToObjectCenter = rotation * pivotPointToObjectCenter; //rotate this vector
         this.gameObject.transform.localPosition = m_position + pivotPointToObjectCenter;
-
-        if (this is ShapeAnimator)
-            Debug.Log("zPosition:" + this.gameObject.transform.localPosition.z);
     }
 }

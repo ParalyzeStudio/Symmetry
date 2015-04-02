@@ -13,6 +13,14 @@ public class ShapeAnimator : GameObjectAnimator
         shapeRenderer.SetColor(newColor);
     }
 
+    public override void SetColor(Color color)
+    {
+        base.SetColor(color);
+
+        ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
+        shapeRenderer.SetColor(color);
+    }
+
     public override Vector3 GetGameObjectSize()
     {
         Shape shapeData = this.gameObject.GetComponent<ShapeRenderer>().m_shape;
