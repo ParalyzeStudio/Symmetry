@@ -39,6 +39,10 @@ public class GUITouchHandler : TouchHandler
                 {
                     HandleClickOnLevels(clickLocation);
                 }
+                else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.LEVEL_INTRO)
+                {
+                    HandleClickOnLevelIntro(clickLocation);
+                }
                 else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
                 {
                     HandleClickOnGame(clickLocation);
@@ -54,6 +58,18 @@ public class GUITouchHandler : TouchHandler
     {
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
+    }
+
+    /**
+     * The user clicked on the skip button
+     * **/
+    public void OnClickSkipIntro()
+    {
+        Debug.Log("OnClickSkipIntro");
+        return;
+        GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
+        sceneAnimator.FadeTo(0, 0.7f, 5.0f);
     }
 
     /**
@@ -139,6 +155,25 @@ public class GUITouchHandler : TouchHandler
                 levels.OnClickLevelSlot(iSlotIndex);
             }
         }
+    }
+
+    /**
+     * Processes click on levels scene
+     * **/
+    public void HandleClickOnLevelIntro(Vector2 clickLocation)
+    {
+        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+
+        float skipAreaWidth = 800;
+        float skipAreaHeight = 200;
+        Vector2 skipAreaPosition = new Vector2(0, -130.0f); //position of the center of the skip text
+
+        if (clickLocation.x >= skipAreaPosition.x - 0.5f * skipAreaWidth && clickLocation.x <= skipAreaPosition.x + 0.5f * skipAreaWidth
+            &&
+            clickLocation.y <= skipAreaPosition.y + 0.5f * skipAreaHeight && clickLocation.y >= skipAreaPosition.y - 0.5f * skipAreaHeight)
+        {
+            OnClickSkipIntro();
+        }         
     }
 
     /**
