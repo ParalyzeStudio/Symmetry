@@ -71,15 +71,15 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildAxisSegment()
     {
-        m_axisSegment = (GameObject)Instantiate(m_axisSegmentPfb);
-        m_axisSegment.transform.parent = this.transform;
-        AxisSegment segment = m_axisSegment.GetComponent<AxisSegment>();
-        segment.m_startPointGrid = m_endpoint1GridPosition;
-        segment.m_endPointGrid = m_endpoint2GridPosition;
-        m_buildStatus = BuildStatus.BUILDING_SEGMENT;
-        m_buildStatus = BuildStatus.DONE_BUILDING;
+        //m_axisSegment = (GameObject)Instantiate(m_axisSegmentPfb);
+        //m_axisSegment.transform.parent = this.transform;
+        //AxisSegment segment = m_axisSegment.GetComponent<AxisSegment>();
+        //segment.m_startPointGrid = m_endpoint1GridPosition;
+        //segment.m_endPointGrid = m_endpoint2GridPosition;
+        //m_buildStatus = BuildStatus.BUILDING_SEGMENT;
+        //m_buildStatus = BuildStatus.DONE_BUILDING;
 
-        OnFinishBuildAxisSegment();
+        //OnFinishBuildAxisSegment();
     }
 
     /**

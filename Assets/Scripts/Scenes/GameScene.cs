@@ -27,6 +27,7 @@ public class GameScene : GUIScene
     public GameObject m_rightDiagonalAxisPfb;
     public GameObject m_diagonalsAxesPfb;
     public GameObject m_allAxesPfb;
+    public GameObject m_moveShapePfb;
 
     //interface buttons prefabs
     public GameObject m_menuBtnPfb;
@@ -41,6 +42,7 @@ public class GameScene : GUIScene
     public const string ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT = "SYMMETRY_AXIS_DIAGONAL_RIGHT";
     public const string ACTION_TAG_SYMMETRY_AXES_DIAGONALS = "SYMMETRY_AXES_DIAGONALS";
     public const string ACTION_TAG_SYMMETRY_AXES_ALL = "SYMMETRY_AXES_ALL";
+    public const string ACTION_TAG_MOVE_SHAPE = "MOVE_SHAPE";
 
     public string m_activeActionTag { get; set; }
 
@@ -170,6 +172,37 @@ public class GameScene : GUIScene
                 hudButton = clonedButton.GetComponent<HUDButton>();
                 hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
             }
+            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
+            {
+                clonedButton = (GameObject)Instantiate(m_straightAxesPfb);
+                hudButton = clonedButton.GetComponent<HUDButton>();
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES;
+            }
+            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
+            {
+                clonedButton = (GameObject)Instantiate(m_leftDiagonalAxisPfb);
+                hudButton = clonedButton.GetComponent<HUDButton>();
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT;
+            }
+            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
+            {
+                clonedButton = (GameObject)Instantiate(m_rightDiagonalAxisPfb);
+                hudButton = clonedButton.GetComponent<HUDButton>();
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT;
+            }
+            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
+            {
+                clonedButton = (GameObject)Instantiate(m_diagonalsAxesPfb);
+                hudButton = clonedButton.GetComponent<HUDButton>();
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES;
+            }
+            else if (tag.Equals(ACTION_TAG_MOVE_SHAPE))
+            {
+                clonedButton = (GameObject)Instantiate(m_moveShapePfb);
+                hudButton = clonedButton.GetComponent<HUDButton>();
+                hudButton.m_ID = HUDButton.HUDButtonID.ID_MOVE_SHAPE;
+            }
+
 
             if (clonedButton != null)
             {
@@ -292,5 +325,31 @@ public class GameScene : GUIScene
         GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetOpacity(0);
         shapesAnimator.FadeTo(1, 0.5f, fDelay);
+    }
+
+    /**
+     * Method that tells if one of the symmetry HUDButton is selected
+     * **/
+    public bool IsSymmetryHUDButtonSelected()
+    {
+        return (m_activeActionTag != null &&
+                    (
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL) ||
+                    m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL)
+                    )
+               );
+    }
+
+    /**
+     * Method that tells if one of move shape HUDButton is selected
+     * **/
+    public bool IsMoveShapeHUDButtonSelected()
+    {
+        return m_activeActionTag != null && m_activeActionTag.Equals(ACTION_TAG_MOVE_SHAPE);
     }
 }

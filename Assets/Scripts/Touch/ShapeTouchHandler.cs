@@ -4,6 +4,11 @@ public class ShapeTouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
+        //First we verify if we entered the move shape mode
+        GameScene gameScene = (GameScene) GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        if (!gameScene.IsMoveShapeHUDButtonSelected())
+            return false;
+
         //Get the triangles of this shape from the MeshFilter
         float triangleCount = GetComponent<ShapeRenderer>().m_shape.m_gridTriangles.Count;
         Vector3[] vertices = GetComponent<MeshFilter>().mesh.vertices;

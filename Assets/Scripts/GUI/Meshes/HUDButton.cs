@@ -12,7 +12,8 @@ public class HUDButton : GUIQuadButton
         ID_SYMMETRY_AXIS_DIAGONAL_LEFT,
         ID_SYMMETRY_AXIS_DIAGONAL_RIGHT,
         ID_SYMMETRY_DIAGONAL_AXES,
-        ID_SYMMETRY_ALL_AXES
+        ID_SYMMETRY_ALL_AXES,
+        ID_MOVE_SHAPE
     }
 
     public HUDButtonID m_ID { get; set; }
@@ -86,6 +87,9 @@ public class HUDButton : GUIQuadButton
             case HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES:
                 OnClickDiagonalAxes();
                 break;
+            case HUDButtonID.ID_MOVE_SHAPE:
+                OnClickMoveShape();
+                break;
             default:
                 break;
         }
@@ -139,9 +143,9 @@ public class HUDButton : GUIQuadButton
         GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_SYMMETRY_AXES_ALL;
     }
 
-    private void OnClickShapesButton()
+    private void OnClickMoveShape()
     {
-
+        GetGameScene().m_activeActionTag = GameScene.ACTION_TAG_MOVE_SHAPE;
     }
 
     private string GetActionTagForButtonID(HUDButtonID iID)
@@ -160,13 +164,14 @@ public class HUDButton : GUIQuadButton
             return GameScene.ACTION_TAG_SYMMETRY_AXES_STRAIGHT;
         else if (iID == HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES)
             return GameScene.ACTION_TAG_SYMMETRY_AXES_DIAGONALS;
+        else if (iID == HUDButtonID.ID_MOVE_SHAPE)
+            return GameScene.ACTION_TAG_MOVE_SHAPE;
         else
             return string.Empty;
     }
 
     private GameScene GetGameScene()
     {
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        return (GameScene)sceneManager.m_currentScene;
+        return (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
     }
 }
