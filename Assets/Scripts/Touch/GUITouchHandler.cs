@@ -66,10 +66,11 @@ public class GUITouchHandler : TouchHandler
     public void OnClickSkipIntro()
     {
         Debug.Log("OnClickSkipIntro");
-        return;
-        GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
-        sceneAnimator.FadeTo(0, 0.7f, 5.0f);
+        //GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
+        //sceneAnimator.FadeTo(0, 0.7f);
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f, 0.7f);
     }
 
     /**

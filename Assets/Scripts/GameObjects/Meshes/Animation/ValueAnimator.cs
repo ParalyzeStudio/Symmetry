@@ -242,14 +242,9 @@ public class ValueAnimator : MonoBehaviour
 
     }
 
-    public virtual void OnStartFading()
-    {
-        
-    }
-
     public virtual void OnFinishFading()
     {
-
+        
     }
 
     public virtual void OnFinishTranslating()
@@ -283,7 +278,6 @@ public class ValueAnimator : MonoBehaviour
                 if (inDelay) //we were in delay previously
                 {
                     dt = m_fadingElapsedTime - m_fadingDelay;
-                    OnStartFading();
                 }
                 float effectiveElapsedTime = m_fadingElapsedTime - m_fadingDelay;
                 float deltaOpacity = 0;

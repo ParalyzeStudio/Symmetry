@@ -13,7 +13,7 @@ public class LevelIntro : GUIScene
         ShowChapterAndLevel(fDelay);
         ShowSkipButton(fDelay);
 
-        sceneAnimator.FadeTo(0, 0.7f, 500.0f);
+        sceneAnimator.FadeTo(0, 0.7f, 5.0f);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)

@@ -2,15 +2,13 @@
 
 public class SceneAnimator : GameObjectAnimator
 {
-    public override void OnStartFading()
+    public override void OnFinishFading()
     {
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        if (sceneManager.m_displayedContent == SceneManager.DisplayContent.LEVEL_INTRO)
+        LevelIntro levelIntro = this.GetComponent<LevelIntro>();
+        if (levelIntro != null) //this scene is the level intro scene
         {
-            if (m_fromOpacity == 1 && m_toOpacity == 0)
-            {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 0.7f, 0.0f);
-            }
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 0.7f, 0.0f);
         }
     }
 }
