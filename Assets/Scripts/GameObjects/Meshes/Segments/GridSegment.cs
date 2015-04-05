@@ -19,17 +19,33 @@ public class GridSegment : Segment
         m_prevEndPointGrid = new Vector2(-1, -1);
     }
 
+    public void SetStartPointInGridCoordinates(Vector2 startPoint)
+    {
+        m_startPointGrid = startPoint;
+        m_prevStartPointGrid = startPoint;
+
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 worldStartPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPoint);
+        SetStartPoint(worldStartPoint);
+    }
+
+    public void SetEndPointInGridCoordinates(Vector2 endPoint)
+    {
+        m_endPointGrid = endPoint;
+        m_prevEndPointGrid = endPoint;
+
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 worldEndPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(endPoint);
+        SetEndPoint(worldEndPoint);
+    }
+
     protected override void Update()
     {
         if (m_prevStartPointGrid != m_startPointGrid ||
             m_prevEndPointGrid != m_endPointGrid)
         {
-            m_prevStartPointGrid = m_startPointGrid;
-            m_prevEndPointGrid = m_endPointGrid;
-
-            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-            m_startPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_startPointGrid);
-            m_endPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_endPointGrid);   
+            SetStartPointInGridCoordinates(m_startPointGrid);
+            SetEndPointInGridCoordinates(m_endPointGrid);  
         }
 
         base.Update();

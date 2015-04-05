@@ -45,7 +45,7 @@ public class Symmetrizer : MonoBehaviour
         ExtractTrianglesOnBothSidesOfAxis(out leftTriangles, out rightTriangles);
 
         //Rebuild shapes from those lists of triangles
-        AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
+        AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
         Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
         Vector3 axisDirection = axisRenderer.GetAxisDirection();
         
@@ -121,12 +121,9 @@ public class Symmetrizer : MonoBehaviour
      * **/
     private void ExtractTrianglesOnBothSidesOfAxis(out List<List<ShapeTriangle>> leftTriangles, out List<List<ShapeTriangle>> rightTriangles)
     {
-        AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
-        Vector2 axisStartPoint = axisRenderer.m_endpoint1GridPosition;
-        Vector2 axisEndPoint = axisRenderer.m_endpoint2GridPosition;
-        Vector2 axisDirection = axisEndPoint - axisStartPoint;
-        axisDirection.Normalize();
-        Vector2 axisNormal = new Vector2(axisDirection.y, -axisDirection.x); //take the normal in clockwise order compared to the axisDirection
+        AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
+        Vector2 axisDirection = axisRenderer.GetAxisDirection();
+        Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
 
         ////First get all triangles
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
@@ -140,8 +137,8 @@ public class Symmetrizer : MonoBehaviour
         }
 
         //Find intersections of lines starting from axis endpoint directed by axisNormal with the grid box
-        List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisStartPoint, axisNormal);
-        List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisEndPoint, axisNormal);
+        List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1Position, axisNormal);
+        List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2Position, axisNormal);
 
         ////Extract triangles that are in the ribbon of the axis...
         //... on the left side of the line that passes by the axisStartPoint
@@ -157,13 +154,13 @@ public class Symmetrizer : MonoBehaviour
                                                         false);
 
         //... finally on the left and right side of the axis itself
-        leftTriangles = ExtractTrianglesOnLineSide(axisStartPoint,
-                                                   axisEndPoint,
+        leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1Position,
+                                                   axisRenderer.m_endpoint2Position,
                                                    extractedTriangles,
                                                    true);
 
-        rightTriangles = ExtractTrianglesOnLineSide(axisStartPoint,
-                                                    axisEndPoint,
+        rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1Position,
+                                                    axisRenderer.m_endpoint2Position,
                                                     extractedTriangles,
                                                     false);
     }
@@ -313,12 +310,9 @@ public class Symmetrizer : MonoBehaviour
         List<ShapeTriangle> reflectedTriangles = new List<ShapeTriangle>();
         reflectedTriangles.Capacity = originalTriangles.Count;
 
-        AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
-        Vector2 axisStartPoint = axisRenderer.m_endpoint1GridPosition;
-        Vector2 axisEndPoint = axisRenderer.m_endpoint2GridPosition;
-        Vector2 axisDirection = axisEndPoint - axisStartPoint;
-        axisDirection.Normalize();
-        Vector2 axisNormal = new Vector2(axisDirection.y, -axisDirection.x);
+        AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
+        Vector2 axisDirection = axisRenderer.GetAxisDirection();
+        Vector2 axisNormal = axisRenderer.GetAxisNormal();
 
         for (int iTriangleIndex = 0; iTriangleIndex != originalTriangles.Count; iTriangleIndex++)
         {
@@ -328,7 +322,7 @@ public class Symmetrizer : MonoBehaviour
             for (int i = 0; i != 3; i++)
             {
                 Vector2 originalVertex = originalTriangle.m_points[i];
-                float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisStartPoint, axisDirection);
+                float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisRenderer.m_endpoint1Position, axisDirection);
                 Vector2 reflectedVertex = originalVertex + (bLeftSide ? 1 : -1) * axisNormal * 2 * distanceToAxis;
 
                 //place the reflected vertex in correct order to produce a ccw triangle (invert last two vertices)

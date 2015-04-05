@@ -11,13 +11,19 @@ public class Axes : MonoBehaviour
         m_childrenAxes = new List<GameObject>();
     }
 
-    public void BuildAxis(Vector2 gridStartPosition)
+    public GameObject BuildAxis(Vector2 gridStartPosition)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
-        newAxis.GetComponent<AxisRenderer>().BuildEndpointAtGridPosition(gridStartPosition);
         newAxis.transform.parent = this.gameObject.transform;
         newAxis.transform.localPosition = Vector3.zero;
+
+        //Build and render the axis once
+        AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
+        axisRenderer.BuildElements();
+        axisRenderer.Render(gridStartPosition, gridStartPosition, true);
+
         AddAxis(newAxis);
+        return newAxis;
     }
 
     public void AddAxis(GameObject axis)
@@ -44,12 +50,8 @@ public class Axes : MonoBehaviour
 
     public GameObject GetAxisBeingBuilt()
     {
-        for (int iAxisIndex = 0; iAxisIndex != m_childrenAxes.Count; iAxisIndex++)
-        {
-            GameObject axis = m_childrenAxes[iAxisIndex];
-            if (axis.GetComponent<AxisRenderer>().m_buildStatus == AxisRenderer.BuildStatus.FIRST_ENDPOINT_SET)
-                return axis;
-        }
+        if (m_childrenAxes.Count > 0)
+            return m_childrenAxes[m_childrenAxes.Count - 1];
 
         return null;
     }

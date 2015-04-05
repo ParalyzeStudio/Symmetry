@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AxisSegment : Segment
+public class AxisSegment : GridSegment
 {
 
 }
