@@ -66,7 +66,24 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerUp()
     {
-        base.OnPointerUp();
+        m_mouseButtonPressed = false;
+        if (!m_selected)
+            return;
+
+        //GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = this.transform.parent.gameObject.GetComponent<GameScene>();
+        GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
+        AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
+
+        if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
+        {
+            Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+            symmetrizer.SymmetrizeByAxis();
+        }
+
+        //remove the axis from the axes list and destroy the object
+        gameScene.m_axes.RemoveAxis(currentAxis);
+        Destroy(currentAxis);
     }
 
     protected override void OnClick()

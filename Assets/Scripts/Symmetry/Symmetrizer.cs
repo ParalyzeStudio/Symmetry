@@ -137,8 +137,8 @@ public class Symmetrizer : MonoBehaviour
         }
 
         //Find intersections of lines starting from axis endpoint directed by axisNormal with the grid box
-        List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1Position, axisNormal);
-        List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2Position, axisNormal);
+        List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
+        List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
 
         ////Extract triangles that are in the ribbon of the axis...
         //... on the left side of the line that passes by the axisStartPoint
@@ -154,13 +154,13 @@ public class Symmetrizer : MonoBehaviour
                                                         false);
 
         //... finally on the left and right side of the axis itself
-        leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1Position,
-                                                   axisRenderer.m_endpoint2Position,
+        leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
+                                                   axisRenderer.m_endpoint2GridPosition,
                                                    extractedTriangles,
                                                    true);
 
-        rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1Position,
-                                                    axisRenderer.m_endpoint2Position,
+        rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
+                                                    axisRenderer.m_endpoint2GridPosition,
                                                     extractedTriangles,
                                                     false);
     }
@@ -233,6 +233,7 @@ public class Symmetrizer : MonoBehaviour
 
     /**
      * Find all intersections between a line and the box determined by grid boundaries
+     * linePoint has to be specified in grid coordinates
      * **/
     private List<Vector2> FindLineGridBoxIntersections(Vector2 linePoint, Vector2 lineDirection)
     {
@@ -322,7 +323,7 @@ public class Symmetrizer : MonoBehaviour
             for (int i = 0; i != 3; i++)
             {
                 Vector2 originalVertex = originalTriangle.m_points[i];
-                float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisRenderer.m_endpoint1Position, axisDirection);
+                float distanceToAxis = GeometryUtils.DistanceToLine(originalVertex, axisRenderer.m_endpoint1GridPosition, axisDirection);
                 Vector2 reflectedVertex = originalVertex + (bLeftSide ? 1 : -1) * axisNormal * 2 * distanceToAxis;
 
                 //place the reflected vertex in correct order to produce a ccw triangle (invert last two vertices)
