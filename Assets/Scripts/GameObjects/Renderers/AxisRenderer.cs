@@ -139,6 +139,31 @@ public class AxisRenderer : MonoBehaviour
         return m_snappedAnchor != null;
     }
 
+    public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
+    {
+        //Find all possible directions for our axis
+        GameScene gameScene = this.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
+        List<Vector2> directions = gameScene.GetDirectionsForSymmetryActiveActionTag();
+
+        float maxDotProduct = float.MinValue;
+        constrainedDirection = Vector2.zero;
+        projectionLength = 0;
+        for (int iDirectionIndex = 0; iDirectionIndex != directions.Count; iDirectionIndex++)
+        {
+            Vector2 axisEndpoint1ToPointer = pointerLocation - m_endpoint1Position;
+            float axisEndpoint1ToPointerDistance = axisEndpoint1ToPointer.magnitude; //store vector length before normalizing it
+            axisEndpoint1ToPointer.Normalize();
+
+            float dotProduct = Vector2.Dot(axisEndpoint1ToPointer, directions[iDirectionIndex]);
+            if (dotProduct > maxDotProduct)
+            {
+                maxDotProduct = dotProduct;
+                constrainedDirection = directions[iDirectionIndex];
+                projectionLength = axisEndpoint1ToPointerDistance;
+            }
+        }
+    }
+
     public Vector2 GetAxisCenterInWorldCoordinates()
     {
         return 0.5f * (m_endpoint1Position + m_endpoint2Position);

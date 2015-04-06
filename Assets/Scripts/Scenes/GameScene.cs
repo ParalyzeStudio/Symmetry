@@ -354,4 +354,69 @@ public class GameScene : GUIScene
     {
         return m_activeActionTag != null && m_activeActionTag.Equals(ACTION_TAG_MOVE_SHAPE);
     }
+
+    public List<Vector2> GetDirectionsForSymmetryActiveActionTag()
+    {
+        Vector2 rightDirection = new Vector2(1, 0);
+        Vector2 bottomDirection = new Vector2(0, -1);
+        Vector2 leftDirection = new Vector2(-1, 0);
+        Vector2 topDirection = new Vector2(0, 1);
+        Vector2 topRightDirection = new Vector2(1, 1);
+        Vector2 bottomRightDirection = new Vector2(1, 1);
+        Vector2 bottomLeftDirection = new Vector2(-1, -1);
+        Vector2 topLeftDirection = new Vector2(-1, 1);
+        topRightDirection.Normalize();
+        bottomRightDirection.Normalize();
+        bottomLeftDirection.Normalize();
+        topLeftDirection.Normalize();
+
+        List<Vector2> directions = new List<Vector2>();
+        if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
+        {
+            directions.Add(rightDirection);
+            directions.Add(bottomDirection);
+            directions.Add(leftDirection);
+            directions.Add(topDirection);
+            directions.Add(topRightDirection);
+            directions.Add(bottomRightDirection);
+            directions.Add(bottomLeftDirection);
+            directions.Add(topLeftDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
+        {
+            directions.Add(rightDirection);
+            directions.Add(bottomDirection);
+            directions.Add(leftDirection);
+            directions.Add(topDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
+        {
+            directions.Add(topRightDirection);
+            directions.Add(bottomRightDirection);
+            directions.Add(bottomLeftDirection);
+            directions.Add(topLeftDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
+        {
+            directions.Add(rightDirection);
+            directions.Add(leftDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
+        {
+            directions.Add(bottomDirection);
+            directions.Add(topDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
+        {
+            directions.Add(bottomRightDirection);
+            directions.Add(topLeftDirection);
+        }
+        else if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
+        {
+            directions.Add(topRightDirection);
+            directions.Add(bottomLeftDirection);
+        }
+
+        return directions;
+    }
 }

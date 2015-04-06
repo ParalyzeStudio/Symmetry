@@ -26,7 +26,6 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        Debug.Log("GRID OnPointerDown");
         base.OnPointerDown(pointerLocation);
 
         Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
@@ -39,16 +38,20 @@ public class GridTouchHandler : TouchHandler
         if (!base.OnPointerMove(pointerLocation, ref delta))
             return false;
 
-        Debug.Log("GRID OnPointerMove");
-
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
 
         //render the axis again
         AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
+
+        //find the constrained direction that will allow us to calculate the projected pointer location
+        Vector2 constrainedDirection;
+        float projectionLength;
+        axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
+        pointerLocation = axisRenderer.m_endpoint1Position + constrainedDirection * projectionLength;
+
         if (axisRenderer.isAxisSnapped())
         {
-            //TODO try to unsnap
             axisRenderer.TryToUnsnap(pointerLocation);
         }
         else
@@ -63,7 +66,6 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerUp()
     {
-        Debug.Log("GRID OnPointerUp");
         base.OnPointerUp();
     }
 
