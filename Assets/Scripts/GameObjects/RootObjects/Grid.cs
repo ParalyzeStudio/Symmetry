@@ -184,6 +184,28 @@ public class Grid : MonoBehaviour
         return m_anchors[(iLineNumber - 1) * m_numColumns + (iColumnNumber - 1)];
     }
 
+    /**
+     * Returns the grid coordinates of the anchor passed as parameter
+     * **/
+    public Vector2 GetAnchorGridCoordinates(GameObject anchor)
+    {
+        int iAnchorIndex = -1;
+        for (int i = 0; i != m_anchors.Count; i++)
+        {
+            if (m_anchors[i] == anchor)
+            {
+                iAnchorIndex = i;
+                break;
+            }
+        }
+
+        if (iAnchorIndex > 0)
+        {
+            return new Vector2(iAnchorIndex % m_numColumns + 1, m_numLines - iAnchorIndex / m_numColumns);
+        }
+
+        return Vector2.zero;
+    }
 
     /**
      * Returns the grid anchor coordinates that is the closest to the position vector passed as parameter

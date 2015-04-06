@@ -13,6 +13,9 @@ public class AxisRenderer : MonoBehaviour
     public Vector2 m_endpoint1GridPosition { get; set; } //the grid position of the first endpoint
     public Vector2 m_endpoint2GridPosition { get; set; } //the grid position of the second endpoint
 
+    private GameObject m_snappedAnchor; //the current anchor the second axis endpoint has been snapped on
+    public float m_snapDistance;
+
     //public enum BuildStatus
     //{
     //    NOTHING, //nothing has been built yet
@@ -30,6 +33,7 @@ public class AxisRenderer : MonoBehaviour
         m_axisSegment = null;
         m_endpoint1 = null;
         m_endpoint2 = null;
+        m_snappedAnchor = null;
     }
 
     /**
@@ -81,6 +85,58 @@ public class AxisRenderer : MonoBehaviour
         GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+    }
+
+    /**
+     * Try to snap the second endpoint to a grid anchor if the distance to it is small enough ( <= m_snapDistance)
+     * **/
+    public bool TryToSnapAxisEndpointToClosestAnchor()
+    {
+        GameScene gameScene = this.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
+        List<GameObject> gridAnchors = gameScene.m_grid.m_anchors;
+
+        for (int anchorIndex = 0; anchorIndex != gridAnchors.Count; anchorIndex++)
+        {
+            GameObject snapAnchor = gridAnchors[anchorIndex];
+
+            Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinates(snapAnchor);
+
+            Vector2 snapAnchorPosition = snapAnchor.transform.position;
+            float fDistanceToAnchor = (m_endpoint2Position - snapAnchorPosition).magnitude;
+
+            //do not snap on the current snapped anchor or on the anchor under the first axis endpoint
+            if (snapAnchor != m_snappedAnchor && snapAnchorGridPosition != m_endpoint1GridPosition)
+            {
+                if (fDistanceToAnchor <= m_snapDistance)
+                {
+                    m_snappedAnchor = snapAnchor;
+                    Render(m_endpoint1Position, snapAnchorPosition, false);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Try to unsnap a the axis second endpoint if the distance to it is big enough ( > m_snapDistance)
+     * **/
+    public void TryToUnsnap(Vector2 pointerLocation)
+    {
+        Vector2 snappedAnchorPosition = m_snappedAnchor.transform.position;
+        float fDistanceFromMouseToAnchor = (pointerLocation - snappedAnchorPosition).magnitude;
+        if (fDistanceFromMouseToAnchor > m_snapDistance)
+        {
+            m_snappedAnchor = null;
+            Render(m_endpoint1Position, pointerLocation, false);
+        }
+    }
+
+    public bool isAxisSnapped()
+    {
+        return m_snappedAnchor != null;
     }
 
     public Vector2 GetAxisCenterInWorldCoordinates()

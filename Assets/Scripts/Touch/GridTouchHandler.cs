@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GridTouchHandler : TouchHandler 
 {
@@ -45,7 +46,17 @@ public class GridTouchHandler : TouchHandler
 
         //render the axis again
         AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
-        axisRenderer.Render(axisRenderer.m_endpoint1Position, pointerLocation, false);
+        if (axisRenderer.isAxisSnapped())
+        {
+            //TODO try to unsnap
+            axisRenderer.TryToUnsnap(pointerLocation);
+        }
+        else
+        {
+            //try to snap, if not just render the axis normally
+            if (!axisRenderer.TryToSnapAxisEndpointToClosestAnchor())
+                axisRenderer.Render(axisRenderer.m_endpoint1Position, pointerLocation, false);
+        }
 
         return true;
     }
