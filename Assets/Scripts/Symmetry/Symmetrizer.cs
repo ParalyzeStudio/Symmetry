@@ -18,22 +18,10 @@ public class Symmetrizer : MonoBehaviour
         SUBTRACTION_AXIS,
         SUBTRACTION_POINT
     };
-    //public const int SYMMETRY_AXIS_HORIZONTAL           = 0x00000001;
-    //public const int SYMMETRY_AXIS_VERTICAL             = 0x00000010;
-    //public const int SYMMETRY_AXIS_STRAIGHT             = 0x00000011; //SYMMETRY_AXIS_HORIZONTAL && SYMMETRY_AXIS_VERTICAL
-    //public const int SYMMETRY_AXIS_DIAGONAL_TOP_LEFT    = 0x00000100;
-    //public const int SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT = 0x00001000;
-    //public const int SYMMETRY_AXIS_DIAGONALS            = 0x00001100; //SYMMETRY_AXIS_DIAGONAL_TOP_LEFT && SYMMETRY_AXIS_DIAGONAL_BOTTOM_LEFT
-    //public const int SYMMETRY_AXIS_ALL                  = 0x00001111; //SYMMETRY_AXIS_STRAIGHT && SYMMETRY_AXIS_DIAGONALS
-
-    //public SymmetryType m_type;
-
-    //private LevelManager m_levelManager;
 
     public void Start()
     {
-        //GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
-        //m_levelManager = levelManagerObject.GetComponent<LevelManager>();
+
     }
 
     public void SymmetrizeByAxis()
@@ -76,7 +64,7 @@ public class Symmetrizer : MonoBehaviour
 
         if (rightTriangles.Count > 0)
         {
-            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
+            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
             {
                 List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles[iTrianglesVecIdx], false);
 
@@ -92,7 +80,7 @@ public class Symmetrizer : MonoBehaviour
                 ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                 shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
-                shapeObjectAnimator.SetRotationAngle(90);
+                shapeObjectAnimator.SetRotationAngle(-90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
                 shapeObjectAnimator.SetColor(shapeData.m_color);
                 shapeObjectAnimator.ColorChangeTo(shapeColor, 0.5f);
