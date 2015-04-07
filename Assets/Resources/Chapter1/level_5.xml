@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 5" number="5">
+	<counter maxActions="3"/>
+	<grid exactNumColumns="7" exactNumLines="7" maxGridSpacing="150"/>
+	<contours>
+		<contour area="1">
+			<point column="2" line="3" />
+			<point column="2" line="2" />
+			<point column="3" line="2" />
+			<point column="3" line="3" />
+		</contour>
+		<contour area="1">
+			<point column="3" line="5" />
+			<point column="3" line="3" />
+			<point column="5" line="3" />
+			<point column="5" line="5" />
+		</contour>
+		<contour area="1">
+			<point column="5" line="5" />
+			<point column="6" line="5" />
+			<point column="6" line="6" />
+			<point column="5" line="6" />
+		</contour>
+	</contours>
+	<shapes>
+		<shape color="1,0,0,1">
+			<contour area="1">
+				<point column="3" line="4" />
+				<point column="3" line="3" />
+				<point column="4" line="3" />
+				<point column="4" line="4" />
+			</contour>
+		</shape>
+	</shapes>
+	<actions>
+		<action tag="SYMMETRY_AXES_VERTICAL"/>
+		<action tag="SYMMETRY_AXES_DIAGONAL_LEFT"/>
+	</actions>
+</level>
