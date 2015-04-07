@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class GridTouchHandler : TouchHandler 
 {
+    public float m_axisCreationMinDistance;
+
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         //First we verify if we entered the move shape mode
@@ -28,9 +30,14 @@ public class GridTouchHandler : TouchHandler
     {
         base.OnPointerDown(pointerLocation);
 
-        Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
+        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        gameScene.m_axes.BuildAxis(clickedAnchorGridCoords);
+        Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
+        float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
+        if (distanceToAnchor < m_axisCreationMinDistance)
+        {
+            gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
+        }
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
@@ -40,6 +47,9 @@ public class GridTouchHandler : TouchHandler
 
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
+
+        if (currentAxis == null)
+            return false;
 
         //render the axis again
         AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
