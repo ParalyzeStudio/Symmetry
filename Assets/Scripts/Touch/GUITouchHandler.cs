@@ -65,7 +65,6 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickSkipIntro()
     {
-        Debug.Log("OnClickSkipIntro");
         //GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
         //sceneAnimator.FadeTo(0, 0.7f);
@@ -163,8 +162,6 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnLevelIntro(Vector2 clickLocation)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
-
         float skipAreaWidth = 800;
         float skipAreaHeight = 200;
         Vector2 skipAreaPosition = new Vector2(0, -130.0f); //position of the center of the skip text

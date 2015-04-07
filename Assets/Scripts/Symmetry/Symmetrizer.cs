@@ -122,7 +122,6 @@ public class Symmetrizer : MonoBehaviour
     private void ExtractTrianglesOnBothSidesOfAxis(out List<List<ShapeTriangle>> leftTriangles, out List<List<ShapeTriangle>> rightTriangles)
     {
         AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
-        Vector2 axisDirection = axisRenderer.GetAxisDirection();
         Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
 
         ////First get all triangles

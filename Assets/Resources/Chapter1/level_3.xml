@@ -27,6 +27,6 @@
 		</shape>
 	</shapes>
 	<actions>
-		<action tag="SYMMETRY_AXES_VERTICAL"/>
+		<action tag="SYMMETRY_AXIS_VERTICAL"/>
 	</actions>
 </level>

@@ -99,7 +99,7 @@ public class AxisRenderer : MonoBehaviour
         {
             GameObject snapAnchor = gridAnchors[anchorIndex];
 
-            Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinates(snapAnchor);
+            Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinatesForAnchorIndex(anchorIndex);
 
             Vector2 snapAnchorPosition = snapAnchor.transform.position;
             float fDistanceToAnchor = (m_endpoint2Position - snapAnchorPosition).magnitude;

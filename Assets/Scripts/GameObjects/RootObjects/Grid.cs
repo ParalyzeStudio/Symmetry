@@ -199,12 +199,18 @@ public class Grid : MonoBehaviour
             }
         }
 
-        if (iAnchorIndex > 0)
-        {
-            return new Vector2(iAnchorIndex % m_numColumns + 1, m_numLines - iAnchorIndex / m_numColumns);
-        }
+        return GetAnchorGridCoordinatesForAnchorIndex(iAnchorIndex);
+    }
 
-        return Vector2.zero;
+    /**
+     * Returns the grid coordinates of the anchor whose index is passed as parameter
+     * **/
+    public Vector2 GetAnchorGridCoordinatesForAnchorIndex(int iAnchorIndex)
+    {
+        if (iAnchorIndex < 0 || iAnchorIndex >= m_anchors.Count)
+            return Vector2.zero;
+
+        return new Vector2(iAnchorIndex % m_numColumns + 1, iAnchorIndex / m_numColumns + 1);
     }
 
     /**
