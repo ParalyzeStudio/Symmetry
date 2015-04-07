@@ -2,7 +2,7 @@
 
 public class MathUtils
 {
-    public const float DEFAULT_EPSILON = 0.1f;
+    public const float DEFAULT_EPSILON = 0.0001f;
 
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
