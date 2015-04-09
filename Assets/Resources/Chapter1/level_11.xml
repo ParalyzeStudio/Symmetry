@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 11" number="11">
+	<counter maxActions="3"/>
+	<grid exactNumColumns="14" exactNumLines="9" maxGridSpacing="150"/>
+	<contours>
+		<contour area="12">
+			<point column="7" line="8" />
+			<point column="7" line="7" />
+			<point column="6" line="7" />
+			<point column="6" line="5" />			
+			<point column="7" line="5" />			
+			<point column="7" line="3" />			
+			<point column="6" line="3" />			
+			<point column="6" line="2" />			
+			<point column="9" line="2" />			
+			<point column="9" line="3" />			
+			<point column="8" line="3" />
+			<point column="8" line="5" />
+			<point column="9" line="5" />
+			<point column="9" line="7" />
+			<point column="8" line="7" />
+			<point column="8" line="8" />
+		</contour>
+	</contours>
+	<shapes>
+		<shape color="1,0,0,1">
+			<contour area="4">
+				<point column="7" line="4" />
+				<point column="7" line="3" />
+				<point column="6" line="3" />
+				<point column="6" line="2" />
+				<point column="9" line="2" />
+				<point column="9" line="3" />
+				<point column="8" line="3" />
+				<point column="8" line="4" />
+			</contour>
+		</shape>
+	</shapes>
+	<actions>
+		<action tag="SYMMETRY_AXIS_VERTICAL"/>
+		<action tag="SYMMETRY_AXIS_HORIZONTAL"/>
+	</actions>
+</level>
