@@ -362,7 +362,7 @@ public class GameScene : GUIScene
         Vector2 leftDirection = new Vector2(-1, 0);
         Vector2 topDirection = new Vector2(0, 1);
         Vector2 topRightDirection = new Vector2(1, 1);
-        Vector2 bottomRightDirection = new Vector2(1, 1);
+        Vector2 bottomRightDirection = new Vector2(1, -1);
         Vector2 bottomLeftDirection = new Vector2(-1, -1);
         Vector2 topLeftDirection = new Vector2(-1, 1);
         topRightDirection.Normalize();

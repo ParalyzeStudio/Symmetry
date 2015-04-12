@@ -17,7 +17,6 @@ public class Triangulable
     {
         m_contour = contour;
         m_gridTriangles = new List<GridTriangle>();
-        Triangulate();
     }
 
     public Triangulable(List<Vector2> contour, List<GridTriangle> triangles)
@@ -42,7 +41,9 @@ public class Triangulable
 
             m_gridTriangles.Add(gridTriangle);
             m_area += gridTriangle.GetArea();
-        }        
+        }
+
+        Debug.Log("Contour triangulated with area:" + m_area);
     }
 
     /**

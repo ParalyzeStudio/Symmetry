@@ -37,6 +37,8 @@ public class Shape : Triangulable
             m_gridTriangles.Add(shapeTriangle);
             m_area += shapeTriangle.GetArea();
         }
+
+        Debug.Log("Shape triangulated with area:" + m_area);
     }
 
     public List<ShapeTriangle> GetShapeTriangles()

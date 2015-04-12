@@ -24,7 +24,7 @@ public class LevelManager : MonoBehaviour
 
     public void ParseAllLevels()
     {
-        for (int iChapterNumber = 1; iChapterNumber != CHAPTERS_COUNT; iChapterNumber++)
+        for (int iChapterNumber = 1; iChapterNumber != CHAPTERS_COUNT + 1; iChapterNumber++)
         {
             Chapter builtChapter = BuildChapterFromXml(iChapterNumber);
             m_chapters[iChapterNumber - 1] = builtChapter;
@@ -48,7 +48,6 @@ public class LevelManager : MonoBehaviour
     public Level ParseLevelFile(int iChapterNumber, int iLevelNumber)
     {
         string levelFilename = "Chapter" + iChapterNumber + "/level_" + iLevelNumber;
-        Debug.Log(levelFilename);
         Object levelObjectFile = Resources.Load(levelFilename);
         if (levelObjectFile == null)
             return null;
@@ -100,8 +99,6 @@ public class LevelManager : MonoBehaviour
         foreach (XMLNode contourNode in contoursNodeList)
         {
             Contour contour = new Contour();
-            string strContourArea = contourNode.GetValue("@area");
-            contour.m_area = float.Parse(strContourArea);
             XMLNodeList contourPointsNodeList = contourNode.GetNodeList("point");
             foreach (XMLNode contourPointNode in contourPointsNodeList)
             {
