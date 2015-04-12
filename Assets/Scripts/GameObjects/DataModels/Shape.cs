@@ -37,8 +37,6 @@ public class Shape : Triangulable
             m_gridTriangles.Add(shapeTriangle);
             m_area += shapeTriangle.GetArea();
         }
-
-        Debug.Log("Shape triangulated with area:" + m_area);
     }
 
     public List<ShapeTriangle> GetShapeTriangles()
@@ -70,19 +68,20 @@ public class Shape : Triangulable
     public void Fusion()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        ShapeRenderer[] shapeRenderers = gameScene.m_shapes.GetComponentsInChildren<ShapeRenderer>();
+        List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObj;
 
         //Find the shapes that overlaps this shape
         List<Shape> shapesToUnion = new List<Shape>();
-        for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
+        List<GameObject> shapeObjectsToUnion = new List<GameObject>();
+        for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
         {
-            Shape shapeData = shapeRenderers[iShapeIndex].m_shape;
+            Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
             if (this.OverlapsShape(shapeData))
             {
                 shapesToUnion.Add(shapeData);
+                shapeObjectsToUnion.Add(shapeObjects[iShapeIndex]);
             }
         }
-
 
         //Pass these shapes to the union clipper
         if (shapesToUnion.Count <= 1)
@@ -94,9 +93,9 @@ public class Shape : Triangulable
             gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 
             //Destroy all previous shapes
-            for (int iShapeIndex = 0; iShapeIndex != shapeRenderers.Length; iShapeIndex++)
+            for (int iShapeIndex = 0; iShapeIndex != shapeObjectsToUnion.Count; iShapeIndex++)
             {
-                GameObject shapeObject = shapeRenderers[iShapeIndex].gameObject;
+                GameObject shapeObject = shapeObjectsToUnion[iShapeIndex];
                 gameScene.m_shapes.DestroyShape(shapeObject);
                 gameScene.m_shapes.RemoveShapeObject(shapeObject);
             }

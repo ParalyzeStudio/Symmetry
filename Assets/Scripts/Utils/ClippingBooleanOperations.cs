@@ -66,6 +66,7 @@ public class ClippingBooleanOperations
             List<Vector2> contour = CreateContourFromPath(singlePath);
 
             Shape shape = new Shape(contour, shapes[0].m_color);
+            shape.Triangulate();
             return shape;
         }
 

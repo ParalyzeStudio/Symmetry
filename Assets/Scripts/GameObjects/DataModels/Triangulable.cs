@@ -42,8 +42,6 @@ public class Triangulable
             m_gridTriangles.Add(gridTriangle);
             m_area += gridTriangle.GetArea();
         }
-
-        Debug.Log("Contour triangulated with area:" + m_area);
     }
 
     /**
