@@ -114,6 +114,22 @@ public class Shape : Triangulable
         return false;
     }
 
+    /**
+     * Does 'this' shape is included inside one triangle of the shape passed as parameter
+     * (i.e all triangles of the first shape are inside one of the second shape triangles)
+     * **/
+    public bool isIncludedInOneShapeTriangle(Shape shape)
+    {
+        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_gridTriangles.Count; iTriangleIndex++)
+        {
+            GridTriangle triangle = shape.m_gridTriangles[iTriangleIndex];
+
+            if (triangle.ContainsShape(this)) //'this' shape is contained entirely inside one of the shape triangles
+                return true;
+        }
+
+        return false;
+    }
 
     /**
      * Does 'this' shape overlaps another shape (i.e intersection is neither a point or null)
@@ -121,6 +137,10 @@ public class Shape : Triangulable
     public bool OverlapsShape(Shape shape)
     {
         if (shape == this)
+            return true;
+
+        //check if 'this' shape is inluded in one of the shape triangles and vice versa
+        if (this.isIncludedInOneShapeTriangle(shape) || shape.isIncludedInOneShapeTriangle(this))
             return true;
 
         //Check if one of the triangle edges intersects triangle edges of the second shape

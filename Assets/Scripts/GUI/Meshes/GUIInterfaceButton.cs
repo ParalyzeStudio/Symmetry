@@ -61,8 +61,6 @@ public class GUIInterfaceButton : GUIQuadButton
 
     public override void OnClick()
     {
-        Debug.Log("m_ID: " + m_ID);
-
         if (m_ID == GUIInterfaceButtonID.ID_OPTIONS_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();

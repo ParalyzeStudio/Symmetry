@@ -90,6 +90,31 @@ public class GridTriangle
     }
 
     /**
+     * Tells if this triangle contains the triangle passed as parameter
+     * **/
+    public bool ContainsTriangle(GridTriangle triangle)
+    {
+        return this.ContainsGridPoint(triangle.m_points[0]) &&
+               this.ContainsGridPoint(triangle.m_points[1]) &&
+               this.ContainsGridPoint(triangle.m_points[2]);
+    }
+
+    /**
+     * Tells if this triangle contains a whole shape
+     * **/
+    public bool ContainsShape(Shape shape)
+    {
+        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_gridTriangles.Count; iTriangleIndex++)
+        {
+            GridTriangle triangle = shape.m_gridTriangles[iTriangleIndex];
+            if (!this.ContainsTriangle(triangle)) //this triangle does not contains at least one of the shape triangles
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns the index of one of the three triangle vertex if the point passed as parameter is equal to it 
      * Otherwise returns -1
      * **/

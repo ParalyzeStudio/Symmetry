@@ -300,6 +300,11 @@ public class GeometryUtils
      * **/
     static public bool IsInsideTriangle(Vector2 testPoint, Vector2 pointA, Vector2 pointB, Vector2 pointC)
     {
+        if (MathUtils.AreVec2PointsEqual(testPoint, pointA) ||
+            MathUtils.AreVec2PointsEqual(testPoint, pointB) ||
+            MathUtils.AreVec2PointsEqual(testPoint, pointC))
+            return true;
+
         float det1 = MathUtils.Determinant(pointA, pointB, testPoint, false);
         float det2 = MathUtils.Determinant(pointB, pointC, testPoint, false);
         float det3 = MathUtils.Determinant(pointC, pointA, testPoint, false);
@@ -342,7 +347,11 @@ public class GeometryUtils
         {
             if (IsPointContainedInSegment(segment1Point1, segment2Point1, segment2Point2, false)
                 ||
-                IsPointContainedInSegment(segment1Point2, segment2Point1, segment2Point2, false))
+                IsPointContainedInSegment(segment1Point2, segment2Point1, segment2Point2, false)
+                ||
+                IsPointContainedInSegment(segment2Point1, segment1Point1, segment1Point2, false)
+                ||
+                IsPointContainedInSegment(segment2Point2, segment1Point1, segment1Point2, false))
             {
                 return true;
             }
