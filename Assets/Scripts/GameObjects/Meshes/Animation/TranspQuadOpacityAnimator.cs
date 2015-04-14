@@ -14,5 +14,16 @@ public class TranspQuadOpacityAnimator : GameObjectAnimator
             material.SetColor("_Color", color);
         }
     }
+
+    public override void SetColor(Color color)
+    {
+        base.SetColor(color);
+
+        Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        if (material != null)
+        {
+            material.SetColor("_Color", color);
+        }
+    }
 }
 

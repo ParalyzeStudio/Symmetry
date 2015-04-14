@@ -5,6 +5,7 @@ public class AxisRenderer : MonoBehaviour
 {
     public GameObject m_axisSegmentPfb;
     public GameObject m_symmetryAxisEndpointPfb;
+    public GameObject m_circlePfb;
     public GameObject m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
@@ -137,6 +138,15 @@ public class AxisRenderer : MonoBehaviour
     public bool isAxisSnapped()
     {
         return m_snappedAnchor != null;
+    }
+
+    /**
+     * Simple animation with circle scaling up and fading out
+     * **/
+    public void LaunchSnapCircleAnimation()
+    {
+        GameObject clonedCircle = (GameObject) Instantiate(m_circlePfb);
+        
     }
 
     public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)

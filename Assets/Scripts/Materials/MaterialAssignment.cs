@@ -18,7 +18,7 @@ public class MaterialAssignment : MonoBehaviour
     {
         if (m_material != m_oldMaterial)
         {
-            DestroyImmediate(m_oldMaterial);
+            DestroyImmediate(m_oldMaterial, true);
             m_oldMaterial = m_material;
             InitMeshRendererMaterial();
         }

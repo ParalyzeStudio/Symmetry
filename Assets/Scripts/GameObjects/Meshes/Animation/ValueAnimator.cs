@@ -54,7 +54,7 @@ public class ValueAnimator : MonoBehaviour
 
     //Variables to handle color variation
     protected bool m_colorChanging;
-    protected Color m_color;
+    public Color m_color;
     protected Color m_fromColor;
     protected Color m_toColor;
     protected float m_colorChangingDuration;
@@ -64,6 +64,7 @@ public class ValueAnimator : MonoBehaviour
 
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity;
+    private Color m_prevColor;
 
     public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
@@ -424,12 +425,20 @@ public class ValueAnimator : MonoBehaviour
     {
         float dt = Time.deltaTime;
 
-        if (m_prevOpacity != m_opacity) //when we modify the opacity value directly in the inspector in edit mode
+        //when we modify the opacity value directly in the inspector in edit mode
+        if (m_prevOpacity != m_opacity)
         {
             SetOpacity(m_opacity);
             return;
         }
 
+        if (m_prevColor != m_color)
+        {
+            SetColor(m_color);
+            return;
+        }
+
+        //update values that have to be modified through time
         UpdateOpacity(dt);
         UpdatePosition(dt);
         UpdateRotation(dt);
