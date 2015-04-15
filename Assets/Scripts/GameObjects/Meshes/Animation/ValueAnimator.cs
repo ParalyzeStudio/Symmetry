@@ -136,6 +136,8 @@ public class ValueAnimator : MonoBehaviour
 
         m_opacity = fOpacity;
         m_prevOpacity = fOpacity;
+        m_color.a = fOpacity;
+        m_prevColor.a = fOpacity;
         OnOpacityChanged();
 
         if (bPassOnChildren)
@@ -178,12 +180,16 @@ public class ValueAnimator : MonoBehaviour
     public virtual void SetColor(Color color)
     {
         m_color = color;
+        m_prevColor = color;
 
         //clamp color channels values between 0 and 1
         MathUtils.Clamp(ref m_color.r, 0, 1);
         MathUtils.Clamp(ref m_color.g, 0, 1);
         MathUtils.Clamp(ref m_color.b, 0, 1);
         MathUtils.Clamp(ref m_color.a, 0, 1);
+
+        m_opacity = m_color.a;
+        m_prevOpacity = m_color.a;
 
         OnColorChanged();
     }

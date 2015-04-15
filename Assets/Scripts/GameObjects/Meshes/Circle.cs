@@ -33,11 +33,11 @@ public class Circle : MonoBehaviour
             meshVertices[numSegments + i] = innerVertices[i];
 
             meshIndices[6 * i] = i;
-            meshIndices[6 * i + 1] = (i == numSegments - 1) ? 0 : i + 1;
-            meshIndices[6 * i + 2] = (i == numSegments - 1) ? numSegments : numSegments + i + 1;
+            meshIndices[6 * i + 1] = (i == numSegments - 1) ? numSegments : numSegments + i + 1;
+            meshIndices[6 * i + 2] = (i == numSegments - 1) ? 0 : i + 1;
             meshIndices[6 * i + 3] = i;
-            meshIndices[6 * i + 4] = (i == numSegments - 1) ? numSegments : numSegments + i + 1;
-            meshIndices[6 * i + 5] = numSegments + i;
+            meshIndices[6 * i + 4] = numSegments + i;
+            meshIndices[6 * i + 5] = (i == numSegments - 1) ? numSegments : numSegments + i + 1;
         }
 
         //Build the actual mesh

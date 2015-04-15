@@ -108,10 +108,12 @@ public class AxisRenderer : MonoBehaviour
             //do not snap on the current snapped anchor or on the anchor under the first axis endpoint
             if (snapAnchor != m_snappedAnchor && snapAnchorGridPosition != m_endpoint1GridPosition)
             {
-                if (fDistanceToAnchor <= m_snapDistance)
+                if (fDistanceToAnchor <= m_snapDistance) //we can snap the anchor
                 {
                     m_snappedAnchor = snapAnchor;
                     Render(m_endpoint1Position, snapAnchorPosition, false);
+
+                    LaunchSnapCircleAnimation(snapAnchorPosition);
 
                     return true;
                 }
@@ -143,10 +145,22 @@ public class AxisRenderer : MonoBehaviour
     /**
      * Simple animation with circle scaling up and fading out
      * **/
-    public void LaunchSnapCircleAnimation()
+    public void LaunchSnapCircleAnimation(Vector2 position)
     {
         GameObject clonedCircle = (GameObject) Instantiate(m_circlePfb);
-        
+        //clonedCircle.transform.parent = this.transform;
+        clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
+
+        CircleAnimator circleAnimator = clonedCircle.GetComponent<CircleAnimator>();
+        circleAnimator.SetInnerRadius(0);
+        circleAnimator.SetThickness(2);
+        circleAnimator.SetNumSegments(64);
+        circleAnimator.SetColor(Color.black);
+
+        circleAnimator.SetInnerRadius(0);
+        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        circleAnimator.SetOpacity(1);
+        circleAnimator.FadeTo(0, 0.3f);
     }
 
     public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
