@@ -15,7 +15,8 @@ public class Shape : Triangulable
         m_color = color;
     }
 
-    public Shape(List<Vector2> contour, List<GridTriangle> triangles, Color color) : base(contour, triangles)
+    public Shape(List<Vector2> contour, List<List<Vector2>> holes, Color color)
+        : base(contour, holes)
     {
         m_color = color;
     }
@@ -102,7 +103,7 @@ public class Shape : Triangulable
         }
     }
 
-    public bool IntersectsContour(Contour contour)
+    public bool IntersectsContour(DottedOutline contour)
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
         {

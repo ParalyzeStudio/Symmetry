@@ -48,6 +48,7 @@ public class LevelManager : MonoBehaviour
     public Level ParseLevelFile(int iChapterNumber, int iLevelNumber)
     {
         string levelFilename = "Chapter" + iChapterNumber + "/level_" + iLevelNumber;
+        Debug.Log(levelFilename);
         Object levelObjectFile = Resources.Load(levelFilename);
         if (levelObjectFile == null)
             return null;
@@ -93,13 +94,17 @@ public class LevelManager : MonoBehaviour
         string strMaxGridSpacing = gridNode.GetValue("@maxGridSpacing");
         level.m_maxGridSpacing = (strMaxGridSpacing == null) ? -1 : float.Parse(strMaxGridSpacing);
 
-        //Parse contours
-        XMLNodeList contoursNodeList = levelNode.GetNodeList("contours>0>contour");
-        level.m_contours.Capacity = contoursNodeList.Count;
-        foreach (XMLNode contourNode in contoursNodeList)
+        //Parse dotted outlines
+        XMLNodeList dottedOutlinesNodeList = levelNode.GetNodeList("dottedOutlines>0>dottedOutline");
+        if (dottedOutlinesNodeList == null)
+            return null;
+        level.m_outlines.Capacity = dottedOutlinesNodeList.Count;
+        foreach (XMLNode outlineNode in dottedOutlinesNodeList)
         {
-            Contour contour = new Contour();
-            XMLNodeList contourPointsNodeList = contourNode.GetNodeList("point");
+            DottedOutline outline = new DottedOutline();
+
+            //Contour
+            XMLNodeList contourPointsNodeList = outlineNode.GetNodeList("contour>0>point");
             foreach (XMLNode contourPointNode in contourPointsNodeList)
             {
                 string strContourPointLine = contourPointNode.GetValue("@line");
@@ -108,9 +113,38 @@ public class LevelManager : MonoBehaviour
                 int contourPointLine = int.Parse(strContourPointLine);
                 int contourPointColumn = int.Parse(strContourPointColumn);
 
-                contour.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
+                outline.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
             }
-            level.m_contours.Add(contour);
+
+            //Holes
+            XMLNodeList holesNodeList = outlineNode.GetNodeList("holes>0>hole");
+            if (holesNodeList != null)
+            {
+                foreach (XMLNode holeNode in holesNodeList)
+                {
+                    List<Vector2> holePoints = new List<Vector2>();
+                    XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
+                    holePoints.Capacity = holePointsNodeList.Count;
+
+                    foreach (XMLNode holePointNode in holePointsNodeList)
+                    {
+                        string strHolePointLine = holePointNode.GetValue("@line");
+                        string strHolePointColumn = holePointNode.GetValue("@column");
+
+                        int holePointLine = int.Parse(strHolePointLine);
+                        int holePointColumn = int.Parse(strHolePointColumn);
+
+                        holePoints.Add(new Vector2(holePointColumn, holePointLine));
+                    }
+
+                    outline.m_holes.Add(holePoints);
+                    Debug.Log("added hole for level " + iLevelNumber);
+                }
+            }
+
+
+            //Finally add the filled outline to the oulines list
+            level.m_outlines.Add(outline);
         }
 
         //Parse shapes

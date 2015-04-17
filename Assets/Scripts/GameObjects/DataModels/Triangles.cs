@@ -33,7 +33,7 @@ public class GridTriangle
     /**
     * Tells if one of the edges of this triangle intersects the contour passed as parameter
     **/
-    public bool IntersectsContour(Contour contour)
+    public bool IntersectsContour(DottedOutline contour)
     {
         List<Vector2> contourPoints = contour.m_contour;
         for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)

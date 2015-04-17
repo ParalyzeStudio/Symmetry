@@ -4,25 +4,29 @@ using System.Collections.Generic;
 public class Triangulable
 {
     public List<GridTriangle> m_gridTriangles { get; set; }
-    public List<Vector2> m_contour { get; set; }
+    public List<Vector2> m_contour { get; set; } //the points surrounding the triangulable shape
+    public List<List<Vector2>> m_holes { get; set; } //the holes inside the triangulable shape
     public float m_area { get;set; }
 
     public Triangulable()
     {
         m_gridTriangles = new List<GridTriangle>();
         m_contour = new List<Vector2>();
+        m_holes = new List<List<Vector2>>();
     }
 
     public Triangulable(List<Vector2> contour)
     {
         m_contour = contour;
         m_gridTriangles = new List<GridTriangle>();
+        m_holes = new List<List<Vector2>>();
     }
 
-    public Triangulable(List<Vector2> contour, List<GridTriangle> triangles)
+    public Triangulable(List<Vector2> contour, List<List<Vector2>> holes)
     {
         m_contour = contour;
-        m_gridTriangles = triangles;
+        m_gridTriangles = new List<GridTriangle>();
+        m_holes = new List<List<Vector2>>();
     }
 
     public virtual void Triangulate()

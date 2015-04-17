@@ -10,8 +10,8 @@ public class Contours : MonoBehaviour
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
         LevelManager levelManager = levelManagerObject.GetComponent<LevelManager>();
 
-        List<Contour> contours = levelManager.m_currentLevel.m_contours;
-        foreach (Contour contour in contours)
+        List<DottedOutline> contours = levelManager.m_currentLevel.m_outlines;
+        foreach (DottedOutline contour in contours)
         {
             //First triangulate the contour
             contour.Triangulate();

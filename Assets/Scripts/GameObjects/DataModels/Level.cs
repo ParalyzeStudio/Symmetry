@@ -6,7 +6,7 @@ public class Level
 {
     public int m_number { get; set; } //the number of this level
     public string m_name { get; set; }
-    public List<Contour> m_contours { get; set; }
+    public List<DottedOutline> m_outlines { get; set; }
     public List<Shape> m_initialShapes { get; set; }
     public List<string> m_actionButtonsTags { get; set; }
     public int m_maxActions { get; set; }
@@ -18,7 +18,7 @@ public class Level
 
     public Level()
     {
-        m_contours = new List<Contour>();
+        m_outlines = new List<DottedOutline>();
         m_initialShapes = new List<Shape>();
         m_actionButtonsTags = new List<string>();
 

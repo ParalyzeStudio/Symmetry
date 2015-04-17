@@ -88,7 +88,7 @@ public class GameController : MonoBehaviour
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         Shapes shapes = gameScene.GetComponentInChildren<Shapes>();
         List<GameObject> allShapeObjects = shapes.m_shapesObj;
-        List<Contour> allContours = m_levelManager.m_currentLevel.m_contours;
+        List<DottedOutline> allContours = m_levelManager.m_currentLevel.m_outlines;
         float shapesArea = 0;
         for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
         {
@@ -96,7 +96,7 @@ public class GameController : MonoBehaviour
             bool shapeInsideContour = false;
             for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
             {
-                Contour contour = allContours[iContourIndex];
+                DottedOutline contour = allContours[iContourIndex];
                 if (shape.IntersectsContour(contour)) //we check if this shape intersects a contour
                     return false;
                 else //if not we check if this shape is inside a contour
@@ -121,7 +121,7 @@ public class GameController : MonoBehaviour
         float contoursArea = 0;
         for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
         {
-            Contour contour = allContours[iContourIndex];
+            DottedOutline contour = allContours[iContourIndex];
             contoursArea += contour.m_area;
         }
 
