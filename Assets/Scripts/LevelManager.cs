@@ -138,7 +138,6 @@ public class LevelManager : MonoBehaviour
                     }
 
                     outline.m_holes.Add(holePoints);
-                    Debug.Log("added hole for level " + iLevelNumber);
                 }
             }
 

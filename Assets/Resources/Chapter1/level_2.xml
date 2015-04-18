@@ -2,21 +2,23 @@
 <level name="Level 2" number="2">
 	<counter maxActions="2"/>
 	<grid exactNumColumns="7" exactNumLines="6" maxGridSpacing="150"/>
-	<contours>
-		<contour area="4">
-			<point column="3" line="4" />
-			<point column="3" line="2" />
-			<point column="4" line="2" />
-			<point column="4" line="3" />
-			<point column="5" line="3" />
-			<point column="5" line="5" />
-			<point column="4" line="5" />
-			<point column="4" line="4" />
-		</contour>
-	</contours>
+	<dottedOutlines>
+		<dottedOutline>
+			<contour>
+				<point column="3" line="4" />
+				<point column="3" line="2" />
+				<point column="4" line="2" />
+				<point column="4" line="3" />
+				<point column="5" line="3" />
+				<point column="5" line="5" />
+				<point column="4" line="5" />
+				<point column="4" line="4" />
+			</contour>
+		</dottedOutline>
+	</dottedOutlines>
 	<shapes>
 		<shape color="1,0,0,1">
-			<contour area="1">
+			<contour>
 				<point column="3" line="4" />
 				<point column="3" line="3" />
 				<point column="5" line="3" />
