@@ -86,36 +86,38 @@ public class GameController : MonoBehaviour
     {
         //First we check if one of the shapes intersects a contour
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        Shapes shapes = gameScene.GetComponentInChildren<Shapes>();
-        List<GameObject> allShapeObjects = shapes.m_shapesObj;
-        List<DottedOutline> allContours = m_levelManager.m_currentLevel.m_outlines;
+
+        List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObj;
+        List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
         float shapesArea = 0;
         for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
         {
             Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
-            bool shapeInsideContour = false;
-            for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+            bool shapeInsideOutline = false;
+            for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
             {
-                DottedOutline contour = allContours[iContourIndex];
-                if (shape.IntersectsContour(contour)) //we check if this shape intersects a contour
-                    return false;
-                else //if not we check if this shape is inside a contour
+                DottedOutline outline = allContours[iOutlineIndex];
+                if (shape.IntersectsOutline(outline)) //we check if this shape intersects an outline
                 {
-                    if (contour.ContainsGridPoint(shape.m_gridTriangles[0].GetBarycentre())) 
+                    return false;
+                }
+                else //if not we check if this shape is inside an outline
+                {
+                    if (outline.ContainsGridPoint(shape.m_gridTriangles[0].GetBarycentre()))
                     {
-                        shapeInsideContour = true;
+                        shapeInsideOutline = true;
                         break;
                     }
                 }
             }
 
-            if (!shapeInsideContour)
+            if (!shapeInsideOutline)
                 return false;
 
             shapesArea += shape.m_area;
         }
 
-        //Debug.Log("1: NO SHAPE/CONTOUR INTERSECTION");
+        //Debug.Log("1: NO SHAPE/OUTLINE INTERSECTION");
 
         //finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
         float contoursArea = 0;
@@ -142,5 +144,8 @@ public class GameController : MonoBehaviour
     public void EndLevel()
     {
         Debug.Log("EndLevel");
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        gameScene.m_grid.Dismiss();
+        gameScene.m_outlines.Dismiss();
     }
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ContourSegment : GridSegment 
+public class OutlineSegment : GridSegment 
 {
     protected override void UpdateTextureRange()
     {

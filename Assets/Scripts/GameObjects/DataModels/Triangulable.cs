@@ -29,6 +29,36 @@ public class Triangulable
         m_holes = new List<List<Vector2>>();
     }
 
+    public Triangulable(Triangulable other)
+    {
+        //deep copy triangles
+        m_gridTriangles = new List<GridTriangle>();
+        m_gridTriangles.Capacity = other.m_gridTriangles.Count;
+        for (int i = 0; i != other.m_gridTriangles.Count; i++)
+        {
+            m_gridTriangles.Add(new GridTriangle(other.m_gridTriangles[i]));
+        }
+
+        //deep copy contour
+        m_contour = new List<Vector2>();
+        m_contour.Capacity = other.m_contour.Count;
+        m_contour.AddRange(other.m_contour); //Vector2 is a value type so no need to clone them deeply
+
+        //deep copy holes
+        m_holes = new List<List<Vector2>>();
+        m_holes.Capacity = other.m_holes.Count;
+        for (int i = 0; i != other.m_holes.Count; i++)
+        {
+            List<Vector2> holesVec = new List<Vector2>();
+            holesVec.Capacity = other.m_holes[i].Count;
+            holesVec.AddRange(other.m_holes[i]); //Vector2 is a value type so no need to clone them deeply
+            m_holes.Add(holesVec);
+        } 
+      
+        //copy area
+        m_area = other.m_area;
+    }
+
     public virtual void Triangulate()
     {
         List<Vector2> triangles = new List<Vector2>();

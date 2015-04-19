@@ -10,8 +10,8 @@ public class GridTouchHandler : TouchHandler
     {
         //First we verify if we entered the move shape mode
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        if (!gameScene.IsSymmetryHUDButtonSelected())
-            return false;
+        //if (!gameScene.IsSymmetryHUDButtonSelected())
+        //    return false;
 
         Grid grid = gameScene.m_grid;
         Vector2 gridSize = grid.m_gridSize;

@@ -16,7 +16,7 @@ public class GameScene : GUIScene
 
     public Grid m_grid { get; set; }
     public Counter m_counter { get; set; }
-    public Contours m_contours { get; set; }
+    public Outlines m_outlines { get; set; }
     public Shapes m_shapes { get; set; }
     public Axes m_axes { get; set; }
 
@@ -63,7 +63,7 @@ public class GameScene : GUIScene
         ShowInterfaceButtons(fDelay);
         ShowCounter(fDelay);
         //ShowGUI(fDelay);
-        ShowContours(fDelay);
+        ShowOutlines(fDelay);
         ShowInitialShapes(fDelay);
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
         m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
@@ -85,7 +85,7 @@ public class GameScene : GUIScene
     {
         m_grid = this.gameObject.GetComponentInChildren<Grid>();
         m_grid.gameObject.transform.parent = this.gameObject.transform;
-        m_grid.Build(false);
+        m_grid.Build();
         Vector3 gridLocalPosition = m_grid.gameObject.transform.localPosition;
         m_grid.gameObject.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, GRID_Z_VALUE);
 
@@ -286,18 +286,18 @@ public class GameScene : GUIScene
     }
 
     /**
-     * Here we build the contour of the shape the player has to reproduce
+     * Here we build the dotted outlines (contour and holes) of the shape the player has to reproduce
      * **/
-    private void ShowContours(float fDelay)
+    private void ShowOutlines(float fDelay)
     {
-        m_contours = this.gameObject.GetComponentInChildren<Contours>();
-        m_contours.transform.parent = this.gameObject.transform;
-        m_contours.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
-        m_contours.Build();
+        m_outlines = this.gameObject.GetComponentInChildren<Outlines>();
+        m_outlines.transform.parent = this.gameObject.transform;
+        m_outlines.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
+        m_outlines.Build();
 
-        GameObjectAnimator contoursAnimator = m_contours.gameObject.GetComponent<GameObjectAnimator>();
-        contoursAnimator.SetOpacity(0);
-        contoursAnimator.FadeTo(1, 0.5f, fDelay);
+        GameObjectAnimator outlinesAnimator = m_outlines.gameObject.GetComponent<GameObjectAnimator>();
+        outlinesAnimator.SetOpacity(0);
+        outlinesAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     /**
@@ -314,7 +314,7 @@ public class GameScene : GUIScene
         List<Shape> initialShapes = levelManager.m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
-            Shape shape = initialShapes[iShapeIndex];
+            Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
 
             //First triangulate the shape
             shape.Triangulate();
@@ -370,7 +370,26 @@ public class GameScene : GUIScene
         bottomLeftDirection.Normalize();
         topLeftDirection.Normalize();
 
+        
+
         List<Vector2> directions = new List<Vector2>();
+
+        /***
+         * TMP DEBUG: unlock all directions
+         * ***/
+        directions.Add(rightDirection);
+        directions.Add(bottomDirection);
+        directions.Add(leftDirection);
+        directions.Add(topDirection);
+        directions.Add(topRightDirection);
+        directions.Add(bottomRightDirection);
+        directions.Add(bottomLeftDirection);
+        directions.Add(topLeftDirection);
+        return directions;
+        /***
+         * 
+         * ***/
+
         if (m_activeActionTag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
         {
             directions.Add(rightDirection);

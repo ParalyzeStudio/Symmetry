@@ -48,7 +48,7 @@ public class LevelManager : MonoBehaviour
     public Level ParseLevelFile(int iChapterNumber, int iLevelNumber)
     {
         string levelFilename = "Chapter" + iChapterNumber + "/level_" + iLevelNumber;
-        Debug.Log(levelFilename);
+        //Debug.Log(levelFilename);
         Object levelObjectFile = Resources.Load(levelFilename);
         if (levelObjectFile == null)
             return null;

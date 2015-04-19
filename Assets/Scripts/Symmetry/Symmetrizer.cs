@@ -57,8 +57,9 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
+                Color targetColor = ColorUtils.DarkenColor(shapeData.m_color, 0.1f);
                 shapeObjectAnimator.SetColor(shapeData.m_color);
-                shapeObjectAnimator.ColorChangeTo(shapeColor, 0.5f);
+                shapeObjectAnimator.ColorChangeTo(targetColor, 0.5f);
             }
         }
 
@@ -82,8 +83,9 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(-90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
+                Color targetColor = ColorUtils.DarkenColor(shapeData.m_color, 0.1f);
                 shapeObjectAnimator.SetColor(shapeData.m_color);
-                shapeObjectAnimator.ColorChangeTo(shapeColor, 0.5f);
+                shapeObjectAnimator.ColorChangeTo(targetColor, 0.5f);
             }
         }
     }

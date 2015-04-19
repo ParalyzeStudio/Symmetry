@@ -47,6 +47,6 @@
 	</shapes>
 	<actions>
 		<action tag="SYMMETRY_AXES_STRAIGHT"/>
-		<action tag="SYMMETRY_AXIS_DIAGONALS"/>
+		<action tag="SYMMETRY_AXES_DIAGONALS"/>
 	</actions>
 </level>

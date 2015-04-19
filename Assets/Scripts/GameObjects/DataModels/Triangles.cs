@@ -30,6 +30,14 @@ public class GridTriangle
         m_points = new Vector2[3];
     }
 
+    public GridTriangle(GridTriangle other) : base()
+    {
+        for (int i = 0; i != 3; i++)
+        {
+            m_points[i] = other.m_points[i];
+        }
+    }
+
     /**
     * Tells if one of the edges of this triangle intersects the contour passed as parameter
     **/

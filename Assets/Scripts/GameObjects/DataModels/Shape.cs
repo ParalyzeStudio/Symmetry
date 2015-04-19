@@ -21,6 +21,12 @@ public class Shape : Triangulable
         m_color = color;
     }
 
+    public Shape(Shape other)
+        : base(other)
+    {
+        m_color = other.m_color; //Color(Vector4) is a value type so no need to clone them deeply
+    }
+
     public override void Triangulate()
     {
         List<Vector2> triangles = new List<Vector2>();
@@ -103,7 +109,7 @@ public class Shape : Triangulable
         }
     }
 
-    public bool IntersectsContour(DottedOutline contour)
+    public bool IntersectsOutline(DottedOutline contour)
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
         {
