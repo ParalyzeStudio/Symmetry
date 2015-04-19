@@ -14,15 +14,11 @@ public class GameController : MonoBehaviour
         RUNNING,
         PAUSED,
         VICTORY,
-        DEFEAT
+        DEFEAT,
+        FINISHED //the level is done and player is waiting for current level to restart or next level to start
     };
 
     private GameStatus m_gameStatus;
-
-    protected void Awake()
-    {
-        m_levelManager = null;
-    }
 
     protected void Start()
     {
@@ -56,7 +52,8 @@ public class GameController : MonoBehaviour
             GameStatus gameStatus = GetGameStatus();
             if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
             {
-                EndLevel();
+                EndLevel(gameStatus);
+                m_gameStatus = GameStatus.FINISHED;
             }
         }
     }    
@@ -66,7 +63,7 @@ public class GameController : MonoBehaviour
      * **/
     public GameStatus GetGameStatus()
     {
-        if (m_gameStatus == GameStatus.DEFEAT || m_gameStatus == GameStatus.VICTORY)
+        if (m_gameStatus == GameStatus.DEFEAT || m_gameStatus == GameStatus.VICTORY || m_gameStatus == GameStatus.FINISHED)
             return m_gameStatus;
 
         bool victory = IsVictory();
@@ -138,14 +135,25 @@ public class GameController : MonoBehaviour
 
 
     /**
-     * Ends the current level by fading out the grid and contours and disabling touch
-     * After a few seconds launch next level
+     * If victory:
+     * -Ends the current level by fading out the grid and contours and disabling touch
+     * -After a few seconds launch next level
+     * If defeat:
+     * -Restart the level
      * **/
-    public void EndLevel()
-    {
-        Debug.Log("EndLevel");
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        gameScene.m_grid.Dismiss();
-        gameScene.m_outlines.Dismiss();
+    public void EndLevel(GameStatus gameStatus)
+    {        
+        if (gameStatus == GameStatus.VICTORY)
+        {
+            Debug.Log("EndLevel VICTORY");
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            gameScene.m_grid.Dismiss(1.0f);
+            gameScene.m_outlines.Dismiss(1.0f);
+        }
+        else if (gameStatus == GameStatus.DEFEAT)
+        {
+            Debug.Log("EndLevel DEFEAT");
+            m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
+        }
     }
 }

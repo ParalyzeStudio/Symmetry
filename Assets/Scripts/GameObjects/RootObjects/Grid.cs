@@ -96,10 +96,10 @@ public class Grid : MonoBehaviour
     /**
      * Fades out the grid (when a level ends for instance)
      * **/
-    public void Dismiss()
+    public void Dismiss(float fDelay)
     {
         GameObjectAnimator gridAnimator = this.GetComponent<GameObjectAnimator>();
-        gridAnimator.FadeTo(0, 1.0f, 0.0f);
+        gridAnimator.FadeTo(0, 2.0f, fDelay);
     }
 
     /**
