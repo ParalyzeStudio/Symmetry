@@ -44,7 +44,7 @@ public class CounterElement : MonoBehaviour
         skinAnimator.SetRotationAngle(45);
         skinAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
         skinAnimator.SetPosition(new Vector3(0, 6, SKIN_Z_VALUE));
-        SetStatus(CounterElementStatus.CURRENT);
+        SetStatus(CounterElementStatus.WAITING);
 
         m_shadow = Instantiate(m_baseQuadElementPfb);
         m_shadow.transform.parent = this.gameObject.transform;
@@ -83,6 +83,12 @@ public class CounterElement : MonoBehaviour
         else if (status == CounterElementStatus.DONE)
         {
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
+            if (m_overlay != null)
+            {
+                Debug.Log("destroy overlay");
+                Destroy(m_overlay);
+                m_overlay = null;
+            }
         }
         else if (status == CounterElementStatus.WAITING)
         {

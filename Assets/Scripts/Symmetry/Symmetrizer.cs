@@ -36,9 +36,12 @@ public class Symmetrizer : MonoBehaviour
         AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
         Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
         Vector3 axisDirection = axisRenderer.GetAxisDirection();
-        
+
+        bool bSymmetryDone = false;
         if (leftTriangles.Count > 0)
         {
+            bSymmetryDone = true;
+
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
             {
                 List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles[iTrianglesVecIdx], true);
@@ -65,6 +68,8 @@ public class Symmetrizer : MonoBehaviour
 
         if (rightTriangles.Count > 0)
         {
+            bSymmetryDone = true;
+
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
             {
                 List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles[iTrianglesVecIdx], false);
@@ -87,6 +92,11 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetColor(shapeData.m_color);
                 shapeObjectAnimator.ColorChangeTo(targetColor, 0.5f);
             }
+        }
+
+        if (bSymmetryDone)
+        {
+            gameScene.m_counter.IncrementCounter();
         }
     }
 

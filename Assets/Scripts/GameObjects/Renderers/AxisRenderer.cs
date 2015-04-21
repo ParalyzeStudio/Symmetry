@@ -188,6 +188,14 @@ public class AxisRenderer : MonoBehaviour
         }
     }
 
+    /**
+     * Renders the ribbon that indicates which parts of shapes will be symmetrized
+     * **/
+    public void RenderRibbon()
+    {
+
+    }
+
     public Vector2 GetAxisCenterInWorldCoordinates()
     {
         return 0.5f * (m_endpoint1Position + m_endpoint2Position);
