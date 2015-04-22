@@ -70,7 +70,13 @@ public class GameController : MonoBehaviour
         if (victory)
             m_gameStatus = GameStatus.VICTORY;
         else
-            m_gameStatus = GameStatus.RUNNING;
+        {
+            bool defeat = IsDefeat();
+            if (defeat)
+                m_gameStatus = GameStatus.DEFEAT;
+            else //neither victory nor defeat, keep playing
+                m_gameStatus = GameStatus.RUNNING;
+        }
 
         return m_gameStatus;
     }
@@ -133,6 +139,18 @@ public class GameController : MonoBehaviour
         return (contoursArea == shapesArea);
     }
 
+    /**
+     * Simply checks if counter is at maximum fill, because we know that conditions of victory have already been checked out negatively at this point
+     * **/
+    public bool IsDefeat()
+    {
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+
+        bool bDefeat = gameScene.m_counter.isFull();
+        if (bDefeat)
+            Debug.Log("DEFEAT");
+        return gameScene.m_counter.isFull();
+    }
 
     /**
      * If victory:
@@ -153,7 +171,7 @@ public class GameController : MonoBehaviour
         else if (gameStatus == GameStatus.DEFEAT)
         {
             Debug.Log("EndLevel DEFEAT");
-            m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
+            //m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
         }
     }
 }

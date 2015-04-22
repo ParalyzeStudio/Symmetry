@@ -25,7 +25,10 @@ public class Outlines : MonoBehaviour
             //First triangulate the outline
             clonedOutline.Triangulate();
 
+            //Then draw the outline
             GameObject outlineObject = new GameObject("Outline");
+
+            //Draw the contour
             List<Vector2> contourPoints = clonedOutline.m_contour;
             for (int iPointIndex = 0; iPointIndex != contourPoints.Count; iPointIndex++)
             {
@@ -37,6 +40,24 @@ public class Outlines : MonoBehaviour
                 outlineSegment.m_startPointGrid = startPointGrid;
                 outlineSegment.m_endPointGrid = endPointGrid;
                 outlineSegment.transform.parent = outlineObject.transform;
+            }
+
+            //Draw holes
+            List<List<Vector2>> holes = clonedOutline.m_holes;
+            for (int iHoleIdx = 0; iHoleIdx != holes.Count; iHoleIdx++)
+            {
+                List<Vector2> holePoints = holes[iHoleIdx];
+                for (int iHolePointIdx = 0; iHolePointIdx != holePoints.Count; iHolePointIdx++)
+                {
+                    Vector2 holeStartPoint = holePoints[iHolePointIdx];
+                    Vector2 holeEndPointGrid = (iHolePointIdx == holePoints.Count - 1) ? holePoints[0] : holePoints[iHolePointIdx + 1];
+
+                    GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
+                    OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
+                    outlineSegment.m_startPointGrid = holeStartPoint;
+                    outlineSegment.m_endPointGrid = holeEndPointGrid;
+                    outlineSegment.transform.parent = outlineObject.transform;
+                }
             }
 
             outlineObject.transform.parent = this.gameObject.transform;

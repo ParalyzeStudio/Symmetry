@@ -6,7 +6,8 @@ public class Counter : MonoBehaviour
     public GameObject m_counterElementPfb;
     public List<CounterElement> m_elements { get; set; }
 
-    public int m_activeCounterElementNumber { get; set; }
+    public int m_reachedCounterElementNumber { get; set; } //the number of the counter element that we reached and whose current status is marked as CURRENT
+                                                           //if counter has just been built, set this number to 0 (no current element)
 
     public void Init()
     {
@@ -39,7 +40,7 @@ public class Counter : MonoBehaviour
             m_elements.Add(counterElementComponent);
         }
 
-        m_activeCounterElementNumber = 1;
+        m_reachedCounterElementNumber = 0;
     }
 
     /**
@@ -47,14 +48,21 @@ public class Counter : MonoBehaviour
      * **/
     public void IncrementCounter()
     {
-        int elementIdx = m_activeCounterElementNumber - 1;
+        m_reachedCounterElementNumber++;
+
+        int elementIdx = m_reachedCounterElementNumber - 1;
 
         m_elements[elementIdx].SetStatus(CounterElement.CounterElementStatus.CURRENT);
 
         if (elementIdx > 0) //set the previous element as DONE
-            m_elements[elementIdx - 1].SetStatus(CounterElement.CounterElementStatus.DONE);
+            m_elements[elementIdx - 1].SetStatus(CounterElement.CounterElementStatus.DONE);       
+    }
 
-        m_activeCounterElementNumber++;
+    /**
+     * Tells if we reached the last counter element
+     * **/
+    public bool isFull()
+    {
+        return (m_reachedCounterElementNumber == m_elements.Count);
     }
 }
-
