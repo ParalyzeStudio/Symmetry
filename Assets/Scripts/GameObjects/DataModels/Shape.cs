@@ -29,12 +29,9 @@ public class Shape : Triangulable
 
     public override void Triangulate()
     {
-        List<Vector2> triangles = new List<Vector2>();
+        Vector2[] triangles = Triangulation.P2tTriangulate(this);
 
-        Triangulation.Process(m_contour, ref triangles);
-
-        m_area = 0;
-        for (int iVertexIndex = 0; iVertexIndex != triangles.Count; iVertexIndex += 3)
+        for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
         {
             ShapeTriangle shapeTriangle = new ShapeTriangle(this);
             shapeTriangle.m_points[0] = triangles[iVertexIndex];

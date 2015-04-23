@@ -47,10 +47,18 @@ public class GameScene : GUIScene
 
     public string m_activeActionTag { get; set; }
 
+    public bool m_isShown; //is the current scene displayed entirely
+
     //buttons
     public List<HUDButton> m_actionButtons { get; set; }
     public List<HUDButton> m_interfaceButtons { get; set; }
     public HUDButton m_selectedActionButton { get; set; } //the action button the player has selected, null if none is selected
+
+    public override void Init()
+    {
+        base.Init();
+        m_isShown = false;
+    }
 
     public override void Show(bool bAnimated, float fDelay = 0.0f)
     {
@@ -68,8 +76,7 @@ public class GameScene : GUIScene
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
         m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
 
-        //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        //guiManager.AnimateFrames(SceneManager.DisplayContent.GAME, fDelay);
+        m_isShown = true;
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)

@@ -7,7 +7,7 @@ public class GUIScene : MonoBehaviour
     private float m_dismissSceneDelay;
     private float m_dismissSceneDuration;
 
-    public void Awake()
+    public virtual void Init()
     {
         m_dismissSceneRunning = false;
     }

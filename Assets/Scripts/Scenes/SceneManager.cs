@@ -94,6 +94,7 @@ public class SceneManager : MonoBehaviour
         }
 
         m_displayedContent = contentToDisplay;
+        m_currentScene.Init();
         m_currentScene.Show(bAnimated, fDelay);
     }
 

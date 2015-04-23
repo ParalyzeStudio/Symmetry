@@ -90,6 +90,9 @@ public class GameController : MonoBehaviour
         //First we check if one of the shapes intersects a contour
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
+        if (!gameScene.m_isShown)
+            return false;
+
         List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObj;
         List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
         float shapesArea = 0;
@@ -145,6 +148,9 @@ public class GameController : MonoBehaviour
     public bool IsDefeat()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+
+        if (!gameScene.m_isShown)
+            return false;
 
         bool bDefeat = gameScene.m_counter.isFull();
         if (bDefeat)
