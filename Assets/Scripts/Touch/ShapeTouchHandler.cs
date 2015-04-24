@@ -65,7 +65,8 @@ public class ShapeTouchHandler : TouchHandler
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
-        shapeRenderer.m_shape.Fusion();
+        //shapeRenderer.m_shape.Fusion();
+        Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
         shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
     }
 

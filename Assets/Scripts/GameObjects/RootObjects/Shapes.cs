@@ -12,34 +12,12 @@ public class Shapes : MonoBehaviour
     }
 
     /**
-     * Build a shape game object from shape data (contour/triangles, color)
+     * Build a shape game object from shape data (contour/triangles, holes, color)
      * **/
     public GameObject CreateShapeObjectFromData(Shape shapeData)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.m_shape = shapeData;
-        shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false);
-
-        clonedShapeObject.transform.parent = this.gameObject.transform;
-        clonedShapeObject.transform.localPosition = Vector3.zero;
-
-        AddShapeObject(clonedShapeObject);
-
-        return clonedShapeObject;
-    }
-
-    /**
-     * Build a shape game object from a contour and a color
-     * **/
-    public GameObject CreateShapeObjectFromContourAndColor(List<Vector2> contour, Color color)
-    {
-        GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
-        ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
-        Shape shapeData = new Shape();
-        shapeData.m_contour = contour;
-        shapeData.m_color = color;
-        shapeData.Triangulate();
         shapeRenderer.m_shape = shapeData;
         shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false);
 
@@ -76,5 +54,19 @@ public class Shapes : MonoBehaviour
     public void ClearShapeObjects()
     {
         m_shapesObj.Clear();
+    }
+
+    /**
+     * Calls recursively Shape.Fusion() on the shape passed as parameter and then on the shape resulting from previous fusion
+     * This way we are sure that the initial shape is fusionned to every shape that overlapped it at the beginning
+     * **/
+    public static void PerformFusionOnShape(Shape shape)
+    {
+        Shape resultingShape = shape;
+        do
+        {
+            resultingShape = resultingShape.Fusion();
+        }
+        while (resultingShape != null);
     }
 }

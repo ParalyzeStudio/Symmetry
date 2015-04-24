@@ -334,6 +334,19 @@ public class GameScene : GUIScene
         GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetOpacity(0);
         shapesAnimator.FadeTo(1, 0.5f, fDelay);
+
+        //fusion initial shapes
+        GameObject shapeObject = m_shapes.m_shapesObj[0];
+        Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
+        Shapes.PerformFusionOnShape(fusionShape);
+        //for (int i = 0; i != m_shapes.m_shapesObj.Count; i++)
+        //{
+        //    GameObject shapeObject = m_shapes.m_shapesObj[i];
+        //    Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
+
+        //    if (fusionShape.Fusion())
+        //}
+
     }
 
     /**

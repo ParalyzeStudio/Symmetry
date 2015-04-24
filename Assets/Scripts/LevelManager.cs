@@ -131,8 +131,8 @@ public class LevelManager : MonoBehaviour
                         string strHolePointLine = holePointNode.GetValue("@line");
                         string strHolePointColumn = holePointNode.GetValue("@column");
 
-                        int holePointLine = int.Parse(strHolePointLine);
-                        int holePointColumn = int.Parse(strHolePointColumn);
+                        float holePointLine = float.Parse(strHolePointLine);
+                        float holePointColumn = float.Parse(strHolePointColumn);
 
                         holePoints.Add(new Vector2(holePointColumn, holePointLine));
                     }
@@ -148,42 +148,74 @@ public class LevelManager : MonoBehaviour
 
         //Parse shapes
         XMLNodeList shapesNodeList = levelNode.GetNodeList("shapes>0>shape");
-        level.m_initialShapes.Capacity = shapesNodeList.Count;
-        foreach (XMLNode shapeNode in shapesNodeList)
+        if (shapesNodeList != null)
         {
-            Shape shape = new Shape();
-            //Get the color of the shape
-            string strShapeColor = shapeNode.GetValue("@color");
-            string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
-            Color shapeColor = new Color();
-            shapeColor.r = float.Parse(strSplitColor[0]);
-            shapeColor.g = float.Parse(strSplitColor[1]);
-            shapeColor.b = float.Parse(strSplitColor[2]);
-            shapeColor.a = float.Parse(strSplitColor[3]);
-            shape.m_color = shapeColor;
-
-            XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");
-            foreach (XMLNode contourPointNode in contourPointsNodeList)
+            level.m_initialShapes.Capacity = shapesNodeList.Count;
+            foreach (XMLNode shapeNode in shapesNodeList)
             {
-                string strContourPointLine = contourPointNode.GetValue("@line");
-                string strContourPointColumn = contourPointNode.GetValue("@column");
+                Shape shape = new Shape();
+                //Get the color of the shape
+                string strShapeColor = shapeNode.GetValue("@color");
+                string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
+                Color shapeColor = new Color();
+                shapeColor.r = float.Parse(strSplitColor[0]);
+                shapeColor.g = float.Parse(strSplitColor[1]);
+                shapeColor.b = float.Parse(strSplitColor[2]);
+                shapeColor.a = float.Parse(strSplitColor[3]);
+                shape.m_color = shapeColor;
 
-                float contourPointLine = float.Parse(strContourPointLine);
-                float contourPointColumn = float.Parse(strContourPointColumn);
+                //Contour
+                XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");
+                foreach (XMLNode contourPointNode in contourPointsNodeList)
+                {
+                    string strContourPointLine = contourPointNode.GetValue("@line");
+                    string strContourPointColumn = contourPointNode.GetValue("@column");
 
-                shape.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
+                    float contourPointLine = float.Parse(strContourPointLine);
+                    float contourPointColumn = float.Parse(strContourPointColumn);
+
+                    shape.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
+                }
+
+                //Holes
+                XMLNodeList holesNodeList = shapeNode.GetNodeList("holes>0>hole");
+                if (holesNodeList != null)
+                {
+                    foreach (XMLNode holeNode in holesNodeList)
+                    {
+                        List<Vector2> holePoints = new List<Vector2>();
+                        XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
+                        holePoints.Capacity = holePointsNodeList.Count;
+
+                        foreach (XMLNode holePointNode in holePointsNodeList)
+                        {
+                            string strHolePointLine = holePointNode.GetValue("@line");
+                            string strHolePointColumn = holePointNode.GetValue("@column");
+
+                            float holePointLine = float.Parse(strHolePointLine);
+                            float holePointColumn = float.Parse(strHolePointColumn);
+
+                            holePoints.Add(new Vector2(holePointColumn, holePointLine));
+                        }
+
+                        shape.m_holes.Add(holePoints);
+                    }
+                }
+
+                level.m_initialShapes.Add(shape);
             }
-
-            level.m_initialShapes.Add(shape);
         }
 
         //Parse action buttons tags
         XMLNodeList actionsNodeList = levelNode.GetNodeList("actions>0>action");
-        level.m_actionButtonsTags.Capacity = actionsNodeList.Count;
-        foreach (XMLNode actionNode in actionsNodeList)
+        if (actionsNodeList != null)
         {
-            string actionTag = actionNode.GetValue("@tag");
-            level.m_actionButtonsTags.Add(actionTag);
+            level.m_actionButtonsTags.Capacity = actionsNodeList.Count;
+            foreach (XMLNode actionNode in actionsNodeList)
+            {
+                string actionTag = actionNode.GetValue("@tag");
+                level.m_actionButtonsTags.Add(actionTag);
+            }
         }
 
         return level;

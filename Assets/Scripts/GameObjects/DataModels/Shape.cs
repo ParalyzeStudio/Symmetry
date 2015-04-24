@@ -68,42 +68,52 @@ public class Shape : Triangulable
     /**
      * Fusion this shape with every shape that overlaps it. 
      * Every shape except 'this' is destroyed and their triangle are added to 'this' shape
+     * Returns the shape resulting from the fusion or null if no fusion occured
      * **/
-    public void Fusion()
+    public Shape Fusion()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObj;
 
-        //Find the shapes that overlaps this shape
-        List<Shape> shapesToUnion = new List<Shape>();
-        List<GameObject> shapeObjectsToUnion = new List<GameObject>();
+        //Find the first shape that overlaps this shape
+        Shape subjShape = null;
+        Shape clipShape = null;
+        GameObject subjShapeObject = null;
+        GameObject clipShapeObject = null;
+
         for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
         {
             Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
-            if (this.OverlapsShape(shapeData))
+            if (this == shapeData)
             {
-                shapesToUnion.Add(shapeData);
-                shapeObjectsToUnion.Add(shapeObjects[iShapeIndex]);
+                subjShape = this;
+                subjShapeObject = shapeObjects[iShapeIndex];
+            }
+            else if (this.OverlapsShape(shapeData))
+            {
+                clipShape = shapeData;
+                clipShapeObject = shapeObjects[iShapeIndex];
+                break;
             }
         }
 
-        //Pass these shapes to the union clipper
-        if (shapesToUnion.Count <= 1)
-            return;
+        if (clipShape == null) //no shape overlaps 'this' shape
+            return null;
 
-        Shape resultingShape = ClippingBooleanOperations.ShapesUnion(shapesToUnion);
+        Shape resultingShape = ClippingBooleanOperations.ShapesUnion(subjShape, clipShape);
         if (resultingShape != null)
         {
             gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 
-            //Destroy all previous shapes
-            for (int iShapeIndex = 0; iShapeIndex != shapeObjectsToUnion.Count; iShapeIndex++)
-            {
-                GameObject shapeObject = shapeObjectsToUnion[iShapeIndex];
-                gameScene.m_shapes.DestroyShape(shapeObject);
-                gameScene.m_shapes.RemoveShapeObject(shapeObject);
-            }
+            gameScene.m_shapes.DestroyShape(subjShapeObject);
+            gameScene.m_shapes.DestroyShape(clipShapeObject);
+            gameScene.m_shapes.RemoveShapeObject(subjShapeObject);
+            gameScene.m_shapes.RemoveShapeObject(clipShapeObject);
+
+            return resultingShape;
         }
+
+        return null;
     }
 
     public bool IntersectsOutline(DottedOutline contour)

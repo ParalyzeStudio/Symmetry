@@ -59,8 +59,10 @@ public class ShapeAnimator : GameObjectAnimator
 
     public override void OnFinishRotating()
     {
+        //shapeRenderer.m_shape.Fusion();
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.m_shape.Fusion();
+        Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
+        
         MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
         shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
     }
