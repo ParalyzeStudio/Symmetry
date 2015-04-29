@@ -67,7 +67,7 @@ public class ShapeTouchHandler : TouchHandler
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
         //shapeRenderer.m_shape.Fusion();
         Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
-        shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
+        shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
     }
 
     protected override void OnClick()

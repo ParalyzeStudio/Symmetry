@@ -25,7 +25,7 @@ public class LevelIntro : GUIScene
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         int currentChapterNumber = levelManager.m_currentChapter.m_number;
-        int currentLevelNumber = levelManager.m_currentLevel.m_number;
+        int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
 
         GameObject clonedLevelIntroTitle = (GameObject) Instantiate(m_levelIntroTitlePfb);
         clonedLevelIntroTitle.transform.parent = this.gameObject.transform;

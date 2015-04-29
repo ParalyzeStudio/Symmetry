@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public class Level
 {
-    public int m_number { get; set; } //the number of this level
+    public int m_chapterRelativeNumber { get; set; } //the number of this level
+    public Chapter m_parentChapter;
     public string m_name { get; set; }
     public List<DottedOutline> m_outlines { get; set; }
     public List<Shape> m_initialShapes { get; set; }

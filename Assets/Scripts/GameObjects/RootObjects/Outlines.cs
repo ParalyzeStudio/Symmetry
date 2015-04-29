@@ -70,10 +70,10 @@ public class Outlines : MonoBehaviour
     /**
      * Fades out the outlines (when a level ends for instance)
      * **/
-    public void Dismiss(float fDelay)
+    public void Dismiss(float fDuration, float fDelay)
     {
         GameObjectAnimator outlinesAnimator = this.GetComponent<GameObjectAnimator>();
-        outlinesAnimator.FadeTo(0, 2.0f, fDelay);
+        outlinesAnimator.FadeTo(0, fDuration, fDelay);
     }
 }
 

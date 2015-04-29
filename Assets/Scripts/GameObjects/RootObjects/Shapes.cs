@@ -19,7 +19,7 @@ public class Shapes : MonoBehaviour
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
         shapeRenderer.m_shape = shapeData;
-        shapeRenderer.Render(null, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false);
+        shapeRenderer.Render(true, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
         clonedShapeObject.transform.parent = this.gameObject.transform;
         clonedShapeObject.transform.localPosition = Vector3.zero;

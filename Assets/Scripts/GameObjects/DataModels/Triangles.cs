@@ -190,6 +190,7 @@ public class GridTriangle
 public class ShapeTriangle : GridTriangle
 {
     public Shape m_parentShape { get; set; }
+    public Color m_color { get; set; }
 
     public ShapeTriangle() : base()
     {

@@ -35,6 +35,10 @@ public class GameScene : GUIScene
     public GameObject m_retryBtnPfb;
     public GameObject m_hintsBtnPfb;
 
+    //holders
+    public GameObject m_actionButtonsHolder { get; set; }
+    public GameObject m_interfaceButtonsHolder { get; set; }
+
     //Action tags
     public const string ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL = "SYMMETRY_AXIS_HORIZONTAL";
     public const string ACTION_TAG_SYMMETRY_AXIS_VERTICAL = "SYMMETRY_AXIS_VERTICAL";
@@ -140,11 +144,11 @@ public class GameScene : GUIScene
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         List<string> actionTags = levelManager.m_currentLevel.m_actionButtonsTags;
 
-        GameObject actionButtonsHolder = new GameObject("ActionButtonsHolder");
-        actionButtonsHolder.transform.parent = this.gameObject.transform;
-        actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
+        m_actionButtonsHolder = new GameObject("ActionButtonsHolder");
+        m_actionButtonsHolder.transform.parent = this.gameObject.transform;
+        m_actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
 
-        GameObjectAnimator holderAnimator = actionButtonsHolder.AddComponent<GameObjectAnimator>();
+        GameObjectAnimator holderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
 
         float gapBetweenButtons = 20.0f;
         float distanceToScreenLeftSide = 60.0f;
@@ -215,7 +219,7 @@ public class GameScene : GUIScene
 
             if (clonedButton != null)
             {
-                clonedButton.transform.parent = actionButtonsHolder.transform;
+                clonedButton.transform.parent = m_actionButtonsHolder.transform;
                 clonedButton.transform.localPosition = buttonLocalPosition;
                 m_actionButtons.Add(clonedButton.GetComponentInChildren<HUDButton>());
             }
@@ -236,18 +240,18 @@ public class GameScene : GUIScene
         Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
         Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
 
-        GameObject interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
-        interfaceButtonsHolder.transform.parent = this.gameObject.transform;
-        interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, INTERFACE_BUTTONS_Z_VALUE);
+        m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
+        m_interfaceButtonsHolder.transform.parent = this.gameObject.transform;
+        m_interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, INTERFACE_BUTTONS_Z_VALUE);
 
-        GameObjectAnimator holderAnimator = interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
+        GameObjectAnimator holderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
 
         float distanceToRightBorder = 30.0f;
         float distanceBetweenButtons = 30.0f;
 
         //menu button
         GameObject clonedMenuBtn = (GameObject)Instantiate(m_menuBtnPfb);
-        clonedMenuBtn.transform.parent = interfaceButtonsHolder.transform;
+        clonedMenuBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float menuBtnXPosition = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
         clonedMenuBtn.transform.localPosition = new Vector3(menuBtnXPosition, 0, 0);
         GUIInterfaceButton interfaceButton = clonedMenuBtn.GetComponent<GUIInterfaceButton>();
@@ -255,7 +259,7 @@ public class GameScene : GUIScene
 
         //retry button
         GameObject clonedRetryBtn = (GameObject)Instantiate(m_retryBtnPfb);
-        clonedRetryBtn.transform.parent = interfaceButtonsHolder.transform;
+        clonedRetryBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float retryBtnXPosition = menuBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedRetryBtn.transform.localPosition = new Vector3(retryBtnXPosition, 0, 0);
         interfaceButton = clonedRetryBtn.GetComponent<GUIInterfaceButton>();
@@ -263,7 +267,7 @@ public class GameScene : GUIScene
 
         //hints button
         GameObject clonedHintsBtn = (GameObject)Instantiate(m_hintsBtnPfb);
-        clonedHintsBtn.transform.parent = interfaceButtonsHolder.transform;
+        clonedHintsBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float hintsBtnXPosition = retryBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedHintsBtn.transform.localPosition = new Vector3(hintsBtnXPosition, 0, 0);
         interfaceButton = clonedHintsBtn.GetComponent<GUIInterfaceButton>();
@@ -271,6 +275,25 @@ public class GameScene : GUIScene
 
         holderAnimator.SetOpacity(0);
         holderAnimator.FadeTo(1, 0.2f, fDelay);
+    }
+
+
+    /**
+     * Fades out interface buttons holder
+     * **/
+    public void DismissInterfaceButtons(float fDuration, float fDelay)
+    {
+        GameObjectAnimator interfaceButtonsHolderAnimator = m_interfaceButtonsHolder.GetComponent<GameObjectAnimator>();
+        interfaceButtonsHolderAnimator.FadeTo(0.0f, fDuration, fDelay);
+    }
+
+    /**
+     * Fades out interface buttons holder
+     * **/
+    public void DismissActionButtons(float fDuration, float fDelay)
+    {
+        GameObjectAnimator actionButtonsHolderAnimator = m_actionButtonsHolder.GetComponent<GameObjectAnimator>();
+        actionButtonsHolderAnimator.FadeTo(0.0f, fDuration, fDelay);
     }
 
     /**
@@ -339,14 +362,6 @@ public class GameScene : GUIScene
         GameObject shapeObject = m_shapes.m_shapesObj[0];
         Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
         Shapes.PerformFusionOnShape(fusionShape);
-        //for (int i = 0; i != m_shapes.m_shapesObj.Count; i++)
-        //{
-        //    GameObject shapeObject = m_shapes.m_shapesObj[i];
-        //    Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
-
-        //    if (fusionShape.Fusion())
-        //}
-
     }
 
     /**

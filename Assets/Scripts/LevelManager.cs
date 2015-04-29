@@ -10,6 +10,7 @@ public class LevelManager : MonoBehaviour
     public Color CHAPTER_GROUP_3_BASE_COLOR { get { return new Color(0, 1, 0, 1); } }
 
     public const int CHAPTERS_COUNT = 8;
+    public const int LEVELS_PER_CHAPTER = 16;
 
     public Chapter[] m_chapters { get; set; }
 
@@ -60,10 +61,13 @@ public class LevelManager : MonoBehaviour
 
         XMLNode levelNode = rootNode.GetNode("level>0");
 
+        Chapter chapter = GetChapterForNumber(iChapterNumber);
+
         Level level = new Level();
         string levelName = levelNode.GetValue("@name");
         string levelNumber = levelNode.GetValue("@number");
-        level.m_number = int.Parse(levelNumber);
+        level.m_chapterRelativeNumber = int.Parse(levelNumber);
+        level.m_parentChapter = chapter;
         level.m_name = levelName;
 
         //Parse counter information
@@ -162,7 +166,7 @@ public class LevelManager : MonoBehaviour
                 shapeColor.g = float.Parse(strSplitColor[1]);
                 shapeColor.b = float.Parse(strSplitColor[2]);
                 shapeColor.a = float.Parse(strSplitColor[3]);
-                shape.m_color = shapeColor;
+                shape.SetOneColor(shapeColor);
 
                 //Contour
                 XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");
@@ -221,7 +225,10 @@ public class LevelManager : MonoBehaviour
         return level;
     }
 
-    public void SetCurrentLevelByNumber(int iLevelNumber)
+    /**
+     * Sets the m_currentLevel variable by providing its absolute number
+     * **/
+    public void SetCurrentLevelByAbsoluteNumber(int iLevelNumber)
     {
         if (iLevelNumber < m_currentChapter.m_levels.Length + 1)
         {
@@ -229,16 +236,52 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /**
+     * Sets the m_currentLevel variable by providing its chapter relative number
+     * **/
+    public void SetLevelOnCurrentChapter(int iLevelRelativeNumber)
+    {
+        if (iLevelRelativeNumber < m_currentChapter.m_levels.Length + 1)
+        {
+            m_currentLevel = m_currentChapter.m_levels[iLevelRelativeNumber - 1];
+        }
+    }
+
+    /**
+     * Gets the m_currentLevel variable by asking for its chapter number and chapter relative level number
+     * **/
+    public Level GetLevelForChapterNumberAndLevelRelativeNumber(int iChapterNumber, int iLevelRelativeNumber)
+    {
+        return m_chapters[iChapterNumber - 1].m_levels[iLevelRelativeNumber - 1];
+    }
+
+    /**
+     * Sets the m_currentChapter variable 
+     * **/
     public void SetCurrentChapterByNumber(int iChapterNumber)
     {
         m_currentChapter = m_chapters[iChapterNumber - 1];
     }
 
+    /**
+     * Gets the chapter whose number is passed as parameter
+     * **/
+    public Chapter GetChapterForNumber(int iChapterNumber)
+    {
+        return m_chapters[iChapterNumber - 1];
+    }
+
+    /**
+     * Gets the chapter group (a group = 4 chapters)
+     * **/
     public int GetChapterGroupForChapter(Chapter chapter)
     {
         return (chapter.m_number - 1) / 4 + 1;
     }
 
+    /**
+     * Gets the current chapter group
+     * **/
     public int GetCurrentChapterGroup()
     {
         return GetChapterGroupForChapter(m_currentChapter);

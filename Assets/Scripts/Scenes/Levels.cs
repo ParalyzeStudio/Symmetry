@@ -113,7 +113,7 @@ public class Levels : GUIScene
 
         float verticalDistanceBetweenLevelSlots = m_levelsGridHeight / 4.2f;
         float horizontalDistanceBetweenLevelSlots = 340.0f / 240.0f * verticalDistanceBetweenLevelSlots;
-        for (int iLevelSlotIdx = 0; iLevelSlotIdx != 16; iLevelSlotIdx++)
+        for (int iLevelSlotIdx = 0; iLevelSlotIdx != LevelManager.LEVELS_PER_CHAPTER; iLevelSlotIdx++)
         {
             GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
             m_levelSlots[iLevelSlotIdx] = clonedLevelSlot;
@@ -148,7 +148,7 @@ public class Levels : GUIScene
         guiManager.DismissBackButton();
 
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        levelManager.SetCurrentLevelByNumber(iLevelSlotIndex + 1);
+        levelManager.SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
 
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);

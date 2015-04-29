@@ -3,28 +3,37 @@ using System.Collections.Generic;
 
 public class Shape : Triangulable
 {
-    public Color m_color { get; set; }
+    public List<List<Vector2>> m_subContours; //list of sub contours containing triangles of same color
 
     public Shape() : base()
     {
-
+        m_subContours = new List<List<Vector2>>();
     }
 
-    public Shape(List<Vector2> contour, Color color) : base(contour)
+    public Shape(List<Vector2> contour) : base(contour)
     {
-        m_color = color;
+        m_subContours = new List<List<Vector2>>();
     }
 
-    public Shape(List<Vector2> contour, List<List<Vector2>> holes, Color color)
+    public Shape(List<Vector2> contour, List<List<Vector2>> holes)
         : base(contour, holes)
     {
-        m_color = color;
+        m_subContours = new List<List<Vector2>>();
     }
 
     public Shape(Shape other)
         : base(other)
     {
-        m_color = other.m_color; //Color(Vector4) is a value type so no need to clone them deeply
+        //deep copy subcontours
+        m_subContours = new List<List<Vector2>>();
+        m_subContours.Capacity = other.m_subContours.Count;
+        for (int i = 0; i != other.m_subContours.Count; i++)
+        {
+            List<Vector2> subContoursVec = new List<Vector2>();
+            subContoursVec.Capacity = other.m_subContours[i].Count;
+            subContoursVec.AddRange(other.m_subContours[i]); //Vector2 is a value type so no need to clone them deeply
+            m_subContours.Add(subContoursVec);
+        } 
     }
 
     public override void Triangulate()
@@ -66,6 +75,18 @@ public class Shape : Triangulable
     }
 
     /**
+     * Set the unique color of this shape by setting the same color on each of the triangles in it
+     * **/
+    public void SetOneColor(Color color)
+    {
+        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        {
+            ShapeTriangle triangle = (ShapeTriangle)m_gridTriangles[iTriangleIndex];
+            triangle.m_color = color;
+        }
+    }
+
+    /**
      * Fusion this shape with every shape that overlaps it. 
      * Every shape except 'this' is destroyed and their triangle are added to 'this' shape
      * Returns the shape resulting from the fusion or null if no fusion occured
@@ -89,12 +110,14 @@ public class Shape : Triangulable
                 subjShape = this;
                 subjShapeObject = shapeObjects[iShapeIndex];
             }
-            else if (this.OverlapsShape(shapeData))
+            else if (clipShape != null && this.OverlapsShape(shapeData)) //we have not find a clip shape yet
             {
                 clipShape = shapeData;
-                clipShapeObject = shapeObjects[iShapeIndex];
-                break;
+                clipShapeObject = shapeObjects[iShapeIndex];                
             }
+
+            if (clipShape != null && subjShape != null) //we have both subj and clip shape we can break the loop
+                break;
         }
 
         if (clipShape == null) //no shape overlaps 'this' shape
@@ -103,6 +126,8 @@ public class Shape : Triangulable
         Shape resultingShape = ClippingBooleanOperations.ShapesUnion(subjShape, clipShape);
         if (resultingShape != null)
         {
+            resultingShape.Triangulate();
+
             gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 
             gameScene.m_shapes.DestroyShape(subjShapeObject);

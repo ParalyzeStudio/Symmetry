@@ -9,6 +9,10 @@ public class GameController : MonoBehaviour
 
     public Vector2 m_designScreenSize; //the design screen size that can be set in the inspector
 
+    public bool m_finishingLevelVictory;
+    public float m_finishLevelVictoryElapsedTime;
+    public float m_finishLevelVictoryDelay;
+
     public enum GameStatus
     {
         RUNNING,
@@ -43,6 +47,8 @@ public class GameController : MonoBehaviour
         guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
 
         TouchHandler.s_touchDeactivated = false;
+
+        m_finishingLevelVictory = false;
     }
 
     protected void Update()
@@ -54,6 +60,20 @@ public class GameController : MonoBehaviour
             {
                 EndLevel(gameStatus);
                 m_gameStatus = GameStatus.FINISHED;
+            }
+            else if (m_gameStatus == GameStatus.FINISHED)
+            {
+                if (m_finishingLevelVictory)
+                {
+                    float dt = Time.deltaTime;
+                    m_finishLevelVictoryElapsedTime += dt;
+                    if (m_finishLevelVictoryElapsedTime >= m_finishLevelVictoryDelay)
+                    {
+                        OnFinishEndingLevelVictory();
+                        Debug.Log("OnFinishEndingLevelVictory");
+                        m_finishingLevelVictory = false;
+                    }
+                }
             }
         }
     }    
@@ -171,13 +191,44 @@ public class GameController : MonoBehaviour
         {
             Debug.Log("EndLevel VICTORY");
             GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-            gameScene.m_grid.Dismiss(1.0f);
-            gameScene.m_outlines.Dismiss(1.0f);
+            gameScene.m_grid.Dismiss(2.0f, 1.0f);
+            gameScene.m_outlines.Dismiss(2.0f, 1.0f);
+            gameScene.DismissInterfaceButtons(2.0f, 1.0f);
+            gameScene.DismissActionButtons(2.0f, 1.0f);
+
+            LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
+            if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
+            {
+                levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
+
+                m_finishingLevelVictory = true;
+                m_finishLevelVictoryElapsedTime = 0.0f;
+                m_finishLevelVictoryDelay = 3.0f;
+            }
+            else
+            {
+                //TODO go to next chapter by showing chapter menu for instance
+            }
+
+            //Save the status of this level to preferences
+            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            persistentDataManager.SetLevelDone(currentLevelNumber);
+
         }
         else if (gameStatus == GameStatus.DEFEAT)
         {
             Debug.Log("EndLevel DEFEAT");
             //m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
         }
+    }
+
+    /**
+     * Function called when all scene elements have been faded out except shapes (victory)
+     * Time to switch scene and go to next level or next chapter (if level 16 has been reached)
+     * **/
+    public void OnFinishEndingLevelVictory()
+    {
+        m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 2.0f, 3.0f, 2.0f); //restart the level
     }
 }

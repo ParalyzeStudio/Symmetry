@@ -8,9 +8,15 @@ public class ShapeAnimator : GameObjectAnimator
         base.SetOpacity(opacity, bPassOnChildren);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        Color oldColor = shapeRenderer.m_color;
-        Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, opacity);
-        shapeRenderer.SetColor(newColor);
+        for (int iTriangleIndex = 0; iTriangleIndex != shapeRenderer.m_shape.m_gridTriangles.Count; iTriangleIndex++)
+        {
+            ShapeTriangle shapeTriangle = (ShapeTriangle)(shapeRenderer.m_shape.m_gridTriangles[iTriangleIndex]);
+            Color oldTriangleColor = shapeTriangle.m_color;
+            Color newColor = new Color(oldTriangleColor.r, oldTriangleColor.g, oldTriangleColor.b, opacity);
+            shapeTriangle.m_color = newColor;
+        }
+
+        shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override void SetColor(Color color)
@@ -18,7 +24,8 @@ public class ShapeAnimator : GameObjectAnimator
         base.SetColor(color);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.SetColor(color);
+        shapeRenderer.m_shape.SetOneColor(color);
+        shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override Vector3 GetGameObjectSize()
@@ -61,9 +68,9 @@ public class ShapeAnimator : GameObjectAnimator
     {
         //shapeRenderer.m_shape.Fusion();
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
+        //Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
         
-        MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
-        shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
+        //MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
+        //shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape
     }
 }

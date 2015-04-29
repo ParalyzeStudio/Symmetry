@@ -37,21 +37,15 @@ public class Symmetrizer : MonoBehaviour
         Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
         Vector3 axisDirection = axisRenderer.GetAxisDirection();
 
-        bool bSymmetryDone = false;
+        Shape shapeData = null;
         if (leftTriangles.Count > 0)
         {
-            bSymmetryDone = true;
-
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
             {
                 List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(leftTriangles[iTrianglesVecIdx], true);
 
-                //the color of the new shape is the color of the old shape which can be retrieved from one of the ShapeTriangle objects
-                Color shapeColor = reflectedTriangles[0].m_parentShape.m_color;
-
-                Shape shapeData = new Shape();
+                shapeData = new Shape();
                 shapeData.SetShapeTriangles(reflectedTriangles);
-                shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
                 GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
@@ -60,26 +54,17 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
-                Color targetColor = ColorUtils.DarkenColor(shapeData.m_color, 0.1f);
-                shapeObjectAnimator.SetColor(shapeData.m_color);
-                shapeObjectAnimator.ColorChangeTo(targetColor, 0.5f);
             }
         }
 
         if (rightTriangles.Count > 0)
         {
-            bSymmetryDone = true;
-
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
             {
                 List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(rightTriangles[iTrianglesVecIdx], false);
 
-                //the color of the new shape is the color of the old shape which can be retrieved from one of the ShapeTriangle objects
-                Color shapeColor = reflectedTriangles[0].m_parentShape.m_color;
-
-                Shape shapeData = new Shape();
+                shapeData = new Shape();
                 shapeData.SetShapeTriangles(reflectedTriangles);
-                shapeData.m_color = ColorUtils.DarkenColor(shapeColor, 0.5f);
                 shapeData.CalculateContour();
                 shapeData.CalculateArea();
                 GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
@@ -88,14 +73,14 @@ public class Symmetrizer : MonoBehaviour
                 shapeObjectAnimator.SetRotationAxis(axisDirection);
                 shapeObjectAnimator.SetRotationAngle(-90);
                 shapeObjectAnimator.RotateTo(0, 0.5f);
-                Color targetColor = ColorUtils.DarkenColor(shapeData.m_color, 0.1f);
-                shapeObjectAnimator.SetColor(shapeData.m_color);
-                shapeObjectAnimator.ColorChangeTo(targetColor, 0.5f);
             }
         }
 
-        if (bSymmetryDone)
+        if (shapeData != null)
         {
+            ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
+            Shapes.PerformFusionOnShape(shapeData);
+
             gameScene.m_counter.IncrementCounter();
         }
     }
