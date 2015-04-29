@@ -75,6 +75,9 @@ public class GUIInterfaceButton : GUIQuadButton
             SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
             soundManager.ToggleMusic();
 
+            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            persistentDataManager.SetMusicStatus(soundManager.m_musicActive);
+
             MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
             Material onMaterial = m_materials[0];
             Material offMaterial = m_materials[1];
@@ -84,6 +87,9 @@ public class GUIInterfaceButton : GUIQuadButton
         {
             SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
             soundManager.ToggleSound();
+
+            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
 
             MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
             Material onMaterial = m_materials[0];
@@ -130,6 +136,14 @@ public class GUIInterfaceButton : GUIQuadButton
         else if (m_ID == GUIInterfaceButtonID.ID_HINTS_BUTTON)
         {
             Debug.Log("HINTS");
+        }
+        else if (m_ID == GUIInterfaceButtonID.ID_BACK_TO_LEVELS_BUTTON)
+        {
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f, 0.0f);
+
+            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            guiManager.DismissPauseWindow();
         }
     }
 }

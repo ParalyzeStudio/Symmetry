@@ -3,37 +3,26 @@ using System.Collections.Generic;
 
 public class Shape : Triangulable
 {
-    public List<List<Vector2>> m_subContours; //list of sub contours containing triangles of same color
-
     public Shape() : base()
     {
-        m_subContours = new List<List<Vector2>>();
+        
     }
 
     public Shape(List<Vector2> contour) : base(contour)
     {
-        m_subContours = new List<List<Vector2>>();
+        
     }
 
     public Shape(List<Vector2> contour, List<List<Vector2>> holes)
         : base(contour, holes)
     {
-        m_subContours = new List<List<Vector2>>();
+        
     }
 
     public Shape(Shape other)
         : base(other)
     {
-        //deep copy subcontours
-        m_subContours = new List<List<Vector2>>();
-        m_subContours.Capacity = other.m_subContours.Count;
-        for (int i = 0; i != other.m_subContours.Count; i++)
-        {
-            List<Vector2> subContoursVec = new List<Vector2>();
-            subContoursVec.Capacity = other.m_subContours[i].Count;
-            subContoursVec.AddRange(other.m_subContours[i]); //Vector2 is a value type so no need to clone them deeply
-            m_subContours.Add(subContoursVec);
-        } 
+
     }
 
     public override void Triangulate()
