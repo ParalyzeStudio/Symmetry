@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 8" number="8">
+	<counter maxActions="3"/>
+	<grid exactNumColumns="13" exactNumLines="13" maxGridSpacing="150"/>
+	<dottedOutlines>
+		<dottedOutline>
+			<contour>
+				<point column="6" line="10" />
+				<point column="6" line="8" />
+				<point column="8" line="8" />
+				<point column="9" line="9" />
+				<point column="9" line="11" />
+				<point column="7" line="11" />
+			</contour>
+		</dottedOutline>
+		<dottedOutline>
+			<contour>
+				<point column="6" line="6" />
+				<point column="5" line="5" />
+				<point column="5" line="3" />
+				<point column="7" line="3" />
+				<point column="8" line="4" />
+				<point column="8" line="6" />
+			</contour>
+		</dottedOutline>
+		<dottedOutline>
+			<contour>
+				<point column="4" line="8" />
+				<point column="6" line="6" />
+				<point column="6" line="8" />
+			</contour>
+		</dottedOutline>
+		<dottedOutline>
+			<contour>
+				<point column="8" line="8" />
+				<point column="8" line="6" />
+				<point column="10" line="6" />
+			</contour>
+		</dottedOutline>
+	</dottedOutlines>
+	<shapes>
+		<shape color="1,0,0,1">
+			<contour>
+				<point column="6.5" line="10.5" />
+				<point column="6" line="10" />
+				<point column="6" line="8" />
+				<point column="8" line="8" />
+				<point column="8.5" line="8.5" />
+			</contour>
+		</shape>
+	</shapes>
+	<actions>
+		<action tag="SYMMETRY_AXES_ALL"/>
+	</actions>
+</level>
