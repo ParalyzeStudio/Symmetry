@@ -99,7 +99,7 @@ public class Shape : Triangulable
                 subjShape = this;
                 subjShapeObject = shapeObjects[iShapeIndex];
             }
-            else if (clipShape != null && this.OverlapsShape(shapeData)) //we have not find a clip shape yet
+            else if (clipShape == null && this.OverlapsShape(shapeData)) //we have not found a clip shape yet
             {
                 clipShape = shapeData;
                 clipShapeObject = shapeObjects[iShapeIndex];                

@@ -137,6 +137,18 @@ public class Symmetrizer : MonoBehaviour
                                                         extractedTriangles,
                                                         false);
 
+        //...on the left side of the right grid border
+        extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[1],
+                                                        line2GridBoxIntersections[1],
+                                                        extractedTriangles,
+                                                        true);
+
+        //...on the right side of the left grid border
+        extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[0],
+                                                        line2GridBoxIntersections[0],
+                                                        extractedTriangles,
+                                                        false);
+
         //... finally on the left and right side of the axis itself
         leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
                                                    axisRenderer.m_endpoint2GridPosition,

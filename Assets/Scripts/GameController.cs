@@ -36,6 +36,10 @@ public class GameController : MonoBehaviour
         //parse xml levels files
         m_levelManager.ParseAllLevels();
 
+        //Init persistent data on first application launch
+        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+        persistentDataManager.CreateAndInitAllLevelData();
+
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
