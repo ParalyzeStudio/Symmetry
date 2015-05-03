@@ -48,6 +48,9 @@ public class Counter : MonoBehaviour
      * **/
     public void IncrementCounter()
     {
+        if (m_reachedCounterElementNumber >= m_elements.Count)
+            return;
+
         m_reachedCounterElementNumber++;
 
         int elementIdx = m_reachedCounterElementNumber - 1;
