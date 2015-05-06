@@ -6,7 +6,7 @@ public class AxisRenderer : MonoBehaviour
     public GameObject m_axisSegmentPfb;
     public GameObject m_symmetryAxisEndpointPfb;
     public GameObject m_circlePfb;
-    public GameObject m_axisSegment { get; set; } //the segment joining two endpoints
+    public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
     public Vector2 m_endpoint1Position { get; set; } //the world position of the first endpoint
@@ -42,7 +42,8 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildElements()
     {
-        m_axisSegment = (GameObject)Instantiate(m_axisSegmentPfb);
+        GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
+        m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
         m_axisSegment.transform.parent = this.gameObject.transform;
 
         m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
@@ -77,9 +78,8 @@ public class AxisRenderer : MonoBehaviour
         }
 
         //Set correct points coordinates for segment
-        AxisSegment axisSegment = m_axisSegment.GetComponent<AxisSegment>();
-        axisSegment.SetStartPoint(m_endpoint1Position);
-        axisSegment.SetEndPoint(m_endpoint2Position);
+        m_axisSegment.SetPointA(m_endpoint1Position);
+        m_axisSegment.SetPointB(m_endpoint2Position);
         
         //Set correct position for both endpoints
         GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();

@@ -5,50 +5,34 @@
  * **/
 public class GridSegment : Segment
 {
-    //coordinates of start and end point of this segment in grid coordinates (column, line)
-    public Vector2 m_startPointGrid;
-    public Vector2 m_endPointGrid;
-    //store previous values of m_startPointGrid and m_endPointGrid to check if a change occured
-    protected Vector2 m_prevStartPointGrid;
-    protected Vector2 m_prevEndPointGrid;
+    //coordinates of pointA and pointB of this segment in grid coordinates (column, line)
+    protected Vector2 m_gridPointA;
+    protected Vector2 m_gridPointB;
 
-    protected override void Start()
+    public new void Build(Vector2 gridPointA, Vector2 gridPointB, float thickness, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
-        base.Start();
-        m_prevStartPointGrid = new Vector2(-1, -1);
-        m_prevEndPointGrid = new Vector2(-1, -1);
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 pointA = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointA);
+        Vector2 pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointB);
+        base.Build(pointA, pointB, thickness, color, numSegmentsPerHalfCircle);
     }
 
-    public void SetStartPointInGridCoordinates(Vector2 startPoint)
+    public void SetGridPointA(Vector2 gridPointA)
     {
-        m_startPointGrid = startPoint;
-        m_prevStartPointGrid = startPoint;
+        m_gridPointA = gridPointA;
 
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        Vector2 worldStartPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPoint);
-        SetStartPoint(worldStartPoint);
+        Vector2 pointA = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointA);
+        SetPointA(pointA);
     }
 
-    public void SetEndPointInGridCoordinates(Vector2 endPoint)
+    public void SetGridPointB(Vector2 gridPointB)
     {
-        m_endPointGrid = endPoint;
-        m_prevEndPointGrid = endPoint;
+        m_gridPointB = gridPointB;
 
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        Vector2 worldEndPoint = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(endPoint);
-        SetEndPoint(worldEndPoint);
-    }
-
-    protected override void Update()
-    {
-        if (m_prevStartPointGrid != m_startPointGrid ||
-            m_prevEndPointGrid != m_endPointGrid)
-        {
-            SetStartPointInGridCoordinates(m_startPointGrid);
-            SetEndPointInGridCoordinates(m_endPointGrid);  
-        }
-
-        base.Update();
+        Vector2 pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointB);
+        SetPointB(pointB);
     }
 }
 

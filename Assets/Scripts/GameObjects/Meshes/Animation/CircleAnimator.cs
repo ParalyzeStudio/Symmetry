@@ -56,7 +56,7 @@ public class CircleAnimator : TranspQuadOpacityAnimator
 
     public void RenderCircle()
     {
-        Circle circle = this.GetComponent<Circle>();
+        CircleMesh circle = this.GetComponent<CircleMesh>();
         circle.Render(m_innerRadius, m_thickness, m_color, m_numSegments);
     }
 

@@ -57,11 +57,11 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-                    ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-                    shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                    shapeObjectAnimator.SetRotationAxis(axisDirection);
-                    shapeObjectAnimator.SetRotationAngle(90);
-                    shapeObjectAnimator.RotateTo(0, 0.5f);
+                    //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
+                    //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+                    //shapeObjectAnimator.SetRotationAxis(axisDirection);
+                    //shapeObjectAnimator.SetRotationAngle(90);
+                    //shapeObjectAnimator.RotateTo(0, 5.0f);
                 }
                 else
                     Debug.Log("LEFT reflectedTriangles are NULL");
@@ -81,11 +81,11 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-                    ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-                    shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                    shapeObjectAnimator.SetRotationAxis(axisDirection);
-                    shapeObjectAnimator.SetRotationAngle(-90);
-                    shapeObjectAnimator.RotateTo(0, 0.5f);
+                    //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
+                    //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+                    //shapeObjectAnimator.SetRotationAxis(axisDirection);
+                    //shapeObjectAnimator.SetRotationAngle(-90);
+                    //shapeObjectAnimator.RotateTo(0, 5.0f);
                 }
                 else
                     Debug.Log("RIGHT reflectedTriangles are NULL");

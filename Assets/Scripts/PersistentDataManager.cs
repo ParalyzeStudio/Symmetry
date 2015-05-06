@@ -58,7 +58,7 @@ public class PersistentDataManager : MonoBehaviour
             {
                 FileStream fs = File.Open(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
                 Debug.Log("CREATING LEVEL DATA FILE " + iLevelNumber);
                 LevelData defaultLevelData = new LevelData(iLevelNumber);
@@ -93,7 +93,7 @@ public class PersistentDataManager : MonoBehaviour
         {
             fs = File.Open(Application.persistentDataPath + "/level_" + levelData.m_absNumber + ".dat", FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false; //failed to open or create the file
         }
@@ -116,7 +116,7 @@ public class PersistentDataManager : MonoBehaviour
         {
             fs = File.Open(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
         }
-        catch (FileNotFoundException e)
+        catch (FileNotFoundException)
         {
             levelData = new LevelData(iAbsoluteLevelNumber);
             fs = File.Create(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat");

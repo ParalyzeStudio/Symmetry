@@ -114,8 +114,8 @@ public class LevelManager : MonoBehaviour
                 string strContourPointLine = contourPointNode.GetValue("@line");
                 string strContourPointColumn = contourPointNode.GetValue("@column");
 
-                int contourPointLine = int.Parse(strContourPointLine);
-                int contourPointColumn = int.Parse(strContourPointColumn);
+                float contourPointLine = float.Parse(strContourPointLine);
+                float contourPointColumn = float.Parse(strContourPointColumn);
 
                 outline.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
             }

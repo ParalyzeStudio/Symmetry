@@ -4,7 +4,7 @@
  * Use this class to render a circle
  * **/
 [ExecuteInEditMode]
-public class Circle : MonoBehaviour
+public class CircleMesh : MonoBehaviour
 {
     /** Render this circle as a polygon with a certain number of segments
      * The more segments the polygon has the more it will look like a circle but the drawback is that more vertices have to be rendered

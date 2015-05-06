@@ -3,15 +3,34 @@ using System.Collections;
 
 public class OutlineSegment : GridSegment 
 {
-    protected override void UpdateTextureRange()
+    public const float DEFAULT_OUTLINE_SEGMENT_THICKNESS = 8.0f;
+
+    public void Build(Vector2 gridPointA, Vector2 gridPointB, float thickness = DEFAULT_OUTLINE_SEGMENT_THICKNESS)
     {
-        Texture tex = this.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
-        float texWidth = tex.width;
-        this.m_textureRange = new Vector4(0, 0, m_length / texWidth, 1);
+        base.Build(gridPointA, gridPointB, thickness, Color.black, 0);
+        UpdateUVs();
     }
 
-    protected override void UpdateTextureWrapMode()
+    protected void UpdateUVs()
     {
-        GetComponent<Renderer>().sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
+        Texture tex = this.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
+        if (tex == null)
+            return;
+
+        float texWidth = tex.width;
+        float texHeight = tex.height;
+        float segmentToTextureRatio = m_thickness / texHeight;
+        Vector4 textureRange = new Vector4(0, 0, m_length / (texWidth * segmentToTextureRatio), 1);
+
+        Vector2[] uvs = new Vector2[4];
+        uvs[0] = new Vector2(textureRange.x, textureRange.y); //bottom-left
+        uvs[1] = new Vector2(textureRange.x, textureRange.y + textureRange.w); //top-left
+        uvs[2] = new Vector2(textureRange.x + textureRange.z, textureRange.y); //bottom-right
+        uvs[3] = new Vector2(textureRange.x + textureRange.z, textureRange.y + textureRange.w); //top-right
+
+        MeshRenderer renderer = GetComponent<MeshRenderer>();
+        renderer.sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
+
+        GetComponent<MeshFilter>().sharedMesh.uv = uvs;
     }
 }

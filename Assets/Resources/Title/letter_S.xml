@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<letter value="S">
+	<contour>
+		<point x="342" y="650"/>
+		<point x="292" y="710"/>
+		<point x="231" y="782"/>
+		<point x="312" y="846"/>
+		<point x="390" y="885"/>
+		<point x="475" y="900"/>
+		<point x="605" y="868"/>
+		<point x="680" y="810"/>
+		<point x="735" y="735"/>
+		<point x="750" y="640"/>
+		<point x="737" y="568"/>
+		<point x="684" y="488"/>
+		<point x="590" y="429"/>
+		<point x="527" y="403"/>
+		<point x="451" y="353"/>
+		<point x="434" y="293"/>
+		<point x="459" y="248"/>
+		<point x="514" y="231"/>
+		<point x="570" y="252"/>
+		<point x="623" y="279"/>		
+		<point x="683" y="215"/>
+		<point x="729" y="163"/>
+		<point x="660" y="115"/>
+		<point x="588" y="91"/>
+		<point x="525" y="82"/>
+		<point x="453" y="85"/>
+		<point x="371" y="116"/>
+		<point x="315" y="163"/>
+		<point x="270" y="249"/>
+		<point x="261" y="319"/>
+		<point x="279" y="406"/>
+		<point x="342" y="488"/>
+		<point x="450" y="536"/>
+		<point x="533" y="579"/>
+		<point x="574" y="638"/>
+		<point x="550" y="700"/>
+		<point x="498" y="728"/>
+		<point x="439" y="723"/>
+		<point x="380" y="686"/>
+	</contour>
+</letter>

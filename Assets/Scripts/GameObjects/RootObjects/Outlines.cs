@@ -32,13 +32,12 @@ public class Outlines : MonoBehaviour
             List<Vector2> contourPoints = clonedOutline.m_contour;
             for (int iPointIndex = 0; iPointIndex != contourPoints.Count; iPointIndex++)
             {
-                Vector2 startPointGrid = contourPoints[iPointIndex];
-                Vector2 endPointGrid = (iPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iPointIndex + 1];
+                Vector2 gridPointA = contourPoints[iPointIndex];
+                Vector2 gridPointB = (iPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iPointIndex + 1];
 
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                outlineSegment.m_startPointGrid = startPointGrid;
-                outlineSegment.m_endPointGrid = endPointGrid;
+                outlineSegment.Build(gridPointA, gridPointB);
                 outlineSegment.transform.parent = outlineObject.transform;
             }
 
@@ -49,13 +48,12 @@ public class Outlines : MonoBehaviour
                 List<Vector2> holePoints = holes[iHoleIdx];
                 for (int iHolePointIdx = 0; iHolePointIdx != holePoints.Count; iHolePointIdx++)
                 {
-                    Vector2 holeStartPoint = holePoints[iHolePointIdx];
-                    Vector2 holeEndPointGrid = (iHolePointIdx == holePoints.Count - 1) ? holePoints[0] : holePoints[iHolePointIdx + 1];
+                    Vector2 holeGridPointA = holePoints[iHolePointIdx];
+                    Vector2 holeGridPointB = (iHolePointIdx == holePoints.Count - 1) ? holePoints[0] : holePoints[iHolePointIdx + 1];
 
                     GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                     OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                    outlineSegment.m_startPointGrid = holeStartPoint;
-                    outlineSegment.m_endPointGrid = holeEndPointGrid;
+                    outlineSegment.Build(holeGridPointA, holeGridPointB);
                     outlineSegment.transform.parent = outlineObject.transform;
                 }
             }
