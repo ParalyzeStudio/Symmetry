@@ -19,7 +19,7 @@ public class Axes : MonoBehaviour
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
-        axisRenderer.BuildElements();
+        axisRenderer.BuildElements(gridStartPosition, true);
         axisRenderer.Render(gridStartPosition, gridStartPosition, true);
 
         AddAxis(newAxis);

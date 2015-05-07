@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class AxisRenderer : MonoBehaviour
 {
+    public const float DEFAULT_AXIS_THICKNESS = 8.0f;
+
     public GameObject m_axisSegmentPfb;
     public GameObject m_symmetryAxisEndpointPfb;
     public GameObject m_circlePfb;
@@ -40,17 +42,41 @@ public class AxisRenderer : MonoBehaviour
     /**
      * Build both endpoints and segment
      * **/
-    public void BuildElements()
+    public void BuildElements(Vector2 startPosition, bool bGridPoints)
     {
+        if (bGridPoints)
+        {
+            m_endpoint1GridPosition = startPosition;
+            m_endpoint2GridPosition = startPosition;
+
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            m_endpoint1Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
+            m_endpoint2Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
+        }
+        else
+        {
+            m_endpoint1Position = startPosition;
+            m_endpoint2Position = startPosition;
+
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            m_endpoint1GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
+            m_endpoint2GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
+        }
+
         GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
         m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
+        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, Color.black, 0);
         m_axisSegment.transform.parent = this.gameObject.transform;
 
         m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
         m_endpoint1.transform.parent = this.gameObject.transform;
+        GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();
+        endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
 
         m_endpoint2 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
         m_endpoint2.transform.parent = this.gameObject.transform;
+        GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
+        endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
     }
 
     /**
