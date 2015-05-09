@@ -22,6 +22,15 @@ public class Triangulable
         m_holes = new List<List<Vector2>>();
     }
 
+    public Triangulable(Vector2[] contour)
+    {
+        m_contour = new List<Vector2>();
+        m_contour.Capacity = contour.Length;
+        m_contour.AddRange(contour);
+        m_gridTriangles = new List<GridTriangle>();
+        m_holes = new List<List<Vector2>>();
+    }
+
     public Triangulable(List<Vector2> contour, List<List<Vector2>> holes)
     {
         m_contour = contour;

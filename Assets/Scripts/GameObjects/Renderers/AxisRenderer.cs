@@ -8,6 +8,7 @@ public class AxisRenderer : MonoBehaviour
     public GameObject m_axisSegmentPfb;
     public GameObject m_symmetryAxisEndpointPfb;
     public GameObject m_circlePfb;
+    public Material m_axisSegmentMaterial; //the material passed from the inspector to application from which we create instances
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
@@ -44,12 +45,12 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildElements(Vector2 startPosition, bool bGridPoints)
     {
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         if (bGridPoints)
         {
             m_endpoint1GridPosition = startPosition;
             m_endpoint2GridPosition = startPosition;
 
-            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
             m_endpoint1Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
             m_endpoint2Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
         }
@@ -58,15 +59,18 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint1Position = startPosition;
             m_endpoint2Position = startPosition;
 
-            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
             m_endpoint1GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
             m_endpoint2GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
         }
 
         GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
         m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, Color.black, 0);
+        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, gameScene.m_axes.m_clonedAxisSegmentMaterial, Color.black);
         m_axisSegment.transform.parent = this.gameObject.transform;
+
+        MeshRenderer axisSegmentMeshRenderer = clonedAxisSegmentObject.GetComponent<MeshRenderer>();
+        Material clonedAxisSegmentMaterial = (Material) Instantiate(m_axisSegmentMaterial);
+        axisSegmentMeshRenderer.sharedMaterial = clonedAxisSegmentMaterial;
 
         m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
         m_endpoint1.transform.parent = this.gameObject.transform;

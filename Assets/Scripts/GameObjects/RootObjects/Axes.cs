@@ -5,10 +5,17 @@ public class Axes : MonoBehaviour
 {
     public List<GameObject> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
+    public Material m_axisSegmentMaterial;
+    public Material m_clonedAxisSegmentMaterial { get; set; }
 
     public void Awake()
     {
         m_childrenAxes = new List<GameObject>();
+    }
+
+    public void Start()
+    {
+        m_clonedAxisSegmentMaterial = (Material)Instantiate(m_axisSegmentMaterial);
     }
 
     public GameObject BuildAxis(Vector2 gridStartPosition)
@@ -20,7 +27,6 @@ public class Axes : MonoBehaviour
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
         axisRenderer.BuildElements(gridStartPosition, true);
-        axisRenderer.Render(gridStartPosition, gridStartPosition, true);
 
         AddAxis(newAxis);
         return newAxis;

@@ -37,7 +37,7 @@ public class Outlines : MonoBehaviour
 
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                outlineSegment.Build(gridPointA, gridPointB);
+                outlineSegment.Build(gridPointA, gridPointB, Color.white);
                 outlineSegment.transform.parent = outlineObject.transform;
             }
 
@@ -53,7 +53,7 @@ public class Outlines : MonoBehaviour
 
                     GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                     OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                    outlineSegment.Build(holeGridPointA, holeGridPointB);
+                    outlineSegment.Build(holeGridPointA, holeGridPointB, Color.white);
                     outlineSegment.transform.parent = outlineObject.transform;
                 }
             }

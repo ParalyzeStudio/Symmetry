@@ -39,7 +39,7 @@ public class CounterElement : MonoBehaviour
     {
         m_skin = Instantiate(m_baseQuadElementPfb);
         m_skin.transform.parent = this.gameObject.transform;
-        TranspQuadOpacityAnimator skinAnimator = m_skin.GetComponent<TranspQuadOpacityAnimator>();
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
         skinAnimator.SetRotationAxis(Vector3.forward);
         skinAnimator.SetRotationAngle(45);
         skinAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
@@ -48,7 +48,7 @@ public class CounterElement : MonoBehaviour
 
         m_shadow = Instantiate(m_baseQuadElementPfb);
         m_shadow.transform.parent = this.gameObject.transform;
-        TranspQuadOpacityAnimator shadowAnimator = m_shadow.GetComponent<TranspQuadOpacityAnimator>();
+        TexturedQuadAnimator shadowAnimator = m_shadow.GetComponent<TexturedQuadAnimator>();
         shadowAnimator.SetRotationAxis(Vector3.forward);
         shadowAnimator.SetRotationAngle(45);
         shadowAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
@@ -74,7 +74,7 @@ public class CounterElement : MonoBehaviour
             m_overlay = Instantiate(m_baseQuadElementPfb);
             m_overlay.transform.parent = this.transform;
             m_overlay.GetComponent<MeshRenderer>().sharedMaterial = m_overlayMaterial;
-            TranspQuadOpacityAnimator overlayAnimator = m_overlay.GetComponent<TranspQuadOpacityAnimator>();
+            TexturedQuadAnimator overlayAnimator = m_overlay.GetComponent<TexturedQuadAnimator>();
             overlayAnimator.SetRotationAxis(Vector3.forward);
             overlayAnimator.SetRotationAngle(45);
             overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));

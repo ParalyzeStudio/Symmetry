@@ -59,7 +59,7 @@ public class CircleMesh : MonoBehaviour
         meshFilter.sharedMesh = circleMesh;
 
         //Set the color to the mesh
-        TranspQuadOpacityAnimator circleAnimator = this.GetComponent<TranspQuadOpacityAnimator>();
+        TexturedQuadAnimator circleAnimator = this.GetComponent<TexturedQuadAnimator>();
         circleAnimator.SetColor(color);
     }
 }

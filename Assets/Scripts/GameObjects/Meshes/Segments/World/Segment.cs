@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /**
- * Use this class to render a segment with possible rounded endpoints
+ * Use this class to render a segment with one color and possible rounded endpoints
  * **/
 
 public class Segment : MonoBehaviour
@@ -11,6 +11,8 @@ public class Segment : MonoBehaviour
     protected float m_thickness; //segment thickness
     protected int m_numSegmentsPerHalfCircle; //number of segments used to draw each half circle on rounded endpoints. Set to 0 to have a rectangle segment
     protected Color m_color; //the color of the segment
+    protected Material m_material; //the material used to render this segment
+    
 
     //controlling length and angle of the segment manually
     protected float m_length;
@@ -21,7 +23,7 @@ public class Segment : MonoBehaviour
     /**
      * Renders the segment with rounded endpoints
      * **/
-    private void RenderInternal(Vector2 pointA,
+    protected virtual void RenderInternal(Vector2 pointA,
                                 Vector2 pointB,
                                 float thickness,
                                 Color color,
@@ -149,7 +151,6 @@ public class Segment : MonoBehaviour
         {
             int colorsLength = roundedSegmentMesh.vertices.Length;
             Color[] colors = new Color[colorsLength];
-            Debug.Log(color);
             for (int i = 0; i != colorsLength; i++)
             {
                 colors[i] = color;
@@ -163,9 +164,14 @@ public class Segment : MonoBehaviour
         //segmentAnimator.SetColor(color);
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         RenderInternal(pointA, pointB, thickness, color, numSegmentsPerHalfCircle, true); //builds the mesh
+        MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        if (meshRenderer != null && material != null)
+        {
+            meshRenderer.sharedMaterial = material;
+        }
     }
 
     /**

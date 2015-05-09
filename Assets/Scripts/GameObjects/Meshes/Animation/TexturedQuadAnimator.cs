@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class TranspQuadOpacityAnimator : GameObjectAnimator
+public class TexturedQuadAnimator : GameObjectAnimator
 {
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {

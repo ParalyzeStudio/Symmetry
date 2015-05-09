@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class FixedTextureSizeAnimator : TranspQuadOpacityAnimator
+public class FixedTextureSizeAnimator : TexturedQuadAnimator
 {
     public Vector2 m_textureSize { get; set; }
 

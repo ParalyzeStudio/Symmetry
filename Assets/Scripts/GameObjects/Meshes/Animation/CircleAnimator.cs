@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CircleAnimator : TranspQuadOpacityAnimator
+public class CircleAnimator : TexturedQuadAnimator
 {
     //thickness of the circle
     public float m_thickness;

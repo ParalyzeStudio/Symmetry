@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class OutlineSegment : GridSegment 
+public class OutlineSegment : TexturedGridSegment 
 {
     public const float DEFAULT_OUTLINE_SEGMENT_THICKNESS = 8.0f;
 
-    public void Build(Vector2 gridPointA, Vector2 gridPointB, float thickness = DEFAULT_OUTLINE_SEGMENT_THICKNESS)
+    public void Build(Vector2 gridPointA, Vector2 gridPointB, Color tintColor, float thickness = DEFAULT_OUTLINE_SEGMENT_THICKNESS)
     {
-        base.Build(gridPointA, gridPointB, thickness, Color.black, 0);
+        base.Build(gridPointA, gridPointB, thickness, null, Color.black, 0); //material is already set int the prefab so pass null to the function
         UpdateUVs();
+        SetColor(tintColor);
     }
 
-    protected void UpdateUVs()
+    protected override void UpdateUVs()
     {
         Texture tex = this.GetComponent<MeshRenderer>().sharedMaterial.mainTexture;
         if (tex == null)

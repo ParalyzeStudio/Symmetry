@@ -9,12 +9,12 @@ public class GridSegment : Segment
     protected Vector2 m_gridPointA;
     protected Vector2 m_gridPointB;
 
-    public new void Build(Vector2 gridPointA, Vector2 gridPointB, float thickness, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public new void Build(Vector2 gridPointA, Vector2 gridPointB, float thickness, Material material, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         Vector2 pointA = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointA);
         Vector2 pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(gridPointB);
-        base.Build(pointA, pointB, thickness, color, numSegmentsPerHalfCircle);
+        base.Build(pointA, pointB, thickness, material, color, numSegmentsPerHalfCircle);
     }
 
     public void SetGridPointA(Vector2 gridPointA)
@@ -35,4 +35,3 @@ public class GridSegment : Segment
         SetPointB(pointB);
     }
 }
-
