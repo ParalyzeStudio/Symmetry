@@ -20,15 +20,15 @@ public class TitleBuilder : MonoBehaviour
 
         TitleLetter S = ParseAndBuildLetter('S');
         TitleLetter Y = ParseAndBuildLetter('Y');
-        //TitleLetter M = ParseAndBuildLetter('M');
+        TitleLetter M = ParseAndBuildLetter('M');
         //TitleLetter E = ParseAndBuildLetter('E');
         //TitleLetter T = ParseAndBuildLetter('T');
         //TitleLetter R = ParseAndBuildLetter('R');
 
         m_letters[0] = S;
         m_letters[1] = Y;
-        m_letters[2] = new TitleLetter(S);
-        m_letters[3] = new TitleLetter(S);
+        m_letters[2] = M;
+        m_letters[3] = new TitleLetter(M);
         m_letters[4] = new TitleLetter(S);
         m_letters[5] = new TitleLetter(S);
         m_letters[6] = new TitleLetter(S);
@@ -110,50 +110,56 @@ public class TitleBuilder : MonoBehaviour
 
         //Parse inner points
         XMLNodeList innerPointsNodeList = letterNode.GetNodeList("innerPoints>0>point");
-        foreach (XMLNode innerPointNode in innerPointsNodeList)
+        if (innerPointsNodeList != null)
         {
-            string strInnerPointX = innerPointNode.GetValue("@x");
-            string strInnerPointY = innerPointNode.GetValue("@y");
+            foreach (XMLNode innerPointNode in innerPointsNodeList)
+            {
+                string strInnerPointX = innerPointNode.GetValue("@x");
+                string strInnerPointY = innerPointNode.GetValue("@y");
 
-            float innerPointX = float.Parse(strInnerPointX);
-            float innerPointY = float.Parse(strInnerPointY);
+                float innerPointX = float.Parse(strInnerPointX);
+                float innerPointY = float.Parse(strInnerPointY);
 
-            //transform the coordinates of the letter vertices so the origin is at the center of the letter (x et y coordinates are between 0 and 1000)
-            innerPointX -= 500.0f;
-            innerPointY = 1000 - innerPointY; //y-axis is reversed in photoshop
-            innerPointY -= 500.0f;
+                //transform the coordinates of the letter vertices so the origin is at the center of the letter (x et y coordinates are between 0 and 1000)
+                innerPointX -= 500.0f;
+                innerPointY = 1000 - innerPointY; //y-axis is reversed in photoshop
+                innerPointY -= 500.0f;
 
-            //normalize coordinates by dividing by 1000 and scale them to fit the correct letter size
-            innerPointX *= (letterScale / 1000.0f);
-            innerPointY *= (letterScale / 1000.0f);
+                //normalize coordinates by dividing by 1000 and scale them to fit the correct letter size
+                innerPointX *= (letterScale / 1000.0f);
+                innerPointY *= (letterScale / 1000.0f);
 
-            TitleLetterVertex letterVertex = new TitleLetterVertex(iVertexIndex, innerPointX, innerPointY);
-            letter.Add(letterVertex);
-            iVertexIndex++;
+                TitleLetterVertex letterVertex = new TitleLetterVertex(iVertexIndex, innerPointX, innerPointY);
+                letter.Add(letterVertex);
+                iVertexIndex++;
+            }
         }
 
         //Add missing neighbors
         XMLNodeList nodesList = letterNode.GetNodeList("network>0>node");
-        foreach (XMLNode node in nodesList)
+        if (nodesList != null)
         {
-            string strNodeIndex = node.GetValue("@index");
-
-            int nodeIndex = int.Parse(strNodeIndex);
-
-            TitleLetterVertex vertex = letter.GetVertexForIndex(nodeIndex);
-
-            XMLNodeList neighborsNodeList = node.GetNodeList("neighbor");
-            foreach (XMLNode neighborNode in neighborsNodeList)
+            foreach (XMLNode node in nodesList)
             {
-                string strNeighborIndex = neighborNode.GetValue("@index");
+                string strNodeIndex = node.GetValue("@index");
 
-                //Add this vertex as a neighbor for current vertex
-                int neighborIndex = int.Parse(strNeighborIndex);
-                vertex.AddNeighbor(neighborIndex);
+                int nodeIndex = int.Parse(strNodeIndex);
 
-                //Add current vertex as a neighbor for this vertex
-                TitleLetterVertex neighborVertex = letter.GetVertexForIndex(neighborIndex);
-                neighborVertex.AddNeighbor(nodeIndex);
+                TitleLetterVertex vertex = letter.GetVertexForIndex(nodeIndex);
+
+                XMLNodeList neighborsNodeList = node.GetNodeList("neighbor");
+                foreach (XMLNode neighborNode in neighborsNodeList)
+                {
+                    string strNeighborIndex = neighborNode.GetValue("@index");
+
+                    //Add this vertex as a neighbor for current vertex
+                    int neighborIndex = int.Parse(strNeighborIndex);
+                    vertex.AddNeighbor(neighborIndex);
+
+                    //Add current vertex as a neighbor for this vertex
+                    TitleLetterVertex neighborVertex = letter.GetVertexForIndex(neighborIndex);
+                    neighborVertex.AddNeighbor(nodeIndex);
+                }
             }
         }
 
