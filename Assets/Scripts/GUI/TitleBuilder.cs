@@ -21,16 +21,16 @@ public class TitleBuilder : MonoBehaviour
         TitleLetter S = ParseAndBuildLetter('S');
         TitleLetter Y = ParseAndBuildLetter('Y');
         TitleLetter M = ParseAndBuildLetter('M');
-        //TitleLetter E = ParseAndBuildLetter('E');
-        //TitleLetter T = ParseAndBuildLetter('T');
+        TitleLetter E = ParseAndBuildLetter('E');
+        TitleLetter T = ParseAndBuildLetter('T');
         //TitleLetter R = ParseAndBuildLetter('R');
 
         m_letters[0] = S;
         m_letters[1] = Y;
         m_letters[2] = M;
         m_letters[3] = new TitleLetter(M);
-        m_letters[4] = new TitleLetter(S);
-        m_letters[5] = new TitleLetter(S);
+        m_letters[4] = E;
+        m_letters[5] = T;
         m_letters[6] = new TitleLetter(S);
         m_letters[7] = new TitleLetter(Y);
     }
@@ -43,7 +43,7 @@ public class TitleBuilder : MonoBehaviour
         titleHolder.transform.parent = mainMenu.transform;
         titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
-        float gapBetweenLetters = 151.0f;
+        float gapBetweenLetters = 300.0f;
         int lettersCount = m_letters.Length;
 
         for (int i = 0; i != lettersCount; i++)
