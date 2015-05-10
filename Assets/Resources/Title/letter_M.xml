@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<letter value="S">
+	<contour>
+		<point x="155" y="82"/>
+		<point x="196" y="153"/>
+		<point x="265" y="265"/>
+		<point x="334" y="380"/>
+		<point x="414" y="516"/>
+		<point x="414" y="602"/>
+		<point x="414" y="753"/>
+		<point x="414" y="898"/>
+		<point x="586" y="898"/>
+		<point x="586" y="775"/>
+		<point x="586" y="663"/>
+		<point x="586" y="513"/>		
+		<point x="637" y="432"/>
+		<point x="719" y="291"/>
+		<point x="787" y="182"/>
+		<point x="845" y="82"/>
+		<point x="775" y="82"/>
+		<point x="654" y="82"/>		
+		<point x="591" y="185"/>
+		<point x="541" y="267"/>		
+		<point x="499" y="333"/>	
+		<point x="457" y="269"/>
+		<point x="416" y="196"/>
+		<point x="347" y="82"/>
+		<point x="266" y="82"/>
+	</contour>
+	<innerPoints>
+		<point x="290" y="152"/>
+		<point x="335" y="183"/>
+		<point x="341" y="281"/>		
+		<point x="415" y="348"/>
+		<point x="449" y="432"/>		
+		<point x="498" y="516"/>
+		<point x="467" y="631"/>		
+		<point x="519" y="677"/>
+		<point x="487" y="783"/>		
+		<point x="516" y="847"/>		
+		<point x="556" y="570"/>
+		<point x="538" y="401"/>
+		<point x="619" y="346"/>
+		<point x="613" y="286"/>
+		<point x="672" y="195"/>
+		<point x="726" y="169"/>
+	</innerPoints>
+	<network>
+		<node index="15">
+			<neighbor index="17"/>
+		</node>
+		<node index="25">
+			<neighbor index="2"/>
+			<neighbor index="26"/>
+		</node>
+		<node index="26">
+			<neighbor index="2"/>
+			<neighbor index="3"/>
+			<neighbor index="24"/>
+			<neighbor index="27"/>
+		</node>
+		<node index="27">
+			<neighbor index="3"/>
+			<neighbor index="23"/>
+			<neighbor index="24"/>
+			<neighbor index="28"/>
+		</node>
+		<node index="28">
+			<neighbor index="3"/>
+			<neighbor index="4"/>
+			<neighbor index="22"/>
+			<neighbor index="23"/>
+			<neighbor index="29"/>
+		</node>
+		<node index="29">
+			<neighbor index="4"/>
+			<neighbor index="21"/>
+			<neighbor index="22"/>
+			<neighbor index="30"/>
+			<neighbor index="37"/>
+		</node>
+		<node index="30">
+			<neighbor index="4"/>
+			<neighbor index="5"/>
+			<neighbor index="31"/>
+			<neighbor index="37"/>
+		</node>
+		<node index="31">
+			<neighbor index="5"/>
+			<neighbor index="6"/>
+			<neighbor index="12"/>
+			<neighbor index="32"/>
+			<neighbor index="36"/>
+			<neighbor index="37"/>
+		</node>
+		<node index="32">
+			<neighbor index="6"/>
+			<neighbor index="7"/>
+			<neighbor index="33"/>
+			<neighbor index="36"/>
+		</node>
+		<node index="33">
+			<neighbor index="7"/>
+			<neighbor index="10"/>
+			<neighbor index="11"/>
+			<neighbor index="34"/>
+			<neighbor index="36"/>
+		</node>
+		<node index="34">
+			<neighbor index="7"/>
+			<neighbor index="8"/>
+			<neighbor index="10"/>
+			<neighbor index="35"/>
+		</node>
+		<node index="35">
+			<neighbor index="8"/>
+			<neighbor index="9"/>
+			<neighbor index="10"/>
+		</node>
+		<node index="36">
+			<neighbor index="11"/>
+			<neighbor index="12"/>
+		</node>
+		<node index="37">
+			<neighbor index="12"/>
+			<neighbor index="13"/>
+			<neighbor index="21"/>
+			<neighbor index="38"/>
+		</node>
+		<node index="38">
+			<neighbor index="13"/>
+			<neighbor index="14"/>
+			<neighbor index="21"/>
+			<neighbor index="39"/>
+		</node>
+		<node index="39">
+			<neighbor index="14"/>
+			<neighbor index="19"/>
+			<neighbor index="20"/>
+			<neighbor index="21"/>
+			<neighbor index="40"/>
+		</node>
+		<node index="40">
+			<neighbor index="14"/>
+			<neighbor index="18"/>
+			<neighbor index="19"/>
+			<neighbor index="41"/>
+		</node>
+		<node index="41">
+			<neighbor index="14"/>
+			<neighbor index="15"/>
+			<neighbor index="17"/>
+			<neighbor index="18"/>
+		</node>
+	</network>
+</letter>
