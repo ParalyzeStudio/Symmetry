@@ -52,6 +52,7 @@ public class MainMenu : GUIScene
         TitleBuilder titleBuilder = titleBuilderObject.GetComponent<TitleBuilder>();
 
         titleBuilder.Build();
+        titleBuilder.Show(false);
     }
 
     //public void ShowTitle(bool bAnimated, float fDelay = 0.0f)

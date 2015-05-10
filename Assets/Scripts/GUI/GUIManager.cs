@@ -130,28 +130,28 @@ public class GUIManager : MonoBehaviour
 
         if (contentToDisplay == SceneManager.DisplayContent.MENU)
         {
-            framesHolder.transform.position = new Vector3(0, 0, -5);
+            //framesHolder.transform.position = new Vector3(0, 0, -5);
            
-            GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
-            float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
-            float topFrameHeight = 2 * distanceToScreenTopBorder;
+            //GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
+            //float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
+            //float topFrameHeight = 2 * distanceToScreenTopBorder;
 
             
-            topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-            Vector3 fromScale = new Vector3(screenSize.x, 0, 1);
-            Vector3 toScale = new Vector3(screenSize.x, topFrameHeight, 1);
-            topFrameAnimator.SetScale(fromScale);
-            topFrameAnimator.ScaleTo(toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            //topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
+            //Vector3 fromScale = new Vector3(screenSize.x, 0, 1);
+            //Vector3 toScale = new Vector3(screenSize.x, topFrameHeight, 1);
+            //topFrameAnimator.SetScale(fromScale);
+            //topFrameAnimator.ScaleTo(toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
-            float middleFrameHeight = topFrameHeight + 0.23f * screenSize.y;
+            //float middleFrameHeight = topFrameHeight + 0.23f * screenSize.y;
       
-            middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-            middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
-            fromScale = new Vector3(screenSize.x, 0, 1);
-            toScale = new Vector3(screenSize.x, middleFrameHeight, 1);
-            middleFrameAnimator.SetScale(fromScale);
-            middleFrameAnimator.ScaleTo(toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+            //middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+            //middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
+            //fromScale = new Vector3(screenSize.x, 0, 1);
+            //toScale = new Vector3(screenSize.x, middleFrameHeight, 1);
+            //middleFrameAnimator.SetScale(fromScale);
+            //middleFrameAnimator.ScaleTo(toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
         else if (contentToDisplay == SceneManager.DisplayContent.CHAPTERS || contentToDisplay == SceneManager.DisplayContent.LEVELS)
         {

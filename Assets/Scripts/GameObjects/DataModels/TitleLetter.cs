@@ -26,7 +26,23 @@ public class TitleLetterVertex
         : this(index, position.x, position.y)
     {
         
-    }   
+    }
+
+    public TitleLetterVertex(TitleLetterVertex other)
+    {
+        m_position = other.m_position;
+        m_index = other.m_index;
+
+        //deep copy neighbors
+        m_neighbors = new List<int>();
+        m_neighbors.Capacity = other.m_neighbors.Count;
+        m_neighbors.AddRange(other.m_neighbors);
+
+        //deep copy linked neighbors
+        m_linkedNeighbors = new List<int>();
+        m_linkedNeighbors.Capacity = other.m_linkedNeighbors.Count;
+        m_linkedNeighbors.AddRange(other.m_linkedNeighbors);
+    }
 
     public void AddNeighbor(int iNodeIndex)
     {
@@ -52,6 +68,24 @@ public class TitleLetterVertex
 
 public class TitleLetter : List<TitleLetterVertex>
 {
+    public char m_value { get; set; }
+
+    public TitleLetter()
+    {
+
+    }
+
+    public TitleLetter(TitleLetter other) : this()
+    {
+        m_value = other.m_value;
+
+        this.Capacity = other.Count;
+        for (int i = 0; i != other.Count; i++)
+        {
+            this.Add(new TitleLetterVertex(other[i]));
+        }
+    }
+
     /**
      * Get the vertex indexed at position index. index is in the range [1-n] where n is the number of vertices inside this letter
      * **/

@@ -1,30 +1,75 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 public class TitleBuilder : MonoBehaviour
 {
+    public const float TITLE_Z_VALUE = -200.0f;
+
     public GameObject m_letterSegmentPfb;
     public Material m_segmentMaterial;
     private Material m_clonedMaterial;
+    private TitleLetter[] m_letters;
 
     public void Build()
     {
         //Set the unique instance of material for all segments that are going to be rendered
         m_clonedMaterial = (Material) Instantiate(m_segmentMaterial);
 
-        BuildLetter('S');
+        //Title is SYMMETRY
+        m_letters = new TitleLetter[8];
+
+        TitleLetter S = ParseAndBuildLetter('S');
+        TitleLetter Y = ParseAndBuildLetter('Y');
+        //TitleLetter M = ParseAndBuildLetter('M');
+        //TitleLetter E = ParseAndBuildLetter('E');
+        //TitleLetter T = ParseAndBuildLetter('T');
+        //TitleLetter R = ParseAndBuildLetter('R');
+
+        m_letters[0] = S;
+        m_letters[1] = Y;
+        m_letters[2] = new TitleLetter(S);
+        m_letters[3] = new TitleLetter(S);
+        m_letters[4] = new TitleLetter(S);
+        m_letters[5] = new TitleLetter(S);
+        m_letters[6] = new TitleLetter(S);
+        m_letters[7] = new TitleLetter(Y);
     }
 
-    private void BuildLetter(char value)
+    public void Show(bool bAnimated)
     {
-        float letterScale = 300.0f;
+        MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameObject titleHolder = new GameObject("Title");
+        titleHolder.AddComponent<GameObjectAnimator>();
+        titleHolder.transform.parent = mainMenu.transform;
+        titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
-        GameObject letterObject = new GameObject("letter");
-        letterObject.transform.localPosition = new Vector3(0, 0, -200);
+        float gapBetweenLetters = 151.0f;
+        int lettersCount = m_letters.Length;
+
+        for (int i = 0; i != lettersCount; i++)
+        {
+            float letterXPosition = (lettersCount % 2 == 0) ? -0.5f * gapBetweenLetters + (i + 1 - lettersCount / 2) * gapBetweenLetters
+                                                            : (i - lettersCount / 2) * gapBetweenLetters;
+            DrawLetter(bAnimated, m_letters[i], new Vector2(letterXPosition, 0), titleHolder);
+        }
+        //letterObject = DrawLetter(bAnimated, m_letters[1], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[2], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[3], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[4], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[5], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[6], new Vector2(394.0f, 0));
+        //letterObject = DrawLetter(bAnimated, m_letters[7], new Vector2(394.0f, 0));
+    }
+
+    private TitleLetter ParseAndBuildLetter(char value)
+    {
+        float letterScale = 200.0f;
 
         string levelFilename = "Title/letter_" + value;
-        UnityEngine.Object levelObjectFile = Resources.Load(levelFilename);
+        Object levelObjectFile = Resources.Load(levelFilename);
+
+        if (levelObjectFile == null)
+            return null;
 
         TextAsset levelFile = (TextAsset)levelObjectFile;
 
@@ -112,6 +157,15 @@ public class TitleBuilder : MonoBehaviour
             }
         }
 
+        return letter;
+    }
+
+    public void DrawLetter(bool bAnimated, TitleLetter letter, Vector2 position, GameObject titleHolder)
+    {
+        GameObject letterObject = new GameObject("letter_" + letter.m_value);
+        letterObject.transform.parent = titleHolder.transform;
+        letterObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, 0);
+
         for (int i = 0; i != letter.Count; i++)
         {
             TitleLetterVertex vertex = letter[i];
@@ -129,24 +183,10 @@ public class TitleBuilder : MonoBehaviour
                     GameObject clonedRoundedSegmentObject = (GameObject)Instantiate(m_letterSegmentPfb);
                     clonedRoundedSegmentObject.transform.parent = letterObject.transform;
                     SimplifiedRoundedSegment roundedSegment = clonedRoundedSegmentObject.GetComponent<SimplifiedRoundedSegment>();
-                    roundedSegment.Build(vertex.m_position, neighborVertex.m_position, 2.0f, m_clonedMaterial, Color.white);
+                    roundedSegment.Build(vertex.m_position, neighborVertex.m_position, 1.5f, m_clonedMaterial, Color.white);
                 }
             }
         }
-
-        //for (int i = 0; i != contourPoints.Length; i++)
-        //{
-        //    Vector2 pointA = contourPoints[i];
-        //    Vector2 pointB = (i == contourPoints.Length - 1) ? contourPoints[0] : contourPoints[i + 1];
-
-        //    GameObject clonedRoundedSegmentObject = (GameObject)Instantiate(m_letterSegmentPfb);
-        //    clonedRoundedSegmentObject.transform.parent = letterObject.transform;
-
-        //    SimplifiedRoundedSegment roundedSegment = clonedRoundedSegmentObject.GetComponent<SimplifiedRoundedSegment>();
-        //    roundedSegment.Build(pointA, pointB, 2.0f, m_clonedMaterial, Color.white);
-        //    //Segment segment = clonedRoundedSegmentObject.GetComponent<Segment>();
-        //    //segment.Build(pointA, pointB, 2.0f, m_clonedMaterial, Color.black);
-        //}
     }
 }
 
