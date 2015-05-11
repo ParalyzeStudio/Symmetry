@@ -69,16 +69,17 @@ public class TitleLetterVertex
 public class TitleLetter : List<TitleLetterVertex>
 {
     public char m_value { get; set; }
+    public float m_width { get; set; }
 
-    public TitleLetter()
+    public TitleLetter(char value, float width)
     {
-
+        m_value = value;
+        m_width = width;
     }
 
-    public TitleLetter(TitleLetter other) : this()
+    public TitleLetter(TitleLetter other)
+        : this(other.m_value, other.m_width)
     {
-        m_value = other.m_value;
-
         this.Capacity = other.Count;
         for (int i = 0; i != other.Count; i++)
         {

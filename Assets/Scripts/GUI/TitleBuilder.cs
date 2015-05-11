@@ -43,22 +43,30 @@ public class TitleBuilder : MonoBehaviour
         titleHolder.transform.parent = mainMenu.transform;
         titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
-        float gapBetweenLetters = 300.0f;
+        float gapBetweenLetters = 40.0f;
         int lettersCount = m_letters.Length;
 
+        //calculate first the width of the whole title
+        float titleWidth = 0;
+        titleWidth += (lettersCount - 1) * gapBetweenLetters;
         for (int i = 0; i != lettersCount; i++)
         {
-            float letterXPosition = (lettersCount % 2 == 0) ? -0.5f * gapBetweenLetters + (i + 1 - lettersCount / 2) * gapBetweenLetters
-                                                            : (i - lettersCount / 2) * gapBetweenLetters;
-            DrawLetter(bAnimated, m_letters[i], new Vector2(letterXPosition, 0), titleHolder);
+            titleWidth += m_letters[i].m_width;
         }
-        //letterObject = DrawLetter(bAnimated, m_letters[1], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[2], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[3], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[4], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[5], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[6], new Vector2(394.0f, 0));
-        //letterObject = DrawLetter(bAnimated, m_letters[7], new Vector2(394.0f, 0));
+
+        //Then draw letters at correct position
+        float previousLetterXPosition = 0;
+        for (int i = 0; i != lettersCount; i++)
+        {
+            TitleLetter letter = m_letters[i];
+            float previousLetterWidth = (i == 0) ? 0 : m_letters[i - 1].m_width;
+            float letterXPosition = previousLetterXPosition + 0.5f * previousLetterWidth + 0.5f * letter.m_width + gapBetweenLetters;
+
+            previousLetterXPosition = letterXPosition;
+
+            letterXPosition -= 0.5f * titleWidth;
+            DrawLetter(bAnimated, letter, new Vector2(letterXPosition, 0), titleHolder);
+        }
     }
 
     private TitleLetter ParseAndBuildLetter(char value)
@@ -77,9 +85,13 @@ public class TitleBuilder : MonoBehaviour
         XMLNode rootNode = xmlParser.Parse(levelFile.text);
 
         XMLNode letterNode = rootNode.GetNode("letter>0");
-        string letterValue = letterNode.GetValue("@value");
+        string strLetterValue = letterNode.GetValue("@value");
+        string strLetterWidth = letterNode.GetValue("@width");
 
-        TitleLetter letter = new TitleLetter();
+        char letterValue = strLetterValue.ToCharArray()[0];
+        float letterWidth = float.Parse(strLetterWidth) * (letterScale / 1000.0f); ;
+
+        TitleLetter letter = new TitleLetter(letterValue, letterWidth);
 
         //Parse contour
         XMLNodeList contourPointsNodeList = letterNode.GetNodeList("contour>0>point");
