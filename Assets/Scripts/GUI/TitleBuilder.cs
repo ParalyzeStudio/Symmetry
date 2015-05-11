@@ -23,7 +23,7 @@ public class TitleBuilder : MonoBehaviour
         TitleLetter M = ParseAndBuildLetter('M');
         TitleLetter E = ParseAndBuildLetter('E');
         TitleLetter T = ParseAndBuildLetter('T');
-        //TitleLetter R = ParseAndBuildLetter('R');
+        TitleLetter R = ParseAndBuildLetter('R');
 
         m_letters[0] = S;
         m_letters[1] = Y;
@@ -31,7 +31,7 @@ public class TitleBuilder : MonoBehaviour
         m_letters[3] = new TitleLetter(M);
         m_letters[4] = E;
         m_letters[5] = T;
-        m_letters[6] = new TitleLetter(S);
+        m_letters[6] = R;
         m_letters[7] = new TitleLetter(Y);
     }
 
