@@ -38,7 +38,6 @@ public class ValueAnimator : MonoBehaviour
     protected float m_translatingDuration;
     protected float m_translatingDelay;
     protected float m_translatingElapsedTime;
-    protected float m_translatingTimeOffset;
     protected InterpolationType m_translatingInterpolationType;
 
     //Variables to handle rotating
@@ -316,7 +315,6 @@ public class ValueAnimator : MonoBehaviour
             {
                 if (inDelay) //we were in delay previously
                     dt = m_translatingElapsedTime - m_translatingDelay;
-                m_translatingTimeOffset = m_translatingElapsedTime - m_translatingDelay;
                 float effectiveElapsedTime = m_translatingElapsedTime - m_translatingDelay;
                 Vector3 deltaPosition = Vector3.zero;
                 Vector3 positionVariation = m_toPosition - m_fromPosition;

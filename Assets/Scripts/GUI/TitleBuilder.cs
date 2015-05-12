@@ -4,35 +4,37 @@ using System.Collections.Generic;
 public class TitleBuilder : MonoBehaviour
 {
     public const float TITLE_Z_VALUE = -200.0f;
+    public const float DEFAULT_LETTER_SEGMENT_THICKNESS = 1.5f;
 
-    public GameObject m_letterSegmentPfb;
-    public Material m_segmentMaterial;
-    private Material m_clonedMaterial;
+    public Material m_titleLetterSegmentMaterial;
+    public GameObject m_titleLetterPfb;
+
     private TitleLetter[] m_letters;
+
 
     public void Build()
     {
         //Set the unique instance of material for all segments that are going to be rendered
-        m_clonedMaterial = (Material) Instantiate(m_segmentMaterial);
+        Material clonedMaterial = (Material)Instantiate(m_titleLetterSegmentMaterial);
 
         //Title is SYMMETRY
         m_letters = new TitleLetter[8];
 
-        TitleLetter S = ParseAndBuildLetter('S');
-        TitleLetter Y = ParseAndBuildLetter('Y');
-        TitleLetter M = ParseAndBuildLetter('M');
-        TitleLetter E = ParseAndBuildLetter('E');
-        TitleLetter T = ParseAndBuildLetter('T');
-        TitleLetter R = ParseAndBuildLetter('R');
+        TitleLetter S = ParseAndBuildLetter('S', clonedMaterial);
+        TitleLetter Y = ParseAndBuildLetter('Y', clonedMaterial);
+        TitleLetter M = ParseAndBuildLetter('M', clonedMaterial);
+        TitleLetter E = ParseAndBuildLetter('E', clonedMaterial);
+        TitleLetter T = ParseAndBuildLetter('T', clonedMaterial);
+        TitleLetter R = ParseAndBuildLetter('R', clonedMaterial);
 
         m_letters[0] = S;
         m_letters[1] = Y;
         m_letters[2] = M;
-        m_letters[3] = new TitleLetter(M);
+        m_letters[3] = Instantiate(M); //create a clone of M
         m_letters[4] = E;
         m_letters[5] = T;
         m_letters[6] = R;
-        m_letters[7] = new TitleLetter(Y);
+        m_letters[7] = Instantiate(Y); //create a clone of Y
     }
 
     public void Show(bool bAnimated)
@@ -59,17 +61,22 @@ public class TitleBuilder : MonoBehaviour
         for (int i = 0; i != lettersCount; i++)
         {
             TitleLetter letter = m_letters[i];
+            letter.gameObject.transform.parent = titleHolder.transform;
             float previousLetterWidth = (i == 0) ? 0 : m_letters[i - 1].m_width;
             float letterXPosition = previousLetterXPosition + 0.5f * previousLetterWidth + 0.5f * letter.m_width + gapBetweenLetters;
 
             previousLetterXPosition = letterXPosition;
 
             letterXPosition -= 0.5f * titleWidth;
-            DrawLetter(bAnimated, letter, new Vector2(letterXPosition, 0), titleHolder);
+            if (letter.m_value == 'S')
+                DrawLetter(true, letter, new Vector2(letterXPosition, 0));
+            else
+                ;
+                //DrawLetter(false, letter, new Vector2(letterXPosition, 0));           
         }
     }
 
-    private TitleLetter ParseAndBuildLetter(char value)
+    private TitleLetter ParseAndBuildLetter(char value, Material material)
     {
         float letterScale = 200.0f;
 
@@ -91,7 +98,10 @@ public class TitleBuilder : MonoBehaviour
         char letterValue = strLetterValue.ToCharArray()[0];
         float letterWidth = float.Parse(strLetterWidth) * (letterScale / 1000.0f); ;
 
-        TitleLetter letter = new TitleLetter(letterValue, letterWidth);
+        GameObject letterObject = (GameObject)Instantiate(m_titleLetterPfb);
+        letterObject.transform.parent = this.gameObject.transform;
+        TitleLetter letter = letterObject.GetComponent<TitleLetter>();
+        letter.Init(letterValue, letterWidth, material);
 
         //Parse contour
         XMLNodeList contourPointsNodeList = letterNode.GetNodeList("contour>0>point");
@@ -116,7 +126,9 @@ public class TitleBuilder : MonoBehaviour
             TitleLetterVertex letterVertex = new TitleLetterVertex(iVertexIndex, contourPointX, contourPointY);
             letterVertex.AddNeighbor((iVertexIndex == 1) ? contourPointsNodeList.Count : iVertexIndex - 1); //add previous point in contour as neighbor
             letterVertex.AddNeighbor((iVertexIndex == contourPointsNodeList.Count) ? 1 : iVertexIndex); //add next point in contour as neighbor
-            letter.Add(letterVertex);
+            letterVertex.m_parentLetter = letter;
+
+            letter.m_vertices.Add(letterVertex);            
             iVertexIndex++;
         }
 
@@ -142,7 +154,9 @@ public class TitleBuilder : MonoBehaviour
                 innerPointY *= (letterScale / 1000.0f);
 
                 TitleLetterVertex letterVertex = new TitleLetterVertex(iVertexIndex, innerPointX, innerPointY);
-                letter.Add(letterVertex);
+                letterVertex.m_parentLetter = letter;
+
+                letter.m_vertices.Add(letterVertex);
                 iVertexIndex++;
             }
         }
@@ -175,33 +189,50 @@ public class TitleBuilder : MonoBehaviour
             }
         }
 
+        //parse 'spread' nodes
+        XMLNodeList spreadVerticesNodeList = letterNode.GetNodeList("spread>0>vertex");
+        if (spreadVerticesNodeList != null)
+        {
+            foreach (XMLNode spreadVertexNode in spreadVerticesNodeList)
+            {
+                string strVertexIndex = spreadVertexNode.GetValue("@index");
+                int vertexIndex = int.Parse(strVertexIndex);
+
+                letter.m_spreadVertices.Add(vertexIndex);
+            }
+        }
+
         return letter;
     }
 
-    public void DrawLetter(bool bAnimated, TitleLetter letter, Vector2 position, GameObject titleHolder)
+    public void DrawLetter(bool bAnimated, TitleLetter letter, Vector2 position)
     {
-        GameObject letterObject = new GameObject("letter_" + letter.m_value);
-        letterObject.transform.parent = titleHolder.transform;
-        letterObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, 0);
+        letter.gameObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, 0);
 
-        for (int i = 0; i != letter.Count; i++)
+        if (bAnimated)
         {
-            TitleLetterVertex vertex = letter[i];
-            List<int> neighborsIndices = vertex.m_neighbors;
-            for (int iNeighborIdx = 0; iNeighborIdx != neighborsIndices.Count; iNeighborIdx++)
+            List<int> spreadVertices = letter.m_spreadVertices;
+            for (int iVertexIdx = 0; iVertexIdx != spreadVertices.Count; iVertexIdx++)
             {
-                int neighborIndex = neighborsIndices[iNeighborIdx];
-                if (!vertex.IsLinkedToNeighbor(neighborIndex))
+                TitleLetterVertex spreadVertex = letter.GetVertexForIndex(spreadVertices[iVertexIdx]);
+                spreadVertex.SpreadToNeighbors();
+            }
+        }
+        else //simply draw all segments at once
+        {
+            for (int i = 0; i != letter.m_vertices.Count; i++)
+            {
+                TitleLetterVertex vertex = letter.m_vertices[i];
+                List<int> neighborsIndices = vertex.m_neighbors;
+                for (int iNeighborIdx = 0; iNeighborIdx != neighborsIndices.Count; iNeighborIdx++)
                 {
-                    TitleLetterVertex neighborVertex = letter.GetVertexForIndex(neighborIndex);
-
-                    vertex.m_linkedNeighbors.Add(neighborIndex);
-                    neighborVertex.m_linkedNeighbors.Add(vertex.m_index);
-
-                    GameObject clonedRoundedSegmentObject = (GameObject)Instantiate(m_letterSegmentPfb);
-                    clonedRoundedSegmentObject.transform.parent = letterObject.transform;
-                    SimplifiedRoundedSegment roundedSegment = clonedRoundedSegmentObject.GetComponent<SimplifiedRoundedSegment>();
-                    roundedSegment.Build(vertex.m_position, neighborVertex.m_position, 1.5f, m_clonedMaterial, Color.white);
+                    int neighborIndex = neighborsIndices[iNeighborIdx];
+                    if (!vertex.IsLinkedToNeighbor(neighborIndex))
+                    {
+                        TitleLetterVertex neighborVertex = letter.GetVertexForIndex(neighborIndex);
+                        vertex.LinkToNeighbor(neighborIndex);
+                        letter.BuildSegmentBetweenVertices(vertex, neighborVertex, neighborVertex.m_position);
+                    }
                 }
             }
         }

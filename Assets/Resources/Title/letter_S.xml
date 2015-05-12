@@ -184,4 +184,9 @@
 			<neighbor index="24"/>
 		</node>
 	</network>
+	<spread>
+		<vertex index="43"/>
+<!-- 		<vertex index="48"/>
+		<vertex index="54"/> -->
+	<spread/>
 </letter>

@@ -120,6 +120,13 @@ public class SimplifiedRoundedSegment : TexturedSegment
         if (material.mainTexture == null)
             throw new Exception("Material has no texture set on it");
 
+        SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
+        if (segmentAnimator != null)
+        {
+            segmentAnimator.m_pointAPosition = pointA;
+            segmentAnimator.m_pointBPosition = pointB;
+        }
+
         MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
         if (meshRenderer != null && material != null)
         {
@@ -127,6 +134,21 @@ public class SimplifiedRoundedSegment : TexturedSegment
         }
 
         RenderInternal(pointA, pointB, thickness, tintColor); //builds the mesh        
+    }
+
+    public override void SetPointA(Vector2 pointA)
+    {
+        RenderInternal(pointA, m_pointB, m_thickness, m_color, true, false, false);
+    }
+
+    public override void SetPointB(Vector2 pointB)
+    {
+        RenderInternal(m_pointA, pointB, m_thickness, m_color, true, false, false);
+    }
+
+    public override void SetThickness(float thickness)
+    {
+        RenderInternal(m_pointA, m_pointB, m_thickness, m_color, true, false, false);
     }
 
     protected override void UpdateUVs()

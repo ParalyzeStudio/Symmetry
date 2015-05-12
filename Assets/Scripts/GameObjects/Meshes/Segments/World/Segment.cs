@@ -158,15 +158,19 @@ public class Segment : MonoBehaviour
 
             roundedSegmentMesh.colors = colors;
         }
-
-        //Set the color to the mesh
-        //TranspQuadOpacityAnimator segmentAnimator = this.GetComponent<TranspQuadOpacityAnimator>();
-        //segmentAnimator.SetColor(color);
     }
 
     public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         RenderInternal(pointA, pointB, thickness, color, numSegmentsPerHalfCircle, true); //builds the mesh
+
+        SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
+        if (segmentAnimator != null)
+        {
+            segmentAnimator.m_pointAPosition = pointA;
+            segmentAnimator.m_pointBPosition = pointB;
+        }
+
         MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
         if (meshRenderer != null && material != null)
         {
@@ -177,7 +181,7 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointA
      * **/
-    public void SetPointA(Vector2 pointA)
+    public virtual void SetPointA(Vector2 pointA)
     {
         RenderInternal(pointA, m_pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
     }
@@ -185,7 +189,7 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointB
      * **/
-    public void SetPointB(Vector2 pointB)
+    public virtual void SetPointB(Vector2 pointB)
     {
         RenderInternal(m_pointA, pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
     }
@@ -193,7 +197,7 @@ public class Segment : MonoBehaviour
     /**
      * Set new thickness for the segment
      * **/
-    public void SetThickness(float thickness)
+    public virtual void SetThickness(float thickness)
     {
         RenderInternal(m_pointA, m_pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
     }

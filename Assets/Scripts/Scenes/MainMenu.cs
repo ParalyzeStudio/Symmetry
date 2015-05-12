@@ -50,6 +50,7 @@ public class MainMenu : GUIScene
     {
         GameObject titleBuilderObject = (GameObject)Instantiate(m_titleBuilderPfb);
         TitleBuilder titleBuilder = titleBuilderObject.GetComponent<TitleBuilder>();
+        titleBuilder.transform.parent = this.transform;
 
         titleBuilder.Build();
         titleBuilder.Show(false);
