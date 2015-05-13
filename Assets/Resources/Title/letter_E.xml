@@ -267,4 +267,9 @@
 			<neighbor index="20"/>
 		</node>
 	</network>
+	<spread>
+		<vertex index="48"/>
+		<vertex index="56"/>
+		<vertex index="65"/>
+	<spread/>
 </letter>

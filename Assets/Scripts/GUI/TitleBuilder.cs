@@ -11,6 +11,10 @@ public class TitleBuilder : MonoBehaviour
 
     private TitleLetter[] m_letters;
 
+    //variables to handle the drawing of letters with some delay
+    private bool m_drawingLettersWithDelay;
+    private float m_drawLettersDelay;
+    private float m_drawLettersElapsedTime;
 
     public void Build()
     {
@@ -37,8 +41,15 @@ public class TitleBuilder : MonoBehaviour
         m_letters[7] = Instantiate(Y); //create a clone of Y
     }
 
-    public void Show(bool bAnimated)
+    public void Show(bool bAnimated, float fDelay)
     {
+        if (fDelay > 0)
+        {
+            m_drawingLettersWithDelay = true;
+            m_drawLettersDelay = fDelay;
+            return;
+        }
+
         MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         GameObject titleHolder = new GameObject("Title");
         titleHolder.AddComponent<GameObjectAnimator>();
@@ -68,17 +79,13 @@ public class TitleBuilder : MonoBehaviour
             previousLetterXPosition = letterXPosition;
 
             letterXPosition -= 0.5f * titleWidth;
-            if (letter.m_value == 'S')
-                DrawLetter(true, letter, new Vector2(letterXPosition, 0));
-            else
-                ;
-                //DrawLetter(false, letter, new Vector2(letterXPosition, 0));           
+            DrawLetter(bAnimated, letter, new Vector2(letterXPosition, 0));           
         }
     }
 
     private TitleLetter ParseAndBuildLetter(char value, Material material)
     {
-        float letterScale = 200.0f;
+        float letterScale = 250.0f;
 
         string levelFilename = "Title/letter_" + value;
         Object levelObjectFile = Resources.Load(levelFilename);
@@ -234,6 +241,21 @@ public class TitleBuilder : MonoBehaviour
                         letter.BuildSegmentBetweenVertices(vertex, neighborVertex, neighborVertex.m_position);
                     }
                 }
+            }
+        }
+    }
+
+    protected virtual void Update()
+    {
+        if (m_drawingLettersWithDelay)
+        {
+            float dt = Time.deltaTime;
+        
+            bool inDelay = (m_drawLettersElapsedTime < m_drawLettersDelay);
+            m_drawLettersElapsedTime += dt;
+            if (m_drawLettersElapsedTime >= m_drawLettersDelay) //delay is passed
+            {
+                Show(true, 0);
             }
         }
     }

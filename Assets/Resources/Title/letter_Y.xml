@@ -153,4 +153,9 @@
 			<neighbor index="18"/>
 		</node>
 	</network>
+	<spread>
+		<vertex index="33"/>
+		<vertex index="28"/>
+		<vertex index="40"/>
+	<spread/>
 </letter>

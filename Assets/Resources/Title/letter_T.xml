@@ -302,4 +302,9 @@
 			<neighbor index="73"/>
 		</node>
 	</network>
+	<spread>
+		<vertex index="72"/>
+		<vertex index="55"/>
+		<vertex index="42"/>
+	<spread/>
 </letter>

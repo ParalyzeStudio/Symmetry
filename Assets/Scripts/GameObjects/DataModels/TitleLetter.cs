@@ -67,7 +67,7 @@ public class TitleLetterVertex
     public void SpreadToNeighbors()
     {
         TitleLetter parentLetter = m_parentLetter;
-        float spreadingSpeed = 10.0f;
+        float spreadingSpeed = 80.0f;
         for (int iNeighborIdx = 0; iNeighborIdx != m_neighbors.Count; iNeighborIdx++)
         {
             int neighborIndex = m_neighbors[iNeighborIdx];

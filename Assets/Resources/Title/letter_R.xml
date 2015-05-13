@@ -482,4 +482,11 @@
 			<neighbor index="20"/>
 		</node>
 	</network>
+	<spread>
+		<vertex index="51"/>
+		<vertex index="60"/>
+		<vertex index="69"/>
+		<vertex index="78"/>
+		<vertex index="90"/>
+	<spread/>
 </letter>

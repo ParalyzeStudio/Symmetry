@@ -17,7 +17,7 @@ public class MainMenu : GUIScene
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
         menuAnimator.SetOpacity(1);
         //ShowTitle(bAnimated, fDelay);
-        ShowTitle2();
+        ShowTitle2(true, fDelay);
         //ShowAxes(bAnimated, 1.5f + fDelay);
         ShowButtons(bAnimated, 2.0f + fDelay);
         ShowTapToPlay(bAnimated ? 2.0f + fDelay : 0);
@@ -46,14 +46,14 @@ public class MainMenu : GUIScene
         base.OnSceneDismissed();
     }
 
-    public void ShowTitle2()
+    public void ShowTitle2(bool bAnimated, float fDelay)
     {
         GameObject titleBuilderObject = (GameObject)Instantiate(m_titleBuilderPfb);
         TitleBuilder titleBuilder = titleBuilderObject.GetComponent<TitleBuilder>();
         titleBuilder.transform.parent = this.transform;
 
         titleBuilder.Build();
-        titleBuilder.Show(false);
+        titleBuilder.Show(bAnimated, fDelay);
     }
 
     //public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
