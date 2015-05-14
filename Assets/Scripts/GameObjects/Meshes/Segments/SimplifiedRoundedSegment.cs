@@ -10,28 +10,19 @@ public class SimplifiedRoundedSegment : TexturedSegment
     /**
      * Renders the segment with rounded endpoints
      * **/
-    protected void RenderInternal(Vector2 pointA,
-                                  Vector2 pointB,
-                                  float thickness,
-                                  Color tintColor,
-                                  bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
+    protected override void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
     {
-        m_pointA = pointA;
-        m_pointB = pointB;
-        m_thickness = thickness;
-        m_color = tintColor;
-
         //First set the position of the segment and define mesh coordinates for pointA and pointB
-        Vector3 segmentPosition = 0.5f * (pointA + pointB);
+        Vector3 segmentPosition = 0.5f * (m_pointA + m_pointB);
         this.gameObject.transform.localPosition = segmentPosition;
 
         //Calculate the distance between pointA and pointB to determine their mesh coordinates
-        m_length = (pointB - pointA).magnitude;
+        m_length = (m_pointB - m_pointA).magnitude;
         Vector3 localPointA = new Vector3(-0.5f * m_length, 0, 0);
         Vector3 localPointB = new Vector3(0.5f * m_length, 0, 0);
 
         //Then find the angle between pointA and pointB and apply rotation to the segment object
-        m_angle = Mathf.Atan2(pointB.y - pointA.y, pointB.x - pointA.x);
+        m_angle = Mathf.Atan2(m_pointB.y - m_pointA.y, m_pointB.x - m_pointA.x);
         this.gameObject.transform.rotation = Quaternion.AngleAxis(m_angle * Mathf.Rad2Deg, Vector3.forward);
 
         //Build the actual mesh if it doesnt exist
@@ -52,7 +43,7 @@ public class SimplifiedRoundedSegment : TexturedSegment
             Vector3[] meshVertices = new Vector3[numVertices];
 
             //Build vertices
-            float halfThickness = 0.5f * thickness;
+            float halfThickness = 0.5f * m_thickness;
 
             //left vertices
             meshVertices[0] = localPointA - new Vector3(0, halfThickness, 0);
@@ -112,44 +103,58 @@ public class SimplifiedRoundedSegment : TexturedSegment
             UpdateUVs();
         }
 
-        SetColor(tintColor);
+        SetTintColor(m_tintColor);
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor)
+    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool isGridSegment)
     {
-        if (material.mainTexture == null)
-            throw new Exception("Material has no texture set on it");
+        base.Build(pointA, pointB, thickness, material, tintColor, isGridSegment);
 
-        SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
-        if (segmentAnimator != null)
-        {
-            segmentAnimator.m_pointAPosition = pointA;
-            segmentAnimator.m_pointBPosition = pointB;
-        }
+        //m_pointA = pointA;
+        //m_pointB = pointB;
+        //m_thickness = thickness;
+        //m_color = tintColor;
 
-        MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-        if (meshRenderer != null && material != null)
-        {
-            meshRenderer.sharedMaterial = material;
-        }
+        //if (m_isGridSegment)
+        //    TransformPointsFromGridCoordinatesToWorldCoordinates();
 
-        RenderInternal(pointA, pointB, thickness, tintColor); //builds the mesh        
+        //SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
+        //if (segmentAnimator != null)
+        //{
+        //    segmentAnimator.m_pointAPosition = pointA;
+        //    segmentAnimator.m_pointBPosition = pointB;
+        //}
+
+        //MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        //if (meshRenderer != null && material != null)
+        //{
+        //    meshRenderer.sharedMaterial = material;
+        //}
+
+        //RenderInternal(); //builds the mesh        
     }
 
-    public override void SetPointA(Vector2 pointA)
-    {
-        RenderInternal(pointA, m_pointB, m_thickness, m_color, true, false, false);
-    }
+    //public override void SetPointA(Vector2 pointA)
+    //{
+    //    m_pointA = pointA;
+    //    if (m_isGridSegment)
+    //        TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
+    //    RenderInternal(true, false, false);
+    //}
 
-    public override void SetPointB(Vector2 pointB)
-    {
-        RenderInternal(m_pointA, pointB, m_thickness, m_color, true, false, false);
-    }
+    //public override void SetPointB(Vector2 pointB)
+    //{
+    //    m_pointB = pointB;
+    //    if (m_isGridSegment)
+    //        TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
+    //    RenderInternal(true, false, false);
+    //}
 
-    public override void SetThickness(float thickness)
-    {
-        RenderInternal(m_pointA, m_pointB, m_thickness, m_color, true, false, false);
-    }
+    //public override void SetThickness(float thickness)
+    //{
+    //    m_thickness = thickness;
+    //    RenderInternal(true, false, false);
+    //}
 
     protected override void UpdateUVs()
     {
@@ -168,5 +173,7 @@ public class SimplifiedRoundedSegment : TexturedSegment
         meshUVs[7] = new Vector2(1, 1);
 
         mesh.uv = meshUVs;
+
+
     }
 }

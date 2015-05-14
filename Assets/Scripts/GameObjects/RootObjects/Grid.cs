@@ -162,6 +162,15 @@ public class Grid : MonoBehaviour
     }
 
     /**
+     * Returns the ratio between 1 unit in grid coordinates and 1 unit in world coordinates
+     * **/
+    public float GetGridWorldRatio()
+    {
+        float gridWidth = m_gridSize.x;
+        return (float) (m_numColumns - 1) / gridWidth;
+    }
+
+    /**
      * Returns the anchor game object at grid position passed as parameter
      * **/
     public GameObject GetAnchorAtGridPosition(Vector2 gridPosition)

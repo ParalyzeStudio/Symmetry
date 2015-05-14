@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class TitleBuilder : MonoBehaviour
 {
-    public const float TITLE_Z_VALUE = -200.0f;
     public const float DEFAULT_LETTER_SEGMENT_THICKNESS = 1.5f;
 
     public Material m_titleLetterSegmentMaterial;
@@ -22,7 +21,8 @@ public class TitleBuilder : MonoBehaviour
         Material clonedMaterial = (Material)Instantiate(m_titleLetterSegmentMaterial);
 
         //Title is SYMMETRY
-        m_letters = new TitleLetter[8];
+        int lettersCount = 8;
+        m_letters = new TitleLetter[lettersCount];
 
         TitleLetter S = ParseAndBuildLetter('S', clonedMaterial);
         TitleLetter Y = ParseAndBuildLetter('Y', clonedMaterial);
@@ -39,6 +39,11 @@ public class TitleBuilder : MonoBehaviour
         m_letters[5] = T;
         m_letters[6] = R;
         m_letters[7] = Instantiate(Y); //create a clone of Y
+
+        for (int i = 0; i != lettersCount; i++)
+        {
+            m_letters[i].gameObject.transform.parent = this.gameObject.transform;
+        }
     }
 
     public void Show(bool bAnimated, float fDelay)
@@ -51,10 +56,10 @@ public class TitleBuilder : MonoBehaviour
         }
 
         MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        GameObject titleHolder = new GameObject("Title");
-        titleHolder.AddComponent<GameObjectAnimator>();
-        titleHolder.transform.parent = mainMenu.transform;
-        titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
+        //GameObject titleHolder = new GameObject("Title");
+        //titleHolder.AddComponent<GameObjectAnimator>();
+        //titleHolder.transform.parent = mainMenu.transform;
+        //titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
         float gapBetweenLetters = 40.0f;
         int lettersCount = m_letters.Length;
@@ -72,7 +77,6 @@ public class TitleBuilder : MonoBehaviour
         for (int i = 0; i != lettersCount; i++)
         {
             TitleLetter letter = m_letters[i];
-            letter.gameObject.transform.parent = titleHolder.transform;
             float previousLetterWidth = (i == 0) ? 0 : m_letters[i - 1].m_width;
             float letterXPosition = previousLetterXPosition + 0.5f * previousLetterWidth + 0.5f * letter.m_width + gapBetweenLetters;
 
@@ -256,6 +260,7 @@ public class TitleBuilder : MonoBehaviour
             if (m_drawLettersElapsedTime >= m_drawLettersDelay) //delay is passed
             {
                 Show(true, 0);
+                m_drawingLettersWithDelay = false;
             }
         }
     }

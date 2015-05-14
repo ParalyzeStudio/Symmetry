@@ -5,8 +5,10 @@ public class MainMenu : GUIScene
     //public GameObject m_segmentPfb;
     //public GameObject m_titlePartPfb;
     public GameObject m_roundedSegmentPfb;
-    public GameObject m_titleBuilderPfb;
+    public GameObject m_titlePfb;
     //public Material[] m_titlePartsMaterials;
+
+    public const float TITLE_Z_VALUE = -200.0f;
 
     /**
      * Shows MainMenu with or without animation
@@ -48,9 +50,11 @@ public class MainMenu : GUIScene
 
     public void ShowTitle2(bool bAnimated, float fDelay)
     {
-        GameObject titleBuilderObject = (GameObject)Instantiate(m_titleBuilderPfb);
+        GameObject titleBuilderObject = (GameObject)Instantiate(m_titlePfb);
+        titleBuilderObject.name = "Title";
         TitleBuilder titleBuilder = titleBuilderObject.GetComponent<TitleBuilder>();
         titleBuilder.transform.parent = this.transform;
+        titleBuilder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
         titleBuilder.Build();
         titleBuilder.Show(bAnimated, fDelay);

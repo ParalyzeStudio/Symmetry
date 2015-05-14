@@ -94,8 +94,8 @@ public class GridTouchHandler : TouchHandler
             }
 
             //remove the axis from the axes list and destroy the object
-            gameScene.m_axes.RemoveAxis(currentAxis);
-            Destroy(currentAxis);
+            //gameScene.m_axes.RemoveAxis(currentAxis);
+            //Destroy(currentAxis);
         }
     }
 

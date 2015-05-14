@@ -12,7 +12,6 @@ public class Segment : MonoBehaviour
     protected int m_numSegmentsPerHalfCircle; //number of segments used to draw each half circle on rounded endpoints. Set to 0 to have a rectangle segment
     protected Color m_color; //the color of the segment
     protected Material m_material; //the material used to render this segment
-    
 
     //controlling length and angle of the segment manually
     protected float m_length;
@@ -23,30 +22,19 @@ public class Segment : MonoBehaviour
     /**
      * Renders the segment with rounded endpoints
      * **/
-    protected virtual void RenderInternal(Vector2 pointA,
-                                Vector2 pointB,
-                                float thickness,
-                                Color color,
-                                int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE,
-                                bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateColor = true)
+    protected virtual void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateColor = true)
     {
-        m_pointA = pointA;
-        m_pointB = pointB;
-        m_thickness = thickness;
-        m_numSegmentsPerHalfCircle = numSegmentsPerHalfCircle;
-        m_color = color;
-
         //First set the position of the segment and define mesh coordinates for pointA and pointB
-        Vector3 segmentPosition = 0.5f * (pointA + pointB);
+        Vector3 segmentPosition = 0.5f * (m_pointA + m_pointB);
         this.gameObject.transform.localPosition = segmentPosition;
 
         //Calculate the distance between pointA and pointB to determine their mesh coordinates
-        m_length = (pointB - pointA).magnitude;
+        m_length = (m_pointB - m_pointA).magnitude;
         Vector3 localPointA = new Vector3(-0.5f * m_length, 0, 0);
         Vector3 localPointB = new Vector3(0.5f * m_length, 0, 0);
 
         //Then find the angle between pointA and pointB and apply rotation to the segment object
-        m_angle = Mathf.Atan2(pointB.y - pointA.y, pointB.x - pointA.x);
+        m_angle = Mathf.Atan2(m_pointB.y - m_pointA.y, m_pointB.x - m_pointA.x);
         this.gameObject.transform.rotation = Quaternion.AngleAxis(m_angle * Mathf.Rad2Deg, Vector3.forward);
 
         //Build the actual mesh if it doesnt exist
@@ -60,28 +48,28 @@ public class Segment : MonoBehaviour
 
         if (bUpdateVertices)
         {
-            int numVertices = (numSegmentsPerHalfCircle <= 1) ? 4 : 2 * (numSegmentsPerHalfCircle + 1);
+            int numVertices = (m_numSegmentsPerHalfCircle <= 1) ? 4 : 2 * (m_numSegmentsPerHalfCircle + 1);
             Vector3[] meshVertices = new Vector3[numVertices];
 
             //Build vertices
             //left vertices
-            meshVertices[0] = localPointA - new Vector3(0, 0.5f * thickness, 0);
-            meshVertices[1] = localPointA + new Vector3(0, 0.5f * thickness, 0);
+            meshVertices[0] = localPointA - new Vector3(0, 0.5f * m_thickness, 0);
+            meshVertices[1] = localPointA + new Vector3(0, 0.5f * m_thickness, 0);
             for (int i = 2; i != numVertices / 2; i++)
             {
-                float vertexAngle = Mathf.PI / 2.0f + i * Mathf.PI / (float)numSegmentsPerHalfCircle;
-                meshVertices[i] = 0.5f * thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
+                float vertexAngle = Mathf.PI / 2.0f + i * Mathf.PI / (float)m_numSegmentsPerHalfCircle;
+                meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
                 meshVertices[i] += localPointA;
             }
 
             //right vertices
-            meshVertices[numVertices / 2] = localPointB - new Vector3(0, 0.5f * thickness, 0);
-            meshVertices[numVertices / 2 + 1] = localPointB + new Vector3(0, 0.5f * thickness, 0);
+            meshVertices[numVertices / 2] = localPointB - new Vector3(0, 0.5f * m_thickness, 0);
+            meshVertices[numVertices / 2 + 1] = localPointB + new Vector3(0, 0.5f * m_thickness, 0);
             for (int i = numVertices / 2 + 2; i != numVertices; i++)
             {
                 int offsetIndex = i - numVertices / 2 - 2;
-                float vertexAngle = Mathf.PI / 2.0f - offsetIndex * Mathf.PI / (float)numSegmentsPerHalfCircle;
-                meshVertices[i] = 0.5f * thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
+                float vertexAngle = Mathf.PI / 2.0f - offsetIndex * Mathf.PI / (float)m_numSegmentsPerHalfCircle;
+                meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
                 meshVertices[i] += localPointB;
             }
 
@@ -153,16 +141,36 @@ public class Segment : MonoBehaviour
             Color[] colors = new Color[colorsLength];
             for (int i = 0; i != colorsLength; i++)
             {
-                colors[i] = color;
+                colors[i] = m_color;
             }
 
             roundedSegmentMesh.colors = colors;
         }
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    /**
+     * Transform points from 
+     * **/
+    public void TransformPointsFromGridCoordinatesToWorldCoordinates(bool bTransformPointA = true, bool bTransformPointB = true)
     {
-        RenderInternal(pointA, pointB, thickness, color, numSegmentsPerHalfCircle, true); //builds the mesh
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+
+        if (bTransformPointA)
+            m_pointA = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_pointA);
+        if (bTransformPointB)
+            m_pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_pointB);
+    }
+
+    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    {
+        m_pointA = pointA;
+        m_pointB = pointB;
+        m_thickness = thickness;
+        m_numSegmentsPerHalfCircle = numSegmentsPerHalfCircle;
+        m_color = color;
+
+        if (bGridPoints) //this is a grid segment, this means the player is on the game scene
+            TransformPointsFromGridCoordinatesToWorldCoordinates();
 
         SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
         if (segmentAnimator != null)
@@ -176,22 +184,34 @@ public class Segment : MonoBehaviour
         {
             meshRenderer.sharedMaterial = material;
         }
+
+        RenderInternal(); //builds the mesh
     }
 
     /**
-     * Set new coordinates for pointA
+     * Set new coordinates for pointA. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointA(Vector2 pointA)
+    public virtual void SetPointA(Vector2 pointA, bool bGridPoint = false)
     {
-        RenderInternal(pointA, m_pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
+        m_pointA = pointA;
+
+        if (bGridPoint)
+            TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
+
+        RenderInternal(true, false, false);
     }
 
     /**
-     * Set new coordinates for pointB
+     * Set new coordinates for pointB. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointB(Vector2 pointB)
+    public virtual void SetPointB(Vector2 pointB, bool bGridPoint = false)
     {
-        RenderInternal(m_pointA, pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
+        m_pointB = pointB;
+
+        if (bGridPoint)            
+            TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
+
+        RenderInternal(true, false, false);
     }
 
     /**
@@ -199,7 +219,8 @@ public class Segment : MonoBehaviour
      * **/
     public virtual void SetThickness(float thickness)
     {
-        RenderInternal(m_pointA, m_pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
+        m_thickness = thickness;
+        RenderInternal(true, false, false);
     }
 
     /**
@@ -207,7 +228,7 @@ public class Segment : MonoBehaviour
      * **/
     public virtual void SetColor(Color color)
     {
-        RenderInternal(m_pointA, m_pointB, m_thickness, color, m_numSegmentsPerHalfCircle, false, false, true);
+        RenderInternal(false, false, true);
     }
 
     /**
@@ -215,7 +236,7 @@ public class Segment : MonoBehaviour
      * **/
     public void SetNumSegmentsPerHalfCircle(int numSegmentsPerHalfCircle)
     {
-        RenderInternal(m_pointA, m_pointB, m_thickness, m_color, numSegmentsPerHalfCircle, true, true, false);
+        RenderInternal(true, true, false);
     }
 
     /**
@@ -225,6 +246,14 @@ public class Segment : MonoBehaviour
     {
         if (m_length != fLength)
         {
+            //if (m_isGridSegment)
+            //{
+            //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+
+            //    float gridWorldRatio = gameScene.m_grid.GetGridWorldRatio();
+            //    fLength /= gridWorldRatio;
+            //}
+
             m_length = fLength;
             InvalidateEndpoints();
         }
@@ -252,27 +281,35 @@ public class Segment : MonoBehaviour
         m_pointA = center - 0.5f * m_length * segmentDirection;
         m_pointB = center + 0.5f * m_length * segmentDirection;
 
-        RenderInternal(m_pointA, m_pointB, m_thickness, m_color, m_numSegmentsPerHalfCircle, true, false, false);
+        RenderInternal(true, false, false);
     }
 
-    /**
-    * Update the segment position, angle and length after we modified its points
-    * **/
-    protected void InvalidatePositionLengthAndAngle()
-    {
-        //set the length
-        m_length = (m_pointB - m_pointA).magnitude;
+    ///**
+    //* Update the segment position, angle and length after we modified its points
+    //* **/
+    //protected void InvalidatePositionLengthAndAngle()
+    //{
+    //    //set the length
+    //    m_length = (m_pointB - m_pointA).magnitude;
 
-        //Set the center
-        Vector2 center = (m_pointA + m_pointB) / 2.0f;
-        this.transform.localPosition = GeometryUtils.BuildVector3FromVector2(center, 0);
+    //    if (m_isGridSegment)
+    //    {
+    //        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
-        //set the angle
-        float fRotationAngleRad = Mathf.Atan2((m_pointB.y - m_pointA.y), (m_pointB.x - m_pointA.x));
-        m_angle = fRotationAngleRad * Mathf.Rad2Deg;
-        this.transform.rotation = Quaternion.Euler(0, 0, m_angle);
+    //        float gridWorldRatio = gameScene.m_grid.GetGridWorldRatio();
+    //        m_length /= gridWorldRatio;
+    //    }
 
-        //set the size
-        this.transform.localScale = new Vector3(m_length, m_thickness, this.transform.localScale.z);
-    }
+    //    //Set the center
+    //    Vector2 center = (m_pointA + m_pointB) / 2.0f;
+    //    this.transform.localPosition = GeometryUtils.BuildVector3FromVector2(center, 0);
+
+    //    //set the angle
+    //    float fRotationAngleRad = Mathf.Atan2((m_pointB.y - m_pointA.y), (m_pointB.x - m_pointA.x));
+    //    m_angle = fRotationAngleRad * Mathf.Rad2Deg;
+    //    this.transform.rotation = Quaternion.Euler(0, 0, m_angle);
+
+    //    //set the size
+    //    this.transform.localScale = new Vector3(m_length, m_thickness, this.transform.localScale.z);
+    //}
 }
