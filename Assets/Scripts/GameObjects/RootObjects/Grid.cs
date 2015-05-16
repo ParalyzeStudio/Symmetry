@@ -88,6 +88,9 @@ public class Grid : MonoBehaviour
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_gridAnchorPfb, anchorLocalPosition, Quaternion.identity);
                 clonedGridAnchor.transform.parent = this.transform;
                 clonedGridAnchor.transform.localPosition = anchorLocalPosition;
+
+                UVQuad gridAnchorQuad = clonedGridAnchor.GetComponent<UVQuad>();
+                //gridAnchorQuad.InitQuadMesh();
                 m_anchors.Add(clonedGridAnchor);
             }
         }

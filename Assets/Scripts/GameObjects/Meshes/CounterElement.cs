@@ -12,11 +12,16 @@ public class CounterElement : MonoBehaviour
     private GameObject m_skin; //the skin of this element
     private GameObject m_shadow; //the shadow behind the skin
 
+    //colors
+    private Color m_shadowColor;
+    private Color m_skinColor;
+    private Color m_overlayColor;
+
     //materials used for each of the above game objects MeshRenderers
-    public Material m_overlayMaterial;
-    public Material m_skinOnMaterial;
-    public Material m_skinOffMaterial;
-    public Material m_shadowMaterial;
+    private Material m_shadowMaterial;
+    private Material m_skinOnMaterial;
+    private Material m_skinOffMaterial;
+    private Material m_overlayMaterial;
 
     public enum CounterElementStatus
     {
@@ -28,31 +33,47 @@ public class CounterElement : MonoBehaviour
     public CounterElementStatus m_status { get; set; }
     private CounterElementStatus m_prevStatus;
 
-    public void Init()
+    public void Init(Material shadowMaterial, Material skinOnMaterial, Material skinOffMaterial, Material overlayMaterial)
     {
+        //Set cloned materials shared among counter elements to global variables
+        m_shadowMaterial = shadowMaterial;
+        m_skinOnMaterial = skinOnMaterial;
+        m_skinOffMaterial = skinOffMaterial;
+        m_overlayMaterial = overlayMaterial;
+
         m_status = CounterElementStatus.WAITING;
         m_prevStatus = m_status;
+        InitElementsColors();
         InitSkinAndShadow();
+    }
+
+    public void InitElementsColors()
+    {
+        m_shadowColor = new Color(0,0,0,1);
+        m_skinColor = new Color(1,1,1,1);
+        m_overlayColor = new Color(0,0,0,1);
     }
 
     private void InitSkinAndShadow()
     {
         m_skin = Instantiate(m_baseQuadElementPfb);
         m_skin.transform.parent = this.gameObject.transform;
-        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        ColorQuadAnimator skinAnimator = m_skin.GetComponent<ColorQuadAnimator>();
         skinAnimator.SetRotationAxis(Vector3.forward);
         skinAnimator.SetRotationAngle(45);
         skinAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
         skinAnimator.SetPosition(new Vector3(0, 6, SKIN_Z_VALUE));
+        skinAnimator.SetColor(m_skinColor);
         SetStatus(CounterElementStatus.WAITING);
 
         m_shadow = Instantiate(m_baseQuadElementPfb);
         m_shadow.transform.parent = this.gameObject.transform;
-        TexturedQuadAnimator shadowAnimator = m_shadow.GetComponent<TexturedQuadAnimator>();
+        ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
         shadowAnimator.SetRotationAxis(Vector3.forward);
         shadowAnimator.SetRotationAngle(45);
         shadowAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
         shadowAnimator.SetPosition(new Vector3(0, -6, SHADOW_Z_VALUE));
+        shadowAnimator.SetColor(m_shadowColor);
         m_shadow.GetComponent<MeshRenderer>().sharedMaterial = m_shadowMaterial;
     }
 
@@ -79,13 +100,13 @@ public class CounterElement : MonoBehaviour
             overlayAnimator.SetRotationAngle(45);
             overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
             overlayAnimator.SetPosition(new Vector3(0, 6, OVERLAY_Z_VALUE));
+            overlayAnimator.SetColor(m_overlayColor);
         }
         else if (status == CounterElementStatus.DONE)
         {
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
             if (m_overlay != null)
             {
-                Debug.Log("destroy overlay");
                 Destroy(m_overlay);
                 m_overlay = null;
             }

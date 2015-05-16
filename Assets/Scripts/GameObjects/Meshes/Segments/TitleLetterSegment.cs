@@ -15,6 +15,5 @@ public class TitleLetterSegment : SimplifiedRoundedSegment
         m_vertexA = vertexA;
         m_vertexB = vertexB;
         base.Build(pointA, pointB, thickness, material, tintColor, false);
-        //Build(pointA, pointB, thickness, material, tintColor);
     }
 }

@@ -6,30 +6,31 @@
 [ExecuteInEditMode]
 public class ColorNumberSlot : MonoBehaviour
 {
-    public Color m_color;
-    public int m_number;
-
-    private TintColorMaterialAssignment m_skin;
+    private ColorQuad m_skin;
     private TextMesh m_numberText;
+
+    public Material m_skinMaterial;
 
     public void Init()
     {
-        m_skin = this.gameObject.GetComponentInChildren<TintColorMaterialAssignment>();
-        m_skin.InitMeshRendererMaterial();
+        //Init the skin
+        m_skin = this.gameObject.GetComponentInChildren<ColorQuad>();
+        m_skin.InitQuadMesh();
+        Material clonedMaterial = (Material)Instantiate(m_skinMaterial);
+        m_skin.SetMaterial(clonedMaterial);
 
         m_numberText = this.gameObject.GetComponentInChildren<TextMesh>();
     }
 
     public void SetColor(Color color)
     {
-        m_color = color;
-        m_skin.SetTintColor(color);
+        ColorQuadAnimator skinAnimator = m_skin.gameObject.GetComponent<ColorQuadAnimator>();
+        skinAnimator.SetColor(color);
     }
 
     public void SetNumber(int number)
     {
-        m_number = number;
-        m_numberText.text = m_number.ToString();
+        m_numberText.text = number.ToString();
         if (number >= 10 && number <= 99) //2-digits number
         {
             Vector3 numberTextPosition = m_numberText.transform.localPosition;

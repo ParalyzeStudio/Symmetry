@@ -6,10 +6,17 @@ public class SlotAnimator : GameObjectAnimator
     {
         base.SetOpacity(fNewOpacity, bPassOnChildren);
 
-        ColorNumberSlot slotProperties = this.gameObject.GetComponent<ColorNumberSlot>();
-        Color slotColor = slotProperties.m_color;
-        slotColor.a = fNewOpacity;
+        ColorNumberSlot slot = this.gameObject.GetComponent<ColorNumberSlot>();
+        m_color.a = fNewOpacity;
 
-        slotProperties.SetColor(slotColor);
+        slot.SetColor(m_color);
+    }
+
+    public override void SetColor(Color color)
+    {
+        base.SetColor(color);
+
+        ColorNumberSlot slot = this.gameObject.GetComponent<ColorNumberSlot>();
+        slot.SetColor(color);
     }
 }

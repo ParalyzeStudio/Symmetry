@@ -10,7 +10,7 @@ public class SimplifiedRoundedSegment : TexturedSegment
     /**
      * Renders the segment with rounded endpoints
      * **/
-    protected override void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
+    protected void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
     {
         //First set the position of the segment and define mesh coordinates for pointA and pointB
         Vector3 segmentPosition = 0.5f * (m_pointA + m_pointB);
@@ -51,13 +51,11 @@ public class SimplifiedRoundedSegment : TexturedSegment
             meshVertices[4] = localPointA + halfThickness * new Vector3(-1, -1, 0);
             meshVertices[5] = localPointA + halfThickness * new Vector3(-1, 1, 0);
 
-
             //right vertices
             meshVertices[2] = localPointB - new Vector3(0, halfThickness, 0);
             meshVertices[3] = localPointB + new Vector3(0, halfThickness, 0);
             meshVertices[6] = localPointA + halfThickness * new Vector3(1, -1, 0);
-            meshVertices[7] = localPointA + halfThickness * new Vector3(1, 1, 0);
-            
+            meshVertices[7] = localPointA + halfThickness * new Vector3(1, 1, 0);            
 
             roundedSegmentMesh.vertices = meshVertices;
 
@@ -102,59 +100,17 @@ public class SimplifiedRoundedSegment : TexturedSegment
         {
             UpdateUVs();
         }
-
-        SetTintColor(m_tintColor);
     }
 
     public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool isGridSegment)
     {
-        base.Build(pointA, pointB, thickness, material, tintColor, isGridSegment);
+        InitBasicVariables(pointA, pointB, thickness, material, isGridSegment);
 
-        //m_pointA = pointA;
-        //m_pointB = pointB;
-        //m_thickness = thickness;
-        //m_color = tintColor;
+        RenderInternal();
 
-        //if (m_isGridSegment)
-        //    TransformPointsFromGridCoordinatesToWorldCoordinates();
-
-        //SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
-        //if (segmentAnimator != null)
-        //{
-        //    segmentAnimator.m_pointAPosition = pointA;
-        //    segmentAnimator.m_pointBPosition = pointB;
-        //}
-
-        //MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-        //if (meshRenderer != null && material != null)
-        //{
-        //    meshRenderer.sharedMaterial = material;
-        //}
-
-        //RenderInternal(); //builds the mesh        
+        TexturedSegmentAnimator segmentAnimator = this.GetComponent<TexturedSegmentAnimator>();
+        segmentAnimator.SetColor(tintColor);
     }
-
-    //public override void SetPointA(Vector2 pointA)
-    //{
-    //    m_pointA = pointA;
-    //    if (m_isGridSegment)
-    //        TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
-    //    RenderInternal(true, false, false);
-    //}
-
-    //public override void SetPointB(Vector2 pointB)
-    //{
-    //    m_pointB = pointB;
-    //    if (m_isGridSegment)
-    //        TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
-    //    RenderInternal(true, false, false);
-    //}
-
-    //public override void SetThickness(float thickness)
-    //{
-    //    m_thickness = thickness;
-    //    RenderInternal(true, false, false);
-    //}
 
     protected override void UpdateUVs()
     {
@@ -173,7 +129,31 @@ public class SimplifiedRoundedSegment : TexturedSegment
         meshUVs[7] = new Vector2(1, 1);
 
         mesh.uv = meshUVs;
+    }
 
+    public override void SetPointA(Vector2 pointB, bool bGridPoint = false)
+    {
+        m_pointB = pointB;
 
+        if (bGridPoint)
+            TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
+
+        RenderInternal(true, false, false);
+    }
+
+    public override void SetPointB(Vector2 pointB, bool bGridPoint = false)
+    {
+        m_pointB = pointB;
+
+        if (bGridPoint)
+            TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
+
+        RenderInternal(true, false, false);
+    }
+
+    public override void SetThickness(float thickness)
+    {
+        m_thickness = thickness;
+        RenderInternal(true, false, false);
     }
 }

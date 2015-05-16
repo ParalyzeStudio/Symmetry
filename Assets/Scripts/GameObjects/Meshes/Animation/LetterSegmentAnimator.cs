@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class LetterSegmentAnimator : SegmentAnimator
+public class LetterSegmentAnimator : TexturedSegmentAnimator
 {
     public override void OnFinishTranslatingPointB()
     {

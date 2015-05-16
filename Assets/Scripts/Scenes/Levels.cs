@@ -128,13 +128,14 @@ public class Levels : GUIScene
 
             clonedLevelSlot.transform.localPosition = levelSlotPosition;
 
-            ColorNumberSlot slotData = clonedLevelSlot.GetComponent<ColorNumberSlot>();
-            slotData.Init();
-            slotData.SetNumber(iLevelSlotIdx + 1);
+            ColorNumberSlot levelSlot = clonedLevelSlot.GetComponent<ColorNumberSlot>();
+            levelSlot.Init();
+            levelSlot.SetNumber(iLevelSlotIdx + 1);
 
             Color slotBaseColor = levelManager.GetChapterGroupBaseColor(levelManager.GetCurrentChapterGroup());
             Color slotColor = ColorUtils.DarkenColor(slotBaseColor, 0.18f * (column - 1));
-            slotData.SetColor(slotColor);
+            SlotAnimator slotAnimator = levelSlot.GetComponent<SlotAnimator>();
+            slotAnimator.SetColor(slotColor);
         }
 
         GameObjectAnimator levelsHolderAnimator = m_levelsHolder.GetComponent<GameObjectAnimator>();

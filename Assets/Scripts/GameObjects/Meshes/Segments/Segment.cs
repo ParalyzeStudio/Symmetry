@@ -10,7 +10,6 @@ public class Segment : MonoBehaviour
     protected Vector2 m_pointB; //second point of the segment
     protected float m_thickness; //segment thickness
     protected int m_numSegmentsPerHalfCircle; //number of segments used to draw each half circle on rounded endpoints. Set to 0 to have a rectangle segment
-    protected Color m_color; //the color of the segment
     protected Material m_material; //the material used to render this segment
 
     //controlling length and angle of the segment manually
@@ -22,7 +21,7 @@ public class Segment : MonoBehaviour
     /**
      * Renders the segment with rounded endpoints
      * **/
-    protected virtual void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateColor = true)
+    protected virtual void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true)
     {
         //First set the position of the segment and define mesh coordinates for pointA and pointB
         Vector3 segmentPosition = 0.5f * (m_pointA + m_pointB);
@@ -134,18 +133,6 @@ public class Segment : MonoBehaviour
 
             meshFilter.sharedMesh = roundedSegmentMesh;
         }
-
-        if (bUpdateColor)
-        {
-            int colorsLength = roundedSegmentMesh.vertices.Length;
-            Color[] colors = new Color[colorsLength];
-            for (int i = 0; i != colorsLength; i++)
-            {
-                colors[i] = m_color;
-            }
-
-            roundedSegmentMesh.colors = colors;
-        }
     }
 
     /**
@@ -161,13 +148,18 @@ public class Segment : MonoBehaviour
             m_pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_pointB);
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    {
+        InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, numSegmentsPerHalfCircle);
+        RenderInternal(); //builds the mesh
+    }
+
+    public void InitBasicVariables(Vector2 pointA, Vector2 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         m_pointA = pointA;
         m_pointB = pointB;
         m_thickness = thickness;
         m_numSegmentsPerHalfCircle = numSegmentsPerHalfCircle;
-        m_color = color;
 
         if (bGridPoints) //this is a grid segment, this means the player is on the game scene
             TransformPointsFromGridCoordinatesToWorldCoordinates();
@@ -184,8 +176,6 @@ public class Segment : MonoBehaviour
         {
             meshRenderer.sharedMaterial = material;
         }
-
-        RenderInternal(); //builds the mesh
     }
 
     /**
@@ -198,7 +188,7 @@ public class Segment : MonoBehaviour
         if (bGridPoint)
             TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
 
-        RenderInternal(true, false, false);
+        RenderInternal(true, false);
     }
 
     /**
@@ -211,7 +201,7 @@ public class Segment : MonoBehaviour
         if (bGridPoint)            
             TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
 
-        RenderInternal(true, false, false);
+        RenderInternal(true, false);
     }
 
     /**
@@ -220,15 +210,7 @@ public class Segment : MonoBehaviour
     public virtual void SetThickness(float thickness)
     {
         m_thickness = thickness;
-        RenderInternal(true, false, false);
-    }
-
-    /**
-     * Set new color for the segment
-     * **/
-    public virtual void SetColor(Color color)
-    {
-        RenderInternal(false, false, true);
+        RenderInternal(true, false);
     }
 
     /**
@@ -236,7 +218,7 @@ public class Segment : MonoBehaviour
      * **/
     public void SetNumSegmentsPerHalfCircle(int numSegmentsPerHalfCircle)
     {
-        RenderInternal(true, true, false);
+        RenderInternal(true, true);
     }
 
     /**
@@ -281,7 +263,7 @@ public class Segment : MonoBehaviour
         m_pointA = center - 0.5f * m_length * segmentDirection;
         m_pointB = center + 0.5f * m_length * segmentDirection;
 
-        RenderInternal(true, false, false);
+        RenderInternal(true, false);
     }
 
     ///**

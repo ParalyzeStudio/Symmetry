@@ -228,6 +228,7 @@ public class GameScene : GUIScene
                 hudButton.SetSize(actionButtonSize);
         }
 
+
         holderAnimator.SetOpacity(0);
         holderAnimator.FadeTo(1, 0.2f, fDelay);
     }

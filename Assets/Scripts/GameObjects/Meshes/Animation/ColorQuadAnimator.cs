@@ -1,21 +1,20 @@
 ﻿using UnityEngine;
 
-public class TexturedQuadAnimator : GameObjectAnimator
+public class ColorQuadAnimator : GameObjectAnimator
 {
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);
 
-        UVQuad texturedQuad = this.GetComponent<UVQuad>();
-        texturedQuad.SetTintColor(m_color);
+        ColorQuad colorQuad = this.GetComponent<ColorQuad>();
+        colorQuad.SetColor(m_color);
     }
 
     public override void SetColor(Color color)
     {
         base.SetColor(color);
 
-        UVQuad texturedQuad = this.GetComponent<UVQuad>();
-        texturedQuad.SetTintColor(color);
+        ColorQuad colorQuad = this.GetComponent<ColorQuad>();
+        colorQuad.SetColor(color);
     }
 }
-

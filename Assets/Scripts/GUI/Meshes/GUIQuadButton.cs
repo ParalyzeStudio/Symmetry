@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 
-public class GUIQuadButton : UVQuad
+public class GUIQuadButton : MonoBehaviour
 {
+    public UVQuad m_skin { get; set; }
+    public ColorQuad m_shadow { get; set; }
+
     public enum ButtonState
     {
         PRESSED = 1,
@@ -11,19 +14,26 @@ public class GUIQuadButton : UVQuad
 
     public ButtonState m_state { get; set; }
 
-    protected override void Awake()
+    public void Start()
     {
-        base.Awake();
-        m_textureRange = new Vector4(0, 0, 1, 1);
-        m_textureWrapMode = TextureWrapMode.Clamp;
-        m_state = ButtonState.IDLE;
+        Transform[] children = this.GetComponentsInChildren<Transform>();
+        m_skin = children[1].gameObject.GetComponent<UVQuad>();
+        m_shadow = (children.Length > 2) ? children[1].gameObject.GetComponent<ColorQuad>() : null;
+
+        m_skin.SetTextureRange(new Vector4(0,0,1,1));
+        m_skin.SetTextureWrapMode(TextureWrapMode.Clamp);
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        skinAnimator.SetColor(Color.white);
     }
 
-    protected override void Update()
-    {
-        //do nothing in the update not even executing the parent class code
-        //because buttons use a (0,0,1,1) texture range that can't be modified
-    }
+    //public override void InitQuadMesh()
+    //{
+    //    m_textureRange = new Vector4(0, 0, 1, 1);
+    //    m_textureWrapMode = TextureWrapMode.Clamp;
+    //    m_state = ButtonState.IDLE;
+
+    //    base.InitQuadMesh();
+    //}
 
     /**
      * Callback called when button is pressed for the first time

@@ -56,10 +56,6 @@ public class TitleBuilder : MonoBehaviour
         }
 
         MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        //GameObject titleHolder = new GameObject("Title");
-        //titleHolder.AddComponent<GameObjectAnimator>();
-        //titleHolder.transform.parent = mainMenu.transform;
-        //titleHolder.transform.localPosition = new Vector3(0, 349.0f, TITLE_Z_VALUE);
 
         float gapBetweenLetters = 40.0f;
         int lettersCount = m_letters.Length;

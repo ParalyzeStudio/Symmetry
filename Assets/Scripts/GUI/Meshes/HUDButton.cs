@@ -18,14 +18,6 @@ public class HUDButton : GUIQuadButton
 
     public HUDButtonID m_ID { get; set; }
 
-    protected override void Start()
-    {
-        //MeshRenderer skinRenderer = this.gameObject.GetComponentsInChildren<MeshRenderer>()[0];
-        //Texture quadMainTexture = skinRenderer.sharedMaterial.mainTexture;
-        //m_isTextured = (quadMainTexture != null);
-        //InitQuadMesh();
-    }
-
     public void SetSize(Vector2 size)
     {
         Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();

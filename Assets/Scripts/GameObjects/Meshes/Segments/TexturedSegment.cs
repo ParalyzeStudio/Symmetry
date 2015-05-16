@@ -3,20 +3,20 @@ using System;
 
 public class TexturedSegment : Segment
 {
-    public Color m_tintColor;
-
-    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool isGridSegment, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
+    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool bGridPoints, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
     {
-        if (material == null) //material is already set inside the prefab
-            material = GetComponent<MeshRenderer>().sharedMaterial;
+        InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, 0);
 
-        if (material.mainTexture == null)
+        if (GetComponent<MeshRenderer>().sharedMaterial.mainTexture == null)
             throw new Exception("Material has no texture set on it");
 
-        base.Build(pointA, pointB, thickness, material, Color.black, isGridSegment, 0);
+        RenderInternal();
+
         UpdateUVs();
         SetTextureWrapMode(texWrapMode);
-        SetTintColor(tintColor);
+
+        TexturedSegmentAnimator segmentAnimator = this.GetComponent<TexturedSegmentAnimator>();
+        segmentAnimator.SetColor(tintColor);
     }
 
     protected virtual void UpdateUVs()
@@ -47,9 +47,10 @@ public class TexturedSegment : Segment
 
     public void SetTintColor(Color color)
     {
-        m_tintColor = color;
-
-        TexturedQuadAnimator segmentAnimator = this.GetComponent<TexturedQuadAnimator>();
-        segmentAnimator.SetColor(color);
+        Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+        if (material != null)
+        {
+            material.SetColor("_Color", color);
+        }
     }
 }
