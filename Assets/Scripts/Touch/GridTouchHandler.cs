@@ -28,6 +28,10 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        if (guiManager.IsPauseWindowShown()) //swallow the touch
+            return;
+
         base.OnPointerDown(pointerLocation);
 
         Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);

@@ -21,12 +21,6 @@ public class ColorQuad : BaseQuad
     {
         Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
 
-        if (mesh == null)
-        {
-            InitQuadMesh();
-            mesh = GetComponent<MeshFilter>().sharedMesh;
-        }
-
         Color[] colors = mesh.colors;
         for (int i = 0; i != 4; i++)
         {

@@ -18,16 +18,6 @@ public class HUDButton : GUIQuadButton
 
     public HUDButtonID m_ID { get; set; }
 
-    public void SetSize(Vector2 size)
-    {
-        Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();
-        for (int i = 0; i != childTransforms.Length; i++)
-        {
-            if (childTransforms[i] != this.transform)
-                childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
-        }
-    }
-
     public override bool OnPress()
     {
         if (!base.OnPress())

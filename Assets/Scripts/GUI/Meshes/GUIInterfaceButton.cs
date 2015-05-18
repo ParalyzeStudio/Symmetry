@@ -39,16 +39,6 @@ public class GUIInterfaceButton : GUIQuadButton
         return null;
     }
 
-    public void SetSize(Vector2 size)
-    {
-        Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();
-        for (int i = 0; i != childTransforms.Length; i++)
-        {
-            if (childTransforms[i] != this.transform)
-                childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
-        }
-    }
-
     public override bool OnPress()
     {
         return base.OnPress();
@@ -78,10 +68,10 @@ public class GUIInterfaceButton : GUIQuadButton
             PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_musicActive);
 
-            MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+            MeshRenderer skinMeshRenderer = m_skin.gameObject.GetComponent<MeshRenderer>();
             Material onMaterial = m_materials[0];
             Material offMaterial = m_materials[1];
-            meshRenderer.material = soundManager.m_musicActive ? onMaterial : offMaterial;
+            skinMeshRenderer.material = soundManager.m_musicActive ? onMaterial : offMaterial;
         }
         else if (m_ID == GUIInterfaceButtonID.ID_SOUND_BUTTON)
         {
@@ -91,13 +81,14 @@ public class GUIInterfaceButton : GUIQuadButton
             PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
 
-            MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+            MeshRenderer skinMeshRenderer = m_skin.gameObject.GetComponent<MeshRenderer>();
             Material onMaterial = m_materials[0];
             Material offMaterial = m_materials[1];
-            meshRenderer.material = soundManager.m_soundActive ? onMaterial : offMaterial;
+            skinMeshRenderer.material = soundManager.m_soundActive ? onMaterial : offMaterial;
         }
         else if (m_ID == GUIInterfaceButtonID.ID_BACK_BUTTON)
         {
+            Debug.Log("onclick BACK BUTTON");
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;

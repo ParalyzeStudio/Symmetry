@@ -167,53 +167,54 @@ public class GameScene : GUIScene
             string tag = actionTags[iTagIndex];
             GameObject clonedButton = null;
             HUDButton hudButton = null;
+            HUDButton.HUDButtonID hudButtonID = 0;
             if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
             {
                 clonedButton = (GameObject)Instantiate(m_allAxesPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
             {
                 clonedButton = (GameObject)Instantiate(m_horAxisPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
             {
                 clonedButton = (GameObject)Instantiate(m_vertAxisPfb);                
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
             {
                 clonedButton = (GameObject)Instantiate(m_straightAxesPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
             {
                 clonedButton = (GameObject)Instantiate(m_leftDiagonalAxisPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
             {
                 clonedButton = (GameObject)Instantiate(m_rightDiagonalAxisPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT;
             }
             else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
             {
                 clonedButton = (GameObject)Instantiate(m_diagonalsAxesPfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES;
+                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES;
             }
             else if (tag.Equals(ACTION_TAG_MOVE_SHAPE))
             {
                 clonedButton = (GameObject)Instantiate(m_moveShapePfb);
                 hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButton.m_ID = HUDButton.HUDButtonID.ID_MOVE_SHAPE;
+                hudButtonID = HUDButton.HUDButtonID.ID_MOVE_SHAPE;
             }
 
 
@@ -225,7 +226,11 @@ public class GameScene : GUIScene
             }
 
             if (hudButton != null)
+            {
+                hudButton.Init();
+                hudButton.m_ID = hudButtonID;
                 hudButton.SetSize(actionButtonSize);
+            }
         }
 
 
@@ -256,6 +261,7 @@ public class GameScene : GUIScene
         float menuBtnXPosition = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
         clonedMenuBtn.transform.localPosition = new Vector3(menuBtnXPosition, 0, 0);
         GUIInterfaceButton interfaceButton = clonedMenuBtn.GetComponent<GUIInterfaceButton>();
+        interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 
         //retry button
@@ -264,6 +270,7 @@ public class GameScene : GUIScene
         float retryBtnXPosition = menuBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedRetryBtn.transform.localPosition = new Vector3(retryBtnXPosition, 0, 0);
         interfaceButton = clonedRetryBtn.GetComponent<GUIInterfaceButton>();
+        interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 
         //hints button
@@ -272,6 +279,7 @@ public class GameScene : GUIScene
         float hintsBtnXPosition = retryBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedHintsBtn.transform.localPosition = new Vector3(hintsBtnXPosition, 0, 0);
         interfaceButton = clonedHintsBtn.GetComponent<GUIInterfaceButton>();
+        interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 
         holderAnimator.SetOpacity(0);

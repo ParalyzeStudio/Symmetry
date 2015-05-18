@@ -48,7 +48,7 @@ public class TitleBuilder : MonoBehaviour
 
     public void Show(bool bAnimated, float fDelay)
     {
-        if (fDelay > 0)
+        if (bAnimated && fDelay > 0)
         {
             m_drawingLettersWithDelay = true;
             m_drawLettersDelay = fDelay;

@@ -74,11 +74,15 @@ public class AxisRenderer : MonoBehaviour
 
         m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
         m_endpoint1.transform.parent = this.gameObject.transform;
+        UVQuad endpoint1Quad = m_endpoint1.GetComponent<UVQuad>();
+        endpoint1Quad.InitQuadMesh();
         GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
 
         m_endpoint2 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
         m_endpoint2.transform.parent = this.gameObject.transform;
+        UVQuad endpoint2Quad = m_endpoint2.GetComponent<UVQuad>();
+        endpoint2Quad.InitQuadMesh();
         GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
     }
@@ -180,6 +184,8 @@ public class AxisRenderer : MonoBehaviour
         GameObject clonedCircle = (GameObject) Instantiate(m_circlePfb);
         //clonedCircle.transform.parent = this.transform;
         clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
+        ColorCircleMesh circleMesh = clonedCircle.GetComponent<ColorCircleMesh>();
+        circleMesh.Init();
 
         CircleAnimator circleAnimator = clonedCircle.GetComponent<CircleAnimator>();
         circleAnimator.SetInnerRadius(0);

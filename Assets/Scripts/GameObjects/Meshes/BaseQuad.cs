@@ -2,13 +2,13 @@
 
 public class BaseQuad : MonoBehaviour
 {
-    public void Start()
-    {
-        //Check if mesh has not been set manually
-        Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
-        if (mesh == null)
-            InitQuadMesh();
-    }
+    //public void Start()
+    //{
+    //    //Check if mesh has not been set manually
+    //    Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
+    //    if (mesh == null)
+    //        InitQuadMesh();
+    //}
 
     public virtual void InitQuadMesh()
     {

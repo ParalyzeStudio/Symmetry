@@ -14,8 +14,11 @@ public class UVQuad : BaseQuad
         GetComponent<MeshFilter>().sharedMesh.uv = uvs;
         UpdateUVs();
 
-        //set default wrap mode to repeat
-        SetTextureWrapMode(TextureWrapMode.Repeat);
+        //Set default texture range
+        SetTextureRange(new Vector4(0,0,1,1));
+
+        //set default wrap mode to CLAMP
+        SetTextureWrapMode(TextureWrapMode.Clamp);
 
         //set default tint color to white
         TexturedQuadAnimator quadAnimator = this.GetComponent<TexturedQuadAnimator>();

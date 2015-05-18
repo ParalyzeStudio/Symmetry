@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CircleAnimator : TexturedQuadAnimator
+public class CircleAnimator : GameObjectAnimator
 {
     //thickness of the circle
     public float m_thickness;
@@ -54,9 +54,25 @@ public class CircleAnimator : TexturedQuadAnimator
             RenderCircle();
     }
 
+    public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
+    {
+        base.SetOpacity(fOpacity, bPassOnChildren);
+
+        ColorCircleMesh circleMesh = this.GetComponent<ColorCircleMesh>();
+        circleMesh.SetColor(m_color);
+    }
+
+    public override void SetColor(Color color)
+    {
+        base.SetColor(color);
+
+        ColorCircleMesh circleMesh = this.GetComponent<ColorCircleMesh>();
+        circleMesh.SetColor(color);
+    }
+
     public void RenderCircle()
     {
-        CircleMesh circle = this.GetComponent<CircleMesh>();
+        ColorCircleMesh circle = this.GetComponent<ColorCircleMesh>();
         circle.Render(m_innerRadius, m_thickness, m_color, m_numSegments);
     }
 

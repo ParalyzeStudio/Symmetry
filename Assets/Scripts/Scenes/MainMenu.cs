@@ -19,7 +19,7 @@ public class MainMenu : GUIScene
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
         menuAnimator.SetOpacity(1);
         //ShowTitle(bAnimated, fDelay);
-        ShowTitle2(true, fDelay);
+        ShowTitle2(bAnimated, fDelay);
         //ShowAxes(bAnimated, 1.5f + fDelay);
         ShowButtons(bAnimated, 2.0f + fDelay);
         ShowTapToPlay(bAnimated ? 2.0f + fDelay : 0);
@@ -190,6 +190,12 @@ public class MainMenu : GUIScene
 
         GameObject optionsPanel = GameObject.FindGameObjectWithTag("OptionsPanel");
         GameObject creditsPanel = GameObject.FindGameObjectWithTag("CreditsPanel");
+
+        GUIInterfaceButton optionsButton = optionsPanel.GetComponentInChildren<GUIInterfaceButton>();
+        GUIInterfaceButton creditsButton = creditsPanel.GetComponentInChildren<GUIInterfaceButton>();
+        optionsButton.Init();
+        creditsButton.Init();
+
         GameObjectAnimator optionsPanelAnimator = optionsPanel.GetComponent<GameObjectAnimator>();
         GameObjectAnimator creditsPanelAnimator = creditsPanel.GetComponent<GameObjectAnimator>();
 

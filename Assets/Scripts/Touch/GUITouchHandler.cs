@@ -24,7 +24,9 @@ public class GUITouchHandler : TouchHandler
             HandleClickOnChildrenInterfaceButtons(guiManager.m_pauseWindow, clickLocation);
         else
         {
-            bClickProcessed = HandleClickOnChildrenInterfaceButtons(currentScene.gameObject, clickLocation);
+            bClickProcessed = HandleClickOnChildrenInterfaceButtons(this.gameObject, clickLocation);
+            if (!bClickProcessed)
+                bClickProcessed = HandleClickOnChildrenInterfaceButtons(currentScene.gameObject, clickLocation);
             if (!bClickProcessed)
             {
                 if (sceneManager.m_displayedContent == SceneManager.DisplayContent.MENU)

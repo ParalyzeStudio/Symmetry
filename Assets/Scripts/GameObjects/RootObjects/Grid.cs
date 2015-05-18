@@ -13,6 +13,8 @@ public class Grid : MonoBehaviour
     public GameObject m_gridAnchorPfb;
     public GameObject m_gridConstraintAnchorPfb;
 
+    private Color m_gridColor;
+
     public void Awake()
     {
         m_anchors = new List<GameObject>();
@@ -20,6 +22,8 @@ public class Grid : MonoBehaviour
 
     public void Build()
     {
+        m_gridColor = Color.black;
+
         //Get the number of min lines and min columns we want for this level
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         Level currentLevel = levelManager.m_currentLevel;
@@ -90,7 +94,9 @@ public class Grid : MonoBehaviour
                 clonedGridAnchor.transform.localPosition = anchorLocalPosition;
 
                 UVQuad gridAnchorQuad = clonedGridAnchor.GetComponent<UVQuad>();
-                //gridAnchorQuad.InitQuadMesh();
+                gridAnchorQuad.InitQuadMesh();
+                TexturedQuadAnimator anchorAnimator = clonedGridAnchor.GetComponent<TexturedQuadAnimator>();
+                anchorAnimator.SetColor(m_gridColor);
                 m_anchors.Add(clonedGridAnchor);
             }
         }

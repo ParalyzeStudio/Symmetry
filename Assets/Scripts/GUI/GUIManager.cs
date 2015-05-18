@@ -32,6 +32,23 @@ public class GUIManager : MonoBehaviour
         {
             m_optionsWindow = (GameObject)Instantiate(m_optionsWindowPfb);
             m_optionsWindow.transform.parent = this.gameObject.transform;
+
+            GUIInterfaceButton[] interfaceButtons = m_optionsWindow.GetComponentsInChildren<GUIInterfaceButton>();
+            for (int iButtonIdx = 0; iButtonIdx != interfaceButtons.Length; iButtonIdx++)
+            {
+                GUIInterfaceButton interfaceButton = interfaceButtons[iButtonIdx];
+                
+                if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_SOUND_BUTTON)
+                {
+                    SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+                    interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                }
+                else if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_MUSIC_BUTTON)
+                {
+                    SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+                    interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                }
+            }
         }
     }
 
@@ -56,6 +73,25 @@ public class GUIManager : MonoBehaviour
         {
             m_pauseWindow = (GameObject)Instantiate(m_pauseWindowPfb);
             m_pauseWindow.transform.parent = this.gameObject.transform;
+
+            GUIInterfaceButton[] interfaceButtons = m_pauseWindow.GetComponentsInChildren<GUIInterfaceButton>();
+            for (int iButtonIdx = 0; iButtonIdx != interfaceButtons.Length; iButtonIdx++)
+            {
+                GUIInterfaceButton interfaceButton = interfaceButtons[iButtonIdx];
+
+                if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_SOUND_BUTTON)
+                {
+                    SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+                    interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                }
+                else if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_MUSIC_BUTTON)
+                {
+                    SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+                    interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                }
+                else
+                    interfaceButton.Init();
+            }
         }
     }
 
@@ -202,6 +238,7 @@ public class GUIManager : MonoBehaviour
             clonedBackButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
 
             backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
+            backButton.Init();
             GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
             showButtonAnimator.SetOpacity(0);
             showButtonAnimator.FadeTo(1, 0.5f, fDelay);

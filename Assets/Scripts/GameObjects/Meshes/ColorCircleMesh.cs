@@ -4,13 +4,25 @@
  * Use this class to render a circle
  * **/
 [ExecuteInEditMode]
-public class CircleMesh : MonoBehaviour
+public class ColorCircleMesh : MonoBehaviour
 {
+    public void Init()
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "ColorCircleMesh";
+
+        GetComponent<MeshFilter>().sharedMesh = mesh;
+    }
+
     /** Render this circle as a polygon with a certain number of segments
      * The more segments the polygon has the more it will look like a circle but the drawback is that more vertices have to be rendered
      * **/
     public void Render(float innerRadius, float thickness, Color color, int numSegments = 64)
     {
+        Mesh circleMesh = GetComponent<MeshFilter>().sharedMesh;
+        if (circleMesh == null)
+            Init();
+
         float outerRadius = innerRadius + thickness;
         
         //sample the circle with numSegments times
@@ -41,9 +53,6 @@ public class CircleMesh : MonoBehaviour
         }
 
         //Build the actual mesh
-        Mesh circleMesh = new Mesh();
-        circleMesh.name = "CircleMesh";
-
         circleMesh.vertices = meshVertices;
         circleMesh.triangles = meshIndices;
 
@@ -54,12 +63,24 @@ public class CircleMesh : MonoBehaviour
         }
         circleMesh.normals = normals;
 
+        //set the circle color
+        SetColor(color);
+
         //Set the mesh to the MeshFilter component
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         meshFilter.sharedMesh = circleMesh;
+    }
 
-        //Set the color to the mesh
-        TexturedQuadAnimator circleAnimator = this.GetComponent<TexturedQuadAnimator>();
-        circleAnimator.SetColor(color);
+    public void SetColor(Color color)
+    {
+        Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
+
+        Color[] colors = new Color[mesh.vertexCount];
+        for (int i = 0; i != mesh.vertexCount; i++)
+        {
+            colors[i] = color;
+        }
+
+        mesh.colors = colors;
     }
 }

@@ -57,6 +57,7 @@ public class CounterElement : MonoBehaviour
     private void InitSkinAndShadow()
     {
         m_skin = Instantiate(m_baseQuadElementPfb);
+        m_skin.GetComponent<ColorQuad>().InitQuadMesh();
         m_skin.transform.parent = this.gameObject.transform;
         ColorQuadAnimator skinAnimator = m_skin.GetComponent<ColorQuadAnimator>();
         skinAnimator.SetRotationAxis(Vector3.forward);
@@ -68,6 +69,7 @@ public class CounterElement : MonoBehaviour
 
         m_shadow = Instantiate(m_baseQuadElementPfb);
         m_shadow.transform.parent = this.gameObject.transform;
+        m_shadow.GetComponent<ColorQuad>().InitQuadMesh();
         ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
         shadowAnimator.SetRotationAxis(Vector3.forward);
         shadowAnimator.SetRotationAngle(45);
@@ -94,6 +96,7 @@ public class CounterElement : MonoBehaviour
 
             m_overlay = Instantiate(m_baseQuadElementPfb);
             m_overlay.transform.parent = this.transform;
+            m_overlay.GetComponent<ColorQuad>().InitQuadMesh();
             m_overlay.GetComponent<MeshRenderer>().sharedMaterial = m_overlayMaterial;
             TexturedQuadAnimator overlayAnimator = m_overlay.GetComponent<TexturedQuadAnimator>();
             overlayAnimator.SetRotationAxis(Vector3.forward);
