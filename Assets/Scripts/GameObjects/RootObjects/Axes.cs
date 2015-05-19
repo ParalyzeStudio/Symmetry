@@ -6,7 +6,11 @@ public class Axes : MonoBehaviour
     public List<GameObject> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
     public Material m_axisSegmentMaterial;
-    public Material m_clonedAxisSegmentMaterial { get; set; }
+    public Material m_axisSegmentMaterialInstance { get; set; }
+
+    public GameObject m_circlePfb;
+    public Material m_circleMaterial;
+    private Material m_circleMaterialInstance;
 
     public void Awake()
     {
@@ -15,7 +19,8 @@ public class Axes : MonoBehaviour
 
     public void Start()
     {
-        m_clonedAxisSegmentMaterial = (Material)Instantiate(m_axisSegmentMaterial);
+        m_axisSegmentMaterialInstance = (Material)Instantiate(m_axisSegmentMaterial);
+        m_circleMaterialInstance = (Material)Instantiate(m_circleMaterial);
     }
 
     public GameObject BuildAxis(Vector2 gridStartPosition)
@@ -60,5 +65,28 @@ public class Axes : MonoBehaviour
             return m_childrenAxes[m_childrenAxes.Count - 1];
 
         return null;
+    }
+
+    /**
+     * Simple animation with circle scaling up and fading out when an axis snaps
+     * **/
+    public void LaunchSnapCircleAnimation(Vector2 position)
+    {
+        GameObject clonedCircle = (GameObject)Instantiate(m_circlePfb);
+        //clonedCircle.transform.parent = this.transform;
+        clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
+        ColorCircleMesh circleMesh = clonedCircle.GetComponent<ColorCircleMesh>();
+        circleMesh.Init(m_circleMaterialInstance);
+
+        CircleAnimator circleAnimator = clonedCircle.GetComponent<CircleAnimator>();
+        circleAnimator.SetInnerRadius(0);
+        circleAnimator.SetThickness(2);
+        circleAnimator.SetNumSegments(64);
+        circleAnimator.SetColor(Color.black);
+
+        circleAnimator.SetInnerRadius(0);
+        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        circleAnimator.SetOpacity(1);
+        circleAnimator.FadeTo(0, 0.3f);
     }
 }

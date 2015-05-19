@@ -7,7 +7,6 @@ public class AxisRenderer : MonoBehaviour
 
     public GameObject m_axisSegmentPfb;
     public GameObject m_symmetryAxisEndpointPfb;
-    public GameObject m_circlePfb;
     public Material m_axisSegmentMaterial; //the material passed from the inspector to application from which we create instances
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
@@ -65,7 +64,7 @@ public class AxisRenderer : MonoBehaviour
 
         GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
         m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, gameScene.m_axes.m_clonedAxisSegmentMaterial, Color.black);
+        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, gameScene.m_axes.m_axisSegmentMaterialInstance, Color.black);
         m_axisSegment.transform.parent = this.gameObject.transform;
 
         MeshRenderer axisSegmentMeshRenderer = clonedAxisSegmentObject.GetComponent<MeshRenderer>();
@@ -147,7 +146,7 @@ public class AxisRenderer : MonoBehaviour
                     m_snappedAnchor = snapAnchor;
                     Render(m_endpoint1Position, snapAnchorPosition, false);
 
-                    LaunchSnapCircleAnimation(snapAnchorPosition);
+                    gameScene.m_axes.LaunchSnapCircleAnimation(snapAnchorPosition);
 
                     return true;
                 }
@@ -174,29 +173,6 @@ public class AxisRenderer : MonoBehaviour
     public bool isAxisSnapped()
     {
         return m_snappedAnchor != null;
-    }
-
-    /**
-     * Simple animation with circle scaling up and fading out
-     * **/
-    public void LaunchSnapCircleAnimation(Vector2 position)
-    {
-        GameObject clonedCircle = (GameObject) Instantiate(m_circlePfb);
-        //clonedCircle.transform.parent = this.transform;
-        clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
-        ColorCircleMesh circleMesh = clonedCircle.GetComponent<ColorCircleMesh>();
-        circleMesh.Init();
-
-        CircleAnimator circleAnimator = clonedCircle.GetComponent<CircleAnimator>();
-        circleAnimator.SetInnerRadius(0);
-        circleAnimator.SetThickness(2);
-        circleAnimator.SetNumSegments(64);
-        circleAnimator.SetColor(Color.black);
-
-        circleAnimator.SetInnerRadius(0);
-        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        circleAnimator.SetOpacity(1);
-        circleAnimator.FadeTo(0, 0.3f);
     }
 
     public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)

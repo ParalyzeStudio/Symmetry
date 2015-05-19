@@ -355,9 +355,11 @@ public class GameScene : GUIScene
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
 
-            //First triangulate the shape
+            //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
+            shape.PropagateColorToTriangles();
 
+            m_shapes.CreateAndAddMaterialForColor(shape.m_color);
             m_shapes.CreateShapeObjectFromData(shape);
         }
 
@@ -367,10 +369,10 @@ public class GameScene : GUIScene
         shapesAnimator.SetOpacity(0);
         shapesAnimator.FadeTo(1, 0.5f, fDelay);
 
-        //fusion initial shapes
-        GameObject shapeObject = m_shapes.m_shapesObj[0];
-        Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
-        Shapes.PerformFusionOnShape(fusionShape);
+        ////fusion initial shapes
+        //GameObject shapeObject = m_shapes.m_shapesObj[0];
+        //Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
+        //Shapes.PerformFusionOnShape(fusionShape);
     }
 
     /**

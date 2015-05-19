@@ -6,12 +6,15 @@
 [ExecuteInEditMode]
 public class ColorCircleMesh : MonoBehaviour
 {
-    public void Init()
+    public void Init(Material material = null)
     {
         Mesh mesh = new Mesh();
         mesh.name = "ColorCircleMesh";
 
         GetComponent<MeshFilter>().sharedMesh = mesh;
+
+        if (material != null)
+            GetComponent<MeshRenderer>().sharedMaterial = material;
     }
 
     /** Render this circle as a polygon with a certain number of segments

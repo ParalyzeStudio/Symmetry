@@ -166,7 +166,7 @@ public class LevelManager : MonoBehaviour
                 shapeColor.g = float.Parse(strSplitColor[1]);
                 shapeColor.b = float.Parse(strSplitColor[2]);
                 shapeColor.a = float.Parse(strSplitColor[3]);
-                shape.SetOneColor(shapeColor);
+                shape.m_color = shapeColor;
 
                 //Contour
                 XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");

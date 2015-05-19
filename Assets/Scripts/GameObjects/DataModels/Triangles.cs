@@ -192,14 +192,15 @@ public class ShapeTriangle : GridTriangle
     public Shape m_parentShape { get; set; }
     public Color m_color { get; set; }
 
-    public ShapeTriangle() : base()
-    {
-        m_parentShape = null;
-    }
-
-    public ShapeTriangle(Shape parentShape) : base()
+    public ShapeTriangle(Shape parentShape = null) : base()
     {
         m_parentShape = parentShape;
+    }
+
+    public ShapeTriangle(Shape parentShape, Color color) : base()
+    {
+        m_parentShape = parentShape;
+        m_color = color;
     }
 
     /**

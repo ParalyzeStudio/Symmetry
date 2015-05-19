@@ -56,6 +56,7 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.SetShapeTriangles(reflectedTriangles);
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
+                    shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
                     //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                     //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
@@ -332,7 +333,7 @@ public class Symmetrizer : MonoBehaviour
         for (int iTriangleIndex = 0; iTriangleIndex != originalTriangles.Count; iTriangleIndex++)
         {
             ShapeTriangle originalTriangle = originalTriangles[iTriangleIndex];
-            ShapeTriangle reflectedTriangle = new ShapeTriangle(originalTriangle.m_parentShape);
+            ShapeTriangle reflectedTriangle = new ShapeTriangle(originalTriangle.m_parentShape, originalTriangle.m_color);
 
             for (int i = 0; i != 3; i++)
             {

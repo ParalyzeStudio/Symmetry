@@ -8,15 +8,9 @@ public class ShapeAnimator : GameObjectAnimator
         base.SetOpacity(opacity, bPassOnChildren);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        for (int iTriangleIndex = 0; iTriangleIndex != shapeRenderer.m_shape.m_gridTriangles.Count; iTriangleIndex++)
-        {
-            ShapeTriangle shapeTriangle = (ShapeTriangle)(shapeRenderer.m_shape.m_gridTriangles[iTriangleIndex]);
-            Color oldTriangleColor = shapeTriangle.m_color;
-            Color newColor = new Color(oldTriangleColor.r, oldTriangleColor.g, oldTriangleColor.b, opacity);
-            shapeTriangle.m_color = newColor;
-        }
+        shapeRenderer.SetColor(m_color);
 
-        shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
+        //shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override void SetColor(Color color)
@@ -24,8 +18,9 @@ public class ShapeAnimator : GameObjectAnimator
         base.SetColor(color);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.m_shape.SetOneColor(color);
-        shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
+        shapeRenderer.SetColor(color);
+
+        //shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override Vector3 GetGameObjectSize()

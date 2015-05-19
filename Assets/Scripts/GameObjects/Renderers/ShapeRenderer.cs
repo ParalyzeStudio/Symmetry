@@ -27,7 +27,6 @@ public class ShapeRenderer : MonoBehaviour
                        bool bUpdateColors = true,
                        bool renderDebugTriangles = false)
     {
-
         //Build the mesh
         Mesh mesh;
         if (bOverwriteMesh)
@@ -129,6 +128,22 @@ public class ShapeRenderer : MonoBehaviour
 
         if (bOverwriteMesh)
             GetComponent<MeshFilter>().sharedMesh = mesh;
+    }
+
+    /**
+     * Sets the color of this shape
+     * **/
+    public void SetColor(Color color)
+    {
+        Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
+
+        Color[] meshColors = mesh.colors;
+        for (int i = 0; i != mesh.vertexCount; i++)
+        {
+            meshColors[i] = color;
+        }
+
+        mesh.colors = meshColors;
     }
 
     /**

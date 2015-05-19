@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class Shape : Triangulable
 {
+    public Color m_color { get; set; }
+
     public Shape() : base()
     {
         
@@ -22,7 +24,7 @@ public class Shape : Triangulable
     public Shape(Shape other)
         : base(other)
     {
-
+        m_color = other.m_color;
     }
 
     public override void Triangulate()
@@ -64,15 +66,24 @@ public class Shape : Triangulable
     }
 
     /**
-     * Set the unique color of this shape by setting the same color on each of the triangles in it
+     * Set the color of each child triangle from the color of the shape itself
      * **/
-    public void SetOneColor(Color color)
-    {
+    public void PropagateColorToTriangles()
+    {       
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
         {
             ShapeTriangle triangle = (ShapeTriangle)m_gridTriangles[iTriangleIndex];
-            triangle.m_color = color;
+            triangle.m_color = m_color;
         }
+    }
+
+    /**
+     * Obtain the color of this shape from the triangles
+     * **/
+    public void ObtainColorFromTriangles()
+    {
+        if (m_gridTriangles.Count > 0)
+            m_color = ((ShapeTriangle)m_gridTriangles[0]).m_color;
     }
 
     /**
@@ -116,6 +127,8 @@ public class Shape : Triangulable
         if (resultingShape != null)
         {
             resultingShape.Triangulate();
+            resultingShape.m_color = subjShape.m_color;
+            resultingShape.PropagateColorToTriangles();
 
             gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 

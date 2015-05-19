@@ -98,7 +98,7 @@ public class CounterElement : MonoBehaviour
             m_overlay.transform.parent = this.transform;
             m_overlay.GetComponent<ColorQuad>().InitQuadMesh();
             m_overlay.GetComponent<MeshRenderer>().sharedMaterial = m_overlayMaterial;
-            TexturedQuadAnimator overlayAnimator = m_overlay.GetComponent<TexturedQuadAnimator>();
+            ColorQuadAnimator overlayAnimator = m_overlay.GetComponent<ColorQuadAnimator>();
             overlayAnimator.SetRotationAxis(Vector3.forward);
             overlayAnimator.SetRotationAngle(45);
             overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
