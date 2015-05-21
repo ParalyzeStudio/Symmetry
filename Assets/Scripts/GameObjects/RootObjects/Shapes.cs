@@ -4,21 +4,27 @@ using System.Collections.Generic;
 public class Shapes : MonoBehaviour
 {
     public GameObject m_shapePfb; //prefab to instantiate a shape
-    public List<GameObject> m_shapesObj { get; set; } //list of children shapes
+    public List<GameObject> m_shapesObjects { get; set; } //list of children shapes
     public List<PositionColorMaterial> m_materials { get; set; }
+
+    public Shape m_translatedShape; //the shape that is being translated by the user if applicable
+    public List<GameObject> m_intersectionShapesObjects { get; set; } //the temporary list of shapes resulting from the intersection of the shape 
+                                                               //being moved shape and other shapes during translation
 
     public Material m_transpColorMaterial;
 
     public void Awake()
     {
-        m_shapesObj = new List<GameObject>();
+        m_shapesObjects = new List<GameObject>();
         m_materials = new List<PositionColorMaterial>();
+        m_intersectionShapesObjects = new List<GameObject>();
+        m_translatedShape = null;
     }
 
     /**
      * Build a shape game object from shape data (contour/triangles, holes, color)
      * **/
-    public GameObject CreateShapeObjectFromData(Shape shapeData)
+    public GameObject CreateShapeObjectFromData(Shape shapeData, bool bIntersectionShape = false)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         clonedShapeObject.transform.parent = this.gameObject.transform;
@@ -32,9 +38,12 @@ public class Shapes : MonoBehaviour
 
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
         shapeRenderer.m_shape = shapeData;
-        shapeRenderer.Render(true, ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+        shapeRenderer.Render(/*true, */ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
-        AddShapeObject(clonedShapeObject);
+        if (bIntersectionShape)
+            AddIntersectionShapeObject(clonedShapeObject);
+        else
+            AddShapeObject(clonedShapeObject);
 
         return clonedShapeObject;
     }
@@ -49,7 +58,7 @@ public class Shapes : MonoBehaviour
      * **/
     public void AddShapeObject(GameObject shape)
     {
-        m_shapesObj.Add(shape);
+        m_shapesObjects.Add(shape);
     }
 
     /**
@@ -57,11 +66,11 @@ public class Shapes : MonoBehaviour
      * **/
     public void RemoveShapeObject(GameObject shape)
     {
-        for (int shapeIndex = 0; shapeIndex != m_shapesObj.Count; shapeIndex++)
+        for (int shapeIndex = 0; shapeIndex != m_shapesObjects.Count; shapeIndex++)
         {
-            if (m_shapesObj[shapeIndex] == shape)
+            if (m_shapesObjects[shapeIndex] == shape)
             {
-                m_shapesObj.Remove(shape);
+                m_shapesObjects.Remove(shape);
                 return;
             }
         }
@@ -72,22 +81,28 @@ public class Shapes : MonoBehaviour
      * **/
     public void ClearShapeObjects()
     {
-        m_shapesObj.Clear();
+        m_shapesObjects.Clear();
+    }
+
+    /**
+     * Add a shape GameObject to the list of shapes
+     * **/
+    public void AddIntersectionShapeObject(GameObject shape)
+    {
+        m_intersectionShapesObjects.Add(shape);
     }
 
     /**
      * Add a shape material to the list of materials
      * **/
-    public void CreateAndAddMaterialForColor(Color color)
+    public PositionColorMaterial CreateAndAddMaterialForColor(Color color)
     {
-        //First check if the material is not already listed
-        if (GetMaterialForColor(color) != null)
-            return;
-
         //if not, just add it
         Material clonedMaterial = (Material)Instantiate(m_transpColorMaterial);
         PositionColorMaterial pcMaterial = new PositionColorMaterial(color, clonedMaterial);
         m_materials.Add(pcMaterial);
+
+        return pcMaterial;
     }
 
     /**
@@ -120,7 +135,8 @@ public class Shapes : MonoBehaviour
             }
         }
 
-        return null;
+        //material does not exist, create it
+        return CreateAndAddMaterialForColor(color);
     }
 
     /**
@@ -143,5 +159,83 @@ public class Shapes : MonoBehaviour
             resultingShape = resultingShape.Fusion();
         }
         while (resultingShape != null);
+    }
+
+    /**
+     * Check if this shape overlaps a shape of a different color and invalidate the list of intersection shapes if necessary
+     * **/
+    public void InvalidateIntersectionShapes()
+    {
+        int iIntersectionShapeIdx = 0;
+        for (int iShapeIdx = 0; iShapeIdx != m_shapesObjects.Count; iShapeIdx++)
+        {
+            GameObject shapeObject = m_shapesObjects[iShapeIdx];
+
+            Shape shape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
+
+            if (shape == m_translatedShape)
+                continue;
+            else
+            {
+                if (m_translatedShape.OverlapsShape(shape))
+                {     
+                    if (!shape.m_color.Equals(m_translatedShape.m_color))
+                    {
+                        //List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);
+
+                        //Color intersectionShapeColor = 0.5f * (m_translatedShape.m_color + shape.m_color);
+
+                        //for (int i = 0; i != intersectionShapes.Count; i++)
+                        //{
+                        //    Shape intersectionShape = intersectionShapes[i];
+                        //    intersectionShape.m_color = intersectionShapeColor;
+                        //    InsertIntersectionShapeAtIndex(intersectionShape, iIntersectionShapeIdx);
+                        //    iIntersectionShapeIdx++;
+                        //}
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Build a game object to render the intersection shape (index >= list.Count) 
+     * or reuse an existing object (index < list.Count)
+     * **/
+    public void InsertIntersectionShapeAtIndex(Shape shape, int index)
+    {
+        if (index >= m_intersectionShapesObjects.Count)
+        {
+            CreateShapeObjectFromData(shape, true);
+        }
+        else
+        {
+            GameObject recycledShapeObject = m_intersectionShapesObjects[index];
+
+            MeshRenderer meshRenderer = recycledShapeObject.GetComponent<MeshRenderer>();
+            meshRenderer.sharedMaterial = GetMaterialForColor(shape.m_color).m_material;
+
+            ShapeAnimator shapeAnimator = recycledShapeObject.GetComponent<ShapeAnimator>();
+            shapeAnimator.m_color = shape.m_color;
+
+            ShapeRenderer shapeRenderer = recycledShapeObject.GetComponent<ShapeRenderer>();
+            shapeRenderer.m_shape = shape;
+            shapeRenderer.Render(/*true, */ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+        }
+    }
+
+    /**
+     * Crops the end of the list after the specified index and destroy all dismissed objects
+     * **/
+    public void TrimIntersectionsShapesAfterIndex(int trimIndex)
+    {
+        if (trimIndex == m_intersectionShapesObjects.Count - 1) //no element after trimIndex
+            return;
+
+        for (int i = trimIndex + 1; i != m_intersectionShapesObjects.Count; i++)
+        {
+            //Destroy(m_intersectionShapesObjects[i]);
+            m_intersectionShapesObjects[i].GetComponent<MeshFilter>().sharedMesh = null;
+        }
     }
 }

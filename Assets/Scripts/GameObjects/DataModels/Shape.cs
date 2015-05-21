@@ -4,10 +4,13 @@ using System.Collections.Generic;
 public class Shape : Triangulable
 {
     public Color m_color { get; set; }
+    public Vector2 m_offsetOnVertices { get; set; }
+    public Vector2 m_gridOffsetOnVertices { get; set; }
 
     public Shape() : base()
     {
-        
+        m_offsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = Vector2.zero;
     }
 
     public Shape(List<Vector2> contour) : base(contour)
@@ -25,6 +28,8 @@ public class Shape : Triangulable
         : base(other)
     {
         m_color = other.m_color;
+        m_offsetOnVertices = other.m_offsetOnVertices;
+        m_gridOffsetOnVertices = other.m_gridOffsetOnVertices;
     }
 
     public override void Triangulate()
@@ -94,7 +99,7 @@ public class Shape : Triangulable
     public Shape Fusion()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObj;
+        List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
 
         //Find the first shape that overlaps this shape
         Shape subjShape = null;
@@ -174,6 +179,7 @@ public class Shape : Triangulable
 
     /**
      * Does 'this' shape overlaps another shape (i.e intersection is neither a point or null)
+     * We can set an offset (in grid coordiantes) to 'this' shape vertices when the actual shape is being translated
      * **/
     public bool OverlapsShape(Shape shape)
     {
@@ -190,8 +196,8 @@ public class Shape : Triangulable
             GridTriangle triangle = m_gridTriangles[iTriangleIndex];
             for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
             {
-                Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
-                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
+                Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex] + m_gridOffsetOnVertices;
+                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1] + m_gridOffsetOnVertices;
 
                 //the shape intersects or overlaps the edge [triangleEdgePoint1; triangleEdgePoint2]
                 if (shape.IntersectsEdge(triangleEdgePoint1, triangleEdgePoint2)

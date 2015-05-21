@@ -54,6 +54,7 @@ public class Grid : MonoBehaviour
             columnGridSpacing = m_gridSize.x / (float)(minNumColumns - 1);
 
         m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
+        Debug.Log("GRID SPACING:" + m_gridSpacing);
 
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
@@ -114,7 +115,7 @@ public class Grid : MonoBehaviour
     /**
      * Calculates the world coordinates of a point knowing its grid coordinates (column, line) 
      * **/
-    public Vector2 GetWorldCoordinatesFromGridCoordinates(Vector2 gridCoordinates)
+    public Vector2 GetPointWorldCoordinatesFromGridCoordinates(Vector2 gridCoordinates)
     {
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
@@ -143,7 +144,7 @@ public class Grid : MonoBehaviour
     /**
      * Calculates the grid coordinates (column, line) of a point knowing its world coordinates
      * **/
-    public Vector2 GetGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
+    public Vector2 GetPointGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
     {
         worldCoordinates -= GeometryUtils.BuildVector2FromVector3(gameObject.transform.position);
 
@@ -175,8 +176,17 @@ public class Grid : MonoBehaviour
      * **/
     public float GetGridWorldRatio()
     {
-        float gridWidth = m_gridSize.x;
-        return (float) (m_numColumns - 1) / gridWidth;
+        return 1 / m_gridSpacing;
+    }
+
+    public Vector2 TransformGridVectorToWorldVector(Vector2 gridVector)
+    {
+        return gridVector / GetGridWorldRatio();
+    }
+
+    public Vector2 TransformWorldVectorToGridVector(Vector2 worldVector)
+    {
+        return worldVector * GetGridWorldRatio();
     }
 
     /**
@@ -249,7 +259,7 @@ public class Grid : MonoBehaviour
         }
 
         if (iMinDistanceAnchorIndex >= 0)
-            return GetGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
+            return GetPointGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
         else
             return Vector2.zero;
     }

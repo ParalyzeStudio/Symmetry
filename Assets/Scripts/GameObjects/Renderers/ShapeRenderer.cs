@@ -21,21 +21,27 @@ public class ShapeRenderer : MonoBehaviour
      * Renders the shape based on the m_gridTriangles list
      * We can specify a mesh object if we want to render again on this one or pass null to create a new mesh
      * **/
-    public void Render(bool bOverwriteMesh, 
+    public void Render(/*bool bOverwriteMesh,*/ 
                        RenderFaces renderFaces,
                        bool bUpdateVertices = true,
                        bool bUpdateColors = true,
                        bool renderDebugTriangles = false)
     {
         //Build the mesh
-        Mesh mesh;
-        if (bOverwriteMesh)
+        Mesh mesh = this.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        if (mesh == null)
         {
             mesh = new Mesh();
             mesh.name = "ShapeMesh";
+            GetComponent<MeshFilter>().sharedMesh = mesh;
         }
-        else
-            mesh = this.gameObject.GetComponent<MeshFilter>().sharedMesh;
+        //if (bOverwriteMesh)
+        //{
+        //    mesh = new Mesh();
+        //    mesh.name = "ShapeMesh";
+        //}
+        //else
+        //    mesh = this.gameObject.GetComponent<MeshFilter>().sharedMesh;
 
         int vertexCount = 0;
         int indexCount = 0;
@@ -73,7 +79,7 @@ public class ShapeRenderer : MonoBehaviour
                 ShapeTriangle shapeTriangle = (ShapeTriangle) m_shape.m_gridTriangles[iTriangleIndex];
                 if (bUpdateVertices)
                 {
-                    vertices[iTriangleIndex * 3 + i] = grid.GetWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[i]);
+                    vertices[iTriangleIndex * 3 + i] = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[i]);
                     normals[iTriangleIndex * 3 + i] = Vector3.forward;
                 }
                 if (bUpdateColors)
@@ -125,9 +131,6 @@ public class ShapeRenderer : MonoBehaviour
         {
             mesh.colors = colors;
         }
-
-        if (bOverwriteMesh)
-            GetComponent<MeshFilter>().sharedMesh = mesh;
     }
 
     /**

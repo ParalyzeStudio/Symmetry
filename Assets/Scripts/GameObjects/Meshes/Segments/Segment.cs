@@ -143,9 +143,9 @@ public class Segment : MonoBehaviour
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         if (bTransformPointA)
-            m_pointA = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_pointA);
+            m_pointA = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
         if (bTransformPointB)
-            m_pointB = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(m_pointB);
+            m_pointB = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
     }
 
     public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)

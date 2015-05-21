@@ -81,6 +81,7 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.SetShapeTriangles(reflectedTriangles);
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
+                    shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
                     //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                     //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
@@ -129,11 +130,11 @@ public class Symmetrizer : MonoBehaviour
         ////First get all triangles
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         List<List<ShapeTriangle>> allShapeTriangles = new List<List<ShapeTriangle>>(); //the vector containing all triangles in the scene per shape
-        allShapeTriangles.Capacity = gameScene.m_shapes.m_shapesObj.Count;
+        allShapeTriangles.Capacity = gameScene.m_shapes.m_shapesObjects.Count;
 
-        for (int iShapeIndex = 0; iShapeIndex != gameScene.m_shapes.m_shapesObj.Count; iShapeIndex++)
+        for (int iShapeIndex = 0; iShapeIndex != gameScene.m_shapes.m_shapesObjects.Count; iShapeIndex++)
         {
-            Shape shape = gameScene.m_shapes.m_shapesObj[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = gameScene.m_shapes.m_shapesObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
             allShapeTriangles.Add(shape.GetShapeTriangles());
         }
 
@@ -190,7 +191,10 @@ public class Symmetrizer : MonoBehaviour
 
                     for (int i = 0; i != splitTrianglesCount; i++)
                     {
-                        Vector2 triangleBarycentre = splitTriangles[i].GetBarycentre();
+                        ShapeTriangle splitTriangle = splitTriangles[i];
+                        splitTriangle.m_color = triangle.m_color;
+
+                        Vector2 triangleBarycentre = splitTriangle.GetBarycentre();
                         float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
 
                         //the triangle barycentre is on the side of the line we want
@@ -203,7 +207,7 @@ public class Symmetrizer : MonoBehaviour
                                 extractedTrianglesVec = new List<ShapeTriangle>();
                                 extractedTriangles.Add(extractedTrianglesVec);
                             }
-                            extractedTrianglesVec.Add(splitTriangles[i]);
+                            extractedTrianglesVec.Add(splitTriangle);
                         }
                     }
                 }

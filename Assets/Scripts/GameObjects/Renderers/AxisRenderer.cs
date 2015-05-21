@@ -50,16 +50,16 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint1GridPosition = startPosition;
             m_endpoint2GridPosition = startPosition;
 
-            m_endpoint1Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
-            m_endpoint2Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(startPosition);
+            m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
+            m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
         }
         else
         {
             m_endpoint1Position = startPosition;
             m_endpoint2Position = startPosition;
 
-            m_endpoint1GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
-            m_endpoint2GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(startPosition);
+            m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
+            m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
         }
 
         GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
@@ -97,8 +97,8 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint2GridPosition = pointB;
 
             GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-            m_endpoint1Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(pointA);
-            m_endpoint2Position = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(pointB);
+            m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointA);
+            m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointB);
         }
         else
         {
@@ -106,8 +106,8 @@ public class AxisRenderer : MonoBehaviour
             m_endpoint2Position = pointB;
 
             GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-            m_endpoint1GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(pointA);
-            m_endpoint2GridPosition = gameScene.m_grid.GetGridCoordinatesFromWorldCoordinates(pointB);
+            m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointA);
+            m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointB);
         }
 
         //Set correct points coordinates for segment

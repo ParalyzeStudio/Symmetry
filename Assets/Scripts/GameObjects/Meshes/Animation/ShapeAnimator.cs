@@ -55,7 +55,7 @@ public class ShapeAnimator : GameObjectAnimator
         }
 
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        Vector2 objectSize = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(maxCoords) - gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(minCoords);
+        Vector2 objectSize = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(maxCoords) - gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(minCoords);
         return GeometryUtils.BuildVector3FromVector2(objectSize, 1);
     }
 

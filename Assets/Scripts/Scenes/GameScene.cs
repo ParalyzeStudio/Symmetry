@@ -359,7 +359,6 @@ public class GameScene : GUIScene
             shape.Triangulate();
             shape.PropagateColorToTriangles();
 
-            m_shapes.CreateAndAddMaterialForColor(shape.m_color);
             m_shapes.CreateShapeObjectFromData(shape);
         }
 
@@ -367,7 +366,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetOpacity(0);
-        shapesAnimator.FadeTo(1, 0.5f, fDelay);
+        shapesAnimator.FadeTo(0.5f, 0.5f, fDelay);
 
         ////fusion initial shapes
         //GameObject shapeObject = m_shapes.m_shapesObj[0];

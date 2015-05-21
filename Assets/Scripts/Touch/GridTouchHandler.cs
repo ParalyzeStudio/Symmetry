@@ -28,6 +28,8 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
+        return;
+
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         if (guiManager.IsPauseWindowShown()) //swallow the touch
             return;
@@ -36,7 +38,7 @@ public class GridTouchHandler : TouchHandler
 
         Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
+        Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
         float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
         if (distanceToAnchor < m_axisCreationMinDistance)
         {

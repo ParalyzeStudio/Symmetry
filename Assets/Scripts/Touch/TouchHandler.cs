@@ -57,6 +57,7 @@ public class TouchHandler : MonoBehaviour
             return false;
 
         delta = pointerLocation - m_prevPointerLocation;
+
         if (delta.sqrMagnitude < MOVE_EPSILON)
             return false;
 

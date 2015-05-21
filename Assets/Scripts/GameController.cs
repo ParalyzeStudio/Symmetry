@@ -116,7 +116,7 @@ public class GameController : MonoBehaviour
         if (!gameScene.m_isShown)
             return false;
 
-        List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObj;
+        List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObjects;
         List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
         float shapesArea = 0;
         for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
