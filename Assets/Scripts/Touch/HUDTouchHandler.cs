@@ -70,9 +70,9 @@ public class HUDTouchHandler : TouchHandler
             button.OnPress();
     }
 
-    protected override bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
+    protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
     {
-       if (!base.OnPointerMove(pointerLocation, ref delta))
+       if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
         HUDButton button = FindButtonContainingPointerLocation(pointerLocation);

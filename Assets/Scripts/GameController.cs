@@ -49,7 +49,7 @@ public class GameController : MonoBehaviour
         //guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
         guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
 
-        TouchHandler.s_touchDeactivated = false;
+        //TouchHandler.s_touchDeactivated = false;
 
         m_finishingLevelVictory = false;
     }

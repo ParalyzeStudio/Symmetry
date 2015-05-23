@@ -184,11 +184,15 @@ public class Shape : Triangulable
     public bool OverlapsShape(Shape shape)
     {
         if (shape == this)
+        {
             return true;
+        }
 
         //check if 'this' shape is inluded in one of the shape triangles and vice versa
         if (this.isIncludedInOneShapeTriangle(shape) || shape.isIncludedInOneShapeTriangle(this))
+        {
             return true;
+        }
 
         //Check if one of the triangle edges intersects triangle edges of the second shape
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
@@ -197,13 +201,16 @@ public class Shape : Triangulable
             for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
             {
                 Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex] + m_gridOffsetOnVertices;
-                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1] + m_gridOffsetOnVertices;
+                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
+                triangleEdgePoint2 += m_gridOffsetOnVertices;
 
                 //the shape intersects or overlaps the edge [triangleEdgePoint1; triangleEdgePoint2]
                 if (shape.IntersectsEdge(triangleEdgePoint1, triangleEdgePoint2)
                     ||
                     shape.OverlapsEdge(triangleEdgePoint1, triangleEdgePoint2))
                 {
+                    //Debug.Log("point1 X:" + triangleEdgePoint1.x + " Y:" + triangleEdgePoint1.y);
+                    //Debug.Log("point2 X:" + triangleEdgePoint2.x + " Y:" + triangleEdgePoint2.y);
                     return true;
                 }
             }
@@ -252,5 +259,38 @@ public class Shape : Triangulable
         }
 
         return false;
+    }
+
+    public List<Vector2> GetContourWithOffset()
+    {
+        if (m_gridOffsetOnVertices == Vector2.zero)
+            return m_contour;
+
+        List<Vector2> contourWithOffset = new List<Vector2>(m_contour);
+        for (int i = 0; i != contourWithOffset.Count; i++)
+        {
+            contourWithOffset[i] += m_gridOffsetOnVertices;
+        }
+
+        return contourWithOffset;
+    }
+
+    public List<List<Vector2>> GetHolesWithOffset()
+    {
+        if (m_gridOffsetOnVertices == Vector2.zero)
+            return m_holes;
+
+        List<List<Vector2>> holesWithOffset = new List<List<Vector2>>(m_holes);
+
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            List<Vector2> holesVec = m_holes[i];
+            for (int j = 0; j != holesVec.Count; j++)
+            {
+                holesVec[j] += m_gridOffsetOnVertices;
+            }
+        }
+
+        return holesWithOffset;
     }
 }

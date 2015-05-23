@@ -21,8 +21,7 @@ public class ShapeRenderer : MonoBehaviour
      * Renders the shape based on the m_gridTriangles list
      * We can specify a mesh object if we want to render again on this one or pass null to create a new mesh
      * **/
-    public void Render(/*bool bOverwriteMesh,*/ 
-                       RenderFaces renderFaces,
+    public void Render(RenderFaces renderFaces,
                        bool bUpdateVertices = true,
                        bool bUpdateColors = true,
                        bool renderDebugTriangles = false)
@@ -35,13 +34,9 @@ public class ShapeRenderer : MonoBehaviour
             mesh.name = "ShapeMesh";
             GetComponent<MeshFilter>().sharedMesh = mesh;
         }
-        //if (bOverwriteMesh)
-        //{
-        //    mesh = new Mesh();
-        //    mesh.name = "ShapeMesh";
-        //}
-        //else
-        //    mesh = this.gameObject.GetComponent<MeshFilter>().sharedMesh;
+
+        //reset mesh
+        mesh.Clear();        
 
         int vertexCount = 0;
         int indexCount = 0;

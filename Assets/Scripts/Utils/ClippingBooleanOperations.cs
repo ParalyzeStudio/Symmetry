@@ -108,13 +108,16 @@ public class ClippingBooleanOperations
         List<List<IntPoint>> subjsPaths = new List<List<IntPoint>>();
 
         //subj contour
-        subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_contour));
+        List<Vector2> contourWithOffset = subjShape.GetContourWithOffset();
+        subjsPaths.Add(CreatePathFromShapeContour(contourWithOffset));
 
         //subj holes
         for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
         {
             subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_holes[iHoleIdx]));
         }
+
+        List<List<Vector2>> holesWithOffset = subjShape.GetHolesWithOffset();
 
         //build clips paths
         List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
@@ -140,16 +143,9 @@ public class ClippingBooleanOperations
 
         if (result)
         {
-            int resultingShapeCount = 0;
+            resultingShapes.Capacity = polytree.Total;
+
             PolyNode polynode = polytree.GetFirst();
-            while (polynode != null)
-            {
-                resultingShapeCount++;
-                polynode = polynode.GetNext();
-            }
-
-            resultingShapes.Capacity = resultingShapeCount;
-
             while (polynode != null)
             {
                 Shape shape = new Shape();

@@ -10,9 +10,8 @@ public class GUITouchHandler : TouchHandler
     /**
      * Callback when user clicked the screen
      * **/
-    protected override void OnClick()
+    protected override void OnClick(Vector2 clickLocation)
     {
-        Vector2 clickLocation = m_prevPointerLocation;
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         GUIScene currentScene = sceneManager.m_currentScene;
 

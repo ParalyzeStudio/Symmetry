@@ -9,25 +9,54 @@ public class TouchHandler : MonoBehaviour
 {
     public const float MOVE_EPSILON = 0.5f;
     public const float ON_CLICK_MAX_DISPLACEMENT = 32.0f;
-    public static bool s_touchDeactivated;
+//    public static bool s_touchDeactivated;
 
     //public Vector2 m_touchArea;
     protected bool m_selected;
-#if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
-    protected bool m_mouseButtonPressed;
-#endif
-    protected Vector2 m_prevPointerLocation;
+//#if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
+//    protected bool m_mouseButtonPressed;
+//#endif
+//    protected Vector2 m_prevPointerLocation;
     protected Vector2 m_pointerDownPointerLocation;
+
+    private TouchManager m_touchManager;
 
     public virtual void Awake()
     {
+        m_touchManager = null;
         m_selected = false;
-        m_mouseButtonPressed = false;
+        //m_mouseButtonPressed = false;
     }
 
     public virtual void Start()
     {
 
+    }
+
+    /**
+     * Process the pointer event and dispatch it to the relevant callback
+     * **/
+    public bool ProcessPointerEvent(Vector2 pointerLocation, TouchManager.PointerEventType eventType)
+    {
+        if (eventType == TouchManager.PointerEventType.POINTER_DOWN)
+        {
+            if (IsPointerLocationContainedInObject(pointerLocation))
+            {
+                OnPointerDown(pointerLocation);
+                return true;
+            }
+        }
+        else if (eventType == TouchManager.PointerEventType.POINTER_MOVE)
+        {
+            return OnPointerMove(pointerLocation, GetTouchManager().m_pointerDeltaLocation);
+        }
+        else if (eventType == TouchManager.PointerEventType.POINTER_UP)
+        {
+            OnPointerUp();
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -44,24 +73,19 @@ public class TouchHandler : MonoBehaviour
     protected virtual void OnPointerDown(Vector2 pointerLocation)
     {
         m_selected = true;
-        m_prevPointerLocation = pointerLocation;
         m_pointerDownPointerLocation = pointerLocation;
     }
 
     /**
      * Player moved the pointer with object selected
      * **/
-    protected virtual bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
+    protected virtual bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
     {
         if (!m_selected)
             return false;
 
-        delta = pointerLocation - m_prevPointerLocation;
-
         if (delta.sqrMagnitude < MOVE_EPSILON)
             return false;
-
-        m_prevPointerLocation = pointerLocation;
 
         return true;
     }
@@ -71,21 +95,19 @@ public class TouchHandler : MonoBehaviour
      * **/
     protected virtual void OnPointerUp()
     {
-        float pointerDisplacementSqrLength = (m_prevPointerLocation - m_pointerDownPointerLocation).sqrMagnitude;
+        Vector2 prevPointerLocation = GetTouchManager().m_prevPointerLocation;
+        float pointerDisplacementSqrLength = (prevPointerLocation - m_pointerDownPointerLocation).sqrMagnitude;
 
-        if (m_selected && IsPointerLocationContainedInObject(m_prevPointerLocation) && pointerDisplacementSqrLength <= ON_CLICK_MAX_DISPLACEMENT)
-            OnClick();
- 
+        if (m_selected && IsPointerLocationContainedInObject(prevPointerLocation) && pointerDisplacementSqrLength <= ON_CLICK_MAX_DISPLACEMENT)
+            OnClick(prevPointerLocation);
+
         m_selected = false;
-#if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
-        m_mouseButtonPressed = false;
-#endif
     }
 
     /**
      * Player clicked on this object
      * **/
-    protected virtual void OnClick()
+    protected virtual void OnClick(Vector2 clickLocation)
     {
 
     }
@@ -95,76 +117,84 @@ public class TouchHandler : MonoBehaviour
      * -1 touch: drag a node or slide the scene
      * -2 touches: zoom in/out the scene
      * **/
-    void Update()
+//    void Update()
+//    {
+//        if (s_touchDeactivated)
+//            return;        
+
+//        Vector2 touchLocation;
+//#if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
+//        if (Input.touchCount == 1)
+//        {
+//            Touch touch = Input.GetTouch(0);
+//            touchLocation = Camera.main.ScreenToWorldPoint(touch.position);
+
+//            if (!m_selected)
+//            {
+//                Rect touchAreaRect = new Rect();
+//                Vector2 position = transform.position;
+//                touchAreaRect.position = position - 0.5f * m_touchArea;
+//                touchAreaRect.width = m_touchArea.x;
+//                touchAreaRect.height = m_touchArea.y;
+//                if (touchAreaRect.Contains(touchLocation))
+//                {
+//                    OnPointerDown(touchLocation);
+//                }
+//            }
+//            else
+//            {
+//                Vector2 delta = Vector2.zero;
+//                OnPointerMove(touchLocation, ref delta);
+//            }
+//            m_prevPointerLocation = touchLocation;
+//        }
+//        else if (Input.touchCount == 0)
+//        {
+//            if (m_selected)
+//                OnPointerUp();
+//        }
+//        //TODO handle the case of 2 touches
+//        else if (Input.touchCount == 2)
+//        {
+
+//        }
+//#elif UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR //devices with mouse
+
+//        if (Input.GetMouseButton(0))
+//        {
+//            touchLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+//            if (!m_mouseButtonPressed) //first press = OnPointerDown
+//            {
+//                m_mouseButtonPressed = true;
+//                if (IsPointerLocationContainedInObject(touchLocation))
+//                {
+//                    OnPointerDown(touchLocation);
+//                }
+//                else
+//                    m_prevPointerLocation = touchLocation;
+//            }
+//            else //other presses = OnPointerMove
+//            {
+//                Vector2 delta = Vector2.zero;
+//                OnPointerMove(touchLocation, ref delta);
+//            }            
+//        }
+//        else
+//        {
+//            if (m_mouseButtonPressed) //use the m_mouseButtonPressed to call the OnPointerUp() method only once
+//            {
+//                OnPointerUp();
+//            }
+//        }
+//#endif
+//    }
+
+    public TouchManager GetTouchManager()
     {
-        if (s_touchDeactivated)
-            return;        
+        if (m_touchManager == null)
+            m_touchManager = GameObject.FindGameObjectWithTag("TouchManager").GetComponent<TouchManager>();
 
-        Vector2 touchLocation;
-#if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
-        if (Input.touchCount == 1)
-        {
-            Touch touch = Input.GetTouch(0);
-            touchLocation = Camera.main.ScreenToWorldPoint(touch.position);
-
-            if (!m_selected)
-            {
-                Rect touchAreaRect = new Rect();
-                Vector2 position = transform.position;
-                touchAreaRect.position = position - 0.5f * m_touchArea;
-                touchAreaRect.width = m_touchArea.x;
-                touchAreaRect.height = m_touchArea.y;
-                if (touchAreaRect.Contains(touchLocation))
-                {
-                    OnPointerDown(touchLocation);
-                }
-            }
-            else
-            {
-                Vector2 delta = Vector2.zero;
-                OnPointerMove(touchLocation, ref delta);
-            }
-            m_prevPointerLocation = touchLocation;
-        }
-        else if (Input.touchCount == 0)
-        {
-            if (m_selected)
-                OnPointerUp();
-        }
-        //TODO handle the case of 2 touches
-        else if (Input.touchCount == 2)
-        {
-
-        }
-#elif UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR //devices with mouse
-
-        if (Input.GetMouseButton(0))
-        {
-            touchLocation = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            if (!m_mouseButtonPressed) //first press = OnPointerDown
-            {
-                m_mouseButtonPressed = true;
-                if (IsPointerLocationContainedInObject(touchLocation))
-                {
-                    OnPointerDown(touchLocation);
-                }
-                else
-                    m_prevPointerLocation = touchLocation;
-            }
-            else //other presses = OnPointerMove
-            {
-                Vector2 delta = Vector2.zero;
-                OnPointerMove(touchLocation, ref delta);
-            }            
-        }
-        else
-        {
-            if (m_mouseButtonPressed) //use the m_mouseButtonPressed to call the OnPointerUp() method only once
-            {
-                OnPointerUp();
-            }
-        }
-#endif
+        return m_touchManager;
     }
 }

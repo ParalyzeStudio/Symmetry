@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class Shapes : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class Shapes : MonoBehaviour
     public List<PositionColorMaterial> m_materials { get; set; }
 
     public Shape m_translatedShape; //the shape that is being translated by the user if applicable
-    public List<GameObject> m_intersectionShapesObjects { get; set; } //the temporary list of shapes resulting from the intersection of the shape 
+    public GameObject[] m_intersectionShapeObjects { get; set; } //the temporary list of shapes resulting from the intersection of the shape 
                                                                //being moved shape and other shapes during translation
 
     public Material m_transpColorMaterial;
@@ -17,7 +18,7 @@ public class Shapes : MonoBehaviour
     {
         m_shapesObjects = new List<GameObject>();
         m_materials = new List<PositionColorMaterial>();
-        m_intersectionShapesObjects = new List<GameObject>();
+        m_intersectionShapeObjects = new GameObject[64]; //big enough array
         m_translatedShape = null;
     }
 
@@ -89,7 +90,8 @@ public class Shapes : MonoBehaviour
      * **/
     public void AddIntersectionShapeObject(GameObject shape)
     {
-        m_intersectionShapesObjects.Add(shape);
+        int shapeIndex = FindIntersectionShapesArrayFirstNullObjectIndex();
+        m_intersectionShapeObjects[shapeIndex] = shape;
     }
 
     /**
@@ -178,24 +180,33 @@ public class Shapes : MonoBehaviour
             else
             {
                 if (m_translatedShape.OverlapsShape(shape))
-                {     
+                {
+                    Vector2 vertex0 = m_translatedShape.m_gridTriangles[0].m_points[0];
+                    Debug.Log("vertex0 X:" + vertex0.x + " Y:" + vertex0.y + " area:" + m_translatedShape.m_area);
                     if (!shape.m_color.Equals(m_translatedShape.m_color))
                     {
-                        //List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);
+                        List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);
 
-                        //Color intersectionShapeColor = 0.5f * (m_translatedShape.m_color + shape.m_color);
+                        Color intersectionShapeColor = 0.5f * (m_translatedShape.m_color + shape.m_color);
 
-                        //for (int i = 0; i != intersectionShapes.Count; i++)
-                        //{
-                        //    Shape intersectionShape = intersectionShapes[i];
-                        //    intersectionShape.m_color = intersectionShapeColor;
-                        //    InsertIntersectionShapeAtIndex(intersectionShape, iIntersectionShapeIdx);
-                        //    iIntersectionShapeIdx++;
-                        //}
+                        for (int i = 0; i != intersectionShapes.Count; i++)
+                        {
+                            Shape intersectionShape = intersectionShapes[i];
+                            intersectionShape.m_color = intersectionShapeColor;
+                            intersectionShape.Triangulate();
+
+                            InsertIntersectionShapeAtIndex(intersectionShape, iIntersectionShapeIdx);
+                            iIntersectionShapeIdx++;
+                        }
                     }
                 }
             }
         }
+
+        if (iIntersectionShapeIdx == 0) //no overlapping, clear the vector of intersection shapes and remove all related objects
+            CleanUpIntersectionShapes();
+        else
+            TrimIntersectionShapesAfterIndex(iIntersectionShapeIdx - 1); //trim the list after the last inserted index
     }
 
     /**
@@ -204,13 +215,16 @@ public class Shapes : MonoBehaviour
      * **/
     public void InsertIntersectionShapeAtIndex(Shape shape, int index)
     {
-        if (index >= m_intersectionShapesObjects.Count)
+        int intersectionShapesArraySize = GetIntersectionShapesArrayEffectiveSize();
+
+        if (index >= intersectionShapesArraySize)
         {
-            CreateShapeObjectFromData(shape, true);
+            GameObject intersectionShapeObject = CreateShapeObjectFromData(shape, true);
+            intersectionShapeObject.transform.localPosition = new Vector3(0,0,-200);
         }
         else
         {
-            GameObject recycledShapeObject = m_intersectionShapesObjects[index];
+            GameObject recycledShapeObject = m_intersectionShapeObjects[index];
 
             MeshRenderer meshRenderer = recycledShapeObject.GetComponent<MeshRenderer>();
             meshRenderer.sharedMaterial = GetMaterialForColor(shape.m_color).m_material;
@@ -220,22 +234,56 @@ public class Shapes : MonoBehaviour
 
             ShapeRenderer shapeRenderer = recycledShapeObject.GetComponent<ShapeRenderer>();
             shapeRenderer.m_shape = shape;
-            shapeRenderer.Render(/*true, */ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+            shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+
+            recycledShapeObject.transform.localPosition = new Vector3(0, 0, -200);
         }
     }
 
     /**
      * Crops the end of the list after the specified index and destroy all dismissed objects
      * **/
-    public void TrimIntersectionsShapesAfterIndex(int trimIndex)
+    public void TrimIntersectionShapesAfterIndex(int trimIndex)
     {
-        if (trimIndex == m_intersectionShapesObjects.Count - 1) //no element after trimIndex
-            return;
-
-        for (int i = trimIndex + 1; i != m_intersectionShapesObjects.Count; i++)
+        for (int i = trimIndex + 1; i != m_intersectionShapeObjects.Length; i++)
         {
-            //Destroy(m_intersectionShapesObjects[i]);
-            m_intersectionShapesObjects[i].GetComponent<MeshFilter>().sharedMesh = null;
+            GameObject shapeObject = m_intersectionShapeObjects[i];
+            if (shapeObject != null)
+            {
+                Destroy(m_intersectionShapeObjects[i]);
+                m_intersectionShapeObjects[i] = null;
+            }
         }
+    }
+
+    /**
+     * Cleans up entirely the array of intersection shapes and delete all relevant objects
+     * **/
+    public void CleanUpIntersectionShapes()
+    {
+        TrimIntersectionShapesAfterIndex(-1);
+    }
+
+    /**
+     * Get the number of non-null object inside the intersection shapes array
+     * **/
+    public int GetIntersectionShapesArrayEffectiveSize()
+    {
+        return FindIntersectionShapesArrayFirstNullObjectIndex();
+    }
+
+    /**
+     * Find the index of the first non-null element in the intersection shapes array
+     * **/
+    public int FindIntersectionShapesArrayFirstNullObjectIndex()
+    {
+        int i = 0;
+
+        while (m_intersectionShapeObjects[i] != null)
+        {
+            i++;
+        }
+
+        return i;
     }
 }

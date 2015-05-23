@@ -46,9 +46,9 @@ public class GridTouchHandler : TouchHandler
         }
     }
 
-    protected override bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
+    protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
     {
-        if (!base.OnPointerMove(pointerLocation, ref delta))
+        if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
@@ -82,7 +82,6 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerUp()
     {
-        m_mouseButtonPressed = false;
         if (!m_selected)
             return;
 
@@ -105,7 +104,7 @@ public class GridTouchHandler : TouchHandler
         }
     }
 
-    protected override void OnClick()
+    protected override void OnClick(Vector2 clickLocation)
     {
         //Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
         //AxisRenderer axisBuilder = IsSettingEndpoints();

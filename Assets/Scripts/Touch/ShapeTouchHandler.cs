@@ -31,7 +31,6 @@ public class ShapeTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        Debug.Log("OnPointerDown");
         this.GetComponent<ShapeRenderer>().m_shape.m_gridOffsetOnVertices = Vector2.zero;
 
         base.OnPointerDown(pointerLocation);
@@ -41,9 +40,9 @@ public class ShapeTouchHandler : TouchHandler
         m_gameScene.m_shapes.m_translatedShape = this.GetComponent<ShapeRenderer>().m_shape;
     }
 
-    protected override bool OnPointerMove(Vector2 pointerLocation, ref Vector2 delta)
+    protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
     {
-        if (!base.OnPointerMove(pointerLocation, ref delta))
+        if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
         //Debug.Log("OnPointerMove");
@@ -62,9 +61,6 @@ public class ShapeTouchHandler : TouchHandler
         Vector2 gridOffset = m_gameScene.m_grid.TransformWorldVectorToGridVector(shape.m_offsetOnVertices);
         shape.m_gridOffsetOnVertices = gridOffset;
 
-        //Debug.Log("offset:" + shape.m_offsetOnVertices.x + " Y:" + shape.m_offsetOnVertices.y);
-        //Debug.Log("gridOffset:" + gridOffset.x + " Y:" + gridOffset.y);
-
         m_gameScene.m_shapes.InvalidateIntersectionShapes();
 
         return true;
@@ -74,6 +70,8 @@ public class ShapeTouchHandler : TouchHandler
     {
         if (!m_selected)
             return;
+
+        Debug.Log("OnPointerUp");
 
         base.OnPointerUp();
 
@@ -94,15 +92,10 @@ public class ShapeTouchHandler : TouchHandler
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
+        shapeRenderer.m_shape.m_offsetOnVertices = Vector2.zero; //reset offset to zero
         shapeRenderer.m_shape.m_gridOffsetOnVertices = Vector2.zero; //reset offset to zero
-        //shapeRenderer.m_shape.Fusion();
         Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
         shapeRenderer.Render(/*meshFilter.sharedMesh, */ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
-    }
-
-    protected override void OnClick()
-    {
-        base.OnClick();
     }
 }
 
