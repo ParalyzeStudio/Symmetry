@@ -181,7 +181,6 @@ public class Shapes : MonoBehaviour
             {
                 if (m_translatedShape.OverlapsShape(shape))
                 {
-                    Vector2 vertex0 = m_translatedShape.m_gridTriangles[0].m_points[0];
                     if (!shape.m_color.Equals(m_translatedShape.m_color))
                     {
                         List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);
@@ -193,6 +192,7 @@ public class Shapes : MonoBehaviour
                             Shape intersectionShape = intersectionShapes[i];
                             intersectionShape.m_color = intersectionShapeColor;
                             intersectionShape.Triangulate();
+                            intersectionShape.PropagateColorToTriangles();
 
                             InsertIntersectionShapeAtIndex(intersectionShape, iIntersectionShapeIdx);
                             iIntersectionShapeIdx++;

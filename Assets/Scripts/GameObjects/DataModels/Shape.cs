@@ -110,6 +110,10 @@ public class Shape : Triangulable
         for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
         {
             Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+
+            if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
+                continue;
+
             if (this == shapeData)
             {
                 subjShape = this;
