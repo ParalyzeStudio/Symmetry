@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class TouchManager : MonoBehaviour
 {
+    public const float MOVE_EPSILON = 0.5f;
+
     public bool m_touchDeactivated { get; set; }
 
 #if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
@@ -87,13 +89,17 @@ public class TouchManager : MonoBehaviour
             if (!m_mouseButtonPressed) //first press = OnPointerDown
             {
                 eventType = PointerEventType.POINTER_DOWN;
+                m_prevPointerLocation = pointerLocation;
                 m_mouseButtonPressed = true;
             }
             else //other presses = OnPointerMove
             {
-                eventType = PointerEventType.POINTER_MOVE;
                 m_pointerDeltaLocation = pointerLocation - m_prevPointerLocation;
-                m_prevPointerLocation = pointerLocation;
+                if (m_pointerDeltaLocation.sqrMagnitude >= MOVE_EPSILON)
+                {
+                    eventType = PointerEventType.POINTER_MOVE;
+                    m_prevPointerLocation = pointerLocation;
+                }
             }
         }
         else
@@ -110,28 +116,25 @@ public class TouchManager : MonoBehaviour
 
         if (eventType != PointerEventType.NONE)
         {
-            if (eventType == PointerEventType.POINTER_DOWN)
+            bool bProcessed = guiManager.GetComponent<GUITouchHandler>().ProcessPointerEvent(pointerLocation, eventType);
+
+            if (sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
             {
-                bool bProcessed = guiManager.GetComponent<GUITouchHandler>().ProcessPointerEvent(pointerLocation, eventType);
-
-                if (sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
+                if (!bProcessed) //pointer event has not been processed by GUI, try HUD first
                 {
-                    if (!bProcessed) //pointer event has not been processed by GUI, try HUD first
-                    {
-                        GameScene gameScene = (GameScene)sceneManager.m_currentScene;
+                    GameScene gameScene = (GameScene)sceneManager.m_currentScene;
 
-                        //try to process the event on the grid itself
-                        GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
-                        gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                    ////try to process the event on the grid itself
+                    GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
+                    gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
 
-                        //or the shapes
-                        List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
-                        for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
-                        {
-                            ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
-                            shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
-                        }
-                    }
+                    //or the shapes
+                    //List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
+                    //for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
+                    //{
+                    //    ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
+                    //    shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                    //}
                 }
             }
         }

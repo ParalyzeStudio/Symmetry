@@ -2,13 +2,6 @@
 
 public class ShapeTouchHandler : TouchHandler
 {
-    private GameScene m_gameScene;
-
-    public override void Awake()
-    {
-        m_gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-    }
-
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         //First we verify if we entered the move shape mode
@@ -35,9 +28,10 @@ public class ShapeTouchHandler : TouchHandler
 
         base.OnPointerDown(pointerLocation);
 
-        m_gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
+        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+        gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
 
-        m_gameScene.m_shapes.m_translatedShape = this.GetComponent<ShapeRenderer>().m_shape;
+        gameScene.m_shapes.m_translatedShape = this.GetComponent<ShapeRenderer>().m_shape;
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -45,23 +39,21 @@ public class ShapeTouchHandler : TouchHandler
         if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
-        //Debug.Log("OnPointerMove");
-
-        //Debug.Log("Delta:" + delta);
-
         //move the shape of delta vector        
         this.gameObject.transform.localPosition += GeometryUtils.BuildVector3FromVector2(delta, 0);
 
         //convert the delta vector to grid coordinates and set it to the shape
         Shape shape = this.GetComponent<ShapeRenderer>().m_shape;
         shape.m_offsetOnVertices += delta;
+
         //Instead of transforming the delta (which can be very tiny) in grid coordinates that can lead to approximation errors,
         //we add the delta to the world offset of the shape. Then we transform the global offset once
         //(i.e instead of adding multiple big approximation errors we only make one when transforming the whole offset)
-        Vector2 gridOffset = m_gameScene.m_grid.TransformWorldVectorToGridVector(shape.m_offsetOnVertices);
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+        Vector2 gridOffset = gameScene.m_grid.TransformWorldVectorToGridVector(shape.m_offsetOnVertices);
         shape.m_gridOffsetOnVertices = gridOffset;
 
-        m_gameScene.m_shapes.InvalidateIntersectionShapes();
+        gameScene.m_shapes.InvalidateIntersectionShapes();
 
         return true;
     }
@@ -71,11 +63,10 @@ public class ShapeTouchHandler : TouchHandler
         if (!m_selected)
             return;
 
-        Debug.Log("OnPointerUp");
-
         base.OnPointerUp();
 
-        m_gameScene.m_shapes.m_translatedShape = null;
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+        gameScene.m_shapes.m_translatedShape = null;
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
@@ -84,10 +75,11 @@ public class ShapeTouchHandler : TouchHandler
         //and applying this shift value to all vertices
         Vector2 oldGridAnchorCoords = shapeRenderer.m_shape.m_gridTriangles[0].m_points[0];
         Vector2 firstShapeVertex = meshFilter.sharedMesh.vertices[0];
+        
         //calculate the world position of this vertex by adding the game object transform.position
         firstShapeVertex += GeometryUtils.BuildVector2FromVector3(this.gameObject.transform.position);
 
-        Vector2 newGridAnchorCoords = m_gameScene.m_grid.GetClosestGridAnchorCoordinatesForPosition(firstShapeVertex);
+        Vector2 newGridAnchorCoords = gameScene.m_grid.GetClosestGridAnchorCoordinatesForPosition(firstShapeVertex);
         Vector2 shift = newGridAnchorCoords - oldGridAnchorCoords;
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
@@ -95,7 +87,7 @@ public class ShapeTouchHandler : TouchHandler
         shapeRenderer.m_shape.m_offsetOnVertices = Vector2.zero; //reset offset to zero
         shapeRenderer.m_shape.m_gridOffsetOnVertices = Vector2.zero; //reset offset to zero
         Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
-        shapeRenderer.Render(/*meshFilter.sharedMesh, */ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
+        shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
     }
 }
 

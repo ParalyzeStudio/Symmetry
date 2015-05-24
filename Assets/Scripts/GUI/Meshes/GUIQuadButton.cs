@@ -5,6 +5,8 @@ public class GUIQuadButton : MonoBehaviour
     public UVQuad m_skin { get; set; }
     public UVQuad m_shadow { get; set; }
 
+    public Vector2 m_size { get; set; }
+
     public enum ButtonState
     {
         PRESSED = 1,
@@ -37,12 +39,27 @@ public class GUIQuadButton : MonoBehaviour
      * **/
     public void SetSize(Vector2 size)
     {
+        m_size = size;
+
         Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();
         for (int i = 0; i != childTransforms.Length; i++)
         {
             if (childTransforms[i] != this.transform)
                 childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
         }
+    }
+
+    /**
+     * Tells if this button contains the specified point
+     * **/
+    public bool ContainsPoint(Vector2 point)
+    {
+        float minX = this.transform.position.x - 0.5f * m_size.x;
+        float maxX = this.transform.position.x + 0.5f * m_size.x;
+        float minY = this.transform.position.y - 0.5f * m_size.y;
+        float maxY = this.transform.position.y + 0.5f * m_size.y;
+
+        return (point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY);
     }
 
     /**

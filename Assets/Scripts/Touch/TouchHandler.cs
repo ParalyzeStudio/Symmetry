@@ -7,7 +7,6 @@ using System.Collections;
  * **/
 public class TouchHandler : MonoBehaviour
 {
-    public const float MOVE_EPSILON = 0.5f;
     public const float ON_CLICK_MAX_DISPLACEMENT = 32.0f;
 //    public static bool s_touchDeactivated;
 
@@ -20,6 +19,7 @@ public class TouchHandler : MonoBehaviour
     protected Vector2 m_pointerDownPointerLocation;
 
     private TouchManager m_touchManager;
+    private SceneManager m_sceneManager;
 
     public virtual void Awake()
     {
@@ -53,7 +53,7 @@ public class TouchHandler : MonoBehaviour
         else if (eventType == TouchManager.PointerEventType.POINTER_UP)
         {
             OnPointerUp();
-            return true;
+            return m_selected;
         }
 
         return false;
@@ -82,9 +82,6 @@ public class TouchHandler : MonoBehaviour
     protected virtual bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
     {
         if (!m_selected)
-            return false;
-
-        if (delta.sqrMagnitude < MOVE_EPSILON)
             return false;
 
         return true;
@@ -196,5 +193,13 @@ public class TouchHandler : MonoBehaviour
             m_touchManager = GameObject.FindGameObjectWithTag("TouchManager").GetComponent<TouchManager>();
 
         return m_touchManager;
+    }
+
+    public SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+
+        return m_sceneManager;
     }
 }

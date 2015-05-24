@@ -182,7 +182,6 @@ public class Shapes : MonoBehaviour
                 if (m_translatedShape.OverlapsShape(shape))
                 {
                     Vector2 vertex0 = m_translatedShape.m_gridTriangles[0].m_points[0];
-                    Debug.Log("vertex0 X:" + vertex0.x + " Y:" + vertex0.y + " area:" + m_translatedShape.m_area);
                     if (!shape.m_color.Equals(m_translatedShape.m_color))
                     {
                         List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);

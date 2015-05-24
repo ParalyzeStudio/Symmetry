@@ -9,7 +9,7 @@ public class GridTouchHandler : TouchHandler
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         //First we verify if we entered the move shape mode
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
         //if (!gameScene.IsSymmetryHUDButtonSelected())
         //    return false;
 
@@ -28,16 +28,11 @@ public class GridTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        return;
-
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        if (guiManager.IsPauseWindowShown()) //swallow the touch
-            return;
-
         base.OnPointerDown(pointerLocation);
 
-        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+
+        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);        
         Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
         float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
         if (distanceToAnchor < m_axisCreationMinDistance)
@@ -51,7 +46,7 @@ public class GridTouchHandler : TouchHandler
         if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
 
         if (currentAxis == null)
@@ -86,7 +81,7 @@ public class GridTouchHandler : TouchHandler
             return;
 
         //GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        GameScene gameScene = this.transform.parent.gameObject.GetComponent<GameScene>();
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
         if (currentAxis != null)
         {
@@ -99,23 +94,8 @@ public class GridTouchHandler : TouchHandler
             }
 
             //remove the axis from the axes list and destroy the object
-            //gameScene.m_axes.RemoveAxis(currentAxis);
-            //Destroy(currentAxis);
+            gameScene.m_axes.RemoveAxis(currentAxis);
+            Destroy(currentAxis);
         }
-    }
-
-    protected override void OnClick(Vector2 clickLocation)
-    {
-        //Vector2 clickedAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(m_prevPointerLocation);
-        //AxisRenderer axisBuilder = IsSettingEndpoints();
-        //if (axisBuilder) //we build the second endpoint
-        //{
-        //    axisBuilder.BuildEndpointAtGridPosition(clickedAnchorGridCoords);
-        //}
-        //else //We can build another axis
-        //{
-        //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        //    gameScene.m_axes.BuildAxis(clickedAnchorGridCoords);
-        //}
     }
 }

@@ -4,6 +4,29 @@ public class GUITouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
+        if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
+        {
+            GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
+            if (guiManager.IsPauseWindowShown())
+            {
+                return true;
+            }
+            else
+            {
+
+                GUIInterfaceButton[] allInterfaceButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIInterfaceButton>();
+
+                for (int i = 0; i != allInterfaceButtons.Length; i++)
+                {
+                    if (allInterfaceButtons[i].ContainsPoint(pointerLocation))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -154,6 +177,7 @@ public class GUITouchHandler : TouchHandler
                 clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
             {
                 levels.OnClickLevelSlot(iSlotIndex);
+                break;
             }
         }
     }
