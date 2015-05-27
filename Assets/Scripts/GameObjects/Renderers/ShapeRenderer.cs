@@ -133,6 +133,9 @@ public class ShapeRenderer : MonoBehaviour
      * **/
     public void SetColor(Color color)
     {
+        m_shape.m_color = color;
+        m_shape.PropagateColorToTriangles();
+
         Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
 
         Color[] meshColors = mesh.colors;

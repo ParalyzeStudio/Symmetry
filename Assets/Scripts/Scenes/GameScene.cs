@@ -12,8 +12,6 @@ public class GameScene : GUIScene
     public const float SHAPES_Z_VALUE = -20.0f;
     public const float AXES_Z_VALUE = -210.0f;
 
-    public const float SHAPES_OPACITY = 1.0f;
-
     //public GameObject m_gridAnchorSelectedPfb;
 
     public Grid m_grid { get; set; }
@@ -359,16 +357,18 @@ public class GameScene : GUIScene
 
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
-            shape.PropagateColorToTriangles();
 
-            m_shapes.CreateShapeObjectFromData(shape);
+            GameObject shapeObject = m_shapes.CreateShapeObjectFromData(shape);
+
+            ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
+            shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
 
         m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
         GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetOpacity(0);
-        shapesAnimator.FadeTo(SHAPES_OPACITY, 0.5f, fDelay);
+        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.5f, fDelay);
 
         ////fusion initial shapes
         //GameObject shapeObject = m_shapes.m_shapesObj[0];

@@ -43,66 +43,7 @@ public class ClippingBooleanOperations
         return contour;
     }
 
-    public static Shape ShapesUnion(Shape subjShape, Shape clipShape)
-    {
-        //build subjs paths
-        List<List<IntPoint> > subjsPaths = new List<List<IntPoint> >();
-
-        //subj contour
-        subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_contour));
-
-        //subj holes
-        for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
-        {
-            subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_holes[iHoleIdx]));
-        }
-
-        //build clips paths
-        List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
-        
-        //clip contour
-        clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_contour));
-
-        //clip holes
-        for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
-        {
-            clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_holes[iHoleIdx]));
-        }
-
-        //Add subjs and clips paths to the clipper
-        Clipper clipper = new Clipper();
-        clipper.AddPaths(subjsPaths, PolyType.ptSubject, true);
-        clipper.AddPaths(clipsPaths, PolyType.ptClip, true);
-
-        //List<List<IntPoint>> solution = new List<List<IntPoint>>();
-        //bool result = clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
-        PolyTree polytree = new PolyTree();
-        bool result = clipper.Execute(ClipType.ctUnion, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
-
-        if (result)
-        {
-            //Only one child for the PolyTree node, this is the shape resulting from fusion
-            PolyNode polynode = polytree.GetFirst();
-            Shape shape = new Shape();
-
-            //contour
-            List<Vector2> shapeContour = CreateContourFromPath(polynode.Contour);
-            shape.m_contour = shapeContour;
-
-            //holes
-            for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
-            {
-                PolyNode childHole = polynode.Childs[iChildIdx];
-                shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
-            }
-
-            return shape;
-        }
-
-        return null;
-    }
-
-    public static List<Shape> ShapesIntersection(Shape subjShape, Shape clipShape)
+    public static List<Shape> ShapesOperation(Shape subjShape, Shape clipShape, ClipType clipOperation)
     {
         //build subjs paths
         List<List<IntPoint>> subjsPaths = new List<List<IntPoint>>();
@@ -123,7 +64,8 @@ public class ClippingBooleanOperations
         List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
 
         //clip contour
-        clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_contour));
+        contourWithOffset = clipShape.GetContourWithOffset();
+        clipsPaths.Add(CreatePathFromShapeContour(contourWithOffset));
 
         //clip holes
         for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
@@ -137,7 +79,7 @@ public class ClippingBooleanOperations
         clipper.AddPaths(clipsPaths, PolyType.ptClip, true);
 
         PolyTree polytree = new PolyTree();
-        bool result = clipper.Execute(ClipType.ctIntersection, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
+        bool result = clipper.Execute(clipOperation, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
 
         List<Shape> resultingShapes = new List<Shape>();
 
@@ -161,6 +103,22 @@ public class ClippingBooleanOperations
                     shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
                 }
 
+                //Triangulate shape
+                shape.Triangulate();
+
+                //Color
+                Color shapeColor = Color.black;
+                if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
+                    shapeColor = subjShape.m_color;
+                else if (clipOperation == ClipType.ctIntersection)
+                    shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
+
+                shapeColor.a = Shapes.SHAPES_OPACITY;
+                shape.m_color = shapeColor;
+
+                shape.PropagateColorToTriangles();
+
+                //populate the list
                 resultingShapes.Add(shape);
 
                 polynode = polynode.GetNext();
@@ -169,4 +127,63 @@ public class ClippingBooleanOperations
 
         return resultingShapes;
     }
+
+    //public static Shape ShapesUnion(Shape subjShape, Shape clipShape)
+    //{
+    //    //build subjs paths
+    //    List<List<IntPoint> > subjsPaths = new List<List<IntPoint> >();
+
+    //    //subj contour
+    //    subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_contour));
+
+    //    //subj holes
+    //    for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
+    //    {
+    //        subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_holes[iHoleIdx]));
+    //    }
+
+    //    //build clips paths
+    //    List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
+        
+    //    //clip contour
+    //    clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_contour));
+
+    //    //clip holes
+    //    for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
+    //    {
+    //        clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_holes[iHoleIdx]));
+    //    }
+
+    //    //Add subjs and clips paths to the clipper
+    //    Clipper clipper = new Clipper();
+    //    clipper.AddPaths(subjsPaths, PolyType.ptSubject, true);
+    //    clipper.AddPaths(clipsPaths, PolyType.ptClip, true);
+
+    //    //List<List<IntPoint>> solution = new List<List<IntPoint>>();
+    //    //bool result = clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
+    //    PolyTree polytree = new PolyTree();
+    //    bool result = clipper.Execute(ClipType.ctUnion, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
+
+    //    if (result)
+    //    {
+    //        //Only one child for the PolyTree node, this is the shape resulting from fusion
+    //        PolyNode polynode = polytree.GetFirst();
+    //        Shape shape = new Shape();
+
+    //        //contour
+    //        List<Vector2> shapeContour = CreateContourFromPath(polynode.Contour);
+    //        shape.m_contour = shapeContour;
+
+    //        //holes
+    //        for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
+    //        {
+    //            PolyNode childHole = polynode.Childs[iChildIdx];
+    //            shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
+    //        }
+
+    //        return shape;
+    //    }
+
+    //    return null;
+    //}
 }

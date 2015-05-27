@@ -4,13 +4,15 @@ using System;
 
 public class Shapes : MonoBehaviour
 {
+    public const float SHAPES_OPACITY = 0.8f;
+
     public GameObject m_shapePfb; //prefab to instantiate a shape
     public List<GameObject> m_shapesObjects { get; set; } //list of children shapes
     public List<PositionColorMaterial> m_materials { get; set; }
 
-    public Shape m_translatedShape; //the shape that is being translated by the user if applicable
-    public GameObject[] m_intersectionShapeObjects { get; set; } //the temporary list of shapes resulting from the intersection of the shape 
-                                                               //being moved shape and other shapes during translation
+    public GameObject m_translatedShapeObject; //the shape that is being translated by the user if applicable
+    public List<GameObject> m_substitutionShapeObjects; //the list of shapes that will replace the actual shapes that are overlapping
+    public List<GameObject> m_overlappingShapeObjects; //the list shape objects that are currently overlapping and needs to be masked
 
     public Material m_transpColorMaterial;
 
@@ -18,14 +20,16 @@ public class Shapes : MonoBehaviour
     {
         m_shapesObjects = new List<GameObject>();
         m_materials = new List<PositionColorMaterial>();
-        m_intersectionShapeObjects = new GameObject[64]; //big enough array
-        m_translatedShape = null;
+        m_translatedShapeObject = null;
+        m_substitutionShapeObjects = new List<GameObject>();
+        m_overlappingShapeObjects = new List<GameObject>();
+        m_overlappingShapeObjects.Capacity = 16;
     }
 
     /**
      * Build a shape game object from shape data (contour/triangles, holes, color)
      * **/
-    public GameObject CreateShapeObjectFromData(Shape shapeData, bool bIntersectionShape = false)
+    public GameObject CreateShapeObjectFromData(Shape shapeData, bool bSubstitutionShape = false)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
         clonedShapeObject.transform.parent = this.gameObject.transform;
@@ -34,15 +38,15 @@ public class Shapes : MonoBehaviour
         MeshRenderer meshRenderer = clonedShapeObject.GetComponent<MeshRenderer>();
         meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
 
-        ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
-        shapeAnimator.m_color = shapeData.m_color;
-
         ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
         shapeRenderer.m_shape = shapeData;
-        shapeRenderer.Render(/*true, */ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+        shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
-        if (bIntersectionShape)
-            AddIntersectionShapeObject(clonedShapeObject);
+        ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
+        shapeAnimator.SetColor(shapeData.m_color);
+
+        if (bSubstitutionShape)
+            AddSubstitutionShapeObject(clonedShapeObject);
         else
             AddShapeObject(clonedShapeObject);
 
@@ -57,41 +61,92 @@ public class Shapes : MonoBehaviour
     /**
      * Add a shape GameObject to the list of shapes
      * **/
-    public void AddShapeObject(GameObject shape)
+    public void AddShapeObject(GameObject shapeObject)
     {
-        m_shapesObjects.Add(shape);
+        m_shapesObjects.Add(shapeObject);
     }
 
     /**
      * Remove a shape GameObject from the list of shapes
      * **/
-    public void RemoveShapeObject(GameObject shape)
+    public void RemoveShapeObject(GameObject shapeObject)
     {
         for (int shapeIndex = 0; shapeIndex != m_shapesObjects.Count; shapeIndex++)
         {
-            if (m_shapesObjects[shapeIndex] == shape)
+            if (m_shapesObjects[shapeIndex] == shapeObject)
             {
-                m_shapesObjects.Remove(shape);
+                m_shapesObjects.Remove(shapeObject);
                 return;
             }
         }
     }
 
     /**
-     * Remove all shape GameObjects from the list of shapes
+     * Add an shape object to the overlapping shape objects list
      * **/
-    public void ClearShapeObjects()
+    public void AddOverlappingShapeObject(GameObject shapeObject)
     {
-        m_shapesObjects.Clear();
+        for (int i = 0; i != m_overlappingShapeObjects.Count; i++)
+        {
+            if (shapeObject == m_overlappingShapeObjects[i])
+                return;
+        }
+
+        m_overlappingShapeObjects.Add(shapeObject);
     }
 
     /**
-     * Add a shape GameObject to the list of shapes
+     * Clear all indices from the list of overlapping shape objects
      * **/
-    public void AddIntersectionShapeObject(GameObject shape)
+    public void ClearOverlappingShapeObjects(bool bDestroyShapeObjects = false)
     {
-        int shapeIndex = FindIntersectionShapesArrayFirstNullObjectIndex();
-        m_intersectionShapeObjects[shapeIndex] = shape;
+        if (bDestroyShapeObjects)
+        {
+            for (int i = 0; i != m_overlappingShapeObjects.Count; i++)
+            {
+                Destroy(m_overlappingShapeObjects[i]);
+            }
+        }
+
+        m_overlappingShapeObjects.Clear();
+    }
+
+    /**
+     * Tells if this shape object is currently overlapping with another one
+     * **/
+    public bool IsOverlappingShapeObject(GameObject shapeObject)
+    {
+        for (int i = 0; i != m_overlappingShapeObjects.Count; i++)
+        {
+            if (shapeObject == m_overlappingShapeObjects[i])
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Add a shape GameObject to the list of substitution shapes
+     * **/
+    public void AddSubstitutionShapeObject(GameObject shapeObject)
+    {
+        m_substitutionShapeObjects.Add(shapeObject);
+    }
+
+    /**
+     * Remove all shape GameObjects from the list of substitution shapes
+     * **/
+    public void ClearSubstitutionShapeObjects(bool bDestroysShapeObjects = false)
+    {
+        if (bDestroysShapeObjects)
+        {
+            for (int i = 0; i != m_substitutionShapeObjects.Count; i++)
+            {
+                Destroy(m_substitutionShapeObjects[i]);
+            }
+        }
+
+        m_substitutionShapeObjects.Clear();
     }
 
     /**
@@ -164,125 +219,91 @@ public class Shapes : MonoBehaviour
     }
 
     /**
-     * Check if this shape overlaps a shape of a different color and invalidate the list of intersection shapes if necessary
+     * If two or more shape objects overlap, 
      * **/
-    public void InvalidateIntersectionShapes()
+    public void InvalidateOverlappingAndSubstitutionShapes()
     {
-        int iIntersectionShapeIdx = 0;
+        ClearOverlappingShapeObjects();
+        ClearSubstitutionShapeObjects(true);
+
+        //Build lists to hold temporary shapes
+        List<Shape> intersectionShapes = new List<Shape>();
+        List<Shape> resultingShapes1 = new List<Shape>();
+        List<Shape> resultingShapes2 = new List<Shape>();
+
         for (int iShapeIdx = 0; iShapeIdx != m_shapesObjects.Count; iShapeIdx++)
         {
             GameObject shapeObject = m_shapesObjects[iShapeIdx];
 
+            Shape translatedShape = m_translatedShapeObject.GetComponent<ShapeRenderer>().m_shape;
             Shape shape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
 
-            if (shape == m_translatedShape)
+            if (shapeObject == m_translatedShapeObject)
                 continue;
             else
             {
-                if (m_translatedShape.OverlapsShape(shape))
+                if (translatedShape.OverlapsShape(shape))
                 {
-                    if (!shape.m_color.Equals(m_translatedShape.m_color))
+                    AddOverlappingShapeObject(m_translatedShapeObject);
+                    AddOverlappingShapeObject(shapeObject);
+
+                    //Compute intersection shapes
+                    intersectionShapes.AddRange(ClippingBooleanOperations.ShapesOperation(translatedShape, shape, ClipperLib.ClipType.ctIntersection));
+
+                    //Compute resulting shapes from original shape 1
+                    if (resultingShapes1.Count == 0)
                     {
-                        List<Shape> intersectionShapes = ClippingBooleanOperations.ShapesIntersection(m_translatedShape, shape);
-
-                        Color intersectionShapeColor = 0.5f * (m_translatedShape.m_color + shape.m_color);
-
-                        for (int i = 0; i != intersectionShapes.Count; i++)
-                        {
-                            Shape intersectionShape = intersectionShapes[i];
-                            intersectionShape.m_color = intersectionShapeColor;
-                            intersectionShape.Triangulate();
-                            intersectionShape.PropagateColorToTriangles();
-
-                            InsertIntersectionShapeAtIndex(intersectionShape, iIntersectionShapeIdx);
-                            iIntersectionShapeIdx++;
-                        }
+                        resultingShapes1.AddRange(ClippingBooleanOperations.ShapesOperation(translatedShape, shape, ClipperLib.ClipType.ctDifference));
                     }
+                    else
+                    {
+                        List<Shape> newResultingShapes1 = new List<Shape>();
+                        newResultingShapes1.Capacity = resultingShapes1.Count; //newResultingShapes1.Count >= resultingShapes1.Count so set capacity accordingly
+                        for (int iResultingShapeIdx = 0; iResultingShapeIdx != resultingShapes1.Count; iResultingShapeIdx++)
+                        {
+                            Shape resultingShape1 = resultingShapes1[iResultingShapeIdx];
+                            newResultingShapes1.AddRange(ClippingBooleanOperations.ShapesOperation(resultingShape1, shape, ClipperLib.ClipType.ctDifference));
+                        }
+
+                        resultingShapes1 = newResultingShapes1;
+                    }
+
+
+                    //Compute resulting shapes from original shape 2
+                    resultingShapes2.AddRange(ClippingBooleanOperations.ShapesOperation(shape, translatedShape, ClipperLib.ClipType.ctDifference));
                 }
             }
         }
 
-        if (iIntersectionShapeIdx == 0) //no overlapping, clear the vector of intersection shapes and remove all related objects
-            CleanUpIntersectionShapes();
-        else
-            TrimIntersectionShapesAfterIndex(iIntersectionShapeIdx - 1); //trim the list after the last inserted index
-    }
-
-    /**
-     * Build a game object to render the intersection shape (index >= list.Count) 
-     * or reuse an existing object (index < list.Count)
-     * **/
-    public void InsertIntersectionShapeAtIndex(Shape shape, int index)
-    {
-        int intersectionShapesArraySize = GetIntersectionShapesArrayEffectiveSize();
-
-        if (index >= intersectionShapesArraySize)
+        InvalidateOpacityOnShapeObjects();
+        
+        ////Render temporary shape objects
+        for (int i = 0; i != resultingShapes1.Count; i++)
         {
-            GameObject intersectionShapeObject = CreateShapeObjectFromData(shape, true);
-            intersectionShapeObject.transform.localPosition = new Vector3(0,0,-200);
+            CreateShapeObjectFromData(resultingShapes1[i], true);
         }
-        else
+
+        for (int i = 0; i != resultingShapes2.Count; i++)
         {
-            GameObject recycledShapeObject = m_intersectionShapeObjects[index];
+            CreateShapeObjectFromData(resultingShapes2[i], true);
+        }
 
-            MeshRenderer meshRenderer = recycledShapeObject.GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = GetMaterialForColor(shape.m_color).m_material;
-
-            ShapeAnimator shapeAnimator = recycledShapeObject.GetComponent<ShapeAnimator>();
-            shapeAnimator.m_color = shape.m_color;
-
-            ShapeRenderer shapeRenderer = recycledShapeObject.GetComponent<ShapeRenderer>();
-            shapeRenderer.m_shape = shape;
-            shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED);
-
-            recycledShapeObject.transform.localPosition = new Vector3(0, 0, -200);
+        for (int i = 0; i != intersectionShapes.Count; i++)
+        {
+            CreateShapeObjectFromData(intersectionShapes[i], true);
         }
     }
 
     /**
-     * Crops the end of the list after the specified index and destroy all dismissed objects
+     * 
      * **/
-    public void TrimIntersectionShapesAfterIndex(int trimIndex)
+    public void InvalidateOpacityOnShapeObjects()
     {
-        for (int i = trimIndex + 1; i != m_intersectionShapeObjects.Length; i++)
+        for (int iShapeIdx = 0; iShapeIdx != m_shapesObjects.Count; iShapeIdx++)
         {
-            GameObject shapeObject = m_intersectionShapeObjects[i];
-            if (shapeObject != null)
-            {
-                Destroy(m_intersectionShapeObjects[i]);
-                m_intersectionShapeObjects[i] = null;
-            }
+            GameObject shapeObject = m_shapesObjects[iShapeIdx];
+            ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
+            shapeAnimator.SetOpacity(IsOverlappingShapeObject(shapeObject) ? 0 : SHAPES_OPACITY);
         }
-    }
-
-    /**
-     * Cleans up entirely the array of intersection shapes and delete all relevant objects
-     * **/
-    public void CleanUpIntersectionShapes()
-    {
-        TrimIntersectionShapesAfterIndex(-1);
-    }
-
-    /**
-     * Get the number of non-null object inside the intersection shapes array
-     * **/
-    public int GetIntersectionShapesArrayEffectiveSize()
-    {
-        return FindIntersectionShapesArrayFirstNullObjectIndex();
-    }
-
-    /**
-     * Find the index of the first non-null element in the intersection shapes array
-     * **/
-    public int FindIntersectionShapesArrayFirstNullObjectIndex()
-    {
-        int i = 0;
-
-        while (m_intersectionShapeObjects[i] != null)
-        {
-            i++;
-        }
-
-        return i;
     }
 }

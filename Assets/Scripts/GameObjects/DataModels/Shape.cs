@@ -132,13 +132,10 @@ public class Shape : Triangulable
         if (clipShape == null) //no shape overlaps 'this' shape
             return null;
 
-        Shape resultingShape = ClippingBooleanOperations.ShapesUnion(subjShape, clipShape);
-        if (resultingShape != null)
+        List<Shape> resultingShapes = ClippingBooleanOperations.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
+        if (resultingShapes.Count > 1)
         {
-            resultingShape.Triangulate();
-            resultingShape.m_color = subjShape.m_color;
-            resultingShape.PropagateColorToTriangles();
-
+            Shape resultingShape = resultingShapes[0];
             gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
 
             gameScene.m_shapes.DestroyShape(subjShapeObject);

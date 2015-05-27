@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class ShapeTouchHandler : TouchHandler
 {
@@ -31,7 +32,7 @@ public class ShapeTouchHandler : TouchHandler
         GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
         gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
 
-        gameScene.m_shapes.m_translatedShape = this.GetComponent<ShapeRenderer>().m_shape;
+        gameScene.m_shapes.m_translatedShapeObject = this.gameObject;
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -53,7 +54,7 @@ public class ShapeTouchHandler : TouchHandler
         Vector2 gridOffset = gameScene.m_grid.TransformWorldVectorToGridVector(shape.m_offsetOnVertices);
         shape.m_gridOffsetOnVertices = gridOffset;
 
-        gameScene.m_shapes.InvalidateIntersectionShapes();
+        gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
 
         return true;
     }
@@ -66,7 +67,6 @@ public class ShapeTouchHandler : TouchHandler
         base.OnPointerUp();
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        gameScene.m_shapes.m_translatedShape = null;
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
@@ -83,11 +83,36 @@ public class ShapeTouchHandler : TouchHandler
         Vector2 shift = newGridAnchorCoords - oldGridAnchorCoords;
 
         shapeRenderer.ShiftShapeVertices(shift); //shift vertices
+
         this.gameObject.transform.localPosition = Vector3.zero; //reset game object position to zero
         shapeRenderer.m_shape.m_offsetOnVertices = Vector2.zero; //reset offset to zero
         shapeRenderer.m_shape.m_gridOffsetOnVertices = Vector2.zero; //reset offset to zero
-        Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
-        shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
+        //Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
+        //shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED); //render again the shape
+
+
+        gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+
+        //Transfer substitution shape objects to normal shape objects list
+        List<GameObject> substitutionShapeObjects = gameScene.m_shapes.m_substitutionShapeObjects;
+        for (int i = 0; i != substitutionShapeObjects.Count; i++)
+        {
+            gameScene.m_shapes.m_shapesObjects.Add(substitutionShapeObjects[i]);
+        }
+
+        //clean up the list of substition shape objects
+        gameScene.m_shapes.ClearSubstitutionShapeObjects();
+
+        //clean up the list of overlapping shape objects and remove them from the normal shape objects list too
+        List<GameObject> overlappingShapeObjects = gameScene.m_shapes.m_overlappingShapeObjects;
+        for (int i = 0; i != overlappingShapeObjects.Count; i++)
+        {
+            gameScene.m_shapes.m_shapesObjects.Remove(overlappingShapeObjects[i]);
+        }
+        gameScene.m_shapes.ClearOverlappingShapeObjects(true);
+
+        //Set the translated shape object to null
+        gameScene.m_shapes.m_translatedShapeObject = null;
     }
 }
 
