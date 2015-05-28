@@ -4,7 +4,7 @@ using System;
 
 public class Shapes : MonoBehaviour
 {
-    public const float SHAPES_OPACITY = 0.8f;
+    public const float SHAPES_OPACITY = 1.0f;
 
     public GameObject m_shapePfb; //prefab to instantiate a shape
     public List<GameObject> m_shapesObjects { get; set; } //list of children shapes

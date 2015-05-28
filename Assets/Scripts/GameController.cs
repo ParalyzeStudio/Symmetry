@@ -52,6 +52,47 @@ public class GameController : MonoBehaviour
         //TouchHandler.s_touchDeactivated = false;
 
         m_finishingLevelVictory = false;
+
+
+
+        ///DEBUG
+        //List<Vector2> debugContourShape1 = new List<Vector2>();
+        //debugContourShape1.Add(new Vector2(1, 1));
+        //debugContourShape1.Add(new Vector2(3, 1));
+        //debugContourShape1.Add(new Vector2(3, 3));
+        //debugContourShape1.Add(new Vector2(2, 3));
+        //debugContourShape1.Add(new Vector2(2, 2));
+        //debugContourShape1.Add(new Vector2(1, 2));
+        //debugContourShape1.Add(new Vector2(1, 1));
+        //Shape debugShape1 = new Shape(debugContourShape1);
+
+        //List<Vector2> debugContourShape2 = new List<Vector2>();
+        //debugContourShape2.Add(new Vector2(2, 1));
+        //debugContourShape2.Add(new Vector2(3, 1));
+        //debugContourShape2.Add(new Vector2(3, 2));
+        //debugContourShape2.Add(new Vector2(2, 2));
+        //Shape debugShape2 = new Shape(debugContourShape2);
+
+        //List<Shape> debugResultingShapes = ClippingBooleanOperations.ShapesOperation(debugShape1, debugShape2, ClipperLib.ClipType.ctDifference);
+
+        //Debug.Log(debugResultingShapes.Count);
+
+        //List<Vector2> debugContour = new List<Vector2>();
+        //debugContour.Capacity = 11;
+        //debugContour.Add(new Vector2(1, 2));
+        //debugContour.Add(new Vector2(2, 3));
+        //debugContour.Add(new Vector2(3, 2));
+        //debugContour.Add(new Vector2(4, 3));
+        //debugContour.Add(new Vector2(5, 2));
+        //debugContour.Add(new Vector2(6, 3));
+        //debugContour.Add(new Vector2(7, 2));
+        //debugContour.Add(new Vector2(6, 1));
+        //debugContour.Add(new Vector2(5, 2));
+        //debugContour.Add(new Vector2(4, 1));
+        //debugContour.Add(new Vector2(3, 2));
+        //debugContour.Add(new Vector2(2, 1));
+
+        //List<List<Vector2>> splitContours = ClippingBooleanOperations.SplitContour(debugContour);
     }
 
     protected void Update()

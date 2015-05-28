@@ -5,7 +5,7 @@ using ClipperLib;
 
 public class ClippingBooleanOperations
 {
-    public const double CONVERSION_FLOAT_PRECISION = 1.0E4;
+    public const double CONVERSION_FLOAT_PRECISION = 1.0E7;
 
     public static IntPoint ConvertVector2ToIntPoint(Vector2 point)
     {
@@ -90,36 +90,46 @@ public class ClippingBooleanOperations
             PolyNode polynode = polytree.GetFirst();
             while (polynode != null)
             {
-                Shape shape = new Shape();
-
                 //contour
-                List<Vector2> shapeContour = CreateContourFromPath(polynode.Contour);
-                shape.m_contour = shapeContour;
+                List<List<IntPoint>> splitPaths = SplitPath(polynode.Contour);
 
-                //holes
-                for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
+                for (int iPathIdx = 0; iPathIdx != splitPaths.Count; iPathIdx++)
                 {
-                    PolyNode childHole = polynode.Childs[iChildIdx];
-                    shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
+                    Shape shape = new Shape();
+                    shape.m_contour = CreateContourFromPath(splitPaths[iPathIdx]);
+
+                    //holes
+                    if (splitPaths.Count == 1) //only one shape add all holes to it
+                    {
+                        for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
+                        {
+                            PolyNode childHole = polynode.Childs[iChildIdx];
+                            shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
+                        }
+                    }
+                    else //find the shape each hole is related
+                    {
+
+                    }
+
+                    //Triangulate shape
+                    shape.Triangulate();
+
+                    //Color
+                    Color shapeColor = Color.black;
+                    if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
+                        shapeColor = subjShape.m_color;
+                    else if (clipOperation == ClipType.ctIntersection)
+                        shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
+
+                    shapeColor.a = Shapes.SHAPES_OPACITY;
+                    shape.m_color = shapeColor;
+
+                    shape.PropagateColorToTriangles();
+
+                    //populate the list
+                    resultingShapes.Add(shape);
                 }
-
-                //Triangulate shape
-                shape.Triangulate();
-
-                //Color
-                Color shapeColor = Color.black;
-                if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
-                    shapeColor = subjShape.m_color;
-                else if (clipOperation == ClipType.ctIntersection)
-                    shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
-
-                shapeColor.a = Shapes.SHAPES_OPACITY;
-                shape.m_color = shapeColor;
-
-                shape.PropagateColorToTriangles();
-
-                //populate the list
-                resultingShapes.Add(shape);
 
                 polynode = polynode.GetNext();
             }
@@ -128,62 +138,119 @@ public class ClippingBooleanOperations
         return resultingShapes;
     }
 
-    //public static Shape ShapesUnion(Shape subjShape, Shape clipShape)
-    //{
-    //    //build subjs paths
-    //    List<List<IntPoint> > subjsPaths = new List<List<IntPoint> >();
+    /**
+     * Ensure that the contour has no vertices that repeat.
+     * If at least 2 vertices repeat in that contour, split it into several contours
+     * **/
+    public static List<List<Vector2>> SplitContour(List<Vector2> contour)
+    {
+        List<List<Vector2>> splitContours = new List<List<Vector2>>();
 
-    //    //subj contour
-    //    subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_contour));
+        bool bRepeatedVertices = false;
+        while (contour.Count > 0)
+        {
+            for (int i = 0; i != contour.Count; i++)
+            {
+                bRepeatedVertices = false;
 
-    //    //subj holes
-    //    for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
-    //    {
-    //        subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_holes[iHoleIdx]));
-    //    }
+                Vector2 contourVertex = contour[i];
 
-    //    //build clips paths
-    //    List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
-        
-    //    //clip contour
-    //    clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_contour));
+                int farthestEqualVertexIndex = -1;
+                for (int j = i + 1; j != contour.Count; j++)
+                {
+                    Vector2 contourTestVertex = contour[j]; //the vertex to be test against contourVertex for equality
 
-    //    //clip holes
-    //    for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
-    //    {
-    //        clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_holes[iHoleIdx]));
-    //    }
+                    if (contourTestVertex.Equals(contourVertex))
+                        farthestEqualVertexIndex = j;
+                }
 
-    //    //Add subjs and clips paths to the clipper
-    //    Clipper clipper = new Clipper();
-    //    clipper.AddPaths(subjsPaths, PolyType.ptSubject, true);
-    //    clipper.AddPaths(clipsPaths, PolyType.ptClip, true);
+                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
+                {
+                    bRepeatedVertices = true;
 
-    //    //List<List<IntPoint>> solution = new List<List<IntPoint>>();
-    //    //bool result = clipper.Execute(ClipType.ctUnion, solution, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
-    //    PolyTree polytree = new PolyTree();
-    //    bool result = clipper.Execute(ClipType.ctUnion, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
+                    //extract the first split contour
+                    List<Vector2> splitContour = new List<Vector2>();
+                    splitContour.Capacity = contour.Count - farthestEqualVertexIndex + i;
+                    for (int k = farthestEqualVertexIndex; k != contour.Count; k++)
+                    {
+                        splitContour.Add(contour[k]);
+                    }
+                    for (int k = 0; k != i; k++)
+                    {
+                        splitContour.Add(contour[k]);
+                    }
 
-    //    if (result)
-    //    {
-    //        //Only one child for the PolyTree node, this is the shape resulting from fusion
-    //        PolyNode polynode = polytree.GetFirst();
-    //        Shape shape = new Shape();
+                    splitContours.Add(splitContour);
 
-    //        //contour
-    //        List<Vector2> shapeContour = CreateContourFromPath(polynode.Contour);
-    //        shape.m_contour = shapeContour;
+                    //replace the contour with the sub contour
+                    contour = contour.GetRange(i, farthestEqualVertexIndex - i);
 
-    //        //holes
-    //        for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
-    //        {
-    //            PolyNode childHole = polynode.Childs[iChildIdx];
-    //            shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
-    //        }
+                    break; //break the for loop and continue on the while loop
+                }
+            }
+            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
+            {
+                splitContours.Add(contour);
+                break;
+            }
+        }
 
-    //        return shape;
-    //    }
+        return splitContours;
+    }
 
-    //    return null;
-    //}
+    public static List<List<IntPoint>> SplitPath(List<IntPoint> path)
+    {
+        List<List<IntPoint>> splitPaths = new List<List<IntPoint>>();
+
+        bool bRepeatedVertices = false;
+        while (path.Count > 0)
+        {
+            for (int i = 0; i != path.Count; i++)
+            {
+                bRepeatedVertices = false;
+
+                IntPoint contourVertex = path[i];
+
+                int farthestEqualVertexIndex = -1;
+                for (int j = i + 1; j != path.Count; j++)
+                {
+                    IntPoint contourTestVertex = path[j]; //the vertex to be test against contourVertex for equality
+
+                    if (contourTestVertex.Equals(contourVertex))
+                        farthestEqualVertexIndex = j;
+                }
+
+                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
+                {
+                    bRepeatedVertices = true;
+
+                    //extract the first split contour
+                    List<IntPoint> splitPath = new List<IntPoint>();
+                    splitPath.Capacity = path.Count - farthestEqualVertexIndex + i;
+                    for (int k = farthestEqualVertexIndex; k != path.Count; k++)
+                    {
+                        splitPath.Add(path[k]);
+                    }
+                    for (int k = 0; k != i; k++)
+                    {
+                        splitPath.Add(path[k]);
+                    }
+
+                    splitPaths.Add(splitPath);
+
+                    //replace the contour with the sub contour
+                    path = path.GetRange(i, farthestEqualVertexIndex - i);
+
+                    break; //break the for loop and continue on the while loop
+                }
+            }
+            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
+            {
+                splitPaths.Add(path);
+                break;
+            }
+        }
+
+        return splitPaths;
+    }
 }
