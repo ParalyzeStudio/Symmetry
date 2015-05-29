@@ -17,7 +17,7 @@
 		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+<!-- 		<shape color="1,0,0,1">
 			<contour>
 				<point column="3" line="4"/>
 				<point column="3" line="3"/>
@@ -43,8 +43,21 @@
 				<point column="6" line="1"/>
 				<point column="6" line="2"/>
 				<point column="4" line="2"/>
+			</contour> -->
+			
+<!-- 		<shape color="0,1,0,1">
+			<contour>
+				<point column="4" line="5"/>
+				<point column="2" line="5"/>
+				<point column="2" line="2"/>
+				<point column="6" line="2"/>
+				<point column="6" line="5"/>
+				<point column="4" line="5"/>
+				<point column="5" line="4"/>
+				<point column="4" line="3"/>
+				<point column="3" line="4"/>
 			</contour>
-		</shape>
+		</shape> -->
 	</shapes>
 	<actions>
 		<action tag="SYMMETRY_AXIS_VERTICAL"/>

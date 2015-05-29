@@ -10,17 +10,7 @@ public class ShapeTouchHandler : TouchHandler
         //    return false;
 
         //Get the triangles of this shape from the MeshFilter
-        float triangleCount = GetComponent<ShapeRenderer>().m_shape.m_gridTriangles.Count;
-        Vector3[] vertices = GetComponent<MeshFilter>().mesh.vertices;
-        for (int triangleIndex = 0; triangleIndex != triangleCount; triangleIndex++)
-        {
-            Vector2 trianglePoint1 = vertices[3 * triangleIndex];
-            Vector2 trianglePoint2 = vertices[3 * triangleIndex + 1];
-            Vector2 trianglePoint3 = vertices[3 * triangleIndex + 2];
-            if (GeometryUtils.IsInsideTriangle(pointerLocation, trianglePoint1, trianglePoint2, trianglePoint3))
-                return true;
-        }
-        return false;
+        return GetComponent<ShapeRenderer>().m_shape.ContainsWorldPoint(pointerLocation);
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)

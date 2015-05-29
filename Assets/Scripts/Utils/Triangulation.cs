@@ -7,7 +7,7 @@ public class Triangulation
 {
     public const float EPSILON = 0.0000000001f;
 
-    private static float Area(List<Vector2> contour)
+    public static float Area(List<Vector2> contour)
     {
         int n = contour.Count;
 

@@ -34,8 +34,8 @@ public class Triangulable
     public Triangulable(List<Vector2> contour, List<List<Vector2>> holes)
     {
         m_contour = contour;
+        m_holes = holes;
         m_gridTriangles = new List<GridTriangle>();
-        m_holes = new List<List<Vector2>>();
     }
 
     public Triangulable(Triangulable other)
@@ -189,6 +189,9 @@ public class Triangulable
         }
     }
 
+    /**
+    * Does 'this' polygon contains the specified point in grid coordinates
+    * **/
     public bool ContainsGridPoint(Vector2 gridPoint)
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
@@ -198,6 +201,33 @@ public class Triangulable
         }
 
         return false;
+    }
+
+    /**
+    * Does 'this' polygon contains the specified point in world coordinates
+    * **/
+    public bool ContainsWorldPoint(Vector2 worldPoint)
+    {
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        Vector2 gridPoint = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(worldPoint);
+
+        return ContainsGridPoint(gridPoint);
+    }
+
+    /**
+    * Calculates the barycentre of this polygon
+    * **/
+    public Vector2 GetBarycentre()
+    {
+        Vector2 barycentre = Vector2.zero;
+        for (int i = 0; i != m_contour.Count; i++)
+        {
+            barycentre += m_contour[i];
+        }
+
+        barycentre /= m_contour.Count;
+
+        return barycentre;
     }
 }
 

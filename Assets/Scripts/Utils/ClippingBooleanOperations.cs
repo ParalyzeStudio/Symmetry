@@ -93,42 +93,88 @@ public class ClippingBooleanOperations
                 //contour
                 List<List<IntPoint>> splitPaths = SplitPath(polynode.Contour);
 
-                for (int iPathIdx = 0; iPathIdx != splitPaths.Count; iPathIdx++)
+
+                if (splitPaths.Count == 1) //only one shape add all holes to it
                 {
                     Shape shape = new Shape();
-                    shape.m_contour = CreateContourFromPath(splitPaths[iPathIdx]);
+                    shape.m_contour = CreateContourFromPath(splitPaths[0]);
 
-                    //holes
-                    if (splitPaths.Count == 1) //only one shape add all holes to it
+                    //child of an outer is always a hole, no need to call IsHole on the child
+                    for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
                     {
-                        for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
+                        PolyNode childHole = polynode.Childs[iChildIdx];
+                        shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
+                    }
+                }
+
+                //List<Shape> pendingShapes = new List<List<Vector2>>();
+                List<List<Vector2>> pendingHoles = new List<List<Vector2>>();
+                //Separate shapes from holes from the splitPaths list
+                for (int iPathIdx = 0; iPathIdx != splitPaths.Count; iPathIdx++)
+                {
+                    List<Vector2> splitContour = CreateContourFromPath(splitPaths[iPathIdx]);
+
+                    float contourArea = ContourArea(splitContour);
+
+                    Debug.Log("contourArea:" + contourArea);
+
+                    if (contourArea > 0) //counter-clockwise orientation, it is a shape contour
+                    {
+                        Shape shape = new Shape(splitContour);
+
+                        //Color
+                        Color shapeColor = Color.black;
+                        if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
+                            shapeColor = subjShape.m_color;
+                        else if (clipOperation == ClipType.ctIntersection)
+                            shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
+
+                        shapeColor.a = Shapes.SHAPES_OPACITY;
+                        shape.m_color = shapeColor;
+                        shape.PropagateColorToTriangles();
+                        shape.Triangulate(); //tmp triangulation, we will retriangulate if necessary if holes are added
+
+                        resultingShapes.Add(shape);
+                    }
+                    else //a hole
+                    {
+                        pendingHoles.Add(splitContour);
+                    }
+
+                    //Associated each pending hole to one shape
+                    for (int iPendingHoleIdx = 0; iPendingHoleIdx != pendingHoles.Count; iPendingHoleIdx++)
+                    {
+                        List<Vector2> holeContour = pendingHoles[iPendingHoleIdx];
+                        Vector2 holeBarycentre = ContourBarycentre(holeContour);
+
+                        for (int iResultingShapeIdx = 0; iResultingShapeIdx != resultingShapes.Count; iResultingShapeIdx++)
                         {
-                            PolyNode childHole = polynode.Childs[iChildIdx];
-                            shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
+                            Shape resultingShape = resultingShapes[iResultingShapeIdx];
+                            if (resultingShape.ContainsGridPoint(holeBarycentre))
+                            {
+                                resultingShape.m_holes.Add(holeContour);
+                                resultingShape.Triangulate(); //re-triangulate
+                            }
                         }
                     }
-                    else //find the shape each hole is related
-                    {
 
-                    }
+                    ////Triangulate shape
+                    //shape.Triangulate();
 
-                    //Triangulate shape
-                    shape.Triangulate();
+                    ////Color
+                    //Color shapeColor = Color.black;
+                    //if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
+                    //    shapeColor = subjShape.m_color;
+                    //else if (clipOperation == ClipType.ctIntersection)
+                    //    shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
 
-                    //Color
-                    Color shapeColor = Color.black;
-                    if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
-                        shapeColor = subjShape.m_color;
-                    else if (clipOperation == ClipType.ctIntersection)
-                        shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
+                    //shapeColor.a = Shapes.SHAPES_OPACITY;
+                    //shape.m_color = shapeColor;
 
-                    shapeColor.a = Shapes.SHAPES_OPACITY;
-                    shape.m_color = shapeColor;
+                    //shape.PropagateColorToTriangles();
 
-                    shape.PropagateColorToTriangles();
-
-                    //populate the list
-                    resultingShapes.Add(shape);
+                    ////populate the list
+                    //resultingShapes.Add(shape);
                 }
 
                 polynode = polynode.GetNext();
@@ -252,5 +298,31 @@ public class ClippingBooleanOperations
         }
 
         return splitPaths;
+    }
+
+    public static float ContourArea(List<Vector2> contour)
+    {
+        int n = contour.Count;
+
+        float A = 0.0f;
+
+        for (int p = n - 1, q = 0; q < n; p = q++)
+        {
+            A += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
+        }
+        return A * 0.5f;
+    }
+
+    public static Vector2 ContourBarycentre(List<Vector2> contour)
+    {
+        Vector2 barycentre = Vector2.zero;
+        for (int i = 0; i != contour.Count; i++)
+        {
+            barycentre += contour[i];
+        }
+
+        barycentre /= contour.Count;
+
+        return barycentre;
     }
 }

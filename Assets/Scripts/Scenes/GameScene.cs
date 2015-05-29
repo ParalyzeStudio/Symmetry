@@ -374,6 +374,79 @@ public class GameScene : GUIScene
         //GameObject shapeObject = m_shapes.m_shapesObj[0];
         //Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
         //Shapes.PerformFusionOnShape(fusionShape);
+
+        DebugIssues();
+    }
+
+    public void DebugIssues()
+    {
+        ///DEBUG
+        //List<Vector2> debugContourShape1 = new List<Vector2>();
+
+        //debugContourShape1.Add(new Vector2(2, 4));
+        //debugContourShape1.Add(new Vector2(2, 1));
+        //debugContourShape1.Add(new Vector2(6, 1));
+        //debugContourShape1.Add(new Vector2(6, 4));
+
+        //Shape debugShape1 = new Shape(debugContourShape1);
+
+        //List<Vector2> debugContourShape2 = new List<Vector2>();
+        //debugContourShape2.Add(new Vector2(4, 4));
+        //debugContourShape2.Add(new Vector2(3, 3));
+        //debugContourShape2.Add(new Vector2(4, 2));
+        //debugContourShape2.Add(new Vector2(5, 3));
+        //Shape debugShape2 = new Shape(debugContourShape2);
+
+        //List<Shape> debugResultingShapes = ClippingBooleanOperations.ShapesOperation(debugShape1, debugShape2, ClipperLib.ClipType.ctDifference);
+
+        //for (int i = 0; i != debugResultingShapes.Count; i++)
+        //{
+        //    debugResultingShapes[i].m_color = new Color(1, 0, 0, 0.5f);
+        //    m_shapes.CreateShapeObjectFromData(debugResultingShapes[i]);
+        //}
+
+        /*******************************/
+        List<Vector2> debugContourShape1 = new List<Vector2>();
+
+        //debugContourShape1.Add(new Vector2(4, 4));
+        debugContourShape1.Add(new Vector2(2, 4));
+        debugContourShape1.Add(new Vector2(2, 1));
+        debugContourShape1.Add(new Vector2(6, 1));
+        debugContourShape1.Add(new Vector2(6, 4));
+
+        List<List<Vector2>> debugHoles = new List<List<Vector2>>();
+        List<Vector2> debugHoleShape1 = new List<Vector2>();
+
+        debugHoleShape1.Add(new Vector2(4, 4));
+        debugHoleShape1.Add(new Vector2(5, 3));
+        debugHoleShape1.Add(new Vector2(4, 2));
+        debugHoleShape1.Add(new Vector2(3, 3));
+        debugHoles.Add(debugHoleShape1);
+
+        Shape debugShape1 = new Shape(debugContourShape1, debugHoles);
+        debugShape1.Triangulate();
+        debugShape1.m_color = new Color(1, 0, 0, 0.5f);
+        m_shapes.CreateShapeObjectFromData(debugShape1);
+
+        /*******************************/
+        //Debug.Log(debugResultingShapes.Count);
+
+        //List<Vector2> debugContour = new List<Vector2>();
+        //debugContour.Capacity = 11;
+        //debugContour.Add(new Vector2(1, 2));
+        //debugContour.Add(new Vector2(2, 3));
+        //debugContour.Add(new Vector2(3, 2));
+        //debugContour.Add(new Vector2(4, 3));
+        //debugContour.Add(new Vector2(5, 2));
+        //debugContour.Add(new Vector2(6, 3));
+        //debugContour.Add(new Vector2(7, 2));
+        //debugContour.Add(new Vector2(6, 1));
+        //debugContour.Add(new Vector2(5, 2));
+        //debugContour.Add(new Vector2(4, 1));
+        //debugContour.Add(new Vector2(3, 2));
+        //debugContour.Add(new Vector2(2, 1));
+
+        //List<List<Vector2>> splitContours = ClippingBooleanOperations.SplitContour(debugContour);
     }
 
     /**
