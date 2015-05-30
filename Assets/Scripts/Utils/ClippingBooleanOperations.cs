@@ -17,7 +17,7 @@ public class ClippingBooleanOperations
         return new Vector2(point.X / (float) CONVERSION_FLOAT_PRECISION, point.Y / (float) CONVERSION_FLOAT_PRECISION);
     }
 
-    public static List<IntPoint> CreatePathFromShapeContour(List<Vector2> contour)
+    public static List<IntPoint> CreatePathFromContour(Contour contour)
     {
         List<IntPoint> path = new List<IntPoint>();
         path.Capacity = contour.Count;
@@ -30,13 +30,18 @@ public class ClippingBooleanOperations
         return path;
     }
 
-    public static List<Vector2> CreateContourFromPath(List<IntPoint> path)
+    public static Contour CreateContourFromPath(List<IntPoint> path, bool bScalePoints = true)
     {
-        List<Vector2> contour = new List<Vector2>();
+        Contour contour = new Contour();
         contour.Capacity = path.Count;
         for (int iPathPointIndex = 0; iPathPointIndex != path.Count; iPathPointIndex++)
         {
-            Vector2 contourPoint = ConvertIntPointToVector2(path[iPathPointIndex]);
+            IntPoint pathPoint = path[iPathPointIndex];
+            Vector2 contourPoint;
+            if (bScalePoints)
+                contourPoint = ConvertIntPointToVector2(pathPoint);
+            else
+                contourPoint = new Vector2(pathPoint.X, pathPoint.Y);
             contour.Add(contourPoint);
         }
 
@@ -49,28 +54,28 @@ public class ClippingBooleanOperations
         List<List<IntPoint>> subjsPaths = new List<List<IntPoint>>();
 
         //subj contour
-        List<Vector2> contourWithOffset = subjShape.GetContourWithOffset();
-        subjsPaths.Add(CreatePathFromShapeContour(contourWithOffset));
+        Contour contourWithOffset = subjShape.GetContourWithOffset();
+        subjsPaths.Add(CreatePathFromContour(contourWithOffset));
 
         //subj holes
         for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
         {
-            subjsPaths.Add(CreatePathFromShapeContour(subjShape.m_holes[iHoleIdx]));
+            subjsPaths.Add(CreatePathFromContour(subjShape.m_holes[iHoleIdx]));
         }
 
-        List<List<Vector2>> holesWithOffset = subjShape.GetHolesWithOffset();
+        List<Contour> holesWithOffset = subjShape.GetHolesWithOffset();
 
         //build clips paths
         List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
 
         //clip contour
         contourWithOffset = clipShape.GetContourWithOffset();
-        clipsPaths.Add(CreatePathFromShapeContour(contourWithOffset));
+        clipsPaths.Add(CreatePathFromContour(contourWithOffset));
 
         //clip holes
         for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
         {
-            clipsPaths.Add(CreatePathFromShapeContour(clipShape.m_holes[iHoleIdx]));
+            clipsPaths.Add(CreatePathFromContour(clipShape.m_holes[iHoleIdx]));
         }
 
         //Add subjs and clips paths to the clipper
@@ -91,13 +96,21 @@ public class ClippingBooleanOperations
             while (polynode != null)
             {
                 //contour
-                List<List<IntPoint>> splitPaths = SplitPath(polynode.Contour);
+                Contour polynodeContour = CreateContourFromPath(polynode.Contour, false);
+                List<Contour> splitContours = polynodeContour.Split();
 
+                //eliminate repeated points and down scale them
+                for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
+                {
+                    Contour splitContour = splitContours[iContourIdx];
+                    splitContour.RemoveAlignedVertices();
+                    splitContour.ScalePoints(1 / (float)CONVERSION_FLOAT_PRECISION);
+                }
 
-                if (splitPaths.Count == 1) //only one shape add all holes to it
+                if (splitContours.Count == 1) //only one shape add all holes to it
                 {
                     Shape shape = new Shape();
-                    shape.m_contour = CreateContourFromPath(splitPaths[0]);
+                    shape.m_contour = splitContours[0];
 
                     //child of an outer is always a hole, no need to call IsHole on the child
                     for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
@@ -107,16 +120,13 @@ public class ClippingBooleanOperations
                     }
                 }
 
-                //List<Shape> pendingShapes = new List<List<Vector2>>();
-                List<List<Vector2>> pendingHoles = new List<List<Vector2>>();
+                List<Contour> pendingHoles = new List<Contour>();
                 //Separate shapes from holes from the splitPaths list
-                for (int iPathIdx = 0; iPathIdx != splitPaths.Count; iPathIdx++)
+                for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
                 {
-                    List<Vector2> splitContour = CreateContourFromPath(splitPaths[iPathIdx]);
+                    Contour splitContour = splitContours[iContourIdx];
 
-                    float contourArea = ContourArea(splitContour);
-
-                    Debug.Log("contourArea:" + contourArea);
+                    float contourArea = splitContour.GetArea();
 
                     if (contourArea > 0) //counter-clockwise orientation, it is a shape contour
                     {
@@ -144,8 +154,8 @@ public class ClippingBooleanOperations
                     //Associated each pending hole to one shape
                     for (int iPendingHoleIdx = 0; iPendingHoleIdx != pendingHoles.Count; iPendingHoleIdx++)
                     {
-                        List<Vector2> holeContour = pendingHoles[iPendingHoleIdx];
-                        Vector2 holeBarycentre = ContourBarycentre(holeContour);
+                        Contour holeContour = pendingHoles[iPendingHoleIdx];
+                        Vector2 holeBarycentre = holeContour.GetBarycentre();
 
                         for (int iResultingShapeIdx = 0; iResultingShapeIdx != resultingShapes.Count; iResultingShapeIdx++)
                         {
@@ -157,24 +167,6 @@ public class ClippingBooleanOperations
                             }
                         }
                     }
-
-                    ////Triangulate shape
-                    //shape.Triangulate();
-
-                    ////Color
-                    //Color shapeColor = Color.black;
-                    //if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
-                    //    shapeColor = subjShape.m_color;
-                    //else if (clipOperation == ClipType.ctIntersection)
-                    //    shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
-
-                    //shapeColor.a = Shapes.SHAPES_OPACITY;
-                    //shape.m_color = shapeColor;
-
-                    //shape.PropagateColorToTriangles();
-
-                    ////populate the list
-                    //resultingShapes.Add(shape);
                 }
 
                 polynode = polynode.GetNext();
@@ -184,145 +176,87 @@ public class ClippingBooleanOperations
         return resultingShapes;
     }
 
-    /**
-     * Ensure that the contour has no vertices that repeat.
-     * If at least 2 vertices repeat in that contour, split it into several contours
-     * **/
-    public static List<List<Vector2>> SplitContour(List<Vector2> contour)
-    {
-        List<List<Vector2>> splitContours = new List<List<Vector2>>();
+    
 
-        bool bRepeatedVertices = false;
-        while (contour.Count > 0)
-        {
-            for (int i = 0; i != contour.Count; i++)
-            {
-                bRepeatedVertices = false;
+    //public static List<List<IntPoint>> SplitPath(List<IntPoint> path)
+    //{
+    //    List<List<IntPoint>> splitPaths = new List<List<IntPoint>>();
 
-                Vector2 contourVertex = contour[i];
+    //    bool bRepeatedVertices = false;
+    //    while (path.Count > 0)
+    //    {
+    //        for (int i = 0; i != path.Count; i++)
+    //        {
+    //            bRepeatedVertices = false;
 
-                int farthestEqualVertexIndex = -1;
-                for (int j = i + 1; j != contour.Count; j++)
-                {
-                    Vector2 contourTestVertex = contour[j]; //the vertex to be test against contourVertex for equality
+    //            IntPoint contourVertex = path[i];
 
-                    if (contourTestVertex.Equals(contourVertex))
-                        farthestEqualVertexIndex = j;
-                }
+    //            int farthestEqualVertexIndex = -1;
+    //            for (int j = i + 1; j != path.Count; j++)
+    //            {
+    //                IntPoint contourTestVertex = path[j]; //the vertex to be test against contourVertex for equality
 
-                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
-                {
-                    bRepeatedVertices = true;
+    //                if (contourTestVertex.Equals(contourVertex))
+    //                    farthestEqualVertexIndex = j;
+    //            }
 
-                    //extract the first split contour
-                    List<Vector2> splitContour = new List<Vector2>();
-                    splitContour.Capacity = contour.Count - farthestEqualVertexIndex + i;
-                    for (int k = farthestEqualVertexIndex; k != contour.Count; k++)
-                    {
-                        splitContour.Add(contour[k]);
-                    }
-                    for (int k = 0; k != i; k++)
-                    {
-                        splitContour.Add(contour[k]);
-                    }
+    //            if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
+    //            {
+    //                bRepeatedVertices = true;
 
-                    splitContours.Add(splitContour);
+    //                //extract the first split contour
+    //                List<IntPoint> splitPath = new List<IntPoint>();
+    //                splitPath.Capacity = path.Count - farthestEqualVertexIndex + i;
+    //                for (int k = farthestEqualVertexIndex; k != path.Count; k++)
+    //                {
+    //                    splitPath.Add(path[k]);
+    //                }
+    //                for (int k = 0; k != i; k++)
+    //                {
+    //                    splitPath.Add(path[k]);
+    //                }
 
-                    //replace the contour with the sub contour
-                    contour = contour.GetRange(i, farthestEqualVertexIndex - i);
+    //                splitPaths.Add(splitPath);
 
-                    break; //break the for loop and continue on the while loop
-                }
-            }
-            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
-            {
-                splitContours.Add(contour);
-                break;
-            }
-        }
+    //                //replace the contour with the sub contour
+    //                path = path.GetRange(i, farthestEqualVertexIndex - i);
 
-        return splitContours;
-    }
+    //                break; //break the for loop and continue on the while loop
+    //            }
+    //        }
+    //        if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
+    //        {
+    //            splitPaths.Add(path);
+    //            break;
+    //        }
+    //    }
 
-    public static List<List<IntPoint>> SplitPath(List<IntPoint> path)
-    {
-        List<List<IntPoint>> splitPaths = new List<List<IntPoint>>();
+    //    return splitPaths;
+    //}
 
-        bool bRepeatedVertices = false;
-        while (path.Count > 0)
-        {
-            for (int i = 0; i != path.Count; i++)
-            {
-                bRepeatedVertices = false;
+    //public static float ContourArea(Contour contour)
+    //{
+    //    int n = contour.Count;
 
-                IntPoint contourVertex = path[i];
+    //    float A = 0.0f;
 
-                int farthestEqualVertexIndex = -1;
-                for (int j = i + 1; j != path.Count; j++)
-                {
-                    IntPoint contourTestVertex = path[j]; //the vertex to be test against contourVertex for equality
+    //    for (int p = n - 1, q = 0; q < n; p = q++)
+    //    {
+    //        A += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
+    //    }
+    //    return A * 0.5f;
+    //}
 
-                    if (contourTestVertex.Equals(contourVertex))
-                        farthestEqualVertexIndex = j;
-                }
+    //public static Vector2 ContourBarycentre(Contour contour)
+    //{
+    //    Vector2 barycentre = Vector2.zero;
+    //    for (int i = 0; i != contour.Count; i++)
+    //    {
+    //        barycentre += contour[i];
+    //    }
 
-                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
-                {
-                    bRepeatedVertices = true;
+    //    barycentre /= contour.Count;
 
-                    //extract the first split contour
-                    List<IntPoint> splitPath = new List<IntPoint>();
-                    splitPath.Capacity = path.Count - farthestEqualVertexIndex + i;
-                    for (int k = farthestEqualVertexIndex; k != path.Count; k++)
-                    {
-                        splitPath.Add(path[k]);
-                    }
-                    for (int k = 0; k != i; k++)
-                    {
-                        splitPath.Add(path[k]);
-                    }
-
-                    splitPaths.Add(splitPath);
-
-                    //replace the contour with the sub contour
-                    path = path.GetRange(i, farthestEqualVertexIndex - i);
-
-                    break; //break the for loop and continue on the while loop
-                }
-            }
-            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
-            {
-                splitPaths.Add(path);
-                break;
-            }
-        }
-
-        return splitPaths;
-    }
-
-    public static float ContourArea(List<Vector2> contour)
-    {
-        int n = contour.Count;
-
-        float A = 0.0f;
-
-        for (int p = n - 1, q = 0; q < n; p = q++)
-        {
-            A += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
-        }
-        return A * 0.5f;
-    }
-
-    public static Vector2 ContourBarycentre(List<Vector2> contour)
-    {
-        Vector2 barycentre = Vector2.zero;
-        for (int i = 0; i != contour.Count; i++)
-        {
-            barycentre += contour[i];
-        }
-
-        barycentre /= contour.Count;
-
-        return barycentre;
-    }
+    //    return barycentre;
+    //}
 }

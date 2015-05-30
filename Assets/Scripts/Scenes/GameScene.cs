@@ -381,7 +381,7 @@ public class GameScene : GUIScene
     public void DebugIssues()
     {
         ///DEBUG
-        //List<Vector2> debugContourShape1 = new List<Vector2>();
+        //Contour debugContourShape1 = new Contour();
 
         //debugContourShape1.Add(new Vector2(2, 4));
         //debugContourShape1.Add(new Vector2(2, 1));
@@ -390,7 +390,7 @@ public class GameScene : GUIScene
 
         //Shape debugShape1 = new Shape(debugContourShape1);
 
-        //List<Vector2> debugContourShape2 = new List<Vector2>();
+        //Contour debugContourShape2 = new Contour();
         //debugContourShape2.Add(new Vector2(4, 4));
         //debugContourShape2.Add(new Vector2(3, 3));
         //debugContourShape2.Add(new Vector2(4, 2));
@@ -406,32 +406,34 @@ public class GameScene : GUIScene
         //}
 
         /*******************************/
-        List<Vector2> debugContourShape1 = new List<Vector2>();
+        //Contour debugContourShape1 = new Contour();
 
         //debugContourShape1.Add(new Vector2(4, 4));
-        debugContourShape1.Add(new Vector2(2, 4));
-        debugContourShape1.Add(new Vector2(2, 1));
-        debugContourShape1.Add(new Vector2(6, 1));
-        debugContourShape1.Add(new Vector2(6, 4));
+        //debugContourShape1.Add(new Vector2(2, 4));
+        //debugContourShape1.Add(new Vector2(2, 1));
+        //debugContourShape1.Add(new Vector2(6, 1));
+        //debugContourShape1.Add(new Vector2(6, 4));
 
-        List<List<Vector2>> debugHoles = new List<List<Vector2>>();
-        List<Vector2> debugHoleShape1 = new List<Vector2>();
+        //debugContourShape1.RemoveAlignedVertices();
 
-        debugHoleShape1.Add(new Vector2(4, 4));
-        debugHoleShape1.Add(new Vector2(5, 3));
-        debugHoleShape1.Add(new Vector2(4, 2));
-        debugHoleShape1.Add(new Vector2(3, 3));
-        debugHoles.Add(debugHoleShape1);
+        //List<Contour> debugHoles = new List<Contour>();
+        //Contour debugHoleShape1 = new Contour();
 
-        Shape debugShape1 = new Shape(debugContourShape1, debugHoles);
-        debugShape1.Triangulate();
-        debugShape1.m_color = new Color(1, 0, 0, 0.5f);
-        m_shapes.CreateShapeObjectFromData(debugShape1);
+        //debugHoleShape1.Add(new Vector2(4, 4));
+        //debugHoleShape1.Add(new Vector2(5, 3));
+        //debugHoleShape1.Add(new Vector2(4, 2));
+        //debugHoleShape1.Add(new Vector2(3, 3));
+        //debugHoles.Add(debugHoleShape1);
+
+        //Shape debugShape1 = new Shape(debugContourShape1, debugHoles);
+        //debugShape1.Triangulate();
+        //debugShape1.m_color = new Color(1, 0, 0, 0.5f);
+        //m_shapes.CreateShapeObjectFromData(debugShape1);
 
         /*******************************/
         //Debug.Log(debugResultingShapes.Count);
 
-        //List<Vector2> debugContour = new List<Vector2>();
+        //Contour debugContour = new Contour();
         //debugContour.Capacity = 11;
         //debugContour.Add(new Vector2(1, 2));
         //debugContour.Add(new Vector2(2, 3));
@@ -446,7 +448,7 @@ public class GameScene : GUIScene
         //debugContour.Add(new Vector2(3, 2));
         //debugContour.Add(new Vector2(2, 1));
 
-        //List<List<Vector2>> splitContours = ClippingBooleanOperations.SplitContour(debugContour);
+        //List<Contour> splitContours = ClippingBooleanOperations.SplitContour(debugContour);
     }
 
     /**

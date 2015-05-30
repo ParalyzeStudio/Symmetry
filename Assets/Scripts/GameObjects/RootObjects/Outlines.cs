@@ -29,7 +29,7 @@ public class Outlines : MonoBehaviour
             GameObject outlineObject = new GameObject("Outline");
 
             //Draw the contour
-            List<Vector2> contourPoints = clonedOutline.m_contour;
+            Contour contourPoints = clonedOutline.m_contour;
             for (int iPointIndex = 0; iPointIndex != contourPoints.Count; iPointIndex++)
             {
                 Vector2 gridPointA = contourPoints[iPointIndex];
@@ -42,10 +42,10 @@ public class Outlines : MonoBehaviour
             }
 
             //Draw holes
-            List<List<Vector2>> holes = clonedOutline.m_holes;
+            List<Contour> holes = clonedOutline.m_holes;
             for (int iHoleIdx = 0; iHoleIdx != holes.Count; iHoleIdx++)
             {
-                List<Vector2> holePoints = holes[iHoleIdx];
+                Contour holePoints = holes[iHoleIdx];
                 for (int iHolePointIdx = 0; iHolePointIdx != holePoints.Count; iHolePointIdx++)
                 {
                     Vector2 holeGridPointA = holePoints[iHolePointIdx];

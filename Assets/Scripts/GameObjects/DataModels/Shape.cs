@@ -13,12 +13,13 @@ public class Shape : Triangulable
         m_gridOffsetOnVertices = Vector2.zero;
     }
 
-    public Shape(List<Vector2> contour) : base(contour)
+    public Shape(Contour contour)
+        : base(contour)
     {
         
     }
 
-    public Shape(List<Vector2> contour, List<List<Vector2>> holes)
+    public Shape(Contour contour, List<Contour> holes)
         : base(contour, holes)
     {
         
@@ -34,6 +35,8 @@ public class Shape : Triangulable
 
     public override void Triangulate()
     {
+        m_gridTriangles.Clear(); //clear any previous triangles from a previous triangulation
+
         Vector2[] triangles = Triangulation.P2tTriangulate(this);
 
         for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
@@ -262,12 +265,12 @@ public class Shape : Triangulable
         return false;
     }
 
-    public List<Vector2> GetContourWithOffset()
+    public Contour GetContourWithOffset()
     {
         if (m_gridOffsetOnVertices == Vector2.zero)
             return m_contour;
 
-        List<Vector2> contourWithOffset = new List<Vector2>(m_contour);
+        Contour contourWithOffset = new Contour(m_contour);
         for (int i = 0; i != contourWithOffset.Count; i++)
         {
             contourWithOffset[i] += m_gridOffsetOnVertices;
@@ -276,16 +279,16 @@ public class Shape : Triangulable
         return contourWithOffset;
     }
 
-    public List<List<Vector2>> GetHolesWithOffset()
+    public List<Contour> GetHolesWithOffset()
     {
         if (m_gridOffsetOnVertices == Vector2.zero)
             return m_holes;
 
-        List<List<Vector2>> holesWithOffset = new List<List<Vector2>>(m_holes);
+        List<Contour> holesWithOffset = new List<Contour>(m_holes);
 
         for (int i = 0; i != m_holes.Count; i++)
         {
-            List<Vector2> holesVec = m_holes[i];
+            Contour holesVec = m_holes[i];
             for (int j = 0; j != holesVec.Count; j++)
             {
                 holesVec[j] += m_gridOffsetOnVertices;

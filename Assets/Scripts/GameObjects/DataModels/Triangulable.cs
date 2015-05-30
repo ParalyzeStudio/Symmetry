@@ -4,34 +4,34 @@ using System.Collections.Generic;
 public class Triangulable
 {
     public List<GridTriangle> m_gridTriangles { get; set; }
-    public List<Vector2> m_contour { get; set; } //the points surrounding the triangulable shape
-    public List<List<Vector2>> m_holes { get; set; } //the holes inside the triangulable shape
+    public Contour m_contour { get; set; } //the points surrounding the triangulable shape
+    public List<Contour> m_holes { get; set; } //the holes inside the triangulable shape
     public float m_area { get;set; }
 
     public Triangulable()
     {
         m_gridTriangles = new List<GridTriangle>();
-        m_contour = new List<Vector2>();
-        m_holes = new List<List<Vector2>>();
+        m_contour = new Contour();
+        m_holes = new List<Contour>();
     }
 
-    public Triangulable(List<Vector2> contour)
+    public Triangulable(Contour contour)
     {
         m_contour = contour;
         m_gridTriangles = new List<GridTriangle>();
-        m_holes = new List<List<Vector2>>();
+        m_holes = new List<Contour>();
     }
 
     public Triangulable(Vector2[] contour)
     {
-        m_contour = new List<Vector2>();
+        m_contour = new Contour();
         m_contour.Capacity = contour.Length;
         m_contour.AddRange(contour);
         m_gridTriangles = new List<GridTriangle>();
-        m_holes = new List<List<Vector2>>();
+        m_holes = new List<Contour>();
     }
 
-    public Triangulable(List<Vector2> contour, List<List<Vector2>> holes)
+    public Triangulable(Contour contour, List<Contour> holes)
     {
         m_contour = contour;
         m_holes = holes;
@@ -49,16 +49,16 @@ public class Triangulable
         }
 
         //deep copy contour
-        m_contour = new List<Vector2>();
+        m_contour = new Contour();
         m_contour.Capacity = other.m_contour.Count;
         m_contour.AddRange(other.m_contour); //Vector2 is a value type so no need to clone them deeply
 
         //deep copy holes
-        m_holes = new List<List<Vector2>>();
+        m_holes = new List<Contour>();
         m_holes.Capacity = other.m_holes.Count;
         for (int i = 0; i != other.m_holes.Count; i++)
         {
-            List<Vector2> holesVec = new List<Vector2>();
+            Contour holesVec = new Contour();
             holesVec.Capacity = other.m_holes[i].Count;
             holesVec.AddRange(other.m_holes[i]); //Vector2 is a value type so no need to clone them deeply
             m_holes.Add(holesVec);

@@ -43,7 +43,7 @@ public class GridTriangle
     **/
     public bool IntersectsContour(DottedOutline contour)
     {
-        List<Vector2> contourPoints = contour.m_contour;
+        Contour contourPoints = contour.m_contour;
         for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
         {
             Vector2 contourSegmentPoint1 = contourPoints[iContourPointIndex];

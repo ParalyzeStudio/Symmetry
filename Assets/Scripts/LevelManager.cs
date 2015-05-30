@@ -126,7 +126,7 @@ public class LevelManager : MonoBehaviour
             {
                 foreach (XMLNode holeNode in holesNodeList)
                 {
-                    List<Vector2> holePoints = new List<Vector2>();
+                    Contour holePoints = new Contour();
                     XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
                     holePoints.Capacity = holePointsNodeList.Count;
 
@@ -187,7 +187,7 @@ public class LevelManager : MonoBehaviour
                 {
                     foreach (XMLNode holeNode in holesNodeList)
                     {
-                        List<Vector2> holePoints = new List<Vector2>();
+                        Contour holePoints = new Contour();
                         XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
                         holePoints.Capacity = holePointsNodeList.Count;
 
