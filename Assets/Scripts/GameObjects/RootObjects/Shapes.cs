@@ -10,7 +10,7 @@ public class Shapes : MonoBehaviour
     public List<GameObject> m_shapesObjects { get; set; } //list of children shapes
     public List<PositionColorMaterial> m_materials { get; set; }
 
-    public GameObject m_translatedShapeObject; //the shape that is being translated by the user if applicable
+    public GameObject m_mainOverlappingShapeObject; //the subject shape on which the clipping operations are performed on
     public List<GameObject> m_substitutionShapeObjects; //the list of shapes that will replace the actual shapes that are overlapping
     public List<GameObject> m_overlappingShapeObjects; //the list shape objects that are currently overlapping and needs to be masked
 
@@ -20,7 +20,7 @@ public class Shapes : MonoBehaviour
     {
         m_shapesObjects = new List<GameObject>();
         m_materials = new List<PositionColorMaterial>();
-        m_translatedShapeObject = null;
+        m_mainOverlappingShapeObject = null;
         m_substitutionShapeObjects = new List<GameObject>();
         m_overlappingShapeObjects = new List<GameObject>();
         m_overlappingShapeObjects.Capacity = 16;
@@ -235,16 +235,16 @@ public class Shapes : MonoBehaviour
         {
             GameObject shapeObject = m_shapesObjects[iShapeIdx];
 
-            Shape translatedShape = m_translatedShapeObject.GetComponent<ShapeRenderer>().m_shape;
+            Shape translatedShape = m_mainOverlappingShapeObject.GetComponent<ShapeRenderer>().m_shape;
             Shape shape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
 
-            if (shapeObject == m_translatedShapeObject)
+            if (shapeObject == m_mainOverlappingShapeObject)
                 continue;
             else
             {
                 if (translatedShape.OverlapsShape(shape))
                 {
-                    AddOverlappingShapeObject(m_translatedShapeObject);
+                    AddOverlappingShapeObject(m_mainOverlappingShapeObject);
                     AddOverlappingShapeObject(shapeObject);
 
                     //Compute intersection shapes
@@ -295,7 +295,7 @@ public class Shapes : MonoBehaviour
     }
 
     /**
-     * 
+     * Set opacity to 0 if shape object is an overlapping object, otherwise set to SHAPES_OPACITY 
      * **/
     public void InvalidateOpacityOnShapeObjects()
     {
@@ -305,5 +305,38 @@ public class Shapes : MonoBehaviour
             ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
             shapeAnimator.SetOpacity(IsOverlappingShapeObject(shapeObject) ? 0 : SHAPES_OPACITY);
         }
+    }
+
+    /**
+     * Call this when clipping operations are performed on a target shape object
+     * **/
+    public void InitClippingOperationsOnShapeObject(GameObject shapeObject)
+    {
+        m_mainOverlappingShapeObject = shapeObject;
+    }
+
+    /**
+     * Call this when clipping operations are done (for instance player ended translating shape or symmetry has been done)
+     * **/
+    public void FinalizeClippingOperations()
+    {
+        //Transfer substitution shape objects to normal shape objects list
+        for (int i = 0; i != m_substitutionShapeObjects.Count; i++)
+        {
+            m_shapesObjects.Add(m_substitutionShapeObjects[i]);
+        }
+
+        //clean up the list of substition shape objects
+        ClearSubstitutionShapeObjects();
+
+        //clean up the list of overlapping shape objects and remove them from the normal shape objects list too
+        for (int i = 0; i != m_overlappingShapeObjects.Count; i++)
+        {
+            m_shapesObjects.Remove(m_overlappingShapeObjects[i]);
+        }
+        ClearOverlappingShapeObjects(true);
+
+        //Set the translated shape object to null
+        m_mainOverlappingShapeObject = null;
     }
 }

@@ -58,14 +58,15 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.CalculateArea();
                     shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
+                    gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
+                    gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+                    gameScene.m_shapes.FinalizeClippingOperations();
                     //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                     //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
                     //shapeObjectAnimator.SetRotationAxis(axisDirection);
                     //shapeObjectAnimator.SetRotationAngle(90);
                     //shapeObjectAnimator.RotateTo(0, 5.0f);
                 }
-                else
-                    Debug.Log("LEFT reflectedTriangles are NULL");
             }
         }
 
@@ -83,14 +84,15 @@ public class Symmetrizer : MonoBehaviour
                     shapeData.CalculateArea();
                     shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
                     GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
+                    gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
+                    gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+                    gameScene.m_shapes.FinalizeClippingOperations();
                     //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
                     //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
                     //shapeObjectAnimator.SetRotationAxis(axisDirection);
                     //shapeObjectAnimator.SetRotationAngle(-90);
                     //shapeObjectAnimator.RotateTo(0, 5.0f);
                 }
-                else
-                    Debug.Log("RIGHT reflectedTriangles are NULL");
             }
         }
 

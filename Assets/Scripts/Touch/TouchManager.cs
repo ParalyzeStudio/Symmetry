@@ -31,9 +31,7 @@ public class TouchManager : MonoBehaviour
     }
 
     /**
-     * Handles the touches/click on nodes to drag them properly or on scene to slide it
-     * -1 touch: drag a node or slide the scene
-     * -2 touches: zoom in/out the scene
+     * Update function to handle touches/clicks
      * **/
     void Update()
     {
@@ -125,16 +123,16 @@ public class TouchManager : MonoBehaviour
                     GameScene gameScene = (GameScene)sceneManager.m_currentScene;
 
                     ////try to process the event on the grid itself
-                    //GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
-                    //gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                    GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
+                    gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
 
                     //or the shapes
-                    List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
-                    for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
-                    {
-                        ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
-                        shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
-                    }
+                    //List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
+                    //for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
+                    //{
+                    //    ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
+                    //    shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                    //}
                 }
             }
         }
