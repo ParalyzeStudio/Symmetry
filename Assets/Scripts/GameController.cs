@@ -9,9 +9,11 @@ public class GameController : MonoBehaviour
 
     public Vector2 m_designScreenSize; //the design screen size that can be set in the inspector
 
-    public bool m_finishingLevelVictory;
-    public float m_finishLevelVictoryElapsedTime;
-    public float m_finishLevelVictoryDelay;
+    public bool m_finishingLevelVictory { get; set; }
+    public float m_finishLevelVictoryElapsedTime { get; set; }
+    public float m_finishLevelVictoryDelay { get; set; }
+
+    public Material m_debugMaterial;
 
     public enum GameStatus
     {
@@ -32,6 +34,48 @@ public class GameController : MonoBehaviour
         //set correct size for background
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
         backgroundObject.GetComponent<BackgroundAdaptativeSize>().InvalidateSize();
+        
+        //debug gui
+        GameObject guiObject = GameObject.FindGameObjectWithTag("GUIManager");
+        BackgroundTrianglesRenderer trianglesRenderer = guiObject.GetComponentInChildren<BackgroundTrianglesRenderer>();
+        trianglesRenderer.Init();
+
+        //////DEBUG
+        //GameObject debugObject = new GameObject();
+        //debugObject.name = "DEBUGOBJECT";
+        //MeshFilter meshFilter = debugObject.AddComponent<MeshFilter>();
+        //MeshRenderer meshRenderer = debugObject.AddComponent<MeshRenderer>();
+
+        //Mesh mesh = new Mesh();
+        //mesh.name = "DebugMesh";
+        //Vector3[] vertices = new Vector3[3];
+        ////vertices[0] = new Vector3(-864, -640, 0);
+        ////vertices[1] = new Vector3(-960, -695, 0);
+        ////vertices[2] = new Vector3(-960, -585, 0);
+        //vertices[0] = new Vector3(-960, -585, 0);
+        //vertices[1] = new Vector3(-864, -529, 0);
+        //vertices[2] = new Vector3(-864, -640, 0);
+
+        //Color[] colors = new Color[3];
+        //colors[0] = Color.cyan;
+        //colors[1] = Color.cyan;
+        //colors[2] = Color.cyan;
+
+        //int[] triangles = new int[3];
+        //triangles[0] = 0;
+        //triangles[1] = 1;
+        //triangles[2] = 2;
+
+        //mesh.vertices = vertices;
+        //mesh.colors = colors;
+        //mesh.triangles = triangles;
+
+        //meshFilter.sharedMesh = mesh;
+
+        //Material clonedMaterial = (Material)Instantiate(m_debugMaterial);
+        //meshRenderer.sharedMaterial = clonedMaterial;
+
+        ////DEBUG
 
         //parse xml levels files
         m_levelManager.ParseAllLevels();

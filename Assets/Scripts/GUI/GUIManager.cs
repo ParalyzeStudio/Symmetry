@@ -157,6 +157,8 @@ public class GUIManager : MonoBehaviour
      * **/
     public void AnimateFrames(SceneManager.DisplayContent contentToDisplay, float fDelay = 0.0f)
     {
+        return; //disable
+
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
         GUIFrameAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GUIFrameAnimator>();
         GUIFrameAnimator topFrameAnimator = framesAnimators[0];

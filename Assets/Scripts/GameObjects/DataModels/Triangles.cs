@@ -18,24 +18,37 @@ public class TriangleEdge
     }
 }
 
-/**
- * Class that holds data for a triangle in grid coordinates (column, line)
- * **/
-public class GridTriangle
+public class BaseTriangle
 {
     public Vector2[] m_points { get; set; }
 
-    public GridTriangle()
+    public BaseTriangle()
     {
         m_points = new Vector2[3];
     }
 
-    public GridTriangle(GridTriangle other) : base()
+    public BaseTriangle(BaseTriangle other) : base()
     {
         for (int i = 0; i != 3; i++)
         {
             m_points[i] = other.m_points[i];
         }
+    }
+}
+
+/**
+ * Class that holds data for a triangle in grid coordinates (column, line)
+ * **/
+public class GridTriangle : BaseTriangle
+{
+    public GridTriangle() : base()
+    {
+        
+    }
+
+    public GridTriangle(GridTriangle other) : base(other)
+    {
+        
     }
 
     /**
@@ -394,5 +407,72 @@ public class ShapeTriangle : GridTriangle
                 splitTriangles[2].m_points[2] = intersections[1];
             }
         }
+    }
+}
+
+/**
+ * Triangle used for drawing fancy backgrounds
+ * **/
+public class BackgroundTriangle : BaseTriangle
+{
+    public Color m_color { get; set; } //the color of this triangles (the 3 vertices share the same color)
+    public int m_indexInColumn { get; set; }
+
+    /**
+     * Build an equilateral triangle with the given orientation passed through the angle variable
+     * position
+     * **/
+    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color) : base()
+    {
+        float H = Mathf.Sqrt(3) / 2 * edgeLength;
+
+        Vector2 bisector0 = new Vector2(1, 0); //angle 0
+        Vector2 bisector1 = new Vector2(-0.5f, -Mathf.Sqrt(3) / 2); //angle -2 * PI / 3
+        Vector2 bisector2 = new Vector2(-0.5f, Mathf.Sqrt(3) / 2); //angle 2 * PI / 3
+
+        m_points[0] = 2 / 3.0f * H * bisector0;
+        m_points[1] = 2 / 3.0f * H * bisector1;
+        m_points[2] = 2 / 3.0f * H * bisector2;
+
+        if (angle != 0)
+        {
+            for (int i = 0; i != 3; i++)
+            {
+                m_points[i] = Quaternion.AngleAxis(angle, Vector3.forward) * m_points[i];
+            }
+        }
+
+        //Switch to global position
+        for (int i = 0; i != 3; i++)
+        {
+            m_points[i] += position;
+        }
+
+        m_color = color;
+    }
+
+    public void InsertInMeshAtIndex(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, int index)
+    {
+        //vertices
+        vertices[index] = m_points[0];
+        vertices[index + 1] = m_points[1];
+        vertices[index + 2] = m_points[2];
+
+        //indices
+        triangles[index] = index;
+        triangles[index + 1] = index + 1;
+        triangles[index + 2] = index + 2;
+
+        //colors
+        colors[index] = m_color;
+        colors[index + 1] = m_color;
+        colors[index + 2] = m_color;
+
+        ////normals
+        //Vector3[] normals = mesh.normals;
+        //normals[index] = Vector3.forward;
+        //normals[index + 1] = Vector3.forward;
+        //normals[index + 2] = Vector3.forward;
+        //mesh.normals = normals;
     }
 }
