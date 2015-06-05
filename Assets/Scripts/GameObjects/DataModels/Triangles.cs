@@ -27,7 +27,7 @@ public class BaseTriangle
         m_points = new Vector2[3];
     }
 
-    public BaseTriangle(BaseTriangle other) : base()
+    public BaseTriangle(BaseTriangle other) : this()
     {
         for (int i = 0; i != 3; i++)
         {
@@ -415,8 +415,27 @@ public class ShapeTriangle : GridTriangle
  * **/
 public class BackgroundTriangle : BaseTriangle
 {
-    public Color m_color { get; set; } //the color of this triangles (the 3 vertices share the same color)
+    public Color m_color { get; set; } //the color of this triangle (the 3 vertices share the same color)
     public int m_indexInColumn { get; set; }
+    public BackgroundTriangleColumn m_parentColumn { get; set; }
+    public Mesh m_parentMesh { get; set; }
+
+    //Variables to handle this triangle as a column leader
+    public bool m_leader { get; set; }
+    public int m_leaderStopIndex { get; set; }
+    public Color m_leaderTargetColor { get; set; } //the color the triangles behind their leader have to reach
+
+    public BackgroundTriangle(BackgroundTriangle other) : base(other)
+    {
+        m_color = other.m_color;
+        m_indexInColumn = other.m_indexInColumn;
+        m_parentColumn = other.m_parentColumn;
+        m_parentMesh = other.m_parentMesh;
+
+        m_leader = other.m_leader;
+        m_leaderStopIndex = other.m_leaderStopIndex;
+        m_leaderTargetColor = other.m_leaderTargetColor;
+    }
 
     /**
      * Build an equilateral triangle with the given orientation passed through the angle variable
@@ -451,28 +470,48 @@ public class BackgroundTriangle : BaseTriangle
         m_color = color;
     }
 
-    public void InsertInMeshAtIndex(ref Vector3[] vertices, ref int[] triangles, ref Color[] colors, int index)
+    public void UpdateMeshData()
     {
-        //vertices
-        vertices[index] = m_points[0];
-        vertices[index + 1] = m_points[1];
-        vertices[index + 2] = m_points[2];
+        int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.Count + m_indexInColumn;
 
-        //indices
-        triangles[index] = index;
-        triangles[index + 1] = index + 1;
-        triangles[index + 2] = index + 2;
+        Vector3[] vertices = m_parentMesh.vertices;
+        int[] triangles = m_parentMesh.triangles;
+        Color[] colors = m_parentMesh.colors;
 
-        //colors
-        colors[index] = m_color;
-        colors[index + 1] = m_color;
-        colors[index + 2] = m_color;
+        ////vertices
+        //vertices[3 * triangleGlobalIndex] = m_points[0];
+        //vertices[3 * triangleGlobalIndex + 1] = m_points[1];
+        //vertices[3 * triangleGlobalIndex + 2] = m_points[2];
 
-        ////normals
-        //Vector3[] normals = mesh.normals;
-        //normals[index] = Vector3.forward;
-        //normals[index + 1] = Vector3.forward;
-        //normals[index + 2] = Vector3.forward;
-        //mesh.normals = normals;
+        ////indices
+        //triangles[3 * triangleGlobalIndex] = 3 * triangleGlobalIndex;
+        //triangles[3 * triangleGlobalIndex + 1] = 3 * triangleGlobalIndex + 1;
+        //triangles[3 * triangleGlobalIndex + 2] = 3 * triangleGlobalIndex + 2;
+
+        ////colors
+        //colors[3 * triangleGlobalIndex] = m_color;
+        //colors[3 * triangleGlobalIndex + 1] = m_color;
+        //colors[3 * triangleGlobalIndex + 2] = m_color;
+
+        //m_parentMesh.vertices = vertices;
+        //m_parentMesh.triangles = triangles;
+        //m_parentMesh.colors = colors;
+    }
+
+    /**
+     * Returns the leader this triangle is following
+     * **/
+    public BackgroundTriangle GetLeader()
+    {
+        if (this.m_leader)
+            return this;
+
+        for (int iTriangleIdx = m_indexInColumn + 1; iTriangleIdx != m_parentColumn.Count; iTriangleIdx++)
+        {
+            if (m_parentColumn[iTriangleIdx].m_leader)
+                return m_parentColumn[iTriangleIdx];
+        }
+
+        return null;
     }
 }

@@ -39,43 +39,7 @@ public class GameController : MonoBehaviour
         GameObject guiObject = GameObject.FindGameObjectWithTag("GUIManager");
         BackgroundTrianglesRenderer trianglesRenderer = guiObject.GetComponentInChildren<BackgroundTrianglesRenderer>();
         trianglesRenderer.Init();
-
-        //////DEBUG
-        //GameObject debugObject = new GameObject();
-        //debugObject.name = "DEBUGOBJECT";
-        //MeshFilter meshFilter = debugObject.AddComponent<MeshFilter>();
-        //MeshRenderer meshRenderer = debugObject.AddComponent<MeshRenderer>();
-
-        //Mesh mesh = new Mesh();
-        //mesh.name = "DebugMesh";
-        //Vector3[] vertices = new Vector3[3];
-        ////vertices[0] = new Vector3(-864, -640, 0);
-        ////vertices[1] = new Vector3(-960, -695, 0);
-        ////vertices[2] = new Vector3(-960, -585, 0);
-        //vertices[0] = new Vector3(-960, -585, 0);
-        //vertices[1] = new Vector3(-864, -529, 0);
-        //vertices[2] = new Vector3(-864, -640, 0);
-
-        //Color[] colors = new Color[3];
-        //colors[0] = Color.cyan;
-        //colors[1] = Color.cyan;
-        //colors[2] = Color.cyan;
-
-        //int[] triangles = new int[3];
-        //triangles[0] = 0;
-        //triangles[1] = 1;
-        //triangles[2] = 2;
-
-        //mesh.vertices = vertices;
-        //mesh.colors = colors;
-        //mesh.triangles = triangles;
-
-        //meshFilter.sharedMesh = mesh;
-
-        //Material clonedMaterial = (Material)Instantiate(m_debugMaterial);
-        //meshRenderer.sharedMaterial = clonedMaterial;
-
-        ////DEBUG
+        trianglesRenderer.RenderForMainMenu();
 
         //parse xml levels files
         m_levelManager.ParseAllLevels();

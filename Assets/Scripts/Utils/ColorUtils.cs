@@ -3,15 +3,15 @@ using System;
 
 public class ColorUtils
 {
-    public static Color DarkenColor(Color inColor, float percentage)
+    public static Color DarkenColor(Color inColor, float t)
     {
-        Color outColor = Color.Lerp(inColor, Color.black, percentage);
+        Color outColor = Color.Lerp(inColor, Color.black, t);
         return outColor;
     }
 
-    public static Color LightenColor(Color inColor, float percentage)
+    public static Color LightenColor(Color inColor, float t)
     {
-        Color outColor = Color.Lerp(inColor, Color.white, percentage);
+        Color outColor = Color.Lerp(inColor, Color.white, t);
         return outColor;
     }
 
@@ -42,12 +42,7 @@ public class ColorUtils
         Color startColor = milestones[tierIndex];
         Color endColor = milestones[(tierIndex == 5) ? 0 : tierIndex + 1];
 
-        return ColorLerp(startColor, endColor, tierLocalPercentage);
-    }
-
-    public static Color ColorLerp(Color startColor, Color endColor, float t)
-    {
-        return (1 - t) * startColor + t * endColor;
+        return Color.Lerp(startColor, endColor, tierLocalPercentage);
     }
 }
 
