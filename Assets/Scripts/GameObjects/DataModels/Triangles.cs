@@ -415,10 +415,12 @@ public class ShapeTriangle : GridTriangle
  * **/
 public class BackgroundTriangle : BaseTriangle
 {
-    public Color m_color { get; set; } //the color of this triangle (the 3 vertices share the same color)
+    private Color m_color; //the color of this triangle (the 3 vertices share the same color)
+    public Color m_originalColor { get; set; } //the color that this triangle should have before being offset to m_color
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
-    public Mesh m_parentMesh { get; set; }
+    public bool m_hidden { get; set; } //is this triangle hidden? (i.e replaced by a triangle of the color of default background)
+    public bool m_animationPending { get; set; } //does this triangle is waiting to switch from shown to hidden status (or vice versa)
 
     //Variables to handle this triangle as a column leader
     public bool m_leader { get; set; }
@@ -428,9 +430,11 @@ public class BackgroundTriangle : BaseTriangle
     public BackgroundTriangle(BackgroundTriangle other) : base(other)
     {
         m_color = other.m_color;
+        m_originalColor = other.m_originalColor;
         m_indexInColumn = other.m_indexInColumn;
         m_parentColumn = other.m_parentColumn;
-        m_parentMesh = other.m_parentMesh;
+        m_hidden = other.m_hidden;
+        m_animationPending = other.m_animationPending;
 
         m_leader = other.m_leader;
         m_leaderStopIndex = other.m_leaderStopIndex;
@@ -467,35 +471,40 @@ public class BackgroundTriangle : BaseTriangle
             m_points[i] += position;
         }
 
+        m_originalColor = color;
         m_color = color;
+
+        m_hidden = false;
+        m_animationPending = false;
     }
 
-    public void UpdateMeshData()
+    public void UpdateMeshData(ref Vector2[] vertices, ref int[] triangles, ref Color[] colors)
     {
         int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.Count + m_indexInColumn;
 
-        Vector3[] vertices = m_parentMesh.vertices;
-        int[] triangles = m_parentMesh.triangles;
-        Color[] colors = m_parentMesh.colors;
+        //vertices
+        if (vertices != null)
+        {
+            vertices[3 * triangleGlobalIndex] = m_points[0];
+            vertices[3 * triangleGlobalIndex + 1] = m_points[1];
+            vertices[3 * triangleGlobalIndex + 2] = m_points[2];
+        }
 
-        ////vertices
-        //vertices[3 * triangleGlobalIndex] = m_points[0];
-        //vertices[3 * triangleGlobalIndex + 1] = m_points[1];
-        //vertices[3 * triangleGlobalIndex + 2] = m_points[2];
+        //indices
+        if (triangles != null)
+        {
+            triangles[3 * triangleGlobalIndex] = 3 * triangleGlobalIndex;
+            triangles[3 * triangleGlobalIndex + 1] = 3 * triangleGlobalIndex + 1;
+            triangles[3 * triangleGlobalIndex + 2] = 3 * triangleGlobalIndex + 2;
+        }
 
-        ////indices
-        //triangles[3 * triangleGlobalIndex] = 3 * triangleGlobalIndex;
-        //triangles[3 * triangleGlobalIndex + 1] = 3 * triangleGlobalIndex + 1;
-        //triangles[3 * triangleGlobalIndex + 2] = 3 * triangleGlobalIndex + 2;
-
-        ////colors
-        //colors[3 * triangleGlobalIndex] = m_color;
-        //colors[3 * triangleGlobalIndex + 1] = m_color;
-        //colors[3 * triangleGlobalIndex + 2] = m_color;
-
-        //m_parentMesh.vertices = vertices;
-        //m_parentMesh.triangles = triangles;
-        //m_parentMesh.colors = colors;
+        //colors
+        if (colors != null)
+        {
+            colors[3 * triangleGlobalIndex] = m_color;
+            colors[3 * triangleGlobalIndex + 1] = m_color;
+            colors[3 * triangleGlobalIndex + 2] = m_color;
+        }
     }
 
     /**
@@ -513,5 +522,15 @@ public class BackgroundTriangle : BaseTriangle
         }
 
         return null;
+    }
+
+    public void GenerateColorFromOriginalColor()
+    {
+        m_color = ColorUtils.GetRandomNearColor(m_originalColor, 0.1f);
+    }
+
+    public Color GetColor()
+    {
+        return (m_hidden) ? m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor() : m_color;
     }
 }

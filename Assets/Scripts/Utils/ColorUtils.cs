@@ -3,6 +3,16 @@ using System;
 
 public class ColorUtils
 {
+    public static Color GetColorFromRGBAVector4(Vector4 rgbaVec4)
+    {
+        return new Color(rgbaVec4.x / 255.0f, rgbaVec4.y / 255.0f, rgbaVec4.z / 255.0f, rgbaVec4.w / 255.0f);
+    }
+
+    public static Color GetRGBAVector4FromColor(Color color)
+    {
+        return new Color(color.r * 255.0f, color.g * 255.0f, color.b * 255.0f, color.a * 255.0f);
+    }
+
     public static Color DarkenColor(Color inColor, float t)
     {
         Color outColor = Color.Lerp(inColor, Color.black, t);
@@ -43,6 +53,27 @@ public class ColorUtils
         Color endColor = milestones[(tierIndex == 5) ? 0 : tierIndex + 1];
 
         return Color.Lerp(startColor, endColor, tierLocalPercentage);
+    }
+
+    /**
+     * Gets a random color that is near the passed original color
+     * The amplitude determines the maxismum values each channel R,G,B can differ from the original value
+     * **/
+    public static Color GetRandomNearColor(Color originalColor, float amplitude)
+    {
+        float randomValue = UnityEngine.Random.value;
+        randomValue *= (2 * amplitude);
+        randomValue -= amplitude; //[-amplitude; +amplitude]
+
+        float nearColorRed = originalColor.r + randomValue;
+        float nearColorGreen = originalColor.g + randomValue;
+        float nearColorBlue = originalColor.b + randomValue;
+
+        MathUtils.Clamp(ref nearColorRed, 0, 1);
+        MathUtils.Clamp(ref nearColorGreen, 0, 1);
+        MathUtils.Clamp(ref nearColorBlue, 0, 1);
+
+        return new Color(nearColorRed, nearColorGreen, nearColorBlue, originalColor.a);
     }
 }
 
