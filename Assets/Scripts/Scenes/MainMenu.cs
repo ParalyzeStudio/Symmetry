@@ -19,8 +19,8 @@ public class MainMenu : GUIScene
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
         menuAnimator.SetOpacity(1);
         //ShowTitle(bAnimated, fDelay);
-        ShowTitle2(bAnimated, fDelay);
-        //ShowAxes(bAnimated, 1.5f + fDelay);
+        //ShowTitle2(bAnimated, fDelay);
+        ShowTitle3(bAnimated, fDelay);
         ShowButtons(bAnimated, 2.0f + fDelay);
         ShowTapToPlay(bAnimated ? 2.0f + fDelay : 0);
 
@@ -58,6 +58,13 @@ public class MainMenu : GUIScene
 
         titleBuilder.Build();
         titleBuilder.Show(bAnimated, fDelay);
+    }
+
+    public void ShowTitle3(bool bAnimated, float fDelay)
+    {
+        BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
+
+        backgroundRenderer.RenderMainMenuTitle();
     }
 
     //public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
@@ -139,48 +146,6 @@ public class MainMenu : GUIScene
     //        bottomLeftAnimator.SetPosition(bottomLeftPartLocalPosition);
     //        bottomLeftAnimator.ScaleTo(new Vector3(titlePartWidth, titlePartHeight, 1.0f), 0.5f, fDelay + 1.8f);
     //        bottomLeftAnimator.TranslateTo(bottomLeftPartLocalPosition - new Vector3(0, 128, 0), 0.5f, fDelay + 1.8f);
-    //    }
-    //}
-
-    //public void ShowAxes(bool bAnimated, float fDelay = 0.0f)
-    //{
-    //    Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
-
-    //    GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
-    //    GameObject horizontalAxisObject = (GameObject)Instantiate(m_segmentPfb);
-    //    GameObject verticalAxisObject = (GameObject)Instantiate(m_segmentPfb);
-    //    Segment horizontalAxis = horizontalAxisObject.GetComponent<Segment>();
-    //    Segment verticalAxis = verticalAxisObject.GetComponent<Segment>();
-    //    SegmentAnimator horizontalAxisAnimator = horizontalAxisObject.GetComponent<SegmentAnimator>();
-    //    SegmentAnimator verticalAxisAnimator = verticalAxisObject.GetComponent<SegmentAnimator>();
-
-    //    horizontalAxisAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.5f, 0.5f));
-    //    verticalAxisAnimator.UpdatePivotPoint(new Vector3(0.5f, 0.5f, 0.5f));
-
-    //    //add axes to parent holder and set correct local positions
-    //    horizontalAxis.transform.parent = axesHolder.transform;
-    //    verticalAxis.transform.parent = axesHolder.transform;
-    //    horizontalAxis.transform.localPosition = Vector3.zero;
-    //    verticalAxis.transform.localPosition = Vector3.zero;
-
-    //    //set thickness on axes
-    //    horizontalAxis.m_thickness = 4;
-    //    float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
-    //    verticalAxis.m_thickness = 4;
-
-    //    //set correct angles
-    //    horizontalAxis.SetAngle(0);
-    //    verticalAxis.SetAngle(90);
-
-    //    if (bAnimated)
-    //    {
-    //        horizontalAxisAnimator.ResizeTo(screenSize.x, 1.0f, fDelay);
-    //        verticalAxisAnimator.ResizeTo(2 * distanceToScreenTopBorder, 1.0f, fDelay);
-    //    }
-    //    else
-    //    {
-    //        horizontalAxis.SetLength(screenSize.x);
-    //        verticalAxis.SetLength(2 * distanceToScreenTopBorder);
     //    }
     //}
 

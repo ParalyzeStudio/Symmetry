@@ -15,7 +15,7 @@ public struct TrianglesBlock
  * **/
 public class BackgroundTriangleColumn : List<BackgroundTriangle>
 {
-    public const float COLOR_INVALIDATION_STEP = 0.02f;
+    public const float COLOR_INVALIDATION_STEP = 0.05f;
 
     public BackgroundTrianglesRenderer m_parentRenderer { get; set; }
     public int m_index { get; set; } //the index of this column in the global mesh
@@ -116,30 +116,42 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
     /**
      * Animate the column if any triangle has to be shown or hidden
      * **/
-    public void AnimateTriangles()
+    public void AnimateTriangles(float dt)
     {
-        for (int iBlockIdx = 0; iBlockIdx != m_animatedTrianglesBlocks.Count; iBlockIdx++)
+        m_elapsedTime += dt;
+
+        if (m_elapsedTime > BackgroundTriangleColumn.COLOR_INVALIDATION_STEP)
         {
-            TrianglesBlock block = m_animatedTrianglesBlocks[iBlockIdx];
+            m_elapsedTime = 0;
 
-            //Find the first triangle that can be animated in this block
-            for (int iTriangleIdx = block.m_startIndex; iTriangleIdx != block.m_endIndex + 1; iTriangleIdx++)
+            for (int iBlockIdx = 0; iBlockIdx != m_animatedTrianglesBlocks.Count; iBlockIdx++)
             {
-                BackgroundTriangle triangle = this[iTriangleIdx];
-                if (triangle.m_animationPending)
+                TrianglesBlock block = m_animatedTrianglesBlocks[iBlockIdx];
+
+                //Find the first triangle that can be animated in this block
+                for (int iTriangleIdx = block.m_startIndex; iTriangleIdx != block.m_endIndex + 1; iTriangleIdx++)
                 {
-                    triangle.m_animationPending = false; //remove the animation on this triangle
-                    triangle.m_hidden = !triangle.m_hidden; //toggle the hidden status
-
-                    if (iTriangleIdx == block.m_endIndex) //finished animating this block, we can remove it
+                    BackgroundTriangle triangle = this[iTriangleIdx];
+                    if (triangle.m_statusSwitchPending)
                     {
-                        m_animatedTrianglesBlocks.Remove(block);
-                        iBlockIdx--;
-                    }
+                        triangle.m_statusSwitchPending = false; //remove the animation on this triangle
+                        triangle.StartColorAnimation(5.0f, 0.0f);
 
-                    break; //break the animation process on this block
+                        if (iTriangleIdx == block.m_endIndex) //finished animating this block, we can remove it
+                        {
+                            m_animatedTrianglesBlocks.Remove(block);
+                            iBlockIdx--;
+                        }
+
+                        break; //break the animation process on this block
+                    }
                 }
             }
+        }
+
+        for (int iTriangleIdx = 0; iTriangleIdx != this.Count; iTriangleIdx++)
+        {
+            this[iTriangleIdx].AnimateColor(dt);
         }
 
         m_parentRenderer.UpdateMeshColorsArrayForColumn(this);
@@ -158,18 +170,10 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         m_animatedTrianglesBlocks.Add(block);
 
         //Turn on the animation pending value for every triangle in this block
-        for (int i = startIndex; i != this.Count; i++)
+        for (int i = startIndex; i != endIndex + 1; i++)
         {
-            this[i].m_animationPending = true;
+            this[i].m_statusSwitchPending = true;
         }
-    }
-
-    /**
-     * Tell if some parts of this column are currently animated
-     * **/
-    public bool IsAnimated()
-    {
-        return m_animatedTrianglesBlocks.Count > 0;
     }
 
     ///**

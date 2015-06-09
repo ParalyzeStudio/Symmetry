@@ -135,7 +135,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     /**
      * Updates the colors array for the specific column
-     * Set bUpdateMeshData to true if the actual mesh data has to be invlaidated at this point
+     * Set bUpdateMeshData to true if the actual mesh data has to be invalidated at this point
      * **/
     public void UpdateMeshColorsArrayForColumn(BackgroundTriangleColumn column)
     {
@@ -146,6 +146,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
             int triangleGlobalIndex = column.m_index * column.Count + iTriangleIdx;
 
             Color triangleColor = triangle.GetColor();
+            if (iTriangleIdx == 0)
+                Debug.Log(iTriangleIdx);
             //colors
             m_meshColors[3 * triangleGlobalIndex] = triangleColor;
             m_meshColors[3 * triangleGlobalIndex + 1] = triangleColor;
@@ -176,58 +178,126 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     public void RenderForMainMenu()
     {
-        int[] stopIndices = new int[NUM_COLUMNS];
-        stopIndices[0] = 8;
-        stopIndices[1] = 9;
-        stopIndices[2] = 10;
-        stopIndices[3] = 9;
-        stopIndices[4] = 10;
-        stopIndices[5] = 11;
-        stopIndices[6] = 12;
-        stopIndices[7] = 13;
-        stopIndices[8] = 14;
-        stopIndices[9] = 14;
-        stopIndices[10] = 15;
-        stopIndices[11] = 16;
-        stopIndices[12] = 16;
-        stopIndices[13] = 17;
-        stopIndices[14] = 16;
-        stopIndices[15] = 15;
-        stopIndices[16] = 15;
-        stopIndices[17] = 14;
-        stopIndices[18] = 13;
-        stopIndices[19] = 14;
-        stopIndices[20] = 12;
-        stopIndices[21] = 10;
-        stopIndices[22] = 9;
-        stopIndices[23] = 8;
-        stopIndices[24] = 8;
+        //int[] stopIndices = new int[NUM_COLUMNS];
+        //stopIndices[0] = 8;
+        //stopIndices[1] = 9;
+        //stopIndices[2] = 10;
+        //stopIndices[3] = 9;
+        //stopIndices[4] = 10;
+        //stopIndices[5] = 11;
+        //stopIndices[6] = 12;
+        //stopIndices[7] = 13;
+        //stopIndices[8] = 14;
+        //stopIndices[9] = 14;
+        //stopIndices[10] = 15;
+        //stopIndices[11] = 16;
+        //stopIndices[12] = 16;
+        //stopIndices[13] = 17;
+        //stopIndices[14] = 16;
+        //stopIndices[15] = 15;
+        //stopIndices[16] = 15;
+        //stopIndices[17] = 14;
+        //stopIndices[18] = 13;
+        //stopIndices[19] = 14;
+        //stopIndices[20] = 12;
+        //stopIndices[21] = 10;
+        //stopIndices[22] = 9;
+        //stopIndices[23] = 8;
+        //stopIndices[24] = 8;
 
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
-            column.ApplyGradient(Color.cyan, Color.white); //tmp apply same gradient for all columns
-            column.AddAnimatedTrianglesBlock(0, stopIndices[iColumnIdx]);
+            
+            //column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(118, 203, 252, 255)), Color.white); //tmp apply same gradient for all columns
+            column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 114, 114, 255)), Color.white); //tmp apply same gradient for all columns
+            column.AddAnimatedTrianglesBlock(0, column.Count - 1);
+
             UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
         }
     }
 
+    /**
+     * Modify the color of all triangles forming the title FLEEC
+     * **/
+    public void RenderMainMenuTitle()
+    {
+        //List all triangles inside the title
+        List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
+        titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)
+
+        //Add 9 triangles for letter F
+        titleTriangles.Add(m_triangleColumns[4][7]);
+        titleTriangles.Add(m_triangleColumns[4][8]);
+        titleTriangles.Add(m_triangleColumns[4][9]);
+        titleTriangles.Add(m_triangleColumns[4][10]);
+        titleTriangles.Add(m_triangleColumns[4][11]);
+        titleTriangles.Add(m_triangleColumns[4][12]);
+        titleTriangles.Add(m_triangleColumns[5][6]);
+        titleTriangles.Add(m_triangleColumns[5][7]);
+        titleTriangles.Add(m_triangleColumns[5][9]);
+
+        //Add 8 triangles for letter L
+        titleTriangles.Add(m_triangleColumns[7][6]);
+        titleTriangles.Add(m_triangleColumns[7][7]);
+        titleTriangles.Add(m_triangleColumns[7][8]);
+        titleTriangles.Add(m_triangleColumns[7][9]);
+        titleTriangles.Add(m_triangleColumns[7][10]);
+        titleTriangles.Add(m_triangleColumns[7][11]);
+        titleTriangles.Add(m_triangleColumns[7][12]);
+        titleTriangles.Add(m_triangleColumns[8][12]);
+
+        //Add 10 triangles for first letter E
+        titleTriangles.Add(m_triangleColumns[10][7]);
+        titleTriangles.Add(m_triangleColumns[10][8]);
+        titleTriangles.Add(m_triangleColumns[10][9]);
+        titleTriangles.Add(m_triangleColumns[10][10]);
+        titleTriangles.Add(m_triangleColumns[10][11]);
+        titleTriangles.Add(m_triangleColumns[11][6]);
+        titleTriangles.Add(m_triangleColumns[11][7]);
+        titleTriangles.Add(m_triangleColumns[11][9]);
+        titleTriangles.Add(m_triangleColumns[11][11]);
+        titleTriangles.Add(m_triangleColumns[11][12]);
+
+        //Add 10 triangles for second letter E
+        titleTriangles.Add(m_triangleColumns[14][6]);
+        titleTriangles.Add(m_triangleColumns[14][7]);
+        titleTriangles.Add(m_triangleColumns[14][9]);
+        titleTriangles.Add(m_triangleColumns[14][11]);
+        titleTriangles.Add(m_triangleColumns[14][12]);
+        titleTriangles.Add(m_triangleColumns[15][7]);
+        titleTriangles.Add(m_triangleColumns[15][8]);
+        titleTriangles.Add(m_triangleColumns[15][9]);
+        titleTriangles.Add(m_triangleColumns[15][10]);
+        titleTriangles.Add(m_triangleColumns[15][11]);
+
+        //Add 15 triangles for second letter C
+        titleTriangles.Add(m_triangleColumns[18][7]);
+        titleTriangles.Add(m_triangleColumns[18][8]);
+        titleTriangles.Add(m_triangleColumns[18][9]);
+        titleTriangles.Add(m_triangleColumns[18][10]);
+        titleTriangles.Add(m_triangleColumns[18][11]);
+        titleTriangles.Add(m_triangleColumns[19][6]);
+        titleTriangles.Add(m_triangleColumns[19][7]);
+        titleTriangles.Add(m_triangleColumns[19][10]);
+        titleTriangles.Add(m_triangleColumns[19][11]);
+        titleTriangles.Add(m_triangleColumns[20][6]);
+        titleTriangles.Add(m_triangleColumns[20][7]);
+        titleTriangles.Add(m_triangleColumns[20][10]);
+        titleTriangles.Add(m_triangleColumns[20][11]);
+        titleTriangles.Add(m_triangleColumns[21][7]);
+        titleTriangles.Add(m_triangleColumns[21][11]);
+    }
+
     public void Update()
     {
+        float dt = Time.deltaTime;
+
         for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
-            if (!column.IsAnimated())
-                continue;
 
-            float dt = Time.deltaTime;
-            column.m_elapsedTime += dt;
-
-            if (column.m_elapsedTime > BackgroundTriangleColumn.COLOR_INVALIDATION_STEP)
-            {
-                column.m_elapsedTime = 0;
-                column.AnimateTriangles();
-            }
+            column.AnimateTriangles(dt);
         }
 
         UpdateMeshData(); //update mesh data every frame, 'dirty' variables take care of knowing if mesh has to be actually updated

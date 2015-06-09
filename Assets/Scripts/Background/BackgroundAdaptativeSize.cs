@@ -51,7 +51,7 @@ public class BackgroundAdaptativeSize : MonoBehaviour
             }
 
             m_screenSizeInUnits = new Vector2(fScreenWidthInUnits, fScreenHeightInUnits);
-            this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
+            //this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
         }
     }
 

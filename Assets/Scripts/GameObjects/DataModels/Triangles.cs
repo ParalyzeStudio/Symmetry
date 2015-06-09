@@ -420,12 +420,19 @@ public class BackgroundTriangle : BaseTriangle
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public bool m_hidden { get; set; } //is this triangle hidden? (i.e replaced by a triangle of the color of default background)
-    public bool m_animationPending { get; set; } //does this triangle is waiting to switch from shown to hidden status (or vice versa)
+    public bool m_statusSwitchPending { get; set; } //does this triangle is waiting to switch from shown to hidden status (or vice versa)
 
     //Variables to handle this triangle as a column leader
     public bool m_leader { get; set; }
     public int m_leaderStopIndex { get; set; }
     public Color m_leaderTargetColor { get; set; } //the color the triangles behind their leader have to reach
+
+    //Variables to handle color animation of this triangle
+    private Color m_substitutionColor; //the color that substitutes the m_color member during animation
+    private bool m_colorAnimating;//is this triangle currently animating its own color when switching its status
+    private float m_colorAnimatingElapsedTime;
+    private float m_colorAnimatingDuration;
+    private float m_colorAnimatingDelay;
 
     public BackgroundTriangle(BackgroundTriangle other) : base(other)
     {
@@ -434,11 +441,16 @@ public class BackgroundTriangle : BaseTriangle
         m_indexInColumn = other.m_indexInColumn;
         m_parentColumn = other.m_parentColumn;
         m_hidden = other.m_hidden;
-        m_animationPending = other.m_animationPending;
+        m_statusSwitchPending = other.m_statusSwitchPending;
 
         m_leader = other.m_leader;
         m_leaderStopIndex = other.m_leaderStopIndex;
         m_leaderTargetColor = other.m_leaderTargetColor;
+
+        m_colorAnimating = other.m_colorAnimating;
+        m_colorAnimatingElapsedTime = other.m_colorAnimatingElapsedTime;
+        m_colorAnimatingDuration = other.m_colorAnimatingDuration;
+        m_colorAnimatingDuration = other.m_colorAnimatingDelay;
     }
 
     /**
@@ -475,7 +487,7 @@ public class BackgroundTriangle : BaseTriangle
         m_color = color;
 
         m_hidden = false;
-        m_animationPending = false;
+        m_statusSwitchPending = false;
     }
 
     public void UpdateMeshData(ref Vector2[] vertices, ref int[] triangles, ref Color[] colors)
@@ -531,6 +543,49 @@ public class BackgroundTriangle : BaseTriangle
 
     public Color GetColor()
     {
-        return (m_hidden) ? m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor() : m_color;
+        if (m_colorAnimating)
+            return m_substitutionColor;
+        else
+            return (m_hidden) ? m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor() : m_color;
+       
+    }
+
+    /**
+     * Start the color animation process
+     * **/
+    public void StartColorAnimation(float fDuration, float fDelay = 0.0f)
+    {
+        m_colorAnimating = true;
+        m_colorAnimatingElapsedTime = 0;
+        m_colorAnimatingDuration = fDuration;
+        m_colorAnimatingDelay = fDelay;
+    }    
+
+    /**
+     * Animates the color. This function is called from the Update loop of the parent renderer (via the column)
+     * **/
+    public void AnimateColor(float dt)
+    {
+        if (!m_colorAnimating)
+            return;
+
+        m_colorAnimatingElapsedTime += dt;
+
+        if (m_colorAnimatingElapsedTime < m_colorAnimatingDelay)
+            return;
+
+        if (m_colorAnimatingElapsedTime > m_colorAnimatingDuration)
+        {
+            m_colorAnimating = false;
+            m_hidden = !m_hidden;
+        }
+        else
+        {
+            float timeRatio = m_colorAnimatingElapsedTime / m_colorAnimatingDuration;
+            if (m_hidden)
+                m_substitutionColor = Color.Lerp(m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor(), m_color, timeRatio);
+            else
+                m_substitutionColor = Color.Lerp(m_color, m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor(), timeRatio);
+        }
     }
 }
