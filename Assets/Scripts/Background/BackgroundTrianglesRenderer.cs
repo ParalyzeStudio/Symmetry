@@ -17,6 +17,11 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     private bool m_meshTrianglesDirty;
     private bool m_meshColorsDirty;
 
+    //Variables to handle the delayed rendering of main title
+    private bool m_renderingMainMenuTitle;
+    private float m_renderingMainMenuTitleElapsedTime;
+    private float m_renderingMainMenuTitleDelay;
+
     public void Awake()
     {
         m_triangleColumns = new List<BackgroundTriangleColumn>();
@@ -25,14 +30,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public void Init()
     {
         BuildMesh();
-    }
-    
-    /**
-     * Returns the default background color
-     * **/
-    public Color GetDefaultBackgroundColor()
-    {
-        return Color.white; //just return the color we want as background color
+
+        m_renderingMainMenuTitle = false;
     }
 
     /**
@@ -134,6 +133,14 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     }
 
     /**
+     * Returns the default background color
+     * **/
+    public Color GetDefaultBackgroundColor()
+    {
+        return Color.white; //just return the color we want as background color
+    }
+
+    /**
      * Updates the colors array for the specific column
      * Set bUpdateMeshData to true if the actual mesh data has to be invalidated at this point
      * **/
@@ -145,9 +152,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             int triangleGlobalIndex = column.m_index * column.Count + iTriangleIdx;
 
-            Color triangleColor = triangle.GetColor();
-            if (iTriangleIdx == 0)
-                Debug.Log(iTriangleIdx);
+            Color triangleColor = triangle.GetRenderColor();
+
             //colors
             m_meshColors[3 * triangleGlobalIndex] = triangleColor;
             m_meshColors[3 * triangleGlobalIndex + 1] = triangleColor;
@@ -155,6 +161,17 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
 
         m_meshColorsDirty = true;
+    }
+
+    /**
+    * Same thing that UpdateMeshColorsArrayForColumn() but for all columns instead
+    * **/
+    public void UpdateMeshColorsArrayForAllColumns()
+    {
+        for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
+        {
+            UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
+        }
     }
 
     public void UpdateMeshData()
@@ -176,51 +193,37 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
     }
 
-    public void RenderForMainMenu()
+    public void RenderForMainMenu(float fDelay)
     {
-        //int[] stopIndices = new int[NUM_COLUMNS];
-        //stopIndices[0] = 8;
-        //stopIndices[1] = 9;
-        //stopIndices[2] = 10;
-        //stopIndices[3] = 9;
-        //stopIndices[4] = 10;
-        //stopIndices[5] = 11;
-        //stopIndices[6] = 12;
-        //stopIndices[7] = 13;
-        //stopIndices[8] = 14;
-        //stopIndices[9] = 14;
-        //stopIndices[10] = 15;
-        //stopIndices[11] = 16;
-        //stopIndices[12] = 16;
-        //stopIndices[13] = 17;
-        //stopIndices[14] = 16;
-        //stopIndices[15] = 15;
-        //stopIndices[16] = 15;
-        //stopIndices[17] = 14;
-        //stopIndices[18] = 13;
-        //stopIndices[19] = 14;
-        //stopIndices[20] = 12;
-        //stopIndices[21] = 10;
-        //stopIndices[22] = 9;
-        //stopIndices[23] = 8;
-        //stopIndices[24] = 8;
-
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
             
-            //column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(118, 203, 252, 255)), Color.white); //tmp apply same gradient for all columns
-            column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 114, 114, 255)), Color.white); //tmp apply same gradient for all columns
-            column.AddAnimatedTrianglesBlock(0, column.Count - 1);
-
-            UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
+            column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255)), Color.white); //tmp apply same gradient for all columns
+            //column.AddAnimatedTrianglesBlock(0, column.Count - 1);
+            column.SwitchTrianglesVisibilityStatusBetweenIndices(0, column.Count - 1, fDelay);
         }
+
+        //Modify the colors of some triangles to make the title appear
+        RenderMainMenuTitle(fDelay + 5.0f);
+
+        UpdateMeshColorsArrayForAllColumns();
+    }
+
+    /**
+     * Launches the main menu title rendering processing that will draw it after a certain delay
+     * **/
+    public void RenderMainMenuTitle(float fDelay)
+    {
+        m_renderingMainMenuTitle = true;
+        m_renderingMainMenuTitleElapsedTime = 0;
+        m_renderingMainMenuTitleDelay = fDelay;
     }
 
     /**
      * Modify the color of all triangles forming the title FLEEC
      * **/
-    public void RenderMainMenuTitle()
+    public void DrawMainMenuTitle()
     {
         //List all triangles inside the title
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
@@ -279,14 +282,29 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         titleTriangles.Add(m_triangleColumns[18][11]);
         titleTriangles.Add(m_triangleColumns[19][6]);
         titleTriangles.Add(m_triangleColumns[19][7]);
-        titleTriangles.Add(m_triangleColumns[19][10]);
         titleTriangles.Add(m_triangleColumns[19][11]);
+        titleTriangles.Add(m_triangleColumns[19][12]);
         titleTriangles.Add(m_triangleColumns[20][6]);
         titleTriangles.Add(m_triangleColumns[20][7]);
-        titleTriangles.Add(m_triangleColumns[20][10]);
         titleTriangles.Add(m_triangleColumns[20][11]);
+        titleTriangles.Add(m_triangleColumns[20][12]);
         titleTriangles.Add(m_triangleColumns[21][7]);
         titleTriangles.Add(m_triangleColumns[21][11]);
+
+        //manually set destination color and launch the color animation for every triangle in the previously build list
+        Color blendColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 23, 12, 255));
+        for (int iTriangleIdx = 0; iTriangleIdx != titleTriangles.Count; iTriangleIdx++)
+        {
+            BackgroundTriangle triangle = titleTriangles[iTriangleIdx];
+            Color destinationColor = Color.Lerp(triangle.GetTrueColor(), blendColor, 0.5f);
+
+            //generate a random delay for each title triangle
+            float randomDelay = Random.value;
+            randomDelay *= 0.1f;
+
+            //launch the color animation
+            triangle.StartColorAnimation(destinationColor, 1.5f, randomDelay, true);
+        }
     }
 
     public void Update()
@@ -301,5 +319,16 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
 
         UpdateMeshData(); //update mesh data every frame, 'dirty' variables take care of knowing if mesh has to be actually updated
+
+        //render main menu title
+        if (m_renderingMainMenuTitle)
+        {
+            m_renderingMainMenuTitleElapsedTime += dt;
+            if (m_renderingMainMenuTitleElapsedTime >= m_renderingMainMenuTitleDelay)
+            {
+                m_renderingMainMenuTitle = false;
+                DrawMainMenuTitle();
+            }            
+        }
     }
 }

@@ -420,7 +420,6 @@ public class BackgroundTriangle : BaseTriangle
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public bool m_hidden { get; set; } //is this triangle hidden? (i.e replaced by a triangle of the color of default background)
-    public bool m_statusSwitchPending { get; set; } //does this triangle is waiting to switch from shown to hidden status (or vice versa)
 
     //Variables to handle this triangle as a column leader
     public bool m_leader { get; set; }
@@ -428,11 +427,14 @@ public class BackgroundTriangle : BaseTriangle
     public Color m_leaderTargetColor { get; set; } //the color the triangles behind their leader have to reach
 
     //Variables to handle color animation of this triangle
-    private Color m_substitutionColor; //the color that substitutes the m_color member during animation
+    public Color m_animationStartColor; //the color when the animation starts
+    public Color m_animationEndColor; //the color when the animation ends
+    private Color m_animationCurrentColor; //the color that substitutes the m_color member during animation
     private bool m_colorAnimating;//is this triangle currently animating its own color when switching its status
     private float m_colorAnimatingElapsedTime;
     private float m_colorAnimatingDuration;
     private float m_colorAnimatingDelay;
+    private bool m_replaceGlobalColorOnFinishAnimation;
 
     public BackgroundTriangle(BackgroundTriangle other) : base(other)
     {
@@ -441,9 +443,7 @@ public class BackgroundTriangle : BaseTriangle
         m_indexInColumn = other.m_indexInColumn;
         m_parentColumn = other.m_parentColumn;
         m_hidden = other.m_hidden;
-        m_statusSwitchPending = other.m_statusSwitchPending;
 
-        m_leader = other.m_leader;
         m_leaderStopIndex = other.m_leaderStopIndex;
         m_leaderTargetColor = other.m_leaderTargetColor;
 
@@ -451,6 +451,7 @@ public class BackgroundTriangle : BaseTriangle
         m_colorAnimatingElapsedTime = other.m_colorAnimatingElapsedTime;
         m_colorAnimatingDuration = other.m_colorAnimatingDuration;
         m_colorAnimatingDuration = other.m_colorAnimatingDelay;
+        m_replaceGlobalColorOnFinishAnimation = other.m_replaceGlobalColorOnFinishAnimation;
     }
 
     /**
@@ -487,7 +488,7 @@ public class BackgroundTriangle : BaseTriangle
         m_color = color;
 
         m_hidden = false;
-        m_statusSwitchPending = false;
+        //m_statusSwitchPending = false;
     }
 
     public void UpdateMeshData(ref Vector2[] vertices, ref int[] triangles, ref Color[] colors)
@@ -519,46 +520,63 @@ public class BackgroundTriangle : BaseTriangle
         }
     }
 
-    /**
-     * Returns the leader this triangle is following
-     * **/
-    public BackgroundTriangle GetLeader()
-    {
-        if (this.m_leader)
-            return this;
-
-        for (int iTriangleIdx = m_indexInColumn + 1; iTriangleIdx != m_parentColumn.Count; iTriangleIdx++)
-        {
-            if (m_parentColumn[iTriangleIdx].m_leader)
-                return m_parentColumn[iTriangleIdx];
-        }
-
-        return null;
-    }
-
     public void GenerateColorFromOriginalColor()
     {
         m_color = ColorUtils.GetRandomNearColor(m_originalColor, 0.1f);
     }
 
-    public Color GetColor()
+    /**
+     * Return the color that will be set inside the mesh and rendered
+     * **/
+    public Color GetRenderColor()
     {
+        Color renderColor;
         if (m_colorAnimating)
-            return m_substitutionColor;
+            renderColor = m_animationCurrentColor;
         else
-            return (m_hidden) ? m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor() : m_color;
-       
+            renderColor = (m_hidden) ? m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor() : m_color;
+
+        return renderColor;
+    }
+
+    /**
+     * Return the true color of this triangle (i.e the m_color member value)
+     * **/
+    public Color GetTrueColor()
+    {
+        return m_color;
+    }
+
+    /**
+     * Show or hide this triangle with animation or not
+     * **/
+    public void ToggleVisibility(bool bAnimated, float fAnimationDuration = 1.0f, float fAnimationDelay = 0.0f)
+    {
+        if (bAnimated)
+        {
+            if (!m_hidden)
+                StartColorAnimation(m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor(), fAnimationDuration, fAnimationDelay);
+            else
+                StartColorAnimation(m_color, fAnimationDuration, fAnimationDelay);
+        }
+
+        m_hidden = !m_hidden;
     }
 
     /**
      * Start the color animation process
      * **/
-    public void StartColorAnimation(float fDuration, float fDelay = 0.0f)
+    public void StartColorAnimation(Color toColor, float fDuration, float fDelay = 0.0f, bool bReplaceGlobalColorOnFinish = false)
     {
-        m_colorAnimating = true;
+        m_animationStartColor = GetRenderColor();
+        m_animationEndColor = toColor;
+        m_animationCurrentColor = m_animationStartColor;
         m_colorAnimatingElapsedTime = 0;
         m_colorAnimatingDuration = fDuration;
         m_colorAnimatingDelay = fDelay;
+        m_replaceGlobalColorOnFinishAnimation = bReplaceGlobalColorOnFinish;
+
+        m_colorAnimating = true;
     }    
 
     /**
@@ -574,18 +592,16 @@ public class BackgroundTriangle : BaseTriangle
         if (m_colorAnimatingElapsedTime < m_colorAnimatingDelay)
             return;
 
-        if (m_colorAnimatingElapsedTime > m_colorAnimatingDuration)
+        if (m_colorAnimatingElapsedTime >= m_colorAnimatingDuration + m_colorAnimatingDelay)
         {
             m_colorAnimating = false;
-            m_hidden = !m_hidden;
+            if (m_replaceGlobalColorOnFinishAnimation)
+                m_color = m_animationEndColor;
         }
         else
         {
-            float timeRatio = m_colorAnimatingElapsedTime / m_colorAnimatingDuration;
-            if (m_hidden)
-                m_substitutionColor = Color.Lerp(m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor(), m_color, timeRatio);
-            else
-                m_substitutionColor = Color.Lerp(m_color, m_parentColumn.m_parentRenderer.GetDefaultBackgroundColor(), timeRatio);
+            float timeRatio = (m_colorAnimatingElapsedTime - m_colorAnimatingDelay) / m_colorAnimatingDuration;
+            m_animationCurrentColor = Color.Lerp(m_animationStartColor, m_animationEndColor, timeRatio);
         }
     }
 }

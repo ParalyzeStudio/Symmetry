@@ -39,7 +39,6 @@ public class GameController : MonoBehaviour
         GameObject guiObject = GameObject.FindGameObjectWithTag("GUIManager");
         BackgroundTrianglesRenderer trianglesRenderer = guiObject.GetComponentInChildren<BackgroundTrianglesRenderer>();
         trianglesRenderer.Init();
-        trianglesRenderer.RenderForMainMenu();
 
         //parse xml levels files
         m_levelManager.ParseAllLevels();
