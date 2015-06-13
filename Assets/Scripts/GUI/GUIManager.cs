@@ -5,12 +5,25 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
+    public GameObject m_GUIDiamondShapeButtonPfb; //the prefab to create a diamond-shaped gui button with default skin, background and shadow
+    public GameObject m_GUISkinOnlyButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
     public GameObject m_pauseWindowPfb; //the prefab needed to instantiate the pause window
     public GameObject m_GUIFramePfb; //the prefab containing a background frame
     public GameObject m_backButtonPfb; //the prefab for the back button
     public GameObject m_optionsWindow { get; set; } //the actual options window
     public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
+
+    //Materials for GUI buttons    
+    public Material m_skinCreditsMaterial;
+    public Material m_skinLevelsMaterial;
+    public Material m_skinOptionsMaterial;
+    public Material m_skinHintsMaterial;
+    public Material m_skinRetryMaterial;
+    public Material m_skinMenuMaterial;
+    public Material m_skinColorChangeMaterial;
+    public Material m_GUIButtonBackgroundMaterial;
+    public Material m_GUIButtonShadowMaterial;
 
     public Color[] m_framesColors;
 
@@ -24,6 +37,77 @@ public class GUIManager : MonoBehaviour
     }
 
     /**
+     * Create a GUI Button object with the specified 
+     * -ID
+     * -size
+     * -background color if applicable
+     * -shadow color if applicable
+     * -in case a material could not be determined for the ID,
+     *  force eventually a material for the skin (if the button has several materials for instance force one of them)
+     * **/
+    public GameObject CreateGUIButtonForID(GUIButton.GUIButtonID iID, Vector2 size, Color backgroundColor, Color shadowColor, Material forcedSkinMaterial = null)
+    {
+        GameObject buttonObject;
+        if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON ||
+            iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON ||
+            iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON ||
+            iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
+        {
+            buttonObject = (GameObject)Instantiate(m_GUISkinOnlyButtonPfb);
+        }
+        else
+            buttonObject = (GameObject)Instantiate(m_GUIDiamondShapeButtonPfb);
+
+        GUIButton button = buttonObject.GetComponent<GUIButton>();
+        button.Init(forcedSkinMaterial);
+
+        //Set the size of the button
+        button.SetSize(size);
+
+        //Set the color for background and shadow if applicable
+        button.SetBackgroundColor(backgroundColor);
+        button.SetShadowColor(shadowColor);
+
+        //Set the relevant skin material for the specified button ID
+        Material clonedSkinMaterial = (forcedSkinMaterial != null) ? forcedSkinMaterial : GetClonedSkinMaterialForID(iID);
+
+        //Materials for background and shadow
+        Material clonedBackgroundMaterial = Instantiate(m_GUIButtonBackgroundMaterial);
+        Material clonedShadowMaterial = Instantiate(m_GUIButtonShadowMaterial);
+
+        button.SetSkinMaterial(clonedSkinMaterial);
+        button.SetBackgroundMaterial(clonedBackgroundMaterial);
+        button.SetShadowMaterial(clonedShadowMaterial);
+
+        return buttonObject;
+    }
+
+    public Material GetClonedSkinMaterialForID(GUIButton.GUIButtonID iID)
+    {
+        Material skinMaterial = null;
+        if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON)
+            ;
+        else if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
+            skinMaterial = m_skinLevelsMaterial;
+        else if (iID == GUIButton.GUIButtonID.ID_CLOSE_BUTTON)
+            ;
+        else if (iID == GUIButton.GUIButtonID.ID_COLOR_CHANGE)
+            skinMaterial = m_skinColorChangeMaterial;
+        else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
+            skinMaterial = Instantiate(m_skinCreditsMaterial);
+        else if (iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON)
+            skinMaterial = Instantiate(m_skinHintsMaterial);
+        else if (iID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
+            skinMaterial = m_skinOptionsMaterial;
+        else if (iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
+            skinMaterial = m_skinMenuMaterial;
+        else if (iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON)
+            skinMaterial = m_skinRetryMaterial;
+
+        return Instantiate(skinMaterial);
+    }
+
+    /**
      * Shows the options window on top of the current scene
      * **/
     public void ShowOptionsWindow()
@@ -33,20 +117,20 @@ public class GUIManager : MonoBehaviour
             m_optionsWindow = (GameObject)Instantiate(m_optionsWindowPfb);
             m_optionsWindow.transform.parent = this.gameObject.transform;
 
-            GUIInterfaceButton[] interfaceButtons = m_optionsWindow.GetComponentsInChildren<GUIInterfaceButton>();
-            for (int iButtonIdx = 0; iButtonIdx != interfaceButtons.Length; iButtonIdx++)
+            GUIButton[] childButtons = m_optionsWindow.GetComponentsInChildren<GUIButton>();
+            for (int iButtonIdx = 0; iButtonIdx != childButtons.Length; iButtonIdx++)
             {
-                GUIInterfaceButton interfaceButton = interfaceButtons[iButtonIdx];
-                
-                if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_SOUND_BUTTON)
+                GUIButton childButton = childButtons[iButtonIdx];
+
+                if (childButton.m_ID == GUIButton.GUIButtonID.ID_SOUND_BUTTON)
                 {
                     SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
-                    interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                    childButton.Init(soundManager.m_soundActive ? childButton.m_skinOnMaterial : childButton.m_skinOffMaterial);
                 }
-                else if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_MUSIC_BUTTON)
+                else if (childButton.m_ID == GUIButton.GUIButtonID.ID_MUSIC_BUTTON)
                 {
                     SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
-                    interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                    childButton.Init(soundManager.m_musicActive ? childButton.m_skinOnMaterial : childButton.m_skinOffMaterial);
                 }
             }
         }
@@ -74,20 +158,20 @@ public class GUIManager : MonoBehaviour
             m_pauseWindow = (GameObject)Instantiate(m_pauseWindowPfb);
             m_pauseWindow.transform.parent = this.gameObject.transform;
 
-            GUIInterfaceButton[] interfaceButtons = m_pauseWindow.GetComponentsInChildren<GUIInterfaceButton>();
-            for (int iButtonIdx = 0; iButtonIdx != interfaceButtons.Length; iButtonIdx++)
+            GUIButton[] childButtons = m_pauseWindow.GetComponentsInChildren<GUIButton>();
+            for (int iButtonIdx = 0; iButtonIdx != childButtons.Length; iButtonIdx++)
             {
-                GUIInterfaceButton interfaceButton = interfaceButtons[iButtonIdx];
+                GUIButton interfaceButton = childButtons[iButtonIdx];
 
-                if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_SOUND_BUTTON)
+                if (interfaceButton.m_ID == GUIButton.GUIButtonID.ID_SOUND_BUTTON)
                 {
                     SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
-                    interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                    interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_skinOnMaterial : interfaceButton.m_skinOffMaterial);
                 }
-                else if (interfaceButton.m_ID == GUIInterfaceButton.GUIInterfaceButtonID.ID_MUSIC_BUTTON)
+                else if (interfaceButton.m_ID == GUIButton.GUIButtonID.ID_MUSIC_BUTTON)
                 {
                     SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
-                    interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_materials[0] : interfaceButton.m_materials[1]);
+                    interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_skinOnMaterial : interfaceButton.m_skinOffMaterial);
                 }
                 else
                     interfaceButton.Init();
@@ -230,7 +314,7 @@ public class GUIManager : MonoBehaviour
      * **/
     public void ShowBackButton(float fDelay = 0.0f)
     {
-        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
         if (backButton == null)
         {
             Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
@@ -239,7 +323,7 @@ public class GUIManager : MonoBehaviour
             clonedBackButtonObject.transform.parent = this.gameObject.transform;
             clonedBackButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
 
-            backButton = clonedBackButtonObject.GetComponent<GUIInterfaceButton>();
+            backButton = clonedBackButtonObject.GetComponent<GUIButton>();
             backButton.Init();
             GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
             showButtonAnimator.SetOpacity(0);
@@ -252,7 +336,7 @@ public class GUIManager : MonoBehaviour
      * **/
     public void DismissBackButton()
     {
-        GUIInterfaceButton backButton = GUIInterfaceButton.FindInObjectChildrenForID(this.gameObject, GUIInterfaceButton.GUIInterfaceButtonID.ID_BACK_BUTTON);
+        GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
         if (backButton != null)
             Destroy(backButton.gameObject);
     }

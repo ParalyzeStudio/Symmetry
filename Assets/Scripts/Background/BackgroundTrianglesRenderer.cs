@@ -225,6 +225,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public void DrawMainMenuTitle()
     {
+        return;
         //List all triangles inside the title
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
         titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)

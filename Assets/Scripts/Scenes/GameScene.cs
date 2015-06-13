@@ -20,16 +20,6 @@ public class GameScene : GUIScene
     public Shapes m_shapes { get; set; }
     public Axes m_axes { get; set; }
 
-    //action buttons prefabs
-    public GameObject m_horAxisPfb;
-    public GameObject m_vertAxisPfb;
-    public GameObject m_straightAxesPfb;
-    public GameObject m_leftDiagonalAxisPfb;
-    public GameObject m_rightDiagonalAxisPfb;
-    public GameObject m_diagonalsAxesPfb;
-    public GameObject m_allAxesPfb;
-    public GameObject m_moveShapePfb;
-
     //interface buttons prefabs
     public GameObject m_menuBtnPfb;
     public GameObject m_retryBtnPfb;
@@ -71,7 +61,7 @@ public class GameScene : GUIScene
         sceneAnimator.SetOpacity(1.0f);
 
         ShowGrid(fDelay);
-        ShowActionButtons(fDelay);
+        //ShowActionButtons(fDelay);
         ShowInterfaceButtons(fDelay);
         ShowCounter(fDelay);
         //ShowGUI(fDelay);
@@ -134,109 +124,109 @@ public class GameScene : GUIScene
     /**
      * Actions the player can do on grid and shapes
      * **/
-    private void ShowActionButtons(float fDelay)
-    {
-        m_actionButtons = new List<HUDButton>();
+    //private void ShowActionButtons(float fDelay)
+    //{
+    //    m_actionButtons = new List<HUDButton>();
 
-        GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
-        Vector2 screenSize = backgroundObject.GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+    //    GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
+    //    Vector2 screenSize = backgroundObject.GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        List<string> actionTags = levelManager.m_currentLevel.m_actionButtonsTags;
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    List<string> actionTags = levelManager.m_currentLevel.m_actionButtonsTags;
 
-        m_actionButtonsHolder = new GameObject("ActionButtonsHolder");
-        m_actionButtonsHolder.transform.parent = this.gameObject.transform;
-        m_actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
+    //    m_actionButtonsHolder = new GameObject("ActionButtonsHolder");
+    //    m_actionButtonsHolder.transform.parent = this.gameObject.transform;
+    //    m_actionButtonsHolder.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
 
-        GameObjectAnimator holderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
+    //    GameObjectAnimator holderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
 
-        float gapBetweenButtons = 20.0f;
-        float distanceToScreenLeftSide = 60.0f;
-        Vector2 actionButtonSize = new Vector2(96.0f, 96.0f);
-        for (int iTagIndex = 0; iTagIndex != actionTags.Count; iTagIndex++)
-        {
-            //calculate the local position of the button
-            int numberOfActionButtons = m_actionButtons.Count;
-            float xPosition = -0.5f * screenSize.x +
-                              distanceToScreenLeftSide +
-                              numberOfActionButtons * actionButtonSize.x +
-                              numberOfActionButtons * gapBetweenButtons +
-                              0.5f * actionButtonSize.x;
-            Vector2 buttonLocalPosition = new Vector2(xPosition, 0);
+    //    float gapBetweenButtons = 20.0f;
+    //    float distanceToScreenLeftSide = 60.0f;
+    //    Vector2 actionButtonSize = new Vector2(96.0f, 96.0f);
+    //    for (int iTagIndex = 0; iTagIndex != actionTags.Count; iTagIndex++)
+    //    {
+    //        //calculate the local position of the button
+    //        int numberOfActionButtons = m_actionButtons.Count;
+    //        float xPosition = -0.5f * screenSize.x +
+    //                          distanceToScreenLeftSide +
+    //                          numberOfActionButtons * actionButtonSize.x +
+    //                          numberOfActionButtons * gapBetweenButtons +
+    //                          0.5f * actionButtonSize.x;
+    //        Vector2 buttonLocalPosition = new Vector2(xPosition, 0);
 
-            string tag = actionTags[iTagIndex];
-            GameObject clonedButton = null;
-            HUDButton hudButton = null;
-            HUDButton.HUDButtonID hudButtonID = 0;
-            if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
-            {
-                clonedButton = (GameObject)Instantiate(m_allAxesPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
-            {
-                clonedButton = (GameObject)Instantiate(m_horAxisPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
-            {
-                clonedButton = (GameObject)Instantiate(m_vertAxisPfb);                
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
-            {
-                clonedButton = (GameObject)Instantiate(m_straightAxesPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
-            {
-                clonedButton = (GameObject)Instantiate(m_leftDiagonalAxisPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
-            {
-                clonedButton = (GameObject)Instantiate(m_rightDiagonalAxisPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT;
-            }
-            else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
-            {
-                clonedButton = (GameObject)Instantiate(m_diagonalsAxesPfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES;
-            }
-            else if (tag.Equals(ACTION_TAG_MOVE_SHAPE))
-            {
-                clonedButton = (GameObject)Instantiate(m_moveShapePfb);
-                hudButton = clonedButton.GetComponent<HUDButton>();
-                hudButtonID = HUDButton.HUDButtonID.ID_MOVE_SHAPE;
-            }
-
-
-            if (clonedButton != null)
-            {
-                clonedButton.transform.parent = m_actionButtonsHolder.transform;
-                clonedButton.transform.localPosition = buttonLocalPosition;
-                m_actionButtons.Add(clonedButton.GetComponentInChildren<HUDButton>());
-            }
-
-            if (hudButton != null)
-            {
-                hudButton.Init();
-                hudButton.m_ID = hudButtonID;
-                hudButton.SetSize(actionButtonSize);
-            }
-        }
+    //        string tag = actionTags[iTagIndex];
+    //        GameObject clonedButton = null;
+    //        HUDButton hudButton = null;
+    //        HUDButton.HUDButtonID hudButtonID = 0;
+    //        if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_ALL))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_allAxesPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_ALL_AXES;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_horAxisPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_HORIZONTAL;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_vertAxisPfb);                
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_VERTICAL;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_straightAxesPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_STRAIGHT_AXES;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_leftDiagonalAxisPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_LEFT;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_rightDiagonalAxisPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_AXIS_DIAGONAL_RIGHT;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_diagonalsAxesPfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_SYMMETRY_DIAGONAL_AXES;
+    //        }
+    //        else if (tag.Equals(ACTION_TAG_MOVE_SHAPE))
+    //        {
+    //            clonedButton = (GameObject)Instantiate(m_moveShapePfb);
+    //            hudButton = clonedButton.GetComponent<HUDButton>();
+    //            hudButtonID = HUDButton.HUDButtonID.ID_MOVE_SHAPE;
+    //        }
 
 
-        holderAnimator.SetOpacity(0);
-        holderAnimator.FadeTo(1, 0.2f, fDelay);
-    }
+    //        if (clonedButton != null)
+    //        {
+    //            clonedButton.transform.parent = m_actionButtonsHolder.transform;
+    //            clonedButton.transform.localPosition = buttonLocalPosition;
+    //            m_actionButtons.Add(clonedButton.GetComponentInChildren<HUDButton>());
+    //        }
+
+    //        if (hudButton != null)
+    //        {
+    //            hudButton.Init();
+    //            hudButton.m_ID = hudButtonID;
+    //            hudButton.SetSize(actionButtonSize);
+    //        }
+    //    }
+
+
+    //    holderAnimator.SetOpacity(0);
+    //    holderAnimator.FadeTo(1, 0.2f, fDelay);
+    //}
 
     /**
      * Pause, retry and hints buttons
@@ -260,7 +250,7 @@ public class GameScene : GUIScene
         clonedMenuBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float menuBtnXPosition = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
         clonedMenuBtn.transform.localPosition = new Vector3(menuBtnXPosition, 0, 0);
-        GUIInterfaceButton interfaceButton = clonedMenuBtn.GetComponent<GUIInterfaceButton>();
+        GUIButton interfaceButton = clonedMenuBtn.GetComponent<GUIButton>();
         interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 
@@ -269,7 +259,7 @@ public class GameScene : GUIScene
         clonedRetryBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float retryBtnXPosition = menuBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedRetryBtn.transform.localPosition = new Vector3(retryBtnXPosition, 0, 0);
-        interfaceButton = clonedRetryBtn.GetComponent<GUIInterfaceButton>();
+        interfaceButton = clonedRetryBtn.GetComponent<GUIButton>();
         interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 
@@ -278,7 +268,7 @@ public class GameScene : GUIScene
         clonedHintsBtn.transform.parent = m_interfaceButtonsHolder.transform;
         float hintsBtnXPosition = retryBtnXPosition - distanceBetweenButtons - interfaceButtonSize.x;
         clonedHintsBtn.transform.localPosition = new Vector3(hintsBtnXPosition, 0, 0);
-        interfaceButton = clonedHintsBtn.GetComponent<GUIInterfaceButton>();
+        interfaceButton = clonedHintsBtn.GetComponent<GUIButton>();
         interfaceButton.Init();
         interfaceButton.SetSize(interfaceButtonSize);
 

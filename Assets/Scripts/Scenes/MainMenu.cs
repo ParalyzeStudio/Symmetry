@@ -26,16 +26,16 @@ public class MainMenu : GUIScene
         //ShowTitle2(bAnimated, fDelay);
         ShowTitle3(bAnimated, fDelay);
         ShowButtons(bAnimated, 2.0f + fDelay);
-        ShowTapToPlay(bAnimated ? 2.0f + fDelay : 0);
+        //ShowTapToPlay(bAnimated ? 2.0f + fDelay : 0);
 
         if (!bAnimated)
         {
             menuAnimator.SetOpacity(0);
             menuAnimator.FadeTo(1, 0.5f, 1.0f);
-            GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
-            TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
-            tapToPlayAnimator.SetCyclingPaused(true);
-            ShowTapToPlay(1.0f);
+            //GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
+            //TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
+            //tapToPlayAnimator.SetCyclingPaused(true);
+            //ShowTapToPlay(1.0f);
         }
     }
 
@@ -155,45 +155,54 @@ public class MainMenu : GUIScene
 
     public void ShowButtons(bool bAnimated, float fDelay = 0.0f)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        GameObject buttonObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON,
+                                                                  new Vector2(128.0f, 128.0f),
+                                                                  ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
+                                                                  Color.black);
+        buttonObject.transform.parent = this.transform;
+        buttonObject.transform.localPosition = new Vector3(0,0, -100);
 
-        GameObject optionsPanel = GameObject.FindGameObjectWithTag("OptionsPanel");
-        GameObject creditsPanel = GameObject.FindGameObjectWithTag("CreditsPanel");
 
-        GUIInterfaceButton optionsButton = optionsPanel.GetComponentInChildren<GUIInterfaceButton>();
-        GUIInterfaceButton creditsButton = creditsPanel.GetComponentInChildren<GUIInterfaceButton>();
-        optionsButton.Init();
-        creditsButton.Init();
+        //Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
 
-        GameObjectAnimator optionsPanelAnimator = optionsPanel.GetComponent<GameObjectAnimator>();
-        GameObjectAnimator creditsPanelAnimator = creditsPanel.GetComponent<GameObjectAnimator>();
+        //GameObject optionsPanel = GameObject.FindGameObjectWithTag("OptionsPanel");
+        //GameObject creditsPanel = GameObject.FindGameObjectWithTag("CreditsPanel");
 
-        Vector3 optionsPanelFinalPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, optionsPanel.transform.position.z);
-        Vector3 creditsPanelFinalPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, creditsPanel.transform.position.z);
+        //GUIButton optionsButton = optionsPanel.GetComponentInChildren<GUIButton>();
+        //GUIButton creditsButton = creditsPanel.GetComponentInChildren<GUIButton>();
+        //optionsButton.Init();
+        //creditsButton.Init();
 
-        if (bAnimated)
-        {
-            Vector3 optionsPanelFromPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, optionsPanel.transform.position.z);
-            Vector3 creditsPanelFromPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, creditsPanel.transform.position.z);
+        //GameObjectAnimator optionsPanelAnimator = optionsPanel.GetComponent<GameObjectAnimator>();
+        //GameObjectAnimator creditsPanelAnimator = creditsPanel.GetComponent<GameObjectAnimator>();
 
-            optionsPanelAnimator.SetPosition(optionsPanelFromPosition);
-            creditsPanelAnimator.SetPosition(creditsPanelFromPosition);
-            optionsPanelAnimator.TranslateTo(optionsPanelFinalPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-            creditsPanelAnimator.TranslateTo(creditsPanelFinalPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
-        }
-        else
-        {
-            optionsPanelAnimator.SetPosition(optionsPanelFinalPosition);
-            creditsPanelAnimator.SetPosition(creditsPanelFinalPosition);
-        }
+        //Vector3 optionsPanelFinalPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, optionsPanel.transform.position.z);
+        //Vector3 creditsPanelFinalPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y + 175.0f, creditsPanel.transform.position.z);
+
+        //if (bAnimated)
+        //{
+        //    Vector3 optionsPanelFromPosition = new Vector3(optionsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, optionsPanel.transform.position.z);
+        //    Vector3 creditsPanelFromPosition = new Vector3(creditsPanel.transform.position.x, -0.5f * screenSize.y - 175.0f, creditsPanel.transform.position.z);
+
+        //    optionsPanelAnimator.SetPosition(optionsPanelFromPosition);
+        //    creditsPanelAnimator.SetPosition(creditsPanelFromPosition);
+        //    optionsPanelAnimator.TranslateTo(optionsPanelFinalPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+        //    creditsPanelAnimator.TranslateTo(creditsPanelFinalPosition, 0.5f, fDelay + 0.15f, ValueAnimator.InterpolationType.SINUSOIDAL);
+        //}
+        //else
+        //{
+        //    optionsPanelAnimator.SetPosition(optionsPanelFinalPosition);
+        //    creditsPanelAnimator.SetPosition(creditsPanelFinalPosition);
+        //}
     }
 
-    public void ShowTapToPlay(float fDelay = 0.0f)
-    {
-        GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
-        TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
-        tapToPlayAnimator.SetOpacity(0);
-        tapToPlayAnimator.SetTextMeshOpacityCycling(2.0f, true, fDelay);
-    }
+    //public void ShowTapToPlay(float fDelay = 0.0f)
+    //{
+    //    GameObject tapToPlayObject = GameObject.FindGameObjectWithTag("TapToPlay");
+    //    TextMeshAnimator tapToPlayAnimator = tapToPlayObject.GetComponent<TextMeshAnimator>();
+    //    tapToPlayAnimator.SetOpacity(0);
+    //    tapToPlayAnimator.SetTextMeshOpacityCycling(2.0f, true, fDelay);
+    //}
 }
 

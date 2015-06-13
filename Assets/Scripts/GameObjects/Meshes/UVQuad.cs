@@ -8,6 +8,7 @@ public class UVQuad : BaseQuad
     public override void InitQuadMesh()
     {
         base.InitQuadMesh();
+        GetComponent<MeshFilter>().sharedMesh.name = "UVQuad";
 
         //set UVs
         Vector2[] uvs = new Vector2[4];
@@ -49,8 +50,11 @@ public class UVQuad : BaseQuad
      * **/
     public void SetTextureWrapMode(TextureWrapMode texWrapMode)
     {
+        m_textureWrapMode = texWrapMode;
+
         MeshRenderer renderer = GetComponent<MeshRenderer>();
-        renderer.sharedMaterial.mainTexture.wrapMode = m_textureWrapMode;
+        if (renderer.sharedMaterial != null && renderer.sharedMaterial.mainTexture != null)
+            renderer.sharedMaterial.mainTexture.wrapMode = texWrapMode;
     }
 
     /**

@@ -14,11 +14,11 @@ public class GUITouchHandler : TouchHandler
             else
             {
 
-                GUIInterfaceButton[] allInterfaceButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIInterfaceButton>();
+                GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
 
-                for (int i = 0; i != allInterfaceButtons.Length; i++)
+                for (int i = 0; i != allButtons.Length; i++)
                 {
-                    if (allInterfaceButtons[i].ContainsPoint(pointerLocation))
+                    if (allButtons[i].ContainsPoint(pointerLocation))
                     {
                         return true;
                     }
@@ -41,14 +41,14 @@ public class GUITouchHandler : TouchHandler
         bool bClickProcessed = false;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
         if (guiManager.IsOptionsWindowShown()) //an options window is displayed, process it on the window and swallow the click
-            HandleClickOnChildrenInterfaceButtons(guiManager.m_optionsWindow, clickLocation);
+            HandleClickOnChildButtons(guiManager.m_optionsWindow, clickLocation);
         else if (guiManager.IsPauseWindowShown()) //a pause window is displayed, process it on the window and swallow the click
-            HandleClickOnChildrenInterfaceButtons(guiManager.m_pauseWindow, clickLocation);
+            HandleClickOnChildButtons(guiManager.m_pauseWindow, clickLocation);
         else
         {
-            bClickProcessed = HandleClickOnChildrenInterfaceButtons(this.gameObject, clickLocation);
+            bClickProcessed = HandleClickOnChildButtons(this.gameObject, clickLocation);
             if (!bClickProcessed)
-                bClickProcessed = HandleClickOnChildrenInterfaceButtons(currentScene.gameObject, clickLocation);
+                bClickProcessed = HandleClickOnChildButtons(currentScene.gameObject, clickLocation);
             if (!bClickProcessed)
             {
                 if (sceneManager.m_displayedContent == SceneManager.DisplayContent.MENU)
@@ -99,14 +99,14 @@ public class GUITouchHandler : TouchHandler
     /**
      * Processes click on interface buttons that are children of the root object passes as parameter
      * **/
-    public bool HandleClickOnChildrenInterfaceButtons(GameObject rootObject, Vector2 clickLocation)
+    public bool HandleClickOnChildButtons(GameObject rootObject, Vector2 clickLocation)
     {
-        GUIInterfaceButton[] childButtons = rootObject.GetComponentsInChildren<GUIInterfaceButton>();
+        GUIButton[] childButtons = rootObject.GetComponentsInChildren<GUIButton>();
         for (int iButtonIndex = 0; iButtonIndex != childButtons.Length; iButtonIndex++)
         {
-            GUIInterfaceButton button = childButtons[iButtonIndex];
+            GUIButton button = childButtons[iButtonIndex];
             float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(button.transform.position) - clickLocation).magnitude;
-            if (clickLocationToButtonDistance <= button.m_touchAreaRadius)
+            if (button.ContainsPoint(clickLocation))
             {
                 button.OnClick();
                 return true; //swallow the touch by returning
