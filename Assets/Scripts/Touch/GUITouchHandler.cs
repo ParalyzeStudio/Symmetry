@@ -121,7 +121,7 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnMainMenu(Vector2 clickLocation)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //transform the click location in screen rect coordinates
         clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
@@ -130,8 +130,8 @@ public class GUITouchHandler : TouchHandler
         Rect tapToPlayAreaRect = new Rect();
 
         tapToPlayAreaRect.width = screenSize.x;
-        tapToPlayAreaRect.height = 0.25f * screenSize.y;
-        tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y);
+        tapToPlayAreaRect.height = 175.0f;
+        tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
 
         if (tapToPlayAreaRect.Contains(clickLocation))
             OnClickTapToPlay();

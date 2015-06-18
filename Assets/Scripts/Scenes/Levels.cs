@@ -43,7 +43,7 @@ public class Levels : GUIScene
      * **/
     public void CreateLevelsHolder()
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         m_levelsHolder = new GameObject("LevelsHolder");
         m_levelsHolder.transform.parent = this.gameObject.transform;
@@ -56,7 +56,7 @@ public class Levels : GUIScene
      * **/
     private void InitLevelsGridHeight()
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         float topFrameHeight = 0.144f * screenSize.y; //the height of the top frame containing back button and title
         float bottomFrameHeight = 0.078f * screenSize.y; //the height of the bottom frame containing chapter info
@@ -69,7 +69,7 @@ public class Levels : GUIScene
     **/
     public void ShowTitle(float fDelay = 0.0f)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         GameObject titleObject = (GameObject)Instantiate(m_levelsTitlePfb);
         titleObject.transform.parent = this.gameObject.transform;
@@ -86,7 +86,7 @@ public class Levels : GUIScene
     **/
     public void ShowChapterInfo(float fDelay = 0.0f)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 
         GameObject chapterInfoObject = (GameObject)Instantiate(m_chapterInfoPfb);

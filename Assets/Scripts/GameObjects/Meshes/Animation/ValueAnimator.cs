@@ -12,7 +12,7 @@ public class ValueAnimator : MonoBehaviour
 
     //Variables to handle fading
     protected bool m_fading;
-    public float m_opacity = 1;
+    public float m_opacity;
     protected float m_fromOpacity;
     protected float m_toOpacity;
     protected float m_fadingDuration;
@@ -432,6 +432,8 @@ public class ValueAnimator : MonoBehaviour
         //when we modify the opacity value directly in the inspector in edit mode
         if (m_prevOpacity != m_opacity)
         {
+            if (this is TriangleAnimator)
+                Debug.Log("m_prevOpacity:" + m_prevOpacity + " m_opacity:" + m_opacity);
             SetOpacity(m_opacity);
             return;
         }

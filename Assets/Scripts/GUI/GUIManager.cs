@@ -5,6 +5,8 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
+    public const float BACKGROUND_TRIANGLES_Z_VALUE = -5.0f;
+
     public GameObject m_GUIDiamondShapeButtonPfb; //the prefab to create a diamond-shaped gui button with default skin, background and shadow
     public GameObject m_GUISkinOnlyButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
@@ -34,6 +36,10 @@ public class GUIManager : MonoBehaviour
     {
         m_optionsWindow = null;
         BuildFrames();
+
+        GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
+        backgroundObject.GetComponentInChildren<BackgroundTrianglesRenderer>().Init();
+        backgroundObject.transform.localPosition = new Vector3(0, 0, BACKGROUND_TRIANGLES_Z_VALUE);
     }
 
     /**
@@ -78,6 +84,9 @@ public class GUIManager : MonoBehaviour
         button.SetSkinMaterial(clonedSkinMaterial);
         button.SetBackgroundMaterial(clonedBackgroundMaterial);
         button.SetShadowMaterial(clonedShadowMaterial);
+
+        //add an animator
+        buttonObject.AddComponent<GameObjectAnimator>();
 
         return buttonObject;
     }
@@ -212,7 +221,7 @@ public class GUIManager : MonoBehaviour
      * **/
     public void BuildFrames()
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
         GameObject topFrame = (GameObject)Instantiate(m_GUIFramePfb);
@@ -248,7 +257,7 @@ public class GUIManager : MonoBehaviour
         GUIFrameAnimator topFrameAnimator = framesAnimators[0];
         GUIFrameAnimator middleFrameAnimator = framesAnimators[1];
 
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         if (contentToDisplay == SceneManager.DisplayContent.MENU)
         {
@@ -317,7 +326,7 @@ public class GUIManager : MonoBehaviour
         GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
         if (backButton == null)
         {
-            Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+            Vector2 screenSize = ScreenUtils.GetScreenSize();
 
             GameObject clonedBackButtonObject = (GameObject)Instantiate(m_backButtonPfb);
             clonedBackButtonObject.transform.parent = this.gameObject.transform;

@@ -40,7 +40,6 @@ public class GameObjectAnimator : ValueAnimator
      * **/
     public void UpdatePivotPointPosition(Vector3 pivotPointPosition)
     {
-        //m_pivotPointPosition = pivotPointPosition;
         m_position = pivotPointPosition;
 
         Vector3 objectLocalPosition = this.transform.localPosition;

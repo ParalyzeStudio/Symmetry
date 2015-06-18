@@ -31,14 +31,13 @@ public class GameController : MonoBehaviour
         m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
 
-        //set correct size for background
+        //Set up background fill color
         GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
-        backgroundObject.GetComponent<BackgroundAdaptativeSize>().InvalidateSize();
-        
-        //debug gui
-        GameObject guiObject = GameObject.FindGameObjectWithTag("GUIManager");
-        BackgroundTrianglesRenderer trianglesRenderer = guiObject.GetComponentInChildren<BackgroundTrianglesRenderer>();
-        trianglesRenderer.Init();
+        ColorQuad fillQuad = backgroundObject.GetComponentInChildren<ColorQuad>();
+        fillQuad.InitQuadMesh();
+        ColorQuadAnimator fillQuadAnimator = backgroundObject.GetComponentInChildren<ColorQuadAnimator>();
+        fillQuadAnimator.SetColor(Color.red);
+        fillQuadAnimator.gameObject.transform.localScale = ScreenUtils.GetScreenSize();
 
         //parse xml levels files
         m_levelManager.ParseAllLevels();
@@ -47,14 +46,15 @@ public class GameController : MonoBehaviour
         PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
         persistentDataManager.CreateAndInitAllLevelData();
 
+        //Init the GUIManager
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.Init();
+        //guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
+        //guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
+
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 2.0f);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
-
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.Init();
-        guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
-        //guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
 
         //TouchHandler.s_touchDeactivated = false;
 

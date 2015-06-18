@@ -64,14 +64,14 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         m_parentRenderer.UpdateMeshColorsArrayForColumn(this);
     }
 
-    public void SwitchTrianglesVisibilityStatusBetweenIndices(int startIndex, int endIndex, float fDelay = 0.0f)
+    public void SwitchTrianglesVisibilityStatusBetweenIndices(bool bAnimated, int startIndex, int endIndex, float fDelay = 0.0f)
     {
         //Turn on the animation pending value for every triangle in this block
         for (int i = startIndex; i != endIndex + 1; i++)
         {
             int relativeIndex = i - startIndex;
 
-            this[i].ToggleVisibility(true, 2.5f, fDelay + relativeIndex * BackgroundTriangleColumn.COLOR_INVALIDATION_STEP);
+            this[i].ToggleVisibility(bAnimated, 2.5f, fDelay + relativeIndex * BackgroundTriangleColumn.COLOR_INVALIDATION_STEP);
         }
     }
 }

@@ -420,11 +420,7 @@ public class BackgroundTriangle : BaseTriangle
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public bool m_hidden { get; set; } //is this triangle hidden? (i.e replaced by a triangle of the color of default background)
-
-    //Variables to handle this triangle as a column leader
-    public bool m_leader { get; set; }
-    public int m_leaderStopIndex { get; set; }
-    public Color m_leaderTargetColor { get; set; } //the color the triangles behind their leader have to reach
+    public float m_edgeLength { get; set; }
 
     //Variables to handle color animation of this triangle
     public Color m_animationStartColor; //the color when the animation starts
@@ -444,9 +440,6 @@ public class BackgroundTriangle : BaseTriangle
         m_parentColumn = other.m_parentColumn;
         m_hidden = other.m_hidden;
 
-        m_leaderStopIndex = other.m_leaderStopIndex;
-        m_leaderTargetColor = other.m_leaderTargetColor;
-
         m_colorAnimating = other.m_colorAnimating;
         m_colorAnimatingElapsedTime = other.m_colorAnimatingElapsedTime;
         m_colorAnimatingDuration = other.m_colorAnimatingDuration;
@@ -460,7 +453,9 @@ public class BackgroundTriangle : BaseTriangle
      * **/
     public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color) : base()
     {
-        float H = Mathf.Sqrt(3) / 2 * edgeLength;
+        m_edgeLength = edgeLength;
+
+        float H = Mathf.Sqrt(3) / 2 * edgeLength * 0.95f;
 
         Vector2 bisector0 = new Vector2(1, 0); //angle 0
         Vector2 bisector1 = new Vector2(-0.5f, -Mathf.Sqrt(3) / 2); //angle -2 * PI / 3
@@ -545,6 +540,14 @@ public class BackgroundTriangle : BaseTriangle
     public Color GetTrueColor()
     {
         return m_color;
+    }
+
+    /* 
+     * Set the true color of this triangle
+     * */
+    public void SetTrueColor(Color color)
+    {
+        m_color = color;
     }
 
     /**

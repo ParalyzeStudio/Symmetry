@@ -233,7 +233,7 @@ public class GameScene : GUIScene
      * **/
     private void ShowInterfaceButtons(float fDelay)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
         Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
 
         m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
@@ -300,7 +300,7 @@ public class GameScene : GUIScene
      * **/
     private void ShowCounter(float fDelay)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         m_counter = this.gameObject.GetComponentInChildren<Counter>();
         m_counter.gameObject.transform.parent = this.gameObject.transform;

@@ -17,7 +17,7 @@ public class Chapters : GUIScene
 
     public void CreateChaptersHolder()
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         m_chaptersHolder = new GameObject("ChaptersHolder");
         m_chaptersHolder.transform.parent = this.gameObject.transform;
@@ -55,7 +55,7 @@ public class Chapters : GUIScene
 
     public void ShowTitle(bool bAnimated, float fDelay = 0.0f)
     {
-        Vector2 screenSize = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundAdaptativeSize>().m_screenSizeInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         GameObject titleObject = (GameObject)Instantiate(m_chaptersTitlePfb);
         titleObject.transform.parent = this.gameObject.transform;

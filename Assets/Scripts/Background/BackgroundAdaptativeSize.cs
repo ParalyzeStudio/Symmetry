@@ -6,7 +6,6 @@ public class BackgroundAdaptativeSize : MonoBehaviour
 {
     private Vector2 m_designScreenSize; //the size of the background as it was designed in photoshop
     private float m_previousCameraSize;
-    public Vector2 m_screenSizeInUnits { get; set; }
 
     void Awake()
     {
@@ -50,13 +49,12 @@ public class BackgroundAdaptativeSize : MonoBehaviour
                 fBackgroundHeightInUnits = fBackgroundWidthInUnits / fDesignScreenRatio; //we scale the height (borders are cropped)
             }
 
-            m_screenSizeInUnits = new Vector2(fScreenWidthInUnits, fScreenHeightInUnits);
-            //this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
+            this.transform.localScale = new Vector3(fBackgroundWidthInUnits, fBackgroundHeightInUnits, 1);
         }
     }
 
-	public void Update() 
+    public void Update()
     {
         InvalidateSize();
-	}
+    }
 }
