@@ -15,8 +15,6 @@ public class TexturedQuadAnimator : GameObjectAnimator
         base.SetColor(color);
 
         UVQuad texturedQuad = this.GetComponent<UVQuad>();
-        if (texturedQuad == null)
-            Debug.Log("STOP");
         texturedQuad.SetTintColor(color);
     }
 }

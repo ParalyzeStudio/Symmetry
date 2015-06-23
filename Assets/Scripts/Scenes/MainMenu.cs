@@ -6,8 +6,25 @@ public class MainMenu : GUIScene
     public const float GUI_BUTTONS_Z_VALUE = -10.0f;
     public const float PLAY_BANNER_Z_VALUE = -10.0f;
 
-    public GameObject m_playTextPfb;
+    //buttons
+    public GameObject m_optionsButtonObject { get; set; }
+    public GameObject m_creditsButtonObject { get; set; }
+
+    //play banner
+    public GameObject m_playBannerPfb;
+    public GameObject m_playBannerObject { get; set; }
     public Material m_playBannerMaterial;
+
+    public bool m_isPlayBannerDisplayed { get; set; }
+    private bool m_isPlayBannerAnimating;
+    private float m_playBannerAnimationElapsedTime;
+    private float m_playBannerAnimationDuration;
+
+    public void Awake()
+    {
+        m_isPlayBannerDisplayed = false;
+        m_isPlayBannerAnimating = false;
+    }
 
     /**
      * Shows MainMenu with or without animation
@@ -46,83 +63,78 @@ public class MainMenu : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        GameObject bannerObject = new GameObject("PlayBanner"); //holder
-        bannerObject.transform.parent = this.transform;
+        m_playBannerObject = (GameObject)Instantiate(m_playBannerPfb);
+        m_playBannerObject.transform.parent = this.transform;
+        m_playBannerObject.transform.localPosition = new Vector3(0, -240.0f, PLAY_BANNER_Z_VALUE);
+
+        ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
+        GameObject redFrameObject = childFrames[0].gameObject;
+        GameObject whiteFrameObject = childFrames[1].gameObject;
+        GameObject darkFrameObject = childFrames[2].gameObject;
+
+        GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
+
+        TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
+        GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
+        GameObject backTriangleObject = childPlayTriangles[1].gameObject;
 
         //Red frame
-        float redFrameYPosition = -240.0f;
         float redFrameScaleDuration = 0.8f;
-        Vector3 redFramePosition = new Vector3(-0.5f * screenSize.x, redFrameYPosition, PLAY_BANNER_Z_VALUE);
+        Vector3 redFramePosition = new Vector3(-0.5f * screenSize.x, 0, 0);
         float redFrameHeight = 175.0f;
-
-        GameObject redFrameObject = new GameObject("RedFrame");
-        redFrameObject.transform.parent = bannerObject.transform;
-        redFrameObject.transform.localPosition = redFramePosition;
-
-        redFrameObject.AddComponent<MeshFilter>();
         
-        ColorQuad redFrameColorQuad = redFrameObject.AddComponent<ColorQuad>();
+        ColorQuad redFrameColorQuad = redFrameObject.GetComponent<ColorQuad>();
         redFrameColorQuad.InitQuadMesh();
-        
-        MeshRenderer redFrameRenderer = redFrameObject.AddComponent<MeshRenderer>();
+
+        MeshRenderer redFrameRenderer = redFrameObject.GetComponent<MeshRenderer>();
         redFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
-        ColorQuadAnimator redFrameAnimator = redFrameObject.AddComponent<ColorQuadAnimator>();
+        ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
         redFrameAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(219, 0, 47, 255)));
         redFrameAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
+        redFrameAnimator.SetPosition(redFramePosition);
         redFrameAnimator.SetScale(new Vector3(0, redFrameHeight, 1));
         redFrameAnimator.ScaleTo(new Vector3(screenSize.x, redFrameHeight, 1), redFrameScaleDuration, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
         //White frame
-        Vector3 whiteFramePosition = new Vector3(0, redFrameYPosition - 0.5f * redFrameHeight, PLAY_BANNER_Z_VALUE);
+        Vector3 whiteFramePosition = new Vector3(0, -0.5f * redFrameHeight, 0);
         float whiteFrameScaleDuration = 0.2f;
 
-        GameObject whiteFrameObject = new GameObject("WhiteFrame");
-        whiteFrameObject.transform.parent = bannerObject.transform;
-        whiteFrameObject.transform.localPosition = whiteFramePosition;
-
-        whiteFrameObject.AddComponent<MeshFilter>();
-
-        ColorQuad whiteFrameColorQuad = whiteFrameObject.AddComponent<ColorQuad>();
+        ColorQuad whiteFrameColorQuad = whiteFrameObject.GetComponent<ColorQuad>();
         whiteFrameColorQuad.InitQuadMesh();
 
-        MeshRenderer whiteFrameRenderer = whiteFrameObject.AddComponent<MeshRenderer>();
+        MeshRenderer whiteFrameRenderer = whiteFrameObject.GetComponent<MeshRenderer>();
         whiteFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
-        ColorQuadAnimator whiteFrameAnimator = whiteFrameObject.AddComponent<ColorQuadAnimator>();
+        ColorQuadAnimator whiteFrameAnimator = whiteFrameObject.GetComponent<ColorQuadAnimator>();
         whiteFrameAnimator.SetColor(Color.white);
         whiteFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+        whiteFrameAnimator.SetPosition(whiteFramePosition);
         whiteFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
         whiteFrameAnimator.ScaleTo(new Vector3(screenSize.x, 4.0f, 1), whiteFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
 
         //Dark frame
-        Vector3 darkFramePosition = new Vector3(0, redFrameYPosition - 0.5f * redFrameHeight, PLAY_BANNER_Z_VALUE + 1);
+        Vector3 darkFramePosition = new Vector3(0, -0.5f * redFrameHeight, 1);
         float darkFrameScaleDuration = 0.4f;
 
-        GameObject darkFrameObject = new GameObject("DarkFrame");
-        darkFrameObject.transform.parent = bannerObject.transform;
-        darkFrameObject.transform.localPosition = darkFramePosition;
-
-        darkFrameObject.AddComponent<MeshFilter>();
-
-        ColorQuad darkFrameColorQuad = darkFrameObject.AddComponent<ColorQuad>();
+        ColorQuad darkFrameColorQuad = darkFrameObject.GetComponent<ColorQuad>();
         darkFrameColorQuad.InitQuadMesh();
 
-        MeshRenderer darkFrameRenderer = darkFrameObject.AddComponent<MeshRenderer>();
+        MeshRenderer darkFrameRenderer = darkFrameObject.GetComponent<MeshRenderer>();
         darkFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
         ColorQuadAnimator darkFrameAnimator = darkFrameObject.AddComponent<ColorQuadAnimator>();
         darkFrameAnimator.SetColor(Color.black);
         darkFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+        darkFrameAnimator.SetPosition(darkFramePosition);
         darkFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
         darkFrameAnimator.ScaleTo(new Vector3(screenSize.x, 12.0f, 1), darkFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
 
         //Play text label
         float playButtonFadeDuration = 0.5f;
 
-        GameObject playTextObject = (GameObject)Instantiate(m_playTextPfb);
-        playTextObject.transform.localPosition = new Vector3(0, redFrameYPosition, PLAY_BANNER_Z_VALUE - 5);
-        playTextObject.transform.parent = bannerObject.transform;
+        playTextObject.transform.localPosition = new Vector3(0, 0, -1);
+        playTextObject.transform.parent = m_playBannerObject.transform;
 
         TextMesh playTextMesh = playTextObject.GetComponent<TextMesh>();
         playTextMesh.text = LanguageUtils.GetTranslationForTag("play");
@@ -133,10 +145,10 @@ public class MainMenu : GUIScene
         playTextAnimator.FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
 
         //Play triangles
-        GameObject playTrianglesObject = new GameObject("PlayTriangles");
-        playTrianglesObject.AddComponent<GameObjectAnimator>();
-        playTrianglesObject.transform.parent = bannerObject.transform;
-        playTrianglesObject.transform.localPosition = new Vector3(0.5f * playTextMeshSize.x + 60.0f, redFrameYPosition, PLAY_BANNER_Z_VALUE - 5);
+        GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
+        playTrianglesObject.transform.localPosition = new Vector3(playTextMeshSize.x + 20.0f, 0, -1);
+        playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
+
 
         float triangleScale = 20.0f;
 
@@ -145,35 +157,72 @@ public class MainMenu : GUIScene
         triangleVertices[1] = triangleScale * new Vector2(-0.5f, -1.0f);
         triangleVertices[2] = triangleScale * new Vector2(0.5f, 0.0f);
 
-        //Triangle1
-        Color triangle1Color = Color.white;
+        //Front triangle
+        Color frontTriangleColor = Color.white;
+        
+        frontTriangleObject.transform.parent = frontTriangleObject.transform;
+        frontTriangleObject.transform.localPosition = new Vector3(0, 0, -1);
 
-        GameObject triangle1Object = new GameObject("FrontTriangle");
-        TriangleAnimator triangle1Animator = triangle1Object.AddComponent<TriangleAnimator>();
-        triangle1Object.transform.parent = playTrianglesObject.transform;
-        triangle1Object.transform.localPosition = new Vector3(0, 0, -1);
-        TriangleMesh triangleMesh = triangle1Object.AddComponent<TriangleMesh>();
+        TriangleMesh triangleMesh = frontTriangleObject.GetComponent<TriangleMesh>();
         triangleMesh.Init(Instantiate(m_playBannerMaterial));
-        triangleMesh.Render(triangleVertices, triangle1Color, false);
+        triangleMesh.Render(triangleVertices, frontTriangleColor, false);
 
-        triangle1Animator.SetColor(triangle1Color);
-        triangle1Animator.SetOpacity(0);
-        triangle1Animator.FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
+        TriangleAnimator frontTriangleAnimator = frontTriangleObject.AddComponent<TriangleAnimator>();
+        frontTriangleAnimator.SetColor(frontTriangleColor);
+        frontTriangleAnimator.SetOpacity(0);
 
-        //Triangle2
-        Color triangle2Color = ColorUtils.GetColorFromRGBAVector4(new Vector4(50, 50, 50, 255));
+        //Back triangle
+        Color backTriangleColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(50, 50, 50, 255));
 
-        GameObject triangle2Object = new GameObject("ShadowTriangle");
-        TriangleAnimator triangle2Animator = triangle2Object.AddComponent<TriangleAnimator>();
-        triangle2Object.transform.parent = playTrianglesObject.transform;
-        triangle2Object.transform.localPosition = Vector3.zero;
-        triangleMesh = triangle2Object.AddComponent<TriangleMesh>();
+        triangleMesh = backTriangleObject.AddComponent<TriangleMesh>();
         triangleMesh.Init(Instantiate(m_playBannerMaterial));
-        triangleMesh.Render(triangleVertices, triangle2Color, false);
+        triangleMesh.Render(triangleVertices, backTriangleColor, false);
 
-        triangle2Animator.SetOpacity(0);
-        triangle2Animator.FadeTo(1.0f, 0.1f, fDelay + redFrameScaleDuration + playButtonFadeDuration);
-        triangle2Animator.TranslateTo(new Vector3(3, -3, 0), 0.3f, fDelay + redFrameScaleDuration + playButtonFadeDuration);
+        TriangleAnimator backTriangleAnimator = backTriangleObject.AddComponent<TriangleAnimator>();
+        backTriangleAnimator.SetOpacity(0);
+        backTriangleAnimator.TranslateTo(new Vector3(3, -3, 0), 0.3f, fDelay + redFrameScaleDuration + playButtonFadeDuration);
+
+        //Set the play banner as 'displayed' after animation ended
+        m_isPlayBannerAnimating = true;
+        m_playBannerAnimationDuration = fDelay + redFrameScaleDuration + playButtonFadeDuration;
+        m_playBannerAnimationElapsedTime = 0;
+    }
+
+    /**
+     * Removes the play banner with animation and eventually destroy it at the end of this animation
+     * **/
+    public void DismissPlayBanner()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
+        GameObject redFrameObject = childFrames[0].gameObject;
+        GameObject whiteFrameObject = childFrames[1].gameObject;
+        GameObject darkFrameObject = childFrames[2].gameObject;
+
+        GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
+
+        TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
+        GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
+        GameObject backTriangleObject = childPlayTriangles[1].gameObject;
+
+        //white and dark frames
+        whiteFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.2f, 0.0f);
+        darkFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.4f, 0.0f);
+
+        //red frame
+        ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
+        redFrameAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.0f));
+        redFrameAnimator.ScaleTo(new Vector3(0, redFrameAnimator.transform.localScale.y, redFrameAnimator.transform.localScale.z), 0.8f, 0.4f);
+
+        //Play triangles
+        GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
+        playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
+
+        //Play text
+        playTextObject.GetComponent<TextMeshAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
+
+        m_isPlayBannerDisplayed = false;
     }
 
     /**
@@ -186,25 +235,27 @@ public class MainMenu : GUIScene
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
 
         //Options button
-        GameObject optionsButtonObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
+        m_optionsButtonObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
                                                                          new Vector2(128.0f, 128.0f),
                                                                          ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
                                                                          Color.black);
+        m_optionsButtonObject.name = "OptionsButton";
 
-        optionsButtonObject.transform.parent = this.transform;
+        m_optionsButtonObject.transform.parent = this.transform;
 
-        GameObjectAnimator optionsButtonAnimator = optionsButtonObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator optionsButtonAnimator = m_optionsButtonObject.GetComponent<GameObjectAnimator>();
         Vector3 optionsButtonFinalPosition = new Vector3(-200.0f, -0.5f * screenSize.y + 150.0f, GUI_BUTTONS_Z_VALUE);
 
         //Credits button
-        GameObject creditsButtonObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CREDITS_BUTTON,
+        m_creditsButtonObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CREDITS_BUTTON,
                                                                          new Vector2(128.0f, 128.0f),
                                                                          ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
                                                                          Color.black);
+        m_creditsButtonObject.name = "CreditsButton";
 
-        creditsButtonObject.transform.parent = this.transform;
-        
-        GameObjectAnimator creditsButtonAnimator = creditsButtonObject.GetComponent<GameObjectAnimator>();
+        m_creditsButtonObject.transform.parent = this.transform;
+
+        GameObjectAnimator creditsButtonAnimator = m_creditsButtonObject.GetComponent<GameObjectAnimator>();
         Vector3 creditsButtonFinalPosition = new Vector3(200.0f, -0.5f * screenSize.y + 150.0f, GUI_BUTTONS_Z_VALUE);
 
         if (bAnimated)
@@ -221,6 +272,36 @@ public class MainMenu : GUIScene
         {
             optionsButtonAnimator.SetPosition(optionsButtonFinalPosition);
             creditsButtonAnimator.SetPosition(creditsButtonFinalPosition);
+        }
+    }
+
+    public void DismissButtons()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        GameObjectAnimator optionsButtonAnimator = m_optionsButtonObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator creditsButtonAnimator = m_creditsButtonObject.GetComponent<GameObjectAnimator>();
+
+        Vector3 optionsButtonFinalPosition = new Vector3(-200.0f, -0.5f * screenSize.y - 150.0f, GUI_BUTTONS_Z_VALUE);
+        Vector3 creditsButtonFinalPosition = new Vector3(200.0f, -0.5f * screenSize.y - 150.0f, GUI_BUTTONS_Z_VALUE);
+
+        optionsButtonAnimator.TranslateTo(optionsButtonFinalPosition, 0.5f, 0, ValueAnimator.InterpolationType.SINUSOIDAL);
+        creditsButtonAnimator.TranslateTo(creditsButtonFinalPosition, 0.5f, 0, ValueAnimator.InterpolationType.SINUSOIDAL);
+    }
+
+    public override void Update()
+    {
+        base.Update();
+
+        float dt = Time.deltaTime;
+
+        if (m_isPlayBannerAnimating)
+        {
+            m_playBannerAnimationElapsedTime += dt;
+            if (m_playBannerAnimationElapsedTime >= m_playBannerAnimationDuration)
+            {
+                m_isPlayBannerDisplayed = true;
+            }
         }
     }
 }

@@ -196,7 +196,7 @@ public class Symmetrizer : MonoBehaviour
                         ShapeTriangle splitTriangle = splitTriangles[i];
                         splitTriangle.m_color = triangle.m_color;
 
-                        Vector2 triangleBarycentre = splitTriangle.GetBarycentre();
+                        Vector2 triangleBarycentre = splitTriangle.GetCenter();
                         float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
 
                         //the triangle barycentre is on the side of the line we want
@@ -215,7 +215,7 @@ public class Symmetrizer : MonoBehaviour
                 }
                 else
                 {
-                    Vector2 triangleBarycentre = triangle.GetBarycentre();
+                    Vector2 triangleBarycentre = triangle.GetCenter();
                     float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
 
                     //the triangle barycentre is on the side of the line we want

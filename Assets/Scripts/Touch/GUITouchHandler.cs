@@ -78,10 +78,23 @@ public class GUITouchHandler : TouchHandler
     /**
      * The user clicked on the tap to play area
      * **/
-    public void OnClickTapToPlay()
+    public void OnClickPlay()
     {
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
+        MainMenu mainMenu = (MainMenu)sceneManager.m_currentScene;
+
+        //dismiss play banner        
+        mainMenu.DismissPlayBanner();
+
+        //dismiss buttons
+        mainMenu.DismissButtons();
+
+        //apply new gradient to triangles
+        BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        backgroundRenderer.RenderForChapter(Color.black, Color.red, true, 0.0f);
+
+        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
     }
 
     /**
@@ -122,19 +135,23 @@ public class GUITouchHandler : TouchHandler
     public void HandleClickOnMainMenu(Vector2 clickLocation)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
+        MainMenu mainMenu = (MainMenu) GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         //transform the click location in screen rect coordinates
         clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
         clickLocation.y = -clickLocation.y + screenSize.y;
 
-        Rect tapToPlayAreaRect = new Rect();
+        if (mainMenu.m_isPlayBannerDisplayed)
+        {
+            Rect tapToPlayAreaRect = new Rect();
 
-        tapToPlayAreaRect.width = screenSize.x;
-        tapToPlayAreaRect.height = 175.0f;
-        tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
+            tapToPlayAreaRect.width = screenSize.x;
+            tapToPlayAreaRect.height = 175.0f;
+            tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
 
-        if (tapToPlayAreaRect.Contains(clickLocation))
-            OnClickTapToPlay();
+            if (tapToPlayAreaRect.Contains(clickLocation))
+                OnClickPlay();
+        }
     }
 
     /**

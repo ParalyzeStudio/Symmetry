@@ -6,6 +6,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public const int NUM_COLUMNS = 25;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
+    public int m_numTrianglesPerColumn { get; set; }
     public Material m_triangleMaterial;
     public Mesh m_mesh { get; set; }
     public bool m_meshBuilt { get; set; }
@@ -14,9 +15,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public Vector3[] m_meshVertices { get; set; }
     public int[] m_meshTriangles { get; set; }
     public Color[] m_meshColors { get; set; }
-    private bool m_meshVerticesDirty;
-    private bool m_meshTrianglesDirty;
-    private bool m_meshColorsDirty;
+    public bool m_meshVerticesDirty { get; set; }
+    public bool m_meshTrianglesDirty { get; set; }
+    public bool m_meshColorsDirty { get; set; }
 
     //Variables to handle the delayed rendering of main title
     private bool m_renderingMainMenuTitle;
@@ -58,20 +59,18 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         float triangleHeight = screenSize.x / (float) NUM_COLUMNS;
         float triangleEdgeLength = 2 / Mathf.Sqrt(3) * triangleHeight;
 
-        float fNumberOfColumnTriangles = (screenSize.y - 0.5f * triangleEdgeLength) / triangleEdgeLength;
-        int numberOfColumnTriangles = (int)Mathf.Floor(fNumberOfColumnTriangles);
-        if (fNumberOfColumnTriangles != numberOfColumnTriangles) //no floating part
-            numberOfColumnTriangles += 1; //just round to the next integer
-        numberOfColumnTriangles += 1; //add the first (half) triangle
-        numberOfColumnTriangles *= 2; //multiply by 2 because there are 2 series of opposite trying forming one column
-        int numberOfTriangles = NUM_COLUMNS * numberOfColumnTriangles;
-        //float colorPercentageStep = 100 / (float)(numberOfTriangles - 1);
-        //float colorPercentage = 0.0f;
+        float fNumberOfTrianglesInColumn = (screenSize.y - 0.5f * triangleEdgeLength) / triangleEdgeLength;
+        m_numTrianglesPerColumn = (int)Mathf.Floor(fNumberOfTrianglesInColumn);
+        if (fNumberOfTrianglesInColumn != m_numTrianglesPerColumn) //no floating part
+            m_numTrianglesPerColumn += 1; //just round to the next integer
+        m_numTrianglesPerColumn += 1; //add the first (half) triangle
+        m_numTrianglesPerColumn *= 2; //multiply by 2 because there are 2 series of opposite trying forming one column
+        int numberOfTriangles = NUM_COLUMNS * m_numTrianglesPerColumn;
 
         //Set up correct sizes for mesh arrays
-        m_meshVertices = new Vector3[3 * numberOfTriangles + 4];
-        m_meshTriangles = new int[3 * numberOfTriangles + 6];
-        m_meshColors = new Color[3 * numberOfTriangles + 4];
+        m_meshVertices = new Vector3[6 * numberOfTriangles]; //6 vertices per triangle because 2 sides of different colors
+        m_meshTriangles = new int[6 * numberOfTriangles]; //double sided triangles
+        m_meshColors = new Color[6 * numberOfTriangles]; //double sided triangles
         m_meshVerticesDirty = true;
         m_meshTrianglesDirty = true;
         m_meshColorsDirty = true;
@@ -80,14 +79,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         {
             BackgroundTriangleColumn column = new BackgroundTriangleColumn(this, i);
 
-            for (int j = 0; j != numberOfColumnTriangles; j++)
+            for (int j = 0; j != m_numTrianglesPerColumn; j++)
             {
-                //Color triangleColor = ColorUtils.GetRainbowColorAtPercentage(colorPercentage);
-                //colorPercentage += colorPercentageStep;
-                //if (colorPercentage > 100)
-                //    colorPercentage = 100;
-                //Color triangleColor = Color.white;
-
                 float trianglePositionY = screenSize.y - 0.5f * j * triangleEdgeLength;
                 trianglePositionY -= 0.5f * screenSize.y;
 
@@ -105,49 +98,42 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 }
                 trianglePositionX -= 0.5f * screenSize.x;
 
-                Color triangleColor = GetDefaultBackgroundColor();
-                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor);
+                Color defaultTriangleColor = GetDefaultBackgroundColor();
+                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, defaultTriangleColor, defaultTriangleColor);
                 triangle.m_indexInColumn = j;
                 triangle.m_parentColumn = column;
-                triangle.m_hidden = true; //hide the triangle when building the mesh
                 column.AddTriangle(triangle);
 
                 //Fill in the mesh
-                int triangleGlobalIndex = i * numberOfColumnTriangles + j;
+                int triangleGlobalIndex = i * m_numTrianglesPerColumn + j;
+                int triangleFirstVertexIndex = 6 * triangleGlobalIndex;
 
-                //vertices
-                m_meshVertices[3 * triangleGlobalIndex] = triangle.m_points[0];
-                m_meshVertices[3 * triangleGlobalIndex + 1] = triangle.m_points[1];
-                m_meshVertices[3 * triangleGlobalIndex + 2] = triangle.m_points[2];
+                //vertices                
+                m_meshVertices[triangleFirstVertexIndex] = triangle.m_points[0];
+                m_meshVertices[triangleFirstVertexIndex + 1] = triangle.m_points[1];
+                m_meshVertices[triangleFirstVertexIndex + 2] = triangle.m_points[2];
+                m_meshVertices[triangleFirstVertexIndex + 3] = triangle.m_points[0];
+                m_meshVertices[triangleFirstVertexIndex + 4] = triangle.m_points[2];
+                m_meshVertices[triangleFirstVertexIndex + 5] = triangle.m_points[1];
 
                 //indices
-                m_meshTriangles[3 * triangleGlobalIndex] = 3 * triangleGlobalIndex;
-                m_meshTriangles[3 * triangleGlobalIndex + 1] = 3 * triangleGlobalIndex + 1;
-                m_meshTriangles[3 * triangleGlobalIndex + 2] = 3 * triangleGlobalIndex + 2;
+                m_meshTriangles[triangleFirstVertexIndex] = triangleFirstVertexIndex;
+                m_meshTriangles[triangleFirstVertexIndex + 1] = triangleFirstVertexIndex + 1;
+                m_meshTriangles[triangleFirstVertexIndex + 2] = triangleFirstVertexIndex + 2;
+                m_meshTriangles[triangleFirstVertexIndex + 3] = triangleFirstVertexIndex + 3;
+                m_meshTriangles[triangleFirstVertexIndex + 4] = triangleFirstVertexIndex + 4;
+                m_meshTriangles[triangleFirstVertexIndex + 5] = triangleFirstVertexIndex + 5;
 
                 //colors
-                m_meshColors[3 * triangleGlobalIndex] = triangleColor;
-                m_meshColors[3 * triangleGlobalIndex + 1] = triangleColor;
-                m_meshColors[3 * triangleGlobalIndex + 2] = triangleColor;
+                m_meshColors[triangleFirstVertexIndex] = defaultTriangleColor;
+                m_meshColors[triangleFirstVertexIndex + 1] = defaultTriangleColor;
+                m_meshColors[triangleFirstVertexIndex + 2] = defaultTriangleColor;
+                m_meshColors[triangleFirstVertexIndex + 3] = defaultTriangleColor;
+                m_meshColors[triangleFirstVertexIndex + 4] = defaultTriangleColor;
+                m_meshColors[triangleFirstVertexIndex + 5] = defaultTriangleColor;
             }
 
             m_triangleColumns.Add(column);
-        }
-
-        //Build a solid quad background behind triangles
-        m_meshVertices[3 * numberOfTriangles] = new Vector3(-0.5f * screenSize.x, -0.5f * screenSize.y, 1);
-        m_meshVertices[3 * numberOfTriangles + 1] = new Vector3(0.5f * screenSize.x, -0.5f * screenSize.y, 1);
-        m_meshVertices[3 * numberOfTriangles + 2] = new Vector3(0.5f * screenSize.x, 0.5f * screenSize.y, 1);
-        m_meshVertices[3 * numberOfTriangles + 3] = new Vector3(-0.5f * screenSize.x, 0.5f * screenSize.y, 1);
-        m_meshTriangles[3 * numberOfTriangles] = 0;
-        m_meshTriangles[3 * numberOfTriangles + 1] = 2;
-        m_meshTriangles[3 * numberOfTriangles + 2] = 1;
-        m_meshTriangles[3 * numberOfTriangles + 3] = 0;
-        m_meshTriangles[3 * numberOfTriangles + 4] = 3;
-        m_meshTriangles[3 * numberOfTriangles + 5] = 2;
-        for (int i = 0; i != 4; i++)
-        {
-            m_meshColors[3 * numberOfTriangles + i] = Color.red;
         }
 
         //Instantiate a new material
@@ -165,39 +151,39 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         return Color.white; //just return the color we want as background color
     }
 
-    /**
-     * Updates the colors array for the specific column
-     * Set bUpdateMeshData to true if the actual mesh data has to be invalidated at this point
-     * **/
-    public void UpdateMeshColorsArrayForColumn(BackgroundTriangleColumn column)
-    {
-        for (int iTriangleIdx = 0; iTriangleIdx != column.Count; iTriangleIdx++)
-        {
-            BackgroundTriangle triangle = column[iTriangleIdx];
+    ///**
+    // * Updates the colors array for the specific column
+    // * **/
+    //public void UpdateMeshColorsArrayForColumn(BackgroundTriangleColumn column)
+    //{
+    //    for (int iTriangleIdx = 0; iTriangleIdx != column.Count; iTriangleIdx++)
+    //    {
+    //        BackgroundTriangle triangle = column[iTriangleIdx];
 
-            int triangleGlobalIndex = column.m_index * column.Count + iTriangleIdx;
+    //        int triangleGlobalIndex = column.m_index * column.Count + iTriangleIdx;
 
-            Color triangleColor = triangle.GetRenderColor();
+    //        //colors
+    //        m_meshColors[3 * triangleGlobalIndex] = triangle.m_frontColor;
+    //        m_meshColors[3 * triangleGlobalIndex + 1] = triangle.m_frontColor;
+    //        m_meshColors[3 * triangleGlobalIndex + 2] = triangle.m_frontColor;
+    //        m_meshColors[3 * triangleGlobalIndex + 3] = triangle.m_backColor;
+    //        m_meshColors[3 * triangleGlobalIndex + 4] = triangle.m_backColor;
+    //        m_meshColors[3 * triangleGlobalIndex + 5] = triangle.m_backColor;
+    //    }
 
-            //colors
-            m_meshColors[3 * triangleGlobalIndex] = triangleColor;
-            m_meshColors[3 * triangleGlobalIndex + 1] = triangleColor;
-            m_meshColors[3 * triangleGlobalIndex + 2] = triangleColor;
-        }
+    //    m_meshColorsDirty = true;
+    //}
 
-        m_meshColorsDirty = true;
-    }
-
-    /**
-    * Same thing that UpdateMeshColorsArrayForColumn() but for all columns instead
-    * **/
-    public void UpdateMeshColorsArrayForAllColumns()
-    {
-        for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
-        {
-            UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
-        }
-    }
+    ///**
+    //* Same thing that UpdateMeshColorsArrayForColumn() but for all columns instead
+    //* **/
+    //public void UpdateMeshColorsArrayForAllColumns()
+    //{
+    //    for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
+    //    {
+    //        UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
+    //    }
+    //}
 
     public void UpdateMeshData()
     {
@@ -218,20 +204,47 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
     }
 
-    public void RenderForMainMenu(bool bAnimated, float fDelay)
+    public void RenderForMainMenu(bool bAnimated, float fDelay = 0.0f)
     {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255));//Same gradient for all colors
+        Color gradientEndColor = Color.white;
+
+        Gradient gradient = new Gradient();
+        gradient.CreateLinear(new Vector2(0, 0.5f * screenSize.y),
+                              new Vector2(0, -0.5f * screenSize.y),
+                              gradientStartColor,
+                              gradientEndColor);
+
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
+
+            float randomRelativeDelay = Random.value;
             
-            column.ApplyGradient(ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255)), Color.white); //tmp apply same gradient for all columns
-            column.SwitchTrianglesVisibilityStatusBetweenIndices(bAnimated, 0, column.Count - 1, fDelay);
+            column.ApplyGradient(gradient, true, 0.02f, true, 1.5f, fDelay + randomRelativeDelay, 0.1f);
         }
 
         //Modify the colors of some triangles to make the title appear
         RenderMainMenuTitle(bAnimated, fDelay + 5.0f);
+    }
 
-        UpdateMeshColorsArrayForAllColumns();
+    public void RenderForChapter(Color gradientStartColor, Color gradientEndColor, bool bAnimated, float fDelay = 0.0f)
+    {
+        //for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
+        //{
+        //    BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
+
+        //    //column.ApplyGradient(gradientStartColor, gradientEndColor, 0.05f, true, 1.0f, 0.0f, 0.0f);
+        //    column.ApplyGradient(new Color(0.5f, 0.5f, 0.5f, 1.0f), new Color(0.5f, 0.5f, 0.5f, 1.0f), 0.05f, true, 1.0f, 0.0f, 0.0f);
+        //}
+
+        Gradient radialGradient = new Gradient();
+        Color startColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255));
+        Color endColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+        radialGradient.CreateRadial(Vector2.zero, 960, startColor, endColor);
+        ApplyGradient(radialGradient, true, 0.02f);        
     }
 
     /**
@@ -239,6 +252,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public void RenderMainMenuTitle(bool bAnimated, float fDelay)
     {
+        return;
         if (bAnimated)
         {
             m_renderingMainMenuTitle = true;
@@ -325,7 +339,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         for (int iTriangleIdx = 0; iTriangleIdx != titleTriangles.Count; iTriangleIdx++)
         {
             BackgroundTriangle triangle = titleTriangles[iTriangleIdx];
-            Color destinationColor = Color.Lerp(triangle.GetTrueColor(), blendColor, 0.5f);
+            Color destinationColor = Color.Lerp(triangle.m_frontColor, blendColor, 0.5f);
 
             //generate a random delay for each title triangle
             float randomDelay = Random.value;
@@ -333,9 +347,11 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             //launch the color animation
             if (bAnimated)
-                triangle.StartColorAnimation(destinationColor, 2.0f, randomDelay, true);
+                triangle.StartColorAnimation(true, destinationColor, 2.0f, randomDelay);
             else
-                triangle.SetTrueColor(destinationColor);
+                triangle.m_frontColor = destinationColor;
+
+            triangle.UpdateParentRendererMeshColorsArray(true, false);
         }
     }
 
@@ -377,7 +393,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 float triangleEdgeLength = m_triangleColumns[0][0].m_edgeLength; //all triangles same edge length, take the first one
 
                 float randomValue = Random.value;
-                if (randomValue <= 1.0f) //left side
+                if (false/*randomValue <= 0.33f*/) //left side
                 {
                     int randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
                     
@@ -392,19 +408,81 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                     else //1 ==> -PI / 6
                         lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
                 }
-                else
-                    ;
+                else if (true/*randomValue > 0.33f && randomValue <= 0.66f*/) //top side
+                {
+                    int randomColumn = Mathf.FloorToInt(Random.value * (m_triangleColumns.Count) - 2) + 1;
+
+                    lightStartPosition.y = 0.5f * screenSize.y;
+                    if (randomColumn % 2 == 0) //even column: offset the start position by half a triangle edge length
+                        lightStartPosition.y += 0.5f * triangleEdgeLength;
+                    lightStartPosition.x = randomColumn * Mathf.Sqrt(3) / 2 * triangleEdgeLength;                    
+                    lightStartPosition.x -= 0.5f * screenSize.x;
+
+                    float randomDirectionNumber = Mathf.FloorToInt(Random.value + 2);
+                    //if (randomDirectionNumber == 0) //-PI / 6
+                    //    lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
+                    //else if (randomDirectionNumber == 1) //-5 * PI / 6
+                    //    lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
+                    //else //-PI / 2
+                        lightPointDirection = new Vector2(0, -1.0f);
+                }
+                else if (false /*randomValue > 0.66f*/) //right side
+                {
+                    int randomRow;
+                    if (NUM_COLUMNS % 2 == 1)
+                        randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
+                    else
+                        randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2)) + 1;
+
+                    lightStartPosition.x = 0.5f * screenSize.x;
+                    lightStartPosition.y = ((NUM_COLUMNS % 2 == 1) ? randomRow : 0.5f + randomRow) * triangleEdgeLength;
+                    lightStartPosition.y = screenSize.y - lightStartPosition.y; //reverse the Y-coordinates
+                    lightStartPosition.y -= 0.5f * screenSize.y; //offset it
+
+                    float randomDirectionNumber = Mathf.FloorToInt(Random.value + 1);
+                    if (randomDirectionNumber == 0) //PI / 6
+                        lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, 0.5f);
+                    else //1 ==> -PI / 6
+                        lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
+                }
 
                 light.m_finished = false;
                 light.m_evacuated = false;
                 light.m_startPoint = lightStartPosition;
                 light.m_currentPoint = lightStartPosition;
-                light.m_pointSpeed = 300;
+                light.m_pointSpeed = 100;
                 light.m_pointDirection = lightPointDirection;
                 light.m_segmentLength = triangleEdgeLength;
-                light.SetTintColor(Color.red);
             }
         }
+    }
+
+    /**
+     * Apply a gradient to all triangles at once
+     * **/
+    public void ApplyGradient(Gradient gradient,
+                              bool bFrontFaces,
+                              float localTriangleVariance = 0.0f,
+                              bool bAnimated = false,
+                              float fTriangleAnimationDuration = 1.0f,
+                              float fAnimationDelay = 0.0f,
+                              float fTriangleAnimationInterval = 0.1f)
+    {
+        //Call ApplyGradient() on each column
+        for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
+        {
+            BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
+            column.ApplyGradient(gradient, bFrontFaces, localTriangleVariance, bAnimated, fTriangleAnimationDuration, fAnimationDelay, fTriangleAnimationInterval);
+        }
+    }
+
+    /**
+     * Flip the triangle at specified triangleColumn and index
+     * **/
+    public void FlipTriangle(int triangleColumn, int triangleIndexInColumn, float fDuration = 0.5f, float fDelay = 0.0f)
+    {
+        BackgroundTriangle triangle = m_triangleColumns[triangleColumn][triangleIndexInColumn];
+        triangle.StartFlipAnimation(new Vector3(1, 0, 0), fDuration, fDelay);
     }
 
     public void Update()
@@ -416,9 +494,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
 
             column.AnimateTriangles(dt);
-        }
-
-        UpdateMeshData(); //update mesh data every frame, 'dirty' variables take care of knowing if mesh has to be actually updated
+        }        
 
         //render main menu title
         if (m_renderingMainMenuTitle)
@@ -432,6 +508,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
 
         //point lights
-        ProcessPointLights();
+        //ProcessPointLights();
+
+        UpdateMeshData(); //update mesh data every frame, 'dirty' variables take care of knowing if mesh has to be actually updated
     }
 }

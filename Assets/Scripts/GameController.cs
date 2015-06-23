@@ -36,7 +36,7 @@ public class GameController : MonoBehaviour
         ColorQuad fillQuad = backgroundObject.GetComponentInChildren<ColorQuad>();
         fillQuad.InitQuadMesh();
         ColorQuadAnimator fillQuadAnimator = backgroundObject.GetComponentInChildren<ColorQuadAnimator>();
-        fillQuadAnimator.SetColor(Color.red);
+        fillQuadAnimator.SetColor(0.12f * Color.white);
         fillQuadAnimator.gameObject.transform.localScale = ScreenUtils.GetScreenSize();
 
         //parse xml levels files
@@ -139,7 +139,7 @@ public class GameController : MonoBehaviour
                 }
                 else //if not we check if this shape is inside an outline
                 {
-                    if (outline.ContainsGridPoint(shape.m_gridTriangles[0].GetBarycentre()))
+                    if (outline.ContainsGridPoint(shape.m_gridTriangles[0].GetCenter()))
                     {
                         shapeInsideOutline = true;
                         break;

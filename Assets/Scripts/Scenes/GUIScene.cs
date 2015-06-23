@@ -37,11 +37,6 @@ public class GUIScene : MonoBehaviour
 
     public virtual void OnSceneDismissed()
     {
-        if (this is GameScene)
-        {
-            Debug.Log("Destroy Game scene");
-            //((GameScene)this)
-        }
         Destroy(this.gameObject);
     }
 

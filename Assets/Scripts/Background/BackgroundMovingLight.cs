@@ -5,6 +5,8 @@
  * **/
 public class BackgroundMovingLight : UVQuad
 {
+    public const float POINT_LIGHT_Z_VALUE = -1.0f;
+
     public Material m_pointLightMaterial;
 
     //public GameObject m_attachedObject { get; set; } //a GameObject that moves accordingly to this point
@@ -22,14 +24,15 @@ public class BackgroundMovingLight : UVQuad
         base.InitQuadMesh();
 
         GetComponent<MeshFilter>().sharedMesh.name = "PointLightMesh";
-        GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_pointLightMaterial);
+        //GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_pointLightMaterial);
+        GetComponent<MeshRenderer>().sharedMaterial = m_pointLightMaterial; //do not clone the material for each point light for the moment
+        GetComponent<TexturedQuadAnimator>().SetColor(Color.white);
     }
 
     public void Update()
     {
         float dt = Time.deltaTime;
-
-        m_currentPoint += dt * m_pointSpeed * m_pointDirection;
+        
         float coveredLength = (m_currentPoint - m_startPoint).magnitude;
         if (coveredLength > m_segmentLength)
         {
@@ -57,15 +60,17 @@ public class BackgroundMovingLight : UVQuad
                 //Randomly choose a new direction
                 float randomValue = Random.value;
 
-                if (randomValue <= 1 / 3.0f) //rotate the direction by -PI / 3
-                    m_pointDirection = Quaternion.AngleAxis(-60, Vector3.forward) * m_pointDirection;
-                else if (randomValue > 1 / 3.0f && randomValue <= 2 / 3.0f) //rotate the direction by PI / 3
-                    m_pointDirection = Quaternion.AngleAxis(60, Vector3.forward) * m_pointDirection;
+                //if (randomValue <= 1 / 3.0f) //rotate the direction by -PI / 3
+                //    m_pointDirection = Quaternion.AngleAxis(-60, Vector3.forward) * m_pointDirection;
+                //else if (randomValue > 1 / 3.0f && randomValue <= 2 / 3.0f) //rotate the direction by PI / 3
+                //    m_pointDirection = Quaternion.AngleAxis(60, Vector3.forward) * m_pointDirection;
                 //else keep the same direction
             }
         }
+        else
+            m_currentPoint += dt * m_pointSpeed * m_pointDirection;
 
-        this.transform.localPosition = m_currentPoint;
+        this.transform.localPosition = GeometryUtils.BuildVector3FromVector2(m_currentPoint, POINT_LIGHT_Z_VALUE);
         //m_attachedObject.transform.localPosition = m_currentPoint;
     }
 }
