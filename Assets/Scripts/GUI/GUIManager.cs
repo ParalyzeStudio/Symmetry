@@ -17,15 +17,17 @@ public class GUIManager : MonoBehaviour
     public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
 
     //Materials for GUI buttons    
-    public Material m_skinCreditsMaterial;
-    public Material m_skinLevelsMaterial;
-    public Material m_skinOptionsMaterial;
-    public Material m_skinHintsMaterial;
-    public Material m_skinRetryMaterial;
-    public Material m_skinMenuMaterial;
-    public Material m_skinColorChangeMaterial;
-    public Material m_GUIButtonBackgroundMaterial;
-    public Material m_GUIButtonShadowMaterial;
+    public Material m_skinBack;
+    public Material m_skinSelectionArrow;
+    public Material m_skinCredits;
+    public Material m_skinLevels;
+    public Material m_skinOptions;
+    public Material m_skinHints;
+    public Material m_skinRetry;
+    public Material m_skinMenu;
+    public Material m_skinColorChange;
+    public Material m_GUIButtonBackground;
+    public Material m_GUIButtonShadow;
 
     public Color[] m_framesColors;
 
@@ -57,7 +59,9 @@ public class GUIManager : MonoBehaviour
         if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON ||
             iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON ||
             iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON ||
-            iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
+            iID == GUIButton.GUIButtonID.ID_MENU_BUTTON ||
+            iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS ||
+            iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
         {
             buttonObject = (GameObject)Instantiate(m_GUISkinOnlyButtonPfb);
         }
@@ -73,15 +77,14 @@ public class GUIManager : MonoBehaviour
         //Set the color for background and shadow if applicable
         button.SetBackgroundColor(backgroundColor);
         button.SetShadowColor(shadowColor);
+        
+        //Materials for background and shadow
+        Material clonedBackgroundMaterial = Instantiate(m_GUIButtonBackground);
+        Material clonedShadowMaterial = Instantiate(m_GUIButtonShadow);
 
         //Set the relevant skin material for the specified button ID
-        Material clonedSkinMaterial = (forcedSkinMaterial != null) ? forcedSkinMaterial : GetClonedSkinMaterialForID(iID);
-
-        //Materials for background and shadow
-        Material clonedBackgroundMaterial = Instantiate(m_GUIButtonBackgroundMaterial);
-        Material clonedShadowMaterial = Instantiate(m_GUIButtonShadowMaterial);
-
-        button.SetSkinMaterial(clonedSkinMaterial);
+        if (forcedSkinMaterial == null)
+            button.SetSkinMaterial(GetClonedSkinMaterialForID(iID));
         button.SetBackgroundMaterial(clonedBackgroundMaterial);
         button.SetShadowMaterial(clonedShadowMaterial);
 
@@ -95,23 +98,25 @@ public class GUIManager : MonoBehaviour
     {
         Material skinMaterial = null;
         if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON)
-            ;
+            skinMaterial = m_skinBack;
         else if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
-            skinMaterial = m_skinLevelsMaterial;
+            skinMaterial = m_skinLevels;
         else if (iID == GUIButton.GUIButtonID.ID_CLOSE_BUTTON)
             ;
         else if (iID == GUIButton.GUIButtonID.ID_COLOR_CHANGE)
-            skinMaterial = m_skinColorChangeMaterial;
+            skinMaterial = m_skinColorChange;
         else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
-            skinMaterial = Instantiate(m_skinCreditsMaterial);
+            skinMaterial = m_skinCredits;
         else if (iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON)
-            skinMaterial = Instantiate(m_skinHintsMaterial);
+            skinMaterial = m_skinHints;
         else if (iID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
-            skinMaterial = m_skinOptionsMaterial;
+            skinMaterial = m_skinOptions;
         else if (iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
-            skinMaterial = m_skinMenuMaterial;
+            skinMaterial = m_skinMenu;
         else if (iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON)
-            skinMaterial = m_skinRetryMaterial;
+            skinMaterial = m_skinRetry;
+        else if (iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS || iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
+            skinMaterial = m_skinSelectionArrow;
 
         return Instantiate(skinMaterial);
     }
@@ -328,15 +333,19 @@ public class GUIManager : MonoBehaviour
         {
             Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-            GameObject clonedBackButtonObject = (GameObject)Instantiate(m_backButtonPfb);
-            clonedBackButtonObject.transform.parent = this.gameObject.transform;
-            clonedBackButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
+            GameObject backButtonObject = this.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_BUTTON,
+                                                                    new Vector2(128.0f, 128.0f),
+                                                                    Color.black,
+                                                                    Color.black);
+            backButtonObject.name = "BackButton";
 
-            backButton = clonedBackButtonObject.GetComponent<GUIButton>();
-            backButton.Init();
-            GameObjectAnimator showButtonAnimator = backButton.GetComponent<GameObjectAnimator>();
-            showButtonAnimator.SetOpacity(0);
-            showButtonAnimator.FadeTo(1, 0.5f, fDelay);
+            backButtonObject.transform.parent = this.gameObject.transform;
+            backButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
+
+            //Fade in button
+            GameObjectAnimator backButtonAnimator = backButtonObject.GetComponent<GameObjectAnimator>();
+            backButtonAnimator.SetOpacity(0);
+            backButtonAnimator.FadeTo(1, 0.5f, fDelay);
         }
     }
 
@@ -345,8 +354,8 @@ public class GUIManager : MonoBehaviour
      * **/
     public void DismissBackButton()
     {
-        GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
-        if (backButton != null)
-            Destroy(backButton.gameObject);
+        //GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
+        //if (backButton != null)
+        //    Destroy(backButton.gameObject);
     }
 }

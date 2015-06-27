@@ -89,12 +89,7 @@ public class GUITouchHandler : TouchHandler
         //dismiss buttons
         mainMenu.DismissButtons();
 
-        //apply new gradient to triangles
-        BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        backgroundRenderer.RenderForChapter(Color.black, Color.red, true, 0.0f);
-
-        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
     }
 
     /**
@@ -159,21 +154,21 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnChapters(Vector2 clickLocation)
     {
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        Chapters chapters = (Chapters)sceneManager.m_currentScene;
+        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        //Chapters chapters = (Chapters)sceneManager.m_currentScene;
 
-        GameObject[] chaptersSlots = chapters.m_chapterSlots;
-        for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)
-        {
-            Vector2 slotSize = chaptersSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
-            Vector2 slotPosition = chaptersSlots[iSlotIndex].transform.position;
-            if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
-                &&
-                clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
-            {
-                chapters.OnClickChapterSlot(iSlotIndex);
-            }
-        }
+        //GameObject[] chaptersSlots = chapters.m_chapterSlots;
+        //for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)
+        //{
+        //    Vector2 slotSize = chaptersSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
+        //    Vector2 slotPosition = chaptersSlots[iSlotIndex].transform.position;
+        //    if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
+        //        &&
+        //        clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
+        //    {
+        //        chapters.OnClickChapterSlot(iSlotIndex);
+        //    }
+        //}
     }
 
     /**

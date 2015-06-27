@@ -6,6 +6,7 @@ public class GUIScene : MonoBehaviour
     private float m_dismissSceneElapsedTime;
     private float m_dismissSceneDelay;
     private float m_dismissSceneDuration;
+    protected BackgroundTrianglesRenderer m_backgroundRenderer;
 
     public virtual void Init()
     {
@@ -38,6 +39,14 @@ public class GUIScene : MonoBehaviour
     public virtual void OnSceneDismissed()
     {
         Destroy(this.gameObject);
+    }
+
+    public BackgroundTrianglesRenderer GetBackgroundRenderer()
+    {
+        if (m_backgroundRenderer == null)
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+
+        return m_backgroundRenderer;
     }
 
     public virtual void Update()

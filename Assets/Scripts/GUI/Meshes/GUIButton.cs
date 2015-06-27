@@ -34,6 +34,8 @@ public class GUIButton : MonoBehaviour
         ID_RETRY_BUTTON,
         ID_HINTS_BUTTON,
         ID_BACK_TO_LEVELS_BUTTON,
+        ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
+        ID_CHAPTER_SELECTION_ARROW_NEXT,
 
         //Action buttons
         ID_COLOR_CHANGE,
@@ -228,7 +230,6 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_BACK_BUTTON)
         {
-            Debug.Log("onclick BACK BUTTON");
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
@@ -275,6 +276,14 @@ public class GUIButton : MonoBehaviour
 
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             guiManager.DismissPauseWindow();
+        }
+        else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS)
+        {
+
+        }
+        else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
+        {
+
         }
     }
 }

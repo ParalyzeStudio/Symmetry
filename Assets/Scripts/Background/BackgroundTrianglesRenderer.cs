@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
-    public const int NUM_COLUMNS = 25;
+    public const int NUM_COLUMNS = 26;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
     public int m_numTrianglesPerColumn { get; set; }
@@ -244,7 +244,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         Color startColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255));
         Color endColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
         radialGradient.CreateRadial(Vector2.zero, 960, startColor, endColor);
-        ApplyGradient(radialGradient, true, 0.02f);        
+        ApplyGradient(radialGradient, true, 0.02f, true, 1.0f, 0.0f, 0.1f, false);
+        //FlipAllTriangles(0.5f, 0.0f);
     }
 
     /**
@@ -466,25 +467,70 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                               bool bAnimated = false,
                               float fTriangleAnimationDuration = 1.0f,
                               float fAnimationDelay = 0.0f,
-                              float fTriangleAnimationInterval = 0.1f)
+                              float fTriangleAnimationInterval = 0.1f,
+                              bool bSetRelativeDelayOnEachTriangle = false)
     {
         //Call ApplyGradient() on each column
         for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
-            column.ApplyGradient(gradient, bFrontFaces, localTriangleVariance, bAnimated, fTriangleAnimationDuration, fAnimationDelay, fTriangleAnimationInterval);
+            column.ApplyGradient(gradient, bFrontFaces, localTriangleVariance, bAnimated, fTriangleAnimationDuration, fAnimationDelay, fTriangleAnimationInterval, bSetRelativeDelayOnEachTriangle);
         }
     }
 
     /**
-     * Flip the triangle at specified triangleColumn and index
+     * Flip all triangles
      * **/
-    public void FlipTriangle(int triangleColumn, int triangleIndexInColumn, float fDuration = 0.5f, float fDelay = 0.0f)
+    public void FlipAllTriangles(float fFlipDuration, float fFlipGlobalDelay)
     {
-        BackgroundTriangle triangle = m_triangleColumns[triangleColumn][triangleIndexInColumn];
-        triangle.StartFlipAnimation(new Vector3(1, 0, 0), fDuration, fDelay);
+        for (int i = 0; i != NUM_COLUMNS; i++)
+        {
+            for (int j = 0; j != m_numTrianglesPerColumn; j++)
+            {
+                float fRelativeDelay = Random.value * 1.0f;
+
+                BackgroundTriangle triangle = m_triangleColumns[i][j];
+                triangle.StartFlipAnimation(new Vector3(1, 0, 0), fFlipDuration, fFlipGlobalDelay + fRelativeDelay);
+            }
+        }
     }
 
+    /**
+     * Return the nearest triangle of any column to the screen center y-coordinate
+     * Can filter some triangles based on their indices (even/odd or both)
+     * Can also choose on which column the operation is performed
+     * **/
+    public BackgroundTriangle GetNearestTriangleToScreenYCenter(bool evenIndicesTriangles, bool oddIndicesTriangles, int columnIndex = 0)
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        //take the first column (or any other, it doesn't matter)
+        float minDistance = float.MaxValue;
+        BackgroundTriangle nearestTriangle = null;
+        for (int i = 0; i != m_triangleColumns[columnIndex].Count; i++)
+        {
+            if (!evenIndicesTriangles && i % 2 == 0)
+                continue;
+            if (!oddIndicesTriangles && i % 2 == 1)
+                continue;
+
+            BackgroundTriangle triangle = m_triangleColumns[columnIndex][i];
+
+            Vector2 triangleCenter = triangle.GetCenter();
+            float distanceToCenter = Mathf.Abs(triangleCenter.y); //center is at y-coordinate 0
+            if (distanceToCenter < minDistance)
+            {
+                nearestTriangle = triangle;
+                minDistance = distanceToCenter;
+            }
+        }
+
+        return nearestTriangle;
+    }
+
+    /**
+     * Update/Render loop
+     * **/
     public void Update()
     {
         float dt = Time.deltaTime;

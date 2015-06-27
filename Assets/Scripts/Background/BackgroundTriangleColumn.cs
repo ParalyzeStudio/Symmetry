@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 /**
  * Class to hold and animate background triangles in one single column
@@ -47,7 +46,8 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                                     bool bAnimated = false,
                                     float fTriangleAnimationDuration = 1.0f,
                                     float fAnimationDelay = 0.0f,
-                                    float fTriangleAnimationInterval = 0.1f)
+                                    float fTriangleAnimationInterval = 0.1f,
+                                    bool bSetRelativeDelayOnEachTriangle = false)
     {
         float colorStep = 1 / (float)(this.Count - 1);
 
@@ -64,7 +64,9 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             if (bAnimated)
             {
                 Color animationEndColor = ColorUtils.GetRandomNearColor(triangleOriginalColor, localTriangleVariance);
-                triangle.StartColorAnimation(bFrontFaces, animationEndColor, fTriangleAnimationDuration, fAnimationDelay + iTriangleIdx * fTriangleAnimationInterval);
+                float fRelativeDelay = (bSetRelativeDelayOnEachTriangle) ? Random.value * 0.5f * fTriangleAnimationDuration : 0;
+                float fTriangleDelay = fAnimationDelay + iTriangleIdx * fTriangleAnimationInterval + fRelativeDelay;
+                triangle.StartColorAnimation(bFrontFaces, animationEndColor, fTriangleAnimationDuration, fTriangleDelay);
             }
             else
             {

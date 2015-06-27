@@ -33,7 +33,7 @@ public class MainMenu : GUIScene
     {
         base.Show(bAnimated, fDelay);
 
-        BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
         backgroundRenderer.RenderForMainMenu(bAnimated, fDelay);
 
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
@@ -51,7 +51,7 @@ public class MainMenu : GUIScene
 
     public void ShowTitle(bool bAnimated, float fDelay)
     {
-        BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         backgroundRenderer.RenderMainMenuTitle(bAnimated, fDelay);
     }

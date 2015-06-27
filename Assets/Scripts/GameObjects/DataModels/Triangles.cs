@@ -501,7 +501,7 @@ public class BackgroundTriangle : BaseTriangle
     /**
      * Update the colors array of the parent renderer
      * **/
-    public void UpdateParentRendererMeshColorsArray(bool bFrontFace, bool bBackFace)
+    public void UpdateParentRendererMeshColorsArray(bool bFrontFace = true, bool bBackFace = true)
     {
         int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
@@ -529,46 +529,38 @@ public class BackgroundTriangle : BaseTriangle
     {
         int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
+        //transform each triangle points with the flip rotation
+        Vector3 triangleCenter = this.GetCenter();
+        Vector3 point0 = m_points[0];
+        Vector3 point1 = m_points[1];
+        Vector3 point2 = m_points[2];
+        
+        //switch to local space
+        point0 -= triangleCenter;
+        point1 -= triangleCenter;
+        point2 -= triangleCenter;
+
+        //rotate points in local space
         Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
 
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex] = triangleRotation * m_points[0];
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 1] = triangleRotation * m_points[1];
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 2] = triangleRotation * m_points[2];
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 3] = triangleRotation * m_points[0];
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 4] = triangleRotation * m_points[2];
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 5] = triangleRotation * m_points[1];
+        point0 = triangleRotation * point0;
+        point1 = triangleRotation * point1;
+        point2 = triangleRotation * point2;
+
+        //switch back to global space
+        point0 += triangleCenter;
+        point1 += triangleCenter;
+        point2 += triangleCenter;
+
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex] = point0;
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 1] = point1;
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 2] = point2;
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 3] = point0;
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 4] = point2;
+        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 5] = point1;
 
         m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
     }
-
-    //public void UpdateMeshData(ref Vector2[] vertices, ref int[] triangles, ref Color[] colors)
-    //{
-    //    int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.Count + m_indexInColumn;
-
-    //    //vertices
-    //    if (vertices != null)
-    //    {
-    //        vertices[3 * triangleGlobalIndex] = m_points[0];
-    //        vertices[3 * triangleGlobalIndex + 1] = m_points[1];
-    //        vertices[3 * triangleGlobalIndex + 2] = m_points[2];
-    //    }
-
-    //    //indices
-    //    if (triangles != null)
-    //    {
-    //        triangles[3 * triangleGlobalIndex] = 3 * triangleGlobalIndex;
-    //        triangles[3 * triangleGlobalIndex + 1] = 3 * triangleGlobalIndex + 1;
-    //        triangles[3 * triangleGlobalIndex + 2] = 3 * triangleGlobalIndex + 2;
-    //    }
-
-    //    //colors
-    //    if (colors != null)
-    //    {
-    //        colors[3 * triangleGlobalIndex] = m_color;
-    //        colors[3 * triangleGlobalIndex + 1] = m_color;
-    //        colors[3 * triangleGlobalIndex + 2] = m_color;
-    //    }
-    //}
 
     /**
      * Generate a color slightly different from original color
@@ -666,6 +658,10 @@ public class BackgroundTriangle : BaseTriangle
         m_flipAnimationElapsedTime = 0;
         m_flipAnimationDuration = fDuration;
         m_flipAnimationDelay = fDelay;
+
+        //m_flipAngle = 90;
+        //m_flipAxis = new Vector3(1, 0, 0);
+        //UpdateParentRendererMeshVerticesArray();
     }
 
     public void FlipAnimate(float dt)
@@ -689,5 +685,7 @@ public class BackgroundTriangle : BaseTriangle
             float deltaAngle = (dt / m_flipAnimationDuration) * 180.0f;
             m_flipAngle += deltaAngle;
         }
+
+        UpdateParentRendererMeshVerticesArray();
     }
 }
