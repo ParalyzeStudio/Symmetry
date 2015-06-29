@@ -7,7 +7,8 @@ public class ValueAnimator : MonoBehaviour
     public enum InterpolationType
     {
         LINEAR = 1,
-        SINUSOIDAL = 2
+        SINUSOIDAL = 2,
+        EXPONENTIAL = 3
     }
 
     //Variables to handle fading

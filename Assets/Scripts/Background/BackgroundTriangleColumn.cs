@@ -25,16 +25,6 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         m_index = index;
     }
 
-    public void AddTriangle(BackgroundTriangle triangle)
-    {
-        this.Add(triangle);
-    }
-
-    public void RemoveTriangle(BackgroundTriangle triangle)
-    {
-        this.Remove(triangle);
-    }
-
     /**
      * Apply gradient to this column
      * This will modify the color of every triangle faces (front or back) starting from top (gradient startColor) to bottom (gradient endColor)
@@ -88,31 +78,102 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             this[iTriangleIdx].AnimateColor(dt);
             this[iTriangleIdx].FlipAnimate(dt);
         }
-
-        //m_parentRenderer.UpdateMeshColorsArrayForColumn(this);
     }
 
-    //public void SwitchTrianglesVisibilityStatusBetweenIndices(bool bAnimated, int startIndex, int endIndex, float fDelay = 0.0f)
-    //{
-    //    //Turn on the animation pending value for every triangle in this block
-    //    for (int i = startIndex; i != endIndex + 1; i++)
-    //    {
-    //        int relativeIndex = i - startIndex;
+    /**
+     * Offset the column triangles by dy units
+     * **/
+    public void Offset(float dy)
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        float verticalOffset = m_parentRenderer.m_verticalOffset;
 
-    //        this[i].ToggleVisibility(bAnimated, 2.5f, fDelay + relativeIndex * BackgroundTriangleColumn.COLOR_INVALIDATION_STEP);
-    //    }
-    //}
+        float triangleEdgeLength = this[0].m_edgeLength;
+        float triangleHeight = screenSize.x / (float) BackgroundTrianglesRenderer.NUM_COLUMNS;
 
-    //public void LaunchColorAnimationForTrianglesBetweenIndices(int startIndex, int endIndex, float fTriangleAnimationDuration, float fGlobalDelay, float fTriangleAnimationRelativeDelay)
-    //{
-    //    //Turn on the animation pending value for every triangle in this block
-    //    for (int i = startIndex; i != endIndex + 1; i++)
-    //    {
-    //        BackgroundTriangle triangle = this[i];
-    //        int relativeIndex = i - startIndex;
+        //First offset all triangles
+        for (int iTriangleIndex = 0; iTriangleIndex != this.Count; iTriangleIndex++) //from bottom to top
+        {
+            BackgroundTriangle triangle = this[iTriangleIndex];
+            triangle.Offset(dy);
+            triangle.UpdateParentRendererMeshVerticesArray();
+        }
 
-    //        triangle.StartColorAnimation(triangle.m_color, fTriangleAnimationDuration, fGlobalDelay + relativeIndex * fTriangleAnimationRelativeDelay);
-    //    }
-    //}
+        //Then rearrange triangles by removing/adding to make the column fit in the screen
+        if (dy > 0)
+        {
+            //Calculate the distance between the current last triangle and the bottom of the screen
+            float distanceFromLastTriangleToScreenBottom = this[this.Count - 1].GetCenter().y + 0.5f * screenSize.y;
+            float fNumTrianglesUntilScreenBottom = distanceFromLastTriangleToScreenBottom / triangleEdgeLength;
+            int iNumTrianglesToAdd = Mathf.FloorToInt(fNumTrianglesUntilScreenBottom);
+            if (MathUtils.HasFractionalPart(fNumTrianglesUntilScreenBottom))
+                iNumTrianglesToAdd++;
+            iNumTrianglesToAdd *= 2; //double the number of triangles to add because there are 2 triangles sets in one single column
+
+            Debug.Log("ToAdd:" + iNumTrianglesToAdd);
+            if (iNumTrianglesToAdd > this.Count)
+                iNumTrianglesToAdd = this.Count;
+            Debug.Log("iNumTrianglesToAdd:" + iNumTrianglesToAdd);
+
+            //remove the same number of triangles at the top of the column            
+            int iNumTrianglesToRemove = iNumTrianglesToAdd;
+            for (int iTriangleIndex = 0; iTriangleIndex != this.Count; iTriangleIndex++) //from bottom to top
+            {
+                BackgroundTriangle triangle = this[iTriangleIndex];
+
+                if (iNumTrianglesToRemove > 0)
+                {
+                    this.Remove(triangle);
+                    iNumTrianglesToRemove--;
+                    iTriangleIndex--;
+                }
+            }
+
+            //and shift indices for remaining triangles
+            for (int iTriangleIndex = 0; iTriangleIndex != this.Count; iTriangleIndex++) //from bottom to top
+            {
+                BackgroundTriangle triangle = this[iTriangleIndex];
+                triangle.m_indexInColumn -= iNumTrianglesToAdd;
+                triangle.UpdateParentRendererMeshVerticesArray();
+                triangle.UpdateParentRendererMeshColorsArray();
+            }
+
+            //Determine the orientation of the next triangle to add in this column
+            bool triangleRightPointing;
+            if (this.Count > 0)
+                triangleRightPointing = (this[this.Count - 1].m_angle == 0);
+            else
+                triangleRightPointing = (m_index % 2 == 0);             
+
+            //Finally build and add the triangles
+            for (int i = 0; i != iNumTrianglesToAdd; i++)
+            {
+                triangleRightPointing = !triangleRightPointing;
+                float triangleAngle = triangleRightPointing ? 0 : 180;
+                float trianglePositionX = triangleRightPointing ? (1 / 3.0f + m_index) * triangleHeight : (2 / 3.0f + m_index) * triangleHeight;
+                trianglePositionX -= 0.5f * screenSize.x;
+                float trianglePositionY;
+                if (this.Count > 0)
+                    trianglePositionY = this[this.Count - 1].GetCenter().y - 0.5f * triangleEdgeLength;
+                else
+                {
+                    trianglePositionY = screenSize.y + 0.5f * triangleEdgeLength;
+                    trianglePositionY -= 0.5f * screenSize.y;
+                }
+                Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
+                Color triangleColor = m_parentRenderer.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
+                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor, triangleColor);
+                triangle.GenerateColorFromOriginalColor(true, 0.02f);
+
+                triangle.m_doubleSided = m_parentRenderer.m_doubleSided;
+                triangle.m_indexInColumn = this.Count;
+                triangle.m_parentColumn = this;
+                this.Add(triangle);
+
+                triangle.UpdateParentRendererMeshVerticesArray();
+                triangle.UpdateParentRendererMeshColorsArray();
+            }
+        }    
+    }
 }
 

@@ -92,4 +92,14 @@ public class MathUtils
         else if (fValue < fValueA)
             fValue = fValueA;
     }
+
+    /**
+     * Test if the float value has a fractional part or is a pure int and can be casted so
+     * **/
+    static public bool HasFractionalPart(float fValue)
+    {
+        int iValue = Mathf.FloorToInt(fValue);
+
+        return (iValue != fValue);
+    }
 }

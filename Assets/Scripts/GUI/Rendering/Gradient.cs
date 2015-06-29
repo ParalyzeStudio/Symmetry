@@ -5,15 +5,18 @@ public class Gradient
     //variables related to linear gradients
     public Vector2 m_linearGradientStartPoint { get; set; } //World coordinates of the start point of this gradient
     public Vector2 m_linearGradientEndPoint { get; set; } //World coordinates of the start point of this gradient
-    public Vector2 m_linearGradientDirection { get; set; } //its direction
     public Color m_linearGradientStartColor { get; set; } //the color of the gradient start point
     public Color m_linearGradientEndColor { get; set; } //the color of the gradient end point
 
     //variables related to radial gradients
     public Vector2 m_radialGradientCenter { get; set; }
     public float m_radialGradientRadius { get; set; }
-    public Color m_radialGradientStartColor { get; set; } //the color of the gradient start point
-    public Color m_radialGradientEndColor { get; set; } //the color of the gradient end point
+    public Color m_radialGradientInnerColor { get; set; } //the color at the center of the gradient
+    public Color m_radialGradientOuterColor { get; set; } //the color on the outer circle of the gradient
+
+    //use this to box the gradient
+    public Vector2 m_gradientBoxMin; //coordinates of the bottom left point of this box
+    public Vector2 m_gradientBoxMax; //coordinates of the top right point of this box
 
     public enum GradientType
     {
@@ -36,8 +39,6 @@ public class Gradient
         m_type = GradientType.LINEAR;
         m_linearGradientStartPoint = startPoint;
         m_linearGradientEndPoint = endPoint;
-        m_linearGradientDirection = m_linearGradientEndPoint - m_linearGradientStartPoint;
-        m_linearGradientDirection.Normalize();
         m_linearGradientStartColor = startColor;
         m_linearGradientEndColor = endColor;
     }
@@ -45,13 +46,13 @@ public class Gradient
     /**
      * Creates a radial gradient with center and radius
      * **/
-    public void CreateRadial(Vector2 center, float radius, Color startColor, Color endColor)
+    public void CreateRadial(Vector2 center, float radius, Color innerColor, Color outerColor)
     {
         m_type = GradientType.RADIAL;
         m_radialGradientCenter = center;
         m_radialGradientRadius = radius;
-        m_radialGradientStartColor = startColor;
-        m_radialGradientEndColor = endColor;
+        m_radialGradientInnerColor = innerColor;
+        m_radialGradientOuterColor = outerColor;
     }
 
     /**
@@ -91,10 +92,10 @@ public class Gradient
             if (distanceToCenter < m_radialGradientRadius)
             {
                 float t = distanceToCenter / m_radialGradientRadius;
-                return Color.Lerp(m_radialGradientStartColor, m_radialGradientEndColor, t);
+                return Color.Lerp(m_radialGradientOuterColor, m_radialGradientInnerColor, t);
             }
 
-            return m_radialGradientEndColor;
+            return m_radialGradientOuterColor;
         }
 
         return Color.black;

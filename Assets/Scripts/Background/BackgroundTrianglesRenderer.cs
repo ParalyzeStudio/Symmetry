@@ -1,15 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
+[ExecuteInEditMode]
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
-    public const int NUM_COLUMNS = 26;
+    public const int NUM_COLUMNS = 25;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
     public int m_numTrianglesPerColumn { get; set; }
     public Material m_triangleMaterial;
     public Mesh m_mesh { get; set; }
     public bool m_meshBuilt { get; set; }
+    public bool m_doubleSided { get; set; }
+
+    //min and max values of triangles centers y-coordinates of this mesh
+    public float m_meshMinY { get; set; }
+    public float m_meshMaxY { get; set; }
 
     //mesh arrays
     public Vector3[] m_meshVertices { get; set; }
@@ -23,6 +29,21 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     private bool m_renderingMainMenuTitle;
     private float m_renderingMainMenuTitleElapsedTime;
     private float m_renderingMainMenuTitleDelay;
+
+    //gradients
+    public float m_verticalOffset { get; set; }; //the offset generated when translating background across gradients
+    public Gradient m_mainMenuGradient { get; set; }
+    public Gradient m_transitionGradient { get; set; }
+    public Gradient m_chaptersGradient { get; set; }
+
+    //gradients animation
+    private bool m_offsetting;
+    private float m_offsettingStartY;
+    private float m_offsettingEndY;
+    private float m_offsettingElapsedTime;
+    private float m_offsettingDuration;
+    private float m_offsettingDelay;
+    private ValueAnimator.InterpolationType m_offsettingInterpolationType;
 
     //point lights
     public const int MAX_LIGHTS = 5;
@@ -46,8 +67,10 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Build triangles to fill in the whole screen
      * **/
-    public void BuildMesh()
+    public void BuildMesh(bool bDoubleSided = false)
     {
+        m_doubleSided = bDoubleSided;
+
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Build the actual mesh
@@ -59,18 +82,19 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         float triangleHeight = screenSize.x / (float) NUM_COLUMNS;
         float triangleEdgeLength = 2 / Mathf.Sqrt(3) * triangleHeight;
 
-        float fNumberOfTrianglesInColumn = (screenSize.y - 0.5f * triangleEdgeLength) / triangleEdgeLength;
-        m_numTrianglesPerColumn = (int)Mathf.Floor(fNumberOfTrianglesInColumn);
-        if (fNumberOfTrianglesInColumn != m_numTrianglesPerColumn) //no floating part
-            m_numTrianglesPerColumn += 1; //just round to the next integer
-        m_numTrianglesPerColumn += 1; //add the first (half) triangle
+        float fNumberOfTrianglesInColumn = screenSize.y / triangleEdgeLength;
+        m_numTrianglesPerColumn = Mathf.FloorToInt(fNumberOfTrianglesInColumn);
+        if (MathUtils.HasFractionalPart(fNumberOfTrianglesInColumn)) //fractional part: round to the next integer
+            m_numTrianglesPerColumn += 1;
+        m_numTrianglesPerColumn++; //add another triangle
         m_numTrianglesPerColumn *= 2; //multiply by 2 because there are 2 series of opposite trying forming one column
         int numberOfTriangles = NUM_COLUMNS * m_numTrianglesPerColumn;
 
         //Set up correct sizes for mesh arrays
-        m_meshVertices = new Vector3[6 * numberOfTriangles]; //6 vertices per triangle because 2 sides of different colors
-        m_meshTriangles = new int[6 * numberOfTriangles]; //double sided triangles
-        m_meshColors = new Color[6 * numberOfTriangles]; //double sided triangles
+        int numVerticesPerTriangle = bDoubleSided ? 6 : 3;
+        m_meshVertices = new Vector3[numVerticesPerTriangle * numberOfTriangles]; //6 vertices per triangle because 2 sides of different colors
+        m_meshTriangles = new int[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
+        m_meshColors = new Color[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
         m_meshVerticesDirty = true;
         m_meshTrianglesDirty = true;
         m_meshColorsDirty = true;
@@ -81,7 +105,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             for (int j = 0; j != m_numTrianglesPerColumn; j++)
             {
-                float trianglePositionY = screenSize.y - 0.5f * j * triangleEdgeLength;
+                float trianglePositionY = screenSize.y - 0.5f * (j - 1) * triangleEdgeLength;
                 trianglePositionY -= 0.5f * screenSize.y;
 
                 float triangleAngle;
@@ -100,37 +124,47 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
                 Color defaultTriangleColor = GetDefaultBackgroundColor();
                 BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, defaultTriangleColor, defaultTriangleColor);
+                triangle.m_doubleSided = bDoubleSided;
                 triangle.m_indexInColumn = j;
                 triangle.m_parentColumn = column;
-                column.AddTriangle(triangle);
+                column.Add(triangle);
 
                 //Fill in the mesh
                 int triangleGlobalIndex = i * m_numTrianglesPerColumn + j;
-                int triangleFirstVertexIndex = 6 * triangleGlobalIndex;
+                int triangleFirstVertexIndex = numVerticesPerTriangle * triangleGlobalIndex;
 
                 //vertices                
                 m_meshVertices[triangleFirstVertexIndex] = triangle.m_points[0];
                 m_meshVertices[triangleFirstVertexIndex + 1] = triangle.m_points[1];
                 m_meshVertices[triangleFirstVertexIndex + 2] = triangle.m_points[2];
-                m_meshVertices[triangleFirstVertexIndex + 3] = triangle.m_points[0];
-                m_meshVertices[triangleFirstVertexIndex + 4] = triangle.m_points[2];
-                m_meshVertices[triangleFirstVertexIndex + 5] = triangle.m_points[1];
+                if (bDoubleSided)
+                {
+                    m_meshVertices[triangleFirstVertexIndex + 3] = triangle.m_points[0];
+                    m_meshVertices[triangleFirstVertexIndex + 4] = triangle.m_points[2];
+                    m_meshVertices[triangleFirstVertexIndex + 5] = triangle.m_points[1];
+                }
 
                 //indices
                 m_meshTriangles[triangleFirstVertexIndex] = triangleFirstVertexIndex;
                 m_meshTriangles[triangleFirstVertexIndex + 1] = triangleFirstVertexIndex + 1;
                 m_meshTriangles[triangleFirstVertexIndex + 2] = triangleFirstVertexIndex + 2;
-                m_meshTriangles[triangleFirstVertexIndex + 3] = triangleFirstVertexIndex + 3;
-                m_meshTriangles[triangleFirstVertexIndex + 4] = triangleFirstVertexIndex + 4;
-                m_meshTriangles[triangleFirstVertexIndex + 5] = triangleFirstVertexIndex + 5;
+                if (bDoubleSided)
+                {
+                    m_meshTriangles[triangleFirstVertexIndex + 3] = triangleFirstVertexIndex + 3;
+                    m_meshTriangles[triangleFirstVertexIndex + 4] = triangleFirstVertexIndex + 4;
+                    m_meshTriangles[triangleFirstVertexIndex + 5] = triangleFirstVertexIndex + 5;
+                }
 
                 //colors
                 m_meshColors[triangleFirstVertexIndex] = defaultTriangleColor;
                 m_meshColors[triangleFirstVertexIndex + 1] = defaultTriangleColor;
                 m_meshColors[triangleFirstVertexIndex + 2] = defaultTriangleColor;
-                m_meshColors[triangleFirstVertexIndex + 3] = defaultTriangleColor;
-                m_meshColors[triangleFirstVertexIndex + 4] = defaultTriangleColor;
-                m_meshColors[triangleFirstVertexIndex + 5] = defaultTriangleColor;
+                if (bDoubleSided)
+                {
+                    m_meshColors[triangleFirstVertexIndex + 3] = defaultTriangleColor;
+                    m_meshColors[triangleFirstVertexIndex + 4] = defaultTriangleColor;
+                    m_meshColors[triangleFirstVertexIndex + 5] = defaultTriangleColor;
+                }
             }
 
             m_triangleColumns.Add(column);
@@ -141,6 +175,79 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         GetComponent<MeshRenderer>().sharedMaterial = clonedMaterial;
 
         m_meshBuilt = true;
+    }
+
+    /**
+     * Generate the gradient for the main menu
+     * **/
+    public void GenerateMainMenuGradient()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255));//Same gradient for all colors
+        Color gradientEndColor = new Color(0.5f, 1.0f, 0.8f, 1.0f);
+
+        if (m_mainMenuGradient == null)
+            m_mainMenuGradient = new Gradient();
+        m_mainMenuGradient.CreateLinear(new Vector2(0, 0.5f * screenSize.y),
+                                        new Vector2(0, -0.5f * screenSize.y),
+                                        gradientStartColor,
+                                        gradientEndColor);
+    }
+
+    /**
+     * Generate the gradient that will join main menu gradient and chapter gradient
+     * **/
+    public void GenerateTransitionGradient()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        float transitionGradientLength = screenSize.y; //set the length of the transition gradient to 1 screen unit
+
+        Chapter chapter = levelManager.GetChapterForNumber(1); //TODO get last reached chapter or last played chapter, not decided yet
+        Color gradientEndColor = chapter.GetThemeColors()[0];
+        Color gradientStartColor = m_mainMenuGradient.m_linearGradientEndColor;
+
+        if (m_transitionGradient == null)
+            m_transitionGradient = new Gradient();
+        m_transitionGradient.CreateLinear(m_mainMenuGradient.m_linearGradientEndPoint,
+                                          m_mainMenuGradient.m_linearGradientEndPoint - new Vector2(0, transitionGradientLength),
+                                          gradientStartColor,
+                                          gradientEndColor);
+    }
+
+    /**
+     * Generate the radial gradient for the chapters background
+     * **/
+    public void GenerateChapterGradient()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        Chapter chapter = levelManager.GetChapterForNumber(1); //TODO get last reached chapter or last played chapter, not decided yet
+
+        Color gradientInnerColor = chapter.GetThemeColors()[0];
+        Color gradientOuterColor = chapter.GetThemeColors()[1];
+
+        if (m_chaptersGradient == null)
+            m_chaptersGradient = new Gradient();
+        m_chaptersGradient.CreateRadial(m_transitionGradient.m_linearGradientEndPoint - new Vector2(0, 0.5f * screenSize.y),
+                                        640,
+                                        gradientInnerColor,
+                                        gradientOuterColor);
+    }
+
+    public Color GetColorAtPosition(Vector2 position)
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        if (position.y <= m_mainMenuGradient.m_linearGradientStartPoint.y && position.y >= m_mainMenuGradient.m_linearGradientEndPoint.y)
+            return m_mainMenuGradient.GetColorAtPosition(position);
+        else if (position.y < m_transitionGradient.m_linearGradientStartPoint.y && position.y > m_transitionGradient.m_linearGradientEndPoint.y)
+            return m_transitionGradient.GetColorAtPosition(position);
+        else if (position.y <= m_transitionGradient.m_linearGradientEndPoint.y && position.y >= m_transitionGradient.m_linearGradientEndPoint.y - screenSize.y)
+            return m_chaptersGradient.GetColorAtPosition(position);
+        else
+            return Color.black;
     }
 
     /**
@@ -206,16 +313,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     public void RenderForMainMenu(bool bAnimated, float fDelay = 0.0f)
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255));//Same gradient for all colors
-        Color gradientEndColor = Color.white;
-
-        Gradient gradient = new Gradient();
-        gradient.CreateLinear(new Vector2(0, 0.5f * screenSize.y),
-                              new Vector2(0, -0.5f * screenSize.y),
-                              gradientStartColor,
-                              gradientEndColor);
+        GenerateMainMenuGradient();
+        GenerateTransitionGradient();
+        GenerateChapterGradient();
 
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
@@ -223,7 +323,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             float randomRelativeDelay = Random.value;
             
-            column.ApplyGradient(gradient, true, 0.02f, true, 1.5f, fDelay + randomRelativeDelay, 0.1f);
+            column.ApplyGradient(m_mainMenuGradient, true, 0.02f, true, 1.5f, fDelay + randomRelativeDelay, 0.1f);
         }
 
         //Modify the colors of some triangles to make the title appear
@@ -493,6 +593,23 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 triangle.StartFlipAnimation(new Vector3(1, 0, 0), fFlipDuration, fFlipGlobalDelay + fRelativeDelay);
             }
         }
+    }
+
+    /**
+     * Offset vertically all columns 
+     * **/
+    public void Offset(float dy)
+    {
+        m_verticalOffset += dy;
+        for (int i = 0; i != m_triangleColumns.Count; i++)
+        {
+            m_triangleColumns[i].Offset(dy);
+        }
+    }
+
+    public void SwitchFromMainMenuBackgroundToChapterBackground()
+    {
+
     }
 
     /**

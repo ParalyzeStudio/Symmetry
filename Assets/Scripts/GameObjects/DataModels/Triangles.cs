@@ -413,6 +413,7 @@ public class ShapeTriangle : GridTriangle
  * **/
 public class BackgroundTriangle : BaseTriangle
 {
+    public bool m_doubleSided { get; set; } //1 or 2 faces to render this triangle
     public Color m_frontColor { get; set; } //the color of the front face of this triangle (the 3 vertices share the same color)
     public Color m_backColor { get; set; } //the color of the back face of this triangle (the 3 vertices share the same color)
     public Color m_originalFrontColor { get; set; } //the color that this triangle face should have before being offset to m_frontColor
@@ -423,6 +424,7 @@ public class BackgroundTriangle : BaseTriangle
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public float m_edgeLength { get; set; }
+    public float m_angle { get; set; } //the angle this triangle is rotated
 
     //Variables to handle color animation of this triangle
     private Color m_frontFaceAnimationStartColor; //the color when the animation starts
@@ -467,6 +469,7 @@ public class BackgroundTriangle : BaseTriangle
     public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color frontColor, Color backColor) : base()
     {
         m_edgeLength = edgeLength;
+        m_angle = angle;
 
         float H = Mathf.Sqrt(3) / 2 * edgeLength * 1.0f;
 
@@ -499,23 +502,50 @@ public class BackgroundTriangle : BaseTriangle
     }
 
     /**
+     * Returns the global index of this triangle inside the mesh
+     * **/
+    public int GetGlobalIndexInMesh()
+    {
+        BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
+
+        int globalIndex = 0;
+        for (int iColumnIdx = 0; iColumnIdx != m_parentColumn.m_index; iColumnIdx++)
+        {
+            globalIndex += parentRenderer.m_triangleColumns.Count;
+        }
+
+        globalIndex += m_indexInColumn;
+
+        return globalIndex;
+    }
+
+    /**
      * Update the colors array of the parent renderer
      * **/
     public void UpdateParentRendererMeshColorsArray(bool bFrontFace = true, bool bBackFace = true)
     {
         int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
-        if (bFrontFace)
+        if (!m_doubleSided)
         {
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex] = m_frontColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 1] = m_frontColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 2] = m_frontColor;
+            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_frontColor;
+            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_frontColor;
+            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_frontColor;
         }
-        if (bBackFace)
+        else
         {
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 3] = m_backColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 4] = m_backColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 5] = m_backColor;
+            if (bFrontFace)
+            {
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex] = m_frontColor;
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 1] = m_frontColor;
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 2] = m_frontColor;
+            }
+            if (bBackFace)
+            {
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 3] = m_backColor;
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 4] = m_backColor;
+                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 5] = m_backColor;
+            }
         }
 
         if (bFrontFace || bBackFace)
@@ -535,29 +565,38 @@ public class BackgroundTriangle : BaseTriangle
         Vector3 point1 = m_points[1];
         Vector3 point2 = m_points[2];
         
-        //switch to local space
-        point0 -= triangleCenter;
-        point1 -= triangleCenter;
-        point2 -= triangleCenter;
+        ////switch to local space
+        //point0 -= triangleCenter;
+        //point1 -= triangleCenter;
+        //point2 -= triangleCenter;
 
-        //rotate points in local space
-        Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
+        ////rotate points in local space
+        //Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
 
-        point0 = triangleRotation * point0;
-        point1 = triangleRotation * point1;
-        point2 = triangleRotation * point2;
+        //point0 = triangleRotation * point0;
+        //point1 = triangleRotation * point1;
+        //point2 = triangleRotation * point2;
 
-        //switch back to global space
-        point0 += triangleCenter;
-        point1 += triangleCenter;
-        point2 += triangleCenter;
+        ////switch back to global space
+        //point0 += triangleCenter;
+        //point1 += triangleCenter;
+        //point2 += triangleCenter;
 
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex] = point0;
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 1] = point1;
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 2] = point2;
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 3] = point0;
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 4] = point2;
-        m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 5] = point1;
+        if (!m_doubleSided)
+        {
+            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
+            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
+            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
+        }
+        else
+        {
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex] = point0;
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 1] = point1;
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 2] = point2;
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 3] = point0;
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 4] = point2;
+            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 5] = point1;
+        }
 
         m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
     }
@@ -687,5 +726,14 @@ public class BackgroundTriangle : BaseTriangle
         }
 
         UpdateParentRendererMeshVerticesArray();
+    }
+
+    public void Offset(float dy)
+    {
+        Vector2 offset = new Vector2(0, dy);
+
+        m_points[0] += offset;
+        m_points[1] += offset;
+        m_points[2] += offset;
     }
 }

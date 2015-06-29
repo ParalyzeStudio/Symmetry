@@ -8,8 +8,6 @@ public class Chapters : GUIScene
     public GameObject m_chaptersTitlePfb;
     public GameObject m_chapterSlotPfb;
 
-    private GameObject m_chaptersHolder;
-
     public int m_currentDisplayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
 
     //Show central item with delay

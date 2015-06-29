@@ -20,7 +20,7 @@ public class Chapter
 
     /**
      * Get the colors that will be used to draw elements for this specific chapters
-     * -[0-1]: start and end color for bg radial gradient
+     * -[0-1]: inner and outer colors for bg radial gradient
      * -2: color of central item background
      * **/
     public Color[] GetThemeColors()
