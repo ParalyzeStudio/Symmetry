@@ -81,20 +81,10 @@ public class GUITouchHandler : TouchHandler
     public void OnClickPlay()
     {
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        bgRenderer.GenerateTransitionGradient();
+        bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
         bgRenderer.GenerateChapterGradient();
-        bgRenderer.Offset(2560);
-
-        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        //MainMenu mainMenu = (MainMenu)sceneManager.m_currentScene;
-
-        ////dismiss play banner        
-        //mainMenu.DismissPlayBanner();
-
-        ////dismiss buttons
-        //mainMenu.DismissButtons();
-
-        //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 1.3f, 0.5f);
+        bgRenderer.GenerateTransitionGradients();
+        bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 5.0f);
     }
 
     /**

@@ -88,8 +88,8 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         float verticalOffset = m_parentRenderer.m_verticalOffset;
 
-        float triangleEdgeLength = this[0].m_edgeLength;
-        float triangleHeight = screenSize.x / (float) BackgroundTrianglesRenderer.NUM_COLUMNS;
+        float triangleEdgeLength = m_parentRenderer.m_triangleEdgeLength;
+        float triangleHeight = m_parentRenderer.m_triangleHeight;
 
         //First offset all triangles
         for (int iTriangleIndex = 0; iTriangleIndex != this.Count; iTriangleIndex++) //from bottom to top
@@ -110,10 +110,9 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                 iNumTrianglesToAdd++;
             iNumTrianglesToAdd *= 2; //double the number of triangles to add because there are 2 triangles sets in one single column
 
-            Debug.Log("ToAdd:" + iNumTrianglesToAdd);
             if (iNumTrianglesToAdd > this.Count)
                 iNumTrianglesToAdd = this.Count;
-            Debug.Log("iNumTrianglesToAdd:" + iNumTrianglesToAdd);
+            //Debug.Log("iNumTrianglesToAdd:" + iNumTrianglesToAdd);
 
             //remove the same number of triangles at the top of the column            
             int iNumTrianglesToRemove = iNumTrianglesToAdd;

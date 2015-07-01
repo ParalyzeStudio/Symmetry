@@ -35,6 +35,7 @@ public class MainMenu : GUIScene
 
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
         backgroundRenderer.RenderForMainMenu(bAnimated, fDelay);
+        //backgroundRenderer.RenderForChapter(bAnimated, fDelay);
 
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
         menuAnimator.SetOpacity(1);

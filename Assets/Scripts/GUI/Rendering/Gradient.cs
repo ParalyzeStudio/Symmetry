@@ -92,7 +92,7 @@ public class Gradient
             if (distanceToCenter < m_radialGradientRadius)
             {
                 float t = distanceToCenter / m_radialGradientRadius;
-                return Color.Lerp(m_radialGradientOuterColor, m_radialGradientInnerColor, t);
+                return Color.Lerp(m_radialGradientInnerColor, m_radialGradientOuterColor, t);
             }
 
             return m_radialGradientOuterColor;

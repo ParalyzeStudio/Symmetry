@@ -28,7 +28,7 @@ public class Chapters : GUIScene
         
         //apply new gradient to triangles
         BackgroundTrianglesRenderer backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        backgroundRenderer.RenderForChapter(Color.black, Color.red, true, 0.0f);
+        backgroundRenderer.RenderForChapter(true, 0.0f);
 
         //Display back button
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
