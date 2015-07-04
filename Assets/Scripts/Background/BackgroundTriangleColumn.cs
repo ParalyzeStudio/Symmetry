@@ -39,13 +39,12 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                                     float fTriangleAnimationInterval = 0.1f,
                                     bool bSetRelativeDelayOnEachTriangle = false)
     {
-        float colorStep = 1 / (float)(this.Count - 1);
-
         for (int iTriangleIdx = 0; iTriangleIdx != this.Count; iTriangleIdx++)
         {
             BackgroundTriangle triangle = this[iTriangleIdx];
 
-            Color triangleOriginalColor = gradient.GetColorAtPosition(triangle.GetCenter());
+            Vector2 triangleGlobalPosition = triangle.GetCenter() - new Vector2(0, m_parentRenderer.m_verticalOffset);
+            Color triangleOriginalColor = gradient.GetColorAtPosition(triangleGlobalPosition);
             if (bFrontFaces)
                 triangle.m_originalFrontColor = triangleOriginalColor;
             else
@@ -61,11 +60,9 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             else
             {
                 triangle.GenerateColorFromOriginalColor(bFrontFaces, localTriangleVariance);
-                triangle.UpdateParentRendererMeshColorsArray(bFrontFaces, bFrontFaces);
+                triangle.UpdateParentRendererMeshColorsArray();
             }
         }
-
-        m_parentRenderer.m_meshColorsDirty = true;
     }
 
     /**

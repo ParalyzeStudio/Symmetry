@@ -85,6 +85,9 @@ public class GUITouchHandler : TouchHandler
         bgRenderer.GenerateChapterGradient();
         bgRenderer.GenerateTransitionGradients();
         bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 5.0f);
+
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 5.0f);
     }
 
     /**
@@ -108,7 +111,6 @@ public class GUITouchHandler : TouchHandler
         for (int iButtonIndex = 0; iButtonIndex != childButtons.Length; iButtonIndex++)
         {
             GUIButton button = childButtons[iButtonIndex];
-            float clickLocationToButtonDistance = (GeometryUtils.BuildVector2FromVector3(button.transform.position) - clickLocation).magnitude;
             if (button.ContainsPoint(clickLocation))
             {
                 button.OnClick();
@@ -148,9 +150,11 @@ public class GUITouchHandler : TouchHandler
      * Processes click on chapters scene
      * **/
     public void HandleClickOnChapters(Vector2 clickLocation)
-    {
-        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        //Chapters chapters = (Chapters)sceneManager.m_currentScene;
+    {     
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        Chapters chapters = (Chapters)sceneManager.m_currentScene;
+
+        HandleClickOnChildButtons(chapters.gameObject, clickLocation);
 
         //GameObject[] chaptersSlots = chapters.m_chapterSlots;
         //for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)

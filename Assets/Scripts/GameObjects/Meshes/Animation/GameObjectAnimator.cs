@@ -69,8 +69,7 @@ public class GameObjectAnimator : ValueAnimator
         //update the size of the game object
         this.transform.localScale = scale;
 
-        //translate the object for it can scale around pivot point
-        Vector3 pivotPointToObjectCenter = new Vector3(0.5f - m_pivotPoint.x, 0.5f - m_pivotPoint.y, 0.5f - m_pivotPoint.z);
+        Vector3 pivotPointToObjectCenter = new Vector3(0.5f, 0.5f, 0.5f) - m_pivotPoint;
         pivotPointToObjectCenter.Scale(scale);
         pivotPointToObjectCenter = this.transform.rotation * pivotPointToObjectCenter;
         this.transform.localPosition = m_position + pivotPointToObjectCenter;

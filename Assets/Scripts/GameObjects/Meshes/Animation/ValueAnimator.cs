@@ -20,6 +20,7 @@ public class ValueAnimator : MonoBehaviour
     protected float m_fadingDelay;
     protected float m_fadingElapsedTime;
     protected InterpolationType m_fadingInterpolationType;
+    protected bool m_destroyObjectOnFinish;
 
     //Variables to handle scaling
     protected bool m_scaling;
@@ -66,7 +67,7 @@ public class ValueAnimator : MonoBehaviour
     private float m_prevOpacity;
     private Color m_prevColor;
 
-    public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyObjectOnFinish = false)
     {
         if (m_opacity == toOpacity)
             return;
@@ -78,6 +79,7 @@ public class ValueAnimator : MonoBehaviour
         m_fadingDelay = delay;
         m_fadingElapsedTime = 0;
         m_fadingInterpolationType = interpolType;
+        m_destroyObjectOnFinish = bDestroyObjectOnFinish;
     }
 
     public void ScaleTo(Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
@@ -251,7 +253,8 @@ public class ValueAnimator : MonoBehaviour
 
     public virtual void OnFinishFading()
     {
-        
+        if (m_destroyObjectOnFinish)
+            Destroy(this.gameObject);
     }
 
     public virtual void OnFinishTranslating()

@@ -38,7 +38,7 @@ public class LevelManager : MonoBehaviour
 
         for (int iLevelIdx = 0; iLevelIdx != chapter.m_levels.Length; iLevelIdx++)
         {
-            Level parsedLevel = ParseLevelFile(iChapterNumber, iLevelIdx + 1);
+            Level parsedLevel = ParseLevelFile(chapter, iLevelIdx + 1);
             if (parsedLevel != null)
                 chapter.m_levels[iLevelIdx] = parsedLevel;
         }
@@ -46,10 +46,9 @@ public class LevelManager : MonoBehaviour
         return chapter;
     }
 
-    public Level ParseLevelFile(int iChapterNumber, int iLevelNumber)
+    public Level ParseLevelFile(Chapter chapter, int iLevelNumber)
     {
-        string levelFilename = "Chapter" + iChapterNumber + "/level_" + iLevelNumber;
-        //Debug.Log(levelFilename);
+        string levelFilename = "Chapter" + chapter.m_number + "/level_" + iLevelNumber;
         Object levelObjectFile = Resources.Load(levelFilename);
         if (levelObjectFile == null)
             return null;
@@ -60,8 +59,6 @@ public class LevelManager : MonoBehaviour
         XMLNode rootNode = xmlParser.Parse(levelFile.text);
 
         XMLNode levelNode = rootNode.GetNode("level>0");
-
-        Chapter chapter = GetChapterForNumber(iChapterNumber);
 
         Level level = new Level();
         string levelName = levelNode.GetValue("@name");

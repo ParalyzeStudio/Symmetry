@@ -28,4 +28,10 @@ public class Level
         m_gridExactNumLines = 0;
         m_gridExactNumColumns = 0;
     }
+
+    public bool IsDone()
+    {
+        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+        return persistentDataManager.IsLevelDone((m_parentChapter.m_number - 1) * Chapter.LEVELS_COUNT + m_chapterRelativeNumber);
+    }
 }

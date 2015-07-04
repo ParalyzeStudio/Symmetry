@@ -34,14 +34,20 @@ public class PersistentDataManager : MonoBehaviour
 
 
 
-    public void SetLevelDone(int iLevelNumber)
+    public void SetLevelDone(int iAbsoluteLevelNumber)
     {
-        LevelData levelData = LoadLevelDataFromFile(iLevelNumber);
+        LevelData levelData = LoadLevelDataFromFile(iAbsoluteLevelNumber);
         if (!levelData.m_done)
         {
             levelData.m_done = true;
             SaveLevelDataToFile(levelData);
         }
+    }
+
+    public bool IsLevelDone(int iAbsoluteLevelNumber)
+    {
+        LevelData levelData = LoadLevelDataFromFile(iAbsoluteLevelNumber);
+        return levelData.m_done;
     }
 
     /**

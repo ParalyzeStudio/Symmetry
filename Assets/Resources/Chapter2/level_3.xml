@@ -42,7 +42,7 @@
 				<point column="10" line="9" />
 			</contour>
 		</shape>
-		shape color="1,0,0,1">
+		<shape color="1,0,0,1">
 			<contour>
 				<point column="5" line="7" />
 				<point column="5" line="5" />

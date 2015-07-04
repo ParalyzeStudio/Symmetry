@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-[ExecuteInEditMode]
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
-    public const int NUM_COLUMNS = 25;
+    public const int NUM_COLUMNS = 26;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
     public int m_numTrianglesPerColumn { get; set; }
@@ -238,6 +237,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
         Chapter chapter = levelManager.GetChapterForNumber(1); //TODO get last reached chapter or last played chapter, not decided yet
 
         Color gradientInnerColor = chapter.GetThemeColors()[0];
@@ -634,7 +634,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
 
         float toOffset = bFromMainMenu ? 2560 : 0;
-        animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);       
+        animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);    
     }
 
     /**
@@ -658,7 +658,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             BackgroundTriangle triangle = m_triangleColumns[columnIndex][i];
 
-            Vector2 triangleCenter = triangle.GetCenter();
+            Vector2 triangleCenter = triangle.GetCenter() /*+ new Vector2(0, m_verticalOffset)*/;
             float distanceToCenter = Mathf.Abs(triangleCenter.y); //center is at y-coordinate 0
             if (distanceToCenter < minDistance)
             {

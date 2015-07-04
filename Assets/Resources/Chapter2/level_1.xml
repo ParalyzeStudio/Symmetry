@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 1" number="1">
 	<counter maxActions="2"/>
 	<grid exactNumColumns="13" exactNumLines="9" maxGridSpacing="150"/>
@@ -44,4 +44,4 @@
 	<actions>
 		<action tag="SYMMETRY_AXES_ALL"/>
 	</actions>
-</level>
+</level> 

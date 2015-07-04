@@ -279,11 +279,27 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS)
         {
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            Chapters chapters = (Chapters) sceneManager.m_currentScene;
 
+            if (chapters.DecrementChapterIndex())
+            {
+                chapters.DismissAndDestroyCentralItemInformation();
+                chapters.BuildAndShowCentralItemInformation(true, 0.5f, 0.5f);
+                chapters.UpdateBackgroundGradient();
+            }
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
         {
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            Chapters chapters = (Chapters)sceneManager.m_currentScene;
 
+            if (chapters.IncrementChapterIndex())
+            {
+                chapters.DismissAndDestroyCentralItemInformation();
+                chapters.BuildAndShowCentralItemInformation(true, 0.5f, 0.5f);
+                chapters.UpdateBackgroundGradient();
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
 	<string tag="play" value="JOUER"/>
+	<string tag="chapter" value="CHAPITRE"/>
+	<string tag="progress_bar_completion" value="complétés"/>
 </strings>

@@ -70,6 +70,7 @@ public class GUIManager : MonoBehaviour
 
         GUIButton button = buttonObject.GetComponent<GUIButton>();
         button.Init(forcedSkinMaterial);
+        button.m_ID = iID;
 
         //Set the size of the button
         button.SetSize(size);
