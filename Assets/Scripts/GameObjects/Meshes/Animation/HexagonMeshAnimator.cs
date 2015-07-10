@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
 
-public class CircleAnimator : GameObjectAnimator
+public class HexagonMeshAnimator : GameObjectAnimator
 {
-    //thickness of the circle
-    private float m_thickness;
-
-    //number of segments of the circle
-    private int m_numSegments;
+    public float m_thickness { get; set; }
 
     //Radius animation
     protected bool m_animatingRadius;
-    private float m_innerRadius;
+    public float m_innerRadius { get; set; }
     protected float m_fromRadius;
     protected float m_toRadius;
     protected float m_radiusAnimationDuration;
@@ -22,7 +18,7 @@ public class CircleAnimator : GameObjectAnimator
     {
         m_innerRadius = radius;
         if (bRenderCircle)
-            RenderCircle();
+            RenderHexagon();
     }
 
     public virtual void IncInnerRadius(float deltaRadius)
@@ -35,39 +31,32 @@ public class CircleAnimator : GameObjectAnimator
     {
         m_thickness = thickness;
         if (bRenderCircle)
-            RenderCircle();
-    }
-
-    public void SetNumSegments(int numSegments, bool bRenderCircle = true)
-    {
-        m_numSegments = numSegments;
-        if (bRenderCircle)
-            RenderCircle();
+            RenderHexagon();
     }
 
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);
 
-        ColorCircleMesh circleMesh = this.GetComponent<ColorCircleMesh>();
-        circleMesh.SetColor(m_color);
+        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
+        hexaMesh.SetColor(m_color);
     }
 
     public override void SetColor(Color color)
     {
         base.SetColor(color);
 
-        ColorCircleMesh circleMesh = this.GetComponent<ColorCircleMesh>();
-        circleMesh.SetColor(color);
+        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
+        hexaMesh.SetColor(color);
     }
 
-    public void RenderCircle()
+    public void RenderHexagon()
     {
-        ColorCircleMesh circle = this.GetComponent<ColorCircleMesh>();
-        circle.Render(m_innerRadius, m_thickness, m_color, m_numSegments);
+        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
+        hexaMesh.Render(m_innerRadius, m_thickness, m_color);
     }
 
-    public void AnimateRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void AnimateRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyOnFinish = false)
     {
         if (m_innerRadius == toRadius)
             return;

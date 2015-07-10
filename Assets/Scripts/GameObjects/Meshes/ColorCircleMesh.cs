@@ -3,7 +3,6 @@
 /**
  * Use this class to render a circle
  * **/
-[ExecuteInEditMode]
 public class ColorCircleMesh : MonoBehaviour
 {
     public void Init(Material material = null)
@@ -24,7 +23,10 @@ public class ColorCircleMesh : MonoBehaviour
     {
         Mesh circleMesh = GetComponent<MeshFilter>().sharedMesh;
         if (circleMesh == null)
+        {
             Init();
+            circleMesh = GetComponent<MeshFilter>().sharedMesh;
+        }
 
         float outerRadius = innerRadius + thickness;
         
@@ -59,19 +61,8 @@ public class ColorCircleMesh : MonoBehaviour
         circleMesh.vertices = meshVertices;
         circleMesh.triangles = meshIndices;
 
-        Vector3[] normals = new Vector3[numVertices];
-        for (int i = 0; i != numVertices; i++)
-        {
-            normals[i] = Vector3.forward;
-        }
-        circleMesh.normals = normals;
-
         //set the circle color
         SetColor(color);
-
-        //Set the mesh to the MeshFilter component
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
-        meshFilter.sharedMesh = circleMesh;
     }
 
     public void SetColor(Color color)

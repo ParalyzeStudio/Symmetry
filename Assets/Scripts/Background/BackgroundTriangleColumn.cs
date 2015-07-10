@@ -30,13 +30,12 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
      * This will modify the color of every triangle faces (front or back) starting from top (gradient startColor) to bottom (gradient endColor)
      * Specify a local variance for each triangle to generate a color that is near the color expected from the gradient
      * **/
-    public void ApplyGradient(Gradient gradient, 
-                                    bool bFrontFaces, 
+    public void ApplyGradient(Gradient gradient,
                                     float localTriangleVariance = 0.0f,
                                     bool bAnimated = false,
                                     float fTriangleAnimationDuration = 1.0f,
                                     float fAnimationDelay = 0.0f,
-                                    float fTriangleAnimationInterval = 0.1f,
+                                    float fTriangleAnimationInterval = 0.0f,
                                     bool bSetRelativeDelayOnEachTriangle = false)
     {
         for (int iTriangleIdx = 0; iTriangleIdx != this.Count; iTriangleIdx++)
@@ -44,22 +43,18 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             BackgroundTriangle triangle = this[iTriangleIdx];
 
             Vector2 triangleGlobalPosition = triangle.GetCenter() - new Vector2(0, m_parentRenderer.m_verticalOffset);
-            Color triangleOriginalColor = gradient.GetColorAtPosition(triangleGlobalPosition);
-            if (bFrontFaces)
-                triangle.m_originalFrontColor = triangleOriginalColor;
-            else
-                triangle.m_originalBackColor = triangleOriginalColor;
+            triangle.m_originalColor = gradient.GetColorAtPosition(triangleGlobalPosition);
 
             if (bAnimated)
             {
-                Color animationEndColor = ColorUtils.GetRandomNearColor(triangleOriginalColor, localTriangleVariance);
+                Color animationEndColor = ColorUtils.GetRandomNearColor(triangle.m_originalColor, localTriangleVariance);
                 float fRelativeDelay = (bSetRelativeDelayOnEachTriangle) ? Random.value * 0.5f * fTriangleAnimationDuration : 0;
                 float fTriangleDelay = fAnimationDelay + iTriangleIdx * fTriangleAnimationInterval + fRelativeDelay;
-                triangle.StartColorAnimation(bFrontFaces, animationEndColor, fTriangleAnimationDuration, fTriangleDelay);
+                triangle.StartColorAnimation(animationEndColor, fTriangleAnimationDuration, fTriangleDelay);
             }
             else
             {
-                triangle.GenerateColorFromOriginalColor(bFrontFaces, localTriangleVariance);
+                triangle.GenerateColorFromOriginalColor(localTriangleVariance);
                 triangle.UpdateParentRendererMeshColorsArray();
             }
         }
@@ -158,10 +153,9 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                 }
                 Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
                 Color triangleColor = m_parentRenderer.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
-                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor, triangleColor);
-                triangle.GenerateColorFromOriginalColor(true, 0.02f);
+                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor);
+                triangle.GenerateColorFromOriginalColor(0.02f);
 
-                triangle.m_doubleSided = m_parentRenderer.m_doubleSided;
                 triangle.m_indexInColumn = this.Count;
                 triangle.m_parentColumn = this;
                 this.Add(triangle);

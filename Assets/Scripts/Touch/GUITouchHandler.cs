@@ -133,17 +133,17 @@ public class GUITouchHandler : TouchHandler
         clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
         clickLocation.y = -clickLocation.y + screenSize.y;
 
-        if (mainMenu.m_isPlayBannerDisplayed)
-        {
-            Rect tapToPlayAreaRect = new Rect();
+        //if (mainMenu.m_isPlayBannerDisplayed)
+        //{
+        //    Rect tapToPlayAreaRect = new Rect();
 
-            tapToPlayAreaRect.width = screenSize.x;
-            tapToPlayAreaRect.height = 175.0f;
-            tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
+        //    tapToPlayAreaRect.width = screenSize.x;
+        //    tapToPlayAreaRect.height = 175.0f;
+        //    tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
 
-            if (tapToPlayAreaRect.Contains(clickLocation))
-                OnClickPlay();
-        }
+        //    if (tapToPlayAreaRect.Contains(clickLocation))
+        //        OnClickPlay();
+        //}
     }
 
     /**
@@ -154,20 +154,18 @@ public class GUITouchHandler : TouchHandler
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         Chapters chapters = (Chapters)sceneManager.m_currentScene;
 
-        HandleClickOnChildButtons(chapters.gameObject, clickLocation);
+        if (!HandleClickOnChildButtons(chapters.gameObject, clickLocation))
+        {
+            BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+            float triangleHeight = bgRenderer.m_triangleHeight;
 
-        //GameObject[] chaptersSlots = chapters.m_chapterSlots;
-        //for (int iSlotIndex = 0; iSlotIndex != chaptersSlots.Length; iSlotIndex++)
-        //{
-        //    Vector2 slotSize = chaptersSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
-        //    Vector2 slotPosition = chaptersSlots[iSlotIndex].transform.position;
-        //    if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
-        //        &&
-        //        clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
-        //    {
-        //        chapters.OnClickChapterSlot(iSlotIndex);
-        //    }
-        //}
+            if (clickLocation.x >= -4 * triangleHeight && clickLocation.x <= 4 * triangleHeight &&
+                clickLocation.y >= -4 * triangleHeight && clickLocation.y <= 4 * triangleHeight)
+            {
+                chapters.OnClickChapterSlot();
+            }
+                
+        }
     }
 
     /**
@@ -178,17 +176,15 @@ public class GUITouchHandler : TouchHandler
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         Levels levels = (Levels)sceneManager.m_currentScene;
 
-        GameObject[] levelsSlots = levels.m_levelSlots;
-        for (int iSlotIndex = 0; iSlotIndex != levelsSlots.Length; iSlotIndex++)
+        if (!HandleClickOnChildButtons(levels.gameObject, clickLocation))
         {
-            Vector2 slotSize = levelsSlots[iSlotIndex].GetComponent<GameObjectAnimator>().GetGameObjectSize();
-            Vector2 slotPosition = levelsSlots[iSlotIndex].transform.position;
-            if (clickLocation.x <= slotPosition.x + 0.5f * slotSize.x && clickLocation.x >= slotPosition.x - 0.5f * slotSize.x
-                &&
-                clickLocation.y <= slotPosition.y + 0.5f * slotSize.y && clickLocation.y >= slotPosition.y - 0.5f * slotSize.y)
+            for (int i = 0; i != levels.m_levelSlots.Length; i++)
             {
-                levels.OnClickLevelSlot(iSlotIndex);
-                break;
+                if (levels.m_levelSlots[i].ContainsPoint(clickLocation))
+                {
+                    levels.OnClickLevelSlot(i);
+                    break;
+                }
             }
         }
     }

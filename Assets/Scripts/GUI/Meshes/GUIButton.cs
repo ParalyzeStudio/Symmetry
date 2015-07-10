@@ -284,9 +284,9 @@ public class GUIButton : MonoBehaviour
 
             if (chapters.DecrementChapterIndex())
             {
-                chapters.DismissAndDestroyCentralItemInformation();
-                chapters.BuildAndShowCentralItemInformation(true, 0.5f, 0.5f);
+                chapters.DismissChapterSlot(false, true, 0.5f, 0.0f);
                 chapters.UpdateBackgroundGradient();
+                chapters.ShowChapterSlot(1.0f); //build a new container for diplaying chapter info
             }
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
@@ -296,9 +296,9 @@ public class GUIButton : MonoBehaviour
 
             if (chapters.IncrementChapterIndex())
             {
-                chapters.DismissAndDestroyCentralItemInformation();
-                chapters.BuildAndShowCentralItemInformation(true, 0.5f, 0.5f);
+                chapters.DismissChapterSlot(false, true, 0.5f, 0.0f);
                 chapters.UpdateBackgroundGradient();
+                chapters.ShowChapterSlot(1.0f); //build a new container for diplaying chapter info
             }
         }
     }

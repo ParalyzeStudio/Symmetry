@@ -1,16 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
-    public const int NUM_COLUMNS = 26;
+    public const float BACKGROUND_TRIANGLES_Z_VALUE = -5.0f;
+    public const int NUM_COLUMNS = 30;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
     public int m_numTrianglesPerColumn { get; set; }
     public Material m_triangleMaterial;
     public Mesh m_mesh { get; set; }
     public bool m_meshBuilt { get; set; }
-    public bool m_doubleSided { get; set; }
     public float m_triangleEdgeLength { get; set; }
     public float m_triangleHeight { get; set; }
 
@@ -61,6 +62,12 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     public void Init()
     {
+        m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
+
+        GenerateMainMenuGradient();
+        GenerateChapterGradient();
+        GenerateTransitionGradients();
+
         BuildMesh();
 
         //init the position of the animator to 0
@@ -73,10 +80,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Build triangles to fill in the whole screen
      * **/
-    public void BuildMesh(bool bDoubleSided = false)
+    public void BuildMesh()
     {
-        m_doubleSided = bDoubleSided;
-
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Build the actual mesh
@@ -97,7 +102,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         int numberOfTriangles = NUM_COLUMNS * m_numTrianglesPerColumn;
 
         //Set up correct sizes for mesh arrays
-        int numVerticesPerTriangle = bDoubleSided ? 6 : 3;
+        int numVerticesPerTriangle = 3;
         m_meshVertices = new Vector3[numVerticesPerTriangle * numberOfTriangles]; //6 vertices per triangle because 2 sides of different colors
         m_meshTriangles = new int[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
         m_meshColors = new Color[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
@@ -105,13 +110,16 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         m_meshTrianglesDirty = true;
         m_meshColorsDirty = true;
 
+        float columnHeight = 0.5f * (m_numTrianglesPerColumn + 1) * m_triangleEdgeLength;
+        float columnOffset = 0.5f * (columnHeight - screenSize.y);
+
         for (int i = 0; i != NUM_COLUMNS; i++)
         {
             BackgroundTriangleColumn column = new BackgroundTriangleColumn(this, i);
 
             for (int j = 0; j != m_numTrianglesPerColumn; j++)
             {
-                float trianglePositionY = screenSize.y - 0.5f * (j - 1) * m_triangleEdgeLength;
+                float trianglePositionY = screenSize.y - 0.5f * (j + 1) * m_triangleEdgeLength + columnOffset;
                 trianglePositionY -= 0.5f * screenSize.y;
 
                 float triangleAngle;
@@ -128,9 +136,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 }
                 trianglePositionX -= 0.5f * screenSize.x;
 
-                Color defaultTriangleColor = GetDefaultBackgroundColor();
-                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), m_triangleEdgeLength, triangleAngle, defaultTriangleColor, defaultTriangleColor);
-                triangle.m_doubleSided = bDoubleSided;
+                Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
+                Color triangleColor = ColorUtils.GetRandomNearColor(GetColorAtPosition(trianglePosition), 0.02f);
+                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), m_triangleEdgeLength, triangleAngle, triangleColor);
                 triangle.m_indexInColumn = j;
                 triangle.m_parentColumn = column;
                 column.Add(triangle);
@@ -143,34 +151,16 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 m_meshVertices[triangleFirstVertexIndex] = triangle.m_points[0];
                 m_meshVertices[triangleFirstVertexIndex + 1] = triangle.m_points[1];
                 m_meshVertices[triangleFirstVertexIndex + 2] = triangle.m_points[2];
-                if (bDoubleSided)
-                {
-                    m_meshVertices[triangleFirstVertexIndex + 3] = triangle.m_points[0];
-                    m_meshVertices[triangleFirstVertexIndex + 4] = triangle.m_points[2];
-                    m_meshVertices[triangleFirstVertexIndex + 5] = triangle.m_points[1];
-                }
 
                 //indices
                 m_meshTriangles[triangleFirstVertexIndex] = triangleFirstVertexIndex;
                 m_meshTriangles[triangleFirstVertexIndex + 1] = triangleFirstVertexIndex + 1;
                 m_meshTriangles[triangleFirstVertexIndex + 2] = triangleFirstVertexIndex + 2;
-                if (bDoubleSided)
-                {
-                    m_meshTriangles[triangleFirstVertexIndex + 3] = triangleFirstVertexIndex + 3;
-                    m_meshTriangles[triangleFirstVertexIndex + 4] = triangleFirstVertexIndex + 4;
-                    m_meshTriangles[triangleFirstVertexIndex + 5] = triangleFirstVertexIndex + 5;
-                }
 
                 //colors
-                m_meshColors[triangleFirstVertexIndex] = defaultTriangleColor;
-                m_meshColors[triangleFirstVertexIndex + 1] = defaultTriangleColor;
-                m_meshColors[triangleFirstVertexIndex + 2] = defaultTriangleColor;
-                if (bDoubleSided)
-                {
-                    m_meshColors[triangleFirstVertexIndex + 3] = defaultTriangleColor;
-                    m_meshColors[triangleFirstVertexIndex + 4] = defaultTriangleColor;
-                    m_meshColors[triangleFirstVertexIndex + 5] = defaultTriangleColor;
-                }
+                m_meshColors[triangleFirstVertexIndex] = triangleColor;
+                m_meshColors[triangleFirstVertexIndex + 1] = triangleColor;
+                m_meshColors[triangleFirstVertexIndex + 2] = triangleColor;
             }
 
             m_triangleColumns.Add(column);
@@ -190,8 +180,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(252, 183, 94, 255));//Same gradient for all colors
-        Color gradientEndColor = new Color(0.5f, 1.0f, 0.8f, 1.0f);
+        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(18, 75, 89, 255));
+        Color gradientEndColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(98, 127, 134, 255));
 
         if (m_mainMenuGradient == null)
             m_mainMenuGradient = new Gradient();
@@ -256,7 +246,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        if (position.y <= m_mainMenuGradient.m_linearGradientStartPoint.y && position.y >= m_mainMenuGradient.m_linearGradientEndPoint.y)
+        if (position.y >= m_mainMenuGradient.m_linearGradientEndPoint.y)
             return m_mainMenuGradient.GetColorAtPosition(position);
         else if (position.y < m_mainMenuGradient.m_linearGradientEndPoint.y && position.y > m_mainMenuGradient.m_linearGradientEndPoint.y - m_transitionGradientLength)
         {
@@ -332,22 +322,18 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     public void RenderForMainMenu(bool bAnimated, float fDelay = 0.0f)
     {
-        m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
-        GenerateMainMenuGradient();
-        GenerateChapterGradient();
-        GenerateTransitionGradients();
-
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
 
-            float randomRelativeDelay = Random.value;
-            
-            column.ApplyGradient(m_mainMenuGradient, true, 0.02f, true, 0.75f, fDelay + randomRelativeDelay, 0.05f);
+            //float randomRelativeDelay = Random.value;            
+            //column.ApplyGradient(m_mainMenuGradient, true, 0.02f, true, 0.75f, fDelay + randomRelativeDelay, 0.05f);
+
+            column.ApplyGradient(m_mainMenuGradient, 0.02f, true, 0.75f, fDelay);
         }
 
         //Modify the colors of some triangles to make the title appear
-        RenderMainMenuTitle(bAnimated, fDelay + 5.0f);
+        //RenderMainMenuTitle(bAnimated, fDelay + 5.0f);
     }
 
     public void RenderForChapter(bool bAnimated, float fDelay = 0.0f)
@@ -364,7 +350,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         Color innerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255));
         Color outerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
         radialGradient.CreateRadial(Vector2.zero, 960, innerColor, outerColor);
-        ApplyGradient(radialGradient, true, 0.0f, false, 1.0f, 0.0f, 0.1f, false);
+        ApplyGradient(radialGradient, 0.0f, false, 1.0f, 0.0f, 0.1f, false);
         //FlipAllTriangles(0.5f, 0.0f);
     }
 
@@ -373,7 +359,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public void RenderMainMenuTitle(bool bAnimated, float fDelay)
     {
-        return;
         if (bAnimated)
         {
             m_renderingMainMenuTitle = true;
@@ -393,74 +378,87 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
         titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)
 
+        int titleOffsetX = 3;
+        int titleOffsetY = 3;
+
         //Add 9 triangles for letter F
-        titleTriangles.Add(m_triangleColumns[4][7]);
-        titleTriangles.Add(m_triangleColumns[4][8]);
-        titleTriangles.Add(m_triangleColumns[4][9]);
-        titleTriangles.Add(m_triangleColumns[4][10]);
-        titleTriangles.Add(m_triangleColumns[4][11]);
-        titleTriangles.Add(m_triangleColumns[4][12]);
-        titleTriangles.Add(m_triangleColumns[5][6]);
-        titleTriangles.Add(m_triangleColumns[5][7]);
-        titleTriangles.Add(m_triangleColumns[5][9]);
+        int iReferenceColumnIndex = 4 + titleOffsetX;
+        int iReferenceTriangleIndex = 7 + titleOffsetY;
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 5]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex - 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 2]);
 
         //Add 8 triangles for letter L
-        titleTriangles.Add(m_triangleColumns[7][6]);
-        titleTriangles.Add(m_triangleColumns[7][7]);
-        titleTriangles.Add(m_triangleColumns[7][8]);
-        titleTriangles.Add(m_triangleColumns[7][9]);
-        titleTriangles.Add(m_triangleColumns[7][10]);
-        titleTriangles.Add(m_triangleColumns[7][11]);
-        titleTriangles.Add(m_triangleColumns[7][12]);
-        titleTriangles.Add(m_triangleColumns[8][12]);
+        iReferenceColumnIndex = 7 + titleOffsetX;
+        iReferenceTriangleIndex = 6 + titleOffsetY;
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 5]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 6]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 6]);
 
         //Add 10 triangles for first letter E
-        titleTriangles.Add(m_triangleColumns[10][7]);
-        titleTriangles.Add(m_triangleColumns[10][8]);
-        titleTriangles.Add(m_triangleColumns[10][9]);
-        titleTriangles.Add(m_triangleColumns[10][10]);
-        titleTriangles.Add(m_triangleColumns[10][11]);
-        titleTriangles.Add(m_triangleColumns[11][6]);
-        titleTriangles.Add(m_triangleColumns[11][7]);
-        titleTriangles.Add(m_triangleColumns[11][9]);
-        titleTriangles.Add(m_triangleColumns[11][11]);
-        titleTriangles.Add(m_triangleColumns[11][12]);
+        iReferenceColumnIndex = 10 + titleOffsetX;
+        iReferenceTriangleIndex = 7 + titleOffsetY;
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex - 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 5]);
 
         //Add 10 triangles for second letter E
-        titleTriangles.Add(m_triangleColumns[14][6]);
-        titleTriangles.Add(m_triangleColumns[14][7]);
-        titleTriangles.Add(m_triangleColumns[14][9]);
-        titleTriangles.Add(m_triangleColumns[14][11]);
-        titleTriangles.Add(m_triangleColumns[14][12]);
-        titleTriangles.Add(m_triangleColumns[15][7]);
-        titleTriangles.Add(m_triangleColumns[15][8]);
-        titleTriangles.Add(m_triangleColumns[15][9]);
-        titleTriangles.Add(m_triangleColumns[15][10]);
-        titleTriangles.Add(m_triangleColumns[15][11]);
+        iReferenceColumnIndex = 14 + titleOffsetX;
+        iReferenceTriangleIndex = 6 + titleOffsetY;
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 5]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 6]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 5]);
 
         //Add 15 triangles for second letter C
-        titleTriangles.Add(m_triangleColumns[18][7]);
-        titleTriangles.Add(m_triangleColumns[18][8]);
-        titleTriangles.Add(m_triangleColumns[18][9]);
-        titleTriangles.Add(m_triangleColumns[18][10]);
-        titleTriangles.Add(m_triangleColumns[18][11]);
-        titleTriangles.Add(m_triangleColumns[19][6]);
-        titleTriangles.Add(m_triangleColumns[19][7]);
-        titleTriangles.Add(m_triangleColumns[19][11]);
-        titleTriangles.Add(m_triangleColumns[19][12]);
-        titleTriangles.Add(m_triangleColumns[20][6]);
-        titleTriangles.Add(m_triangleColumns[20][7]);
-        titleTriangles.Add(m_triangleColumns[20][11]);
-        titleTriangles.Add(m_triangleColumns[20][12]);
-        titleTriangles.Add(m_triangleColumns[21][7]);
-        titleTriangles.Add(m_triangleColumns[21][11]);
+        iReferenceColumnIndex = 18 + titleOffsetX;
+        iReferenceTriangleIndex = 7 + titleOffsetY;
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 2]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 3]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex - 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 1][iReferenceTriangleIndex + 5]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 2][iReferenceTriangleIndex - 1]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 2][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 2][iReferenceTriangleIndex + 4]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 2][iReferenceTriangleIndex + 5]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 3][iReferenceTriangleIndex]);
+        titleTriangles.Add(m_triangleColumns[iReferenceColumnIndex + 3][iReferenceTriangleIndex + 4]);
 
         //manually set destination color and launch the color animation for every triangle in the previously build list
-        Color blendColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 23, 12, 255));
+        Color blendColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(189, 215, 255, 255));
         for (int iTriangleIdx = 0; iTriangleIdx != titleTriangles.Count; iTriangleIdx++)
         {
             BackgroundTriangle triangle = titleTriangles[iTriangleIdx];
-            Color destinationColor = Color.Lerp(triangle.m_frontColor, blendColor, 0.5f);
+            Color destinationColor = Color.Lerp(triangle.m_color, blendColor, 1.0f);
 
             //generate a random delay for each title triangle
             float randomDelay = Random.value;
@@ -468,11 +466,11 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
             //launch the color animation
             if (bAnimated)
-                triangle.StartColorAnimation(true, destinationColor, 2.0f, randomDelay);
+                triangle.StartColorAnimation(destinationColor, 2.0f, randomDelay);
             else
-                triangle.m_frontColor = destinationColor;
+                triangle.m_color = destinationColor;
 
-            triangle.UpdateParentRendererMeshColorsArray(true, false);
+            triangle.UpdateParentRendererMeshColorsArray();
         }
     }
 
@@ -581,19 +579,18 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * Apply a gradient to all triangles at once
      * **/
     public void ApplyGradient(Gradient gradient,
-                              bool bFrontFaces,
                               float localTriangleVariance = 0.0f,
                               bool bAnimated = false,
                               float fTriangleAnimationDuration = 1.0f,
                               float fAnimationDelay = 0.0f,
-                              float fTriangleAnimationInterval = 0.1f,
+                              float fTriangleAnimationInterval = 0.0f,
                               bool bSetRelativeDelayOnEachTriangle = false)
     {
         //Call ApplyGradient() on each column
         for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
-            column.ApplyGradient(gradient, bFrontFaces, localTriangleVariance, bAnimated, fTriangleAnimationDuration, fAnimationDelay, fTriangleAnimationInterval, bSetRelativeDelayOnEachTriangle);
+            column.ApplyGradient(gradient, localTriangleVariance, bAnimated, fTriangleAnimationDuration, fAnimationDelay, fTriangleAnimationInterval, bSetRelativeDelayOnEachTriangle);
         }
     }
 
@@ -631,43 +628,122 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public void SwitchBetweenMainMenuBackgroundAndChapterBackground(bool bFromMainMenu, float fDuration, float fDelay = 0.0f)
     {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
 
-        float toOffset = bFromMainMenu ? 2560 : 0;
+        float toOffset = bFromMainMenu ? 2 * screenSize.y : 0; //transition gradient is 1 screen unit length
         animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);    
     }
 
     /**
      * Return the nearest triangle of any column to the screen center y-coordinate
-     * Can filter some triangles based on their indices (even/odd or both)
+     * By default yPosition is at the center of the screen (=0)
+     * Can filter some triangles based on their angle (0 or 180 degrees or -1 for all triangles)
      * Can also choose on which column the operation is performed
      * **/
-    public BackgroundTriangle GetNearestTriangleToScreenYCenter(bool evenIndicesTriangles, bool oddIndicesTriangles, int columnIndex = 0)
+    public BackgroundTriangle GetNearestTriangleToScreenYPosition(float yPosition = 0, int columnIndex = 0, float bTriangleAngle = -1)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //take the first column (or any other, it doesn't matter)
         float minDistance = float.MaxValue;
         BackgroundTriangle nearestTriangle = null;
         for (int i = 0; i != m_triangleColumns[columnIndex].Count; i++)
         {
-            if (!evenIndicesTriangles && i % 2 == 0)
-                continue;
-            if (!oddIndicesTriangles && i % 2 == 1)
-                continue;
-
             BackgroundTriangle triangle = m_triangleColumns[columnIndex][i];
 
-            Vector2 triangleCenter = triangle.GetCenter() /*+ new Vector2(0, m_verticalOffset)*/;
-            float distanceToCenter = Mathf.Abs(triangleCenter.y); //center is at y-coordinate 0
-            if (distanceToCenter < minDistance)
+            if (bTriangleAngle > 0 && triangle.m_angle != bTriangleAngle)
+                continue;
+
+            Vector2 triangleCenter = triangle.GetCenter();
+            float distanceToYPosition = Mathf.Abs(triangleCenter.y - yPosition); //center is at y-coordinate 0
+            if (distanceToYPosition < minDistance)
             {
                 nearestTriangle = triangle;
-                minDistance = distanceToCenter;
+                minDistance = distanceToYPosition;
             }
         }
 
         return nearestTriangle;
+    }
+
+    public Vector2 GetMostCenteredMeshPoint()
+    {
+        float minDistance = float.MaxValue;
+        Vector2 mostCenteredPoint = m_triangleColumns[0][0].m_points[0];
+
+        int meshTrianglesCount = NUM_COLUMNS * m_numTrianglesPerColumn;
+        List<Vector2> testedPoints = new List<Vector2>(); //store points that have already been tested        
+        testedPoints.Capacity = meshTrianglesCount / 3;
+        testedPoints.Add(mostCenteredPoint); //add the first point
+
+        for (int i = 0; i != m_triangleColumns.Count; i++)
+        {
+            for (int j = 0; j != m_triangleColumns[i].Count; j++)
+            {
+                BackgroundTriangle triangle = m_triangleColumns[i][j];
+                for (int iPointIdx = 0; iPointIdx != 3; iPointIdx++)
+                {
+                    Vector2 point = triangle.m_points[iPointIdx];
+                    bool bPointAlreadyTested = false;
+                    for (int k = 0; k != testedPoints.Count; k++)
+                    {
+                        if (point.Equals(testedPoints[k]))
+                        {
+                            bPointAlreadyTested = true;
+                            break;
+                        }
+                    }
+
+                    if (!bPointAlreadyTested)
+                    {
+                        testedPoints.Add(point);
+                        float distanceToScreenCenter = point.magnitude;
+                        if (distanceToScreenCenter < minDistance)
+                        {
+                            minDistance = distanceToScreenCenter;
+                            mostCenteredPoint = point;
+                        }
+                    }
+                }
+            }
+        }
+
+        return mostCenteredPoint;
+    }
+
+    /**
+     * Return all triangles surrounding a mesh point (6 triangles forming an hexagon in case of equilateral triangles)
+     * **/
+    public BackgroundTriangle[] GetTrianglesAroundMeshPoint(Vector2 point)
+    {
+        Stopwatch sw = new Stopwatch();
+
+        sw.Start();
+
+        int iNumSurroundingTriangles = 6; //hexagon
+        BackgroundTriangle[] surroundingTriangles = new BackgroundTriangle[iNumSurroundingTriangles];
+
+        int iSurroundingTriangleIdx = 0;
+        for (int i = 0; i != m_triangleColumns.Count; i++)
+        {
+            for (int j = 0; j != m_triangleColumns[i].Count; j++)
+            {
+                BackgroundTriangle triangle = m_triangleColumns[i][j];
+                if (triangle.HasVertex(point))
+                {
+                    surroundingTriangles[iSurroundingTriangleIdx] = triangle;
+                    if (++iSurroundingTriangleIdx > iNumSurroundingTriangles - 1) //we found all triangles
+                    {
+                        sw.Stop();
+
+                        UnityEngine.Debug.Log("Elapsed:" + sw.Elapsed.TotalMilliseconds);
+                        return surroundingTriangles;
+                    }
+                }
+            }
+        }
+
+        return surroundingTriangles;
     }
 
     /**

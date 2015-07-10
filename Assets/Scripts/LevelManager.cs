@@ -4,11 +4,6 @@ using System.Collections.Generic;
 
 public class LevelManager : MonoBehaviour
 {
-    public const int CHAPTERS_PER_GROUP = 4;
-    public Color CHAPTER_GROUP_1_BASE_COLOR { get { return new Color(1, 0, 0, 1); } }
-    public Color CHAPTER_GROUP_2_BASE_COLOR { get { return new Color(0, 0, 1, 1); } }
-    public Color CHAPTER_GROUP_3_BASE_COLOR { get { return new Color(0, 1, 0, 1); } }
-
     public const int CHAPTERS_COUNT = 8;
     public const int LEVELS_PER_CHAPTER = 16;
 
@@ -266,42 +261,5 @@ public class LevelManager : MonoBehaviour
     public Chapter GetChapterForNumber(int iChapterNumber)
     {
         return m_chapters[iChapterNumber - 1];
-    }
-
-    /**
-     * Gets the chapter group (a group = 4 chapters)
-     * **/
-    public int GetChapterGroupForChapter(Chapter chapter)
-    {
-        return (chapter.m_number - 1) / 4 + 1;
-    }
-
-    /**
-     * Gets the current chapter group
-     * **/
-    public int GetCurrentChapterGroup()
-    {
-        return GetChapterGroupForChapter(m_currentChapter);
-    }
-
-    /**
-     * One chapter group containing 4 chapters is associated with a color
-     * **/
-    public Color GetChapterGroupBaseColor(int iChapterGroup)
-    {
-        Color baseColor;
-        if (iChapterGroup == 1)
-            baseColor = CHAPTER_GROUP_1_BASE_COLOR;
-        else if (iChapterGroup == 2)
-            baseColor = CHAPTER_GROUP_2_BASE_COLOR;
-        else
-            baseColor = CHAPTER_GROUP_3_BASE_COLOR;
-
-        return baseColor;
-    }
-
-    public Color GetCurrentChapterGroupBaseColor()
-    {
-        return GetChapterGroupBaseColor(m_currentChapter.m_number);
     }
 }

@@ -6,13 +6,13 @@ public class Chapters : GUIScene
     public const float CENTRAL_ITEM_Z_VALUE = -10.0f;
     public const float SELECTION_ARROWS_Z_VALUE = -10.0f;
 
-    public GameObject m_chaptersTitlePfb;
+    public GameObject m_chaptersTextPfb;
     public GameObject m_chaptersNumberPfb;
 
     public int m_displayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
 
-    //Cenntral item
-    private GameObject m_centralItemContainer;
+    //Central item
+    private ChapterSlot m_chapterSlot;
     private Vector3 m_centralItemPosition;
     public GameObject m_progressBarBgGameObject;
     public GameObject m_progressBarFillGameObject;
@@ -32,15 +32,13 @@ public class Chapters : GUIScene
         base.Show(bAnimated, fDelay);
         GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
         chaptersAnimator.SetOpacity(1);
-        int reachedChapterNumber = 1;
-        int iReachedChapterGroup = ((reachedChapterNumber - 1) / LevelManager.CHAPTERS_PER_GROUP) + 1;
 
         //Display back button
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         guiManager.ShowBackButton(fDelay);
 
-        //Show chapter central item
-        ShowCentralItem(true, 5.2f);
+        //Show chapter slot
+        ShowChapterSlot(5.2f);
 
         //Show chapter selection arrows
         ShowSelectionArrows(true, fDelay);
@@ -82,18 +80,21 @@ public class Chapters : GUIScene
     //    slotAnimator.FadeTo(1, slotAnimationDuration, 2 * slotAnimationDuration);
     //}
 
-    public void OnClickChapterSlot(int iChapterSlotIndex)
+    /**
+     * Callback used when the player has clicked on a chapter and wants to display levels
+     * **/
+    public void OnClickChapterSlot()
     {
-        //int iChapterNumber = (m_currentChapterGroup - 1) * LevelManager.CHAPTERS_PER_GROUP + iChapterSlotIndex + 1;
+        DismissChapterSlot(true, false, 0.5f, 0.0f);
 
-        //LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        //levelManager.SetCurrentChapterByNumber(iChapterNumber);
+        int iChapterNumber = m_displayedChapterIndex + 1;
 
-        //SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        levelManager.SetCurrentChapterByNumber(iChapterNumber);
+
+        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
     }
-
-
 
     /**
      * Show chapter selection arrows
@@ -146,175 +147,144 @@ public class Chapters : GUIScene
         rightArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
     }
 
-    /**
-     * Show the main item containing chapter information
-     * **/
-    public void ShowCentralItem(bool bShowAfterDelay = false, float fDelay = 0.0f)
+    public void ShowChapterSlot(float fDelay = 0.0f)
     {
-        if (bShowAfterDelay)
+        if (fDelay > 0)
         {
             m_showingCentralItem = true;
             m_showingCentralItemDelay = fDelay;
             m_showingCentralItemElapsedTime = 0;
 
             return;
-        }        
+        }
 
-        //Find triangles whose color needs to be modified in order to draw the item hexagon background
-        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();        
+        if (m_chapterSlot == null)
+        {
+            m_chapterSlot = new ChapterSlot();
+            m_chapterSlot.BuildTriangles();
+        }
 
-        List<BackgroundTriangle> centralItemsTriangles = new List<BackgroundTriangle>();
-        centralItemsTriangles.Capacity = 2 * 15 + 2 * 13 + 2 * 11 + 2 * 9;
-
-        //color to blend every triangle inside the item
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Color itemBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
+        Color slotBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
 
-        //column 1
-        int columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2;
-        BackgroundTriangleColumn column = backgroundRenderer.m_triangleColumns[BackgroundTrianglesRenderer.NUM_COLUMNS / 2];
-        BackgroundTriangle triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 != 0, columnIndex % 2 == 0, BackgroundTrianglesRenderer.NUM_COLUMNS / 2);
-        int triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 7; i != triangleIndex + 8; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
+        //ShowCentralItemBackground();
+        BuildCentralItemInformation();
 
-        m_centralItemPosition = new Vector3(0, triangle.GetCenter().y, 0); //set the position of the central item according to its hexagon background centered triangles
-
-        //column -1
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 == 0, columnIndex % 2 != 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 7; i != triangleIndex + 8; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-        
-        //column 2
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 + 1;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 == 0, columnIndex % 2 != 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 6; i != triangleIndex + 7; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //column -2
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 != 0, columnIndex % 2 == 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 6; i != triangleIndex + 7; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //column 3
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 + 2;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 != 0, columnIndex % 2 == 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 5; i != triangleIndex + 6; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //column -3
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 == 0, columnIndex % 2 != 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 5; i != triangleIndex + 6; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //column 4
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 + 3;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 == 0, columnIndex % 2 != 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 4; i != triangleIndex + 5; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //column -4
-        columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4;
-        column = backgroundRenderer.m_triangleColumns[columnIndex];
-        triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex % 2 != 0, columnIndex % 2 == 0, columnIndex);
-        triangleIndex = triangle.m_indexInColumn;
-        for (int i = triangleIndex - 4; i != triangleIndex + 5; i++)
-        {
-            centralItemsTriangles.Add(column[i]);
-        }
-
-        //blend all triangles
-        for (int i = 0; i != centralItemsTriangles.Count; i++)
-        {
-            triangle = centralItemsTriangles[i];
-            Color toColor = Color.Lerp(triangle.m_frontColor, itemBackgroundBlendColor, 0.25f);
-            triangle.StartColorAnimation(true, toColor, 0.3f, 0.0f);
-        }
-
-        BuildAndShowCentralItemInformation();
+        m_chapterSlot.Show(slotBackgroundBlendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION, true, 0.5f);
     }
+
+    /**
+     * Show the main item containing chapter information
+     * **/
+    //public void ShowCentralItemBackground(float fDuration = 1.0f, float fDelay = 0.0f)
+    //{
+    //    //Find triangles whose color needs to be modified in order to draw the item hexagon background
+    //    BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();        
+
+    //    List<BackgroundTriangle> centralItemsTriangles = new List<BackgroundTriangle>();
+    //    centralItemsTriangles.Capacity = 2 * 15 + 2 * 13 + 2 * 11 + 2 * 9;
+
+    //    //color to blend every triangle inside the item
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+    //    //column 1
+    //    int columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2;
+    //    BackgroundTriangleColumn column = backgroundRenderer.m_triangleColumns[BackgroundTrianglesRenderer.NUM_COLUMNS / 2];
+    //    BackgroundTriangle triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex, 180);
+    //    int referenceTriangleIndex = triangle.m_indexInColumn; //the index of the triangle taken as a reference for building the column
+    //    for (int i = referenceTriangleIndex - 7; i != referenceTriangleIndex + 8; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+
+    //    m_centralItemPosition = new Vector3(0, triangle.GetCenter().y, 0); //set the position of the central item according to its hexagon background centered triangles
+
+    //    //column -1
+    //    columnIndex--;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 7; i != referenceTriangleIndex + 8; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+
+    //    //column -2
+    //    columnIndex--;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 6; i != referenceTriangleIndex + 7; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+
+    //    //column -3
+    //    columnIndex--;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 5; i != referenceTriangleIndex + 6; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+
+    //    //column -4
+    //    columnIndex--;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 4; i != referenceTriangleIndex + 5; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+        
+    //    //column 2
+    //    columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 + 1;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 6; i != referenceTriangleIndex + 7; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }
+
+    //    //column 3
+    //    columnIndex++;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 5; i != referenceTriangleIndex + 6; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }             
+
+    //    //column 4
+    //    columnIndex++;
+    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
+    //    for (int i = referenceTriangleIndex - 4; i != referenceTriangleIndex + 5; i++)
+    //    {
+    //        centralItemsTriangles.Add(column[i]);
+    //    }              
+
+    //    //blend all triangles
+    //    Color itemBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
+    //    for (int i = 0; i != centralItemsTriangles.Count; i++)
+    //    {
+    //        triangle = centralItemsTriangles[i];
+    //        Color toColor = Color.Lerp(triangle.m_frontColor, itemBackgroundBlendColor, 0.25f);
+    //        triangle.StartColorAnimation(true, toColor, fDuration, fDelay);
+    //    }
+    //}
 
     /**
      * Update the info inside the central item when a new chapter is displayed
      * **/
-    public void BuildAndShowCentralItemInformation(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
+    public void BuildCentralItemInformation()
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         Chapter displayedChapter = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
 
-        m_centralItemContainer = new GameObject("CentralItem");
-        m_centralItemContainer.transform.parent = this.transform;
-        m_centralItemContainer.transform.localPosition = new Vector3(0, 0, CENTRAL_ITEM_Z_VALUE);
-        GameObjectAnimator animator = m_centralItemContainer.AddComponent<GameObjectAnimator>();
+        GameObject centralItemContainer = new GameObject("CentralItem");
+        centralItemContainer.transform.parent = this.transform;
+        centralItemContainer.transform.localPosition = new Vector3(0, 0, CENTRAL_ITEM_Z_VALUE);
+        GameObjectAnimator animator = centralItemContainer.AddComponent<GameObjectAnimator>();
 
-        BuildTitle();
-        if (displayedChapter.IsLocked())
-        {
-            ShowLock();
-        }
-        else
-            BuildProgressBar();
+        m_chapterSlot.m_infoContainer = centralItemContainer;
 
-        if (bAnimated)
-        {
-            animator.SetOpacity(0);
-            animator.FadeTo(1.0f, fDuration, fDelay);
-        }
-        else
-            animator.SetOpacity(1);
-    }
-
-    /**
-     * Fade out the information inside the central item
-     * **/
-    public void DismissAndDestroyCentralItemInformation(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
-    {
-        GameObjectAnimator animator = m_centralItemContainer.GetComponent<GameObjectAnimator>();
-        if (bAnimated)
-            animator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        else
-            Destroy(m_centralItemContainer);
-    }
-
-    /**
-     * Show the chapter number
-     * **/
-    public void BuildTitle()
-    {
         BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
 
         //chapter title
-        GameObject clonedChapterTitle = (GameObject)Instantiate(m_chaptersTitlePfb);
-        clonedChapterTitle.transform.parent = m_centralItemContainer.transform;
+        GameObject clonedChapterTitle = (GameObject)Instantiate(m_chaptersTextPfb);
+        clonedChapterTitle.transform.parent = centralItemContainer.transform;
         clonedChapterTitle.transform.localPosition = new Vector3(0, 1.5f * bgRenderer.m_triangleEdgeLength, 0);
 
         TextMesh chapterTitleTextMesh = clonedChapterTitle.GetComponent<TextMesh>();
@@ -322,22 +292,62 @@ public class Chapters : GUIScene
 
         //chapter number
         GameObject clonedChapterNumber = (GameObject)Instantiate(m_chaptersNumberPfb);
-        clonedChapterNumber.transform.parent = m_centralItemContainer.transform;
+        clonedChapterNumber.transform.parent = centralItemContainer.transform;
         clonedChapterNumber.transform.localPosition = new Vector3(0, 0.2f * bgRenderer.m_triangleEdgeLength, 0);
 
         TextMesh chapterNumberTextMesh = clonedChapterNumber.GetComponent<TextMesh>();
         chapterNumberTextMesh.text = (m_displayedChapterIndex + 1).ToString();
+
+        //Display Lock or progress bar
+        if (displayedChapter.IsLocked())
+        {
+            ShowLock();
+        }
+        else
+            ShowProgressBar();        
     }
+
+    /**
+     * Fade out the information inside the central item
+     * **/
+    public void DismissChapterSlot(bool bDismissBackground, bool bAnimated = true, float fDuration = 1.0f, float fDelay = 0.0f)
+    {
+        m_chapterSlot.Dismiss(bDismissBackground, bAnimated, fDuration, fDelay);
+    }
+
+    ///**
+    // * Show the chapter number
+    // * **/
+    //public void BuildTitle()
+    //{
+    //    BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
+
+    //    //chapter title
+    //    GameObject clonedChapterTitle = (GameObject)Instantiate(m_chaptersTextPfb);
+    //    clonedChapterTitle.transform.parent = centralItemContainer.transform;
+    //    clonedChapterTitle.transform.localPosition = new Vector3(0, 1.5f * bgRenderer.m_triangleEdgeLength, 0);
+
+    //    TextMesh chapterTitleTextMesh = clonedChapterTitle.GetComponent<TextMesh>();
+    //    chapterTitleTextMesh.text = LanguageUtils.GetTranslationForTag("chapter");
+
+    //    //chapter number
+    //    GameObject clonedChapterNumber = (GameObject)Instantiate(m_chaptersNumberPfb);
+    //    clonedChapterNumber.transform.parent = centralItemContainer.transform;
+    //    clonedChapterNumber.transform.localPosition = new Vector3(0, 0.2f * bgRenderer.m_triangleEdgeLength, 0);
+
+    //    TextMesh chapterNumberTextMesh = clonedChapterNumber.GetComponent<TextMesh>();
+    //    chapterNumberTextMesh.text = (m_displayedChapterIndex + 1).ToString();
+    //}
 
     /**
      * Show progress bar
      * **/
-    public void BuildProgressBar()
+    public void ShowProgressBar()
     {
         BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
 
         GameObject progressBar = new GameObject("ProgressBar");
-        progressBar.transform.parent = m_centralItemContainer.transform;
+        progressBar.transform.parent = m_chapterSlot.m_infoContainer.transform;
         progressBar.transform.localPosition = new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0);
 
         float progressBarWidth = 5.5f * bgRenderer.m_triangleHeight;
@@ -401,9 +411,9 @@ public class Chapters : GUIScene
     }
 
     /**
-     * Update the background gradient to fit with the currently displayed chapter
+     * Update the background gradient for its color to match with the currently displayed chapter
      * **/
-    public void UpdateBackgroundGradient()
+    public void UpdateBackgroundGradient(float fDuration = 1.0f, float fDelay = 0.0f)
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         Chapter displayedChapter = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
@@ -417,8 +427,7 @@ public class Chapters : GUIScene
                               displayedChapter.GetThemeColors()[1]);
 
        bgRenderer.m_chaptersGradient = gradient;
-       bgRenderer.ApplyGradient(gradient, true, 0.02f, true, 1.0f, 0.0f, 0.0f);
-       bgRenderer.ApplyGradient(gradient, true, 0.02f, false);
+       bgRenderer.ApplyGradient(gradient, 0.02f, true, fDuration, fDelay, 0.0f);
     }
 
     /**
@@ -470,7 +479,7 @@ public class Chapters : GUIScene
             if (m_showingCentralItemElapsedTime > m_showingCentralItemDelay)
             {
                 m_showingCentralItem = false;
-                ShowCentralItem();
+                ShowChapterSlot();
             }
         }
     }

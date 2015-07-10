@@ -7,21 +7,13 @@ public class TriangleMesh : MonoBehaviour
         Mesh mesh = new Mesh();
         mesh.name = "TriangleMesh";
 
-        MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
-        if (meshFilter == null)
-            meshFilter = this.gameObject.AddComponent<MeshFilter>();
-        meshFilter.sharedMesh = mesh;
-
-        MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-        if (meshRenderer == null)
-            meshRenderer = this.gameObject.AddComponent<MeshRenderer>();
+        GetComponent<MeshFilter>().sharedMesh = mesh;
 
         if (material != null)
-            meshRenderer.sharedMaterial = material;
+            GetComponent<MeshRenderer>().sharedMaterial = material;
     }
 
-    /** Render this circle as a polygon with a certain number of segments
-     * The more segments the polygon has the more it will look like a circle but the drawback is that more vertices have to be rendered
+    /** Render this triangle
      * **/
     public void Render(Vector3[] vertices, Color color, bool bDoubleSided = false)
     {

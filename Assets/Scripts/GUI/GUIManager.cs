@@ -5,8 +5,6 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
-    public const float BACKGROUND_TRIANGLES_Z_VALUE = -5.0f;
-
     public GameObject m_GUIDiamondShapeButtonPfb; //the prefab to create a diamond-shaped gui button with default skin, background and shadow
     public GameObject m_GUISkinOnlyButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
@@ -38,10 +36,6 @@ public class GUIManager : MonoBehaviour
     {
         m_optionsWindow = null;
         BuildFrames();
-
-        GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
-        backgroundObject.GetComponentInChildren<BackgroundTrianglesRenderer>().Init();
-        backgroundObject.transform.localPosition = new Vector3(0, 0, BACKGROUND_TRIANGLES_Z_VALUE);
     }
 
     /**

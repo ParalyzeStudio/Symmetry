@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 
 public class ColorUtils
 {
@@ -31,7 +30,7 @@ public class ColorUtils
     public static Color GetRainbowColorAtPercentage(float percentage)
     {
         if (percentage < 0 || percentage > 100)
-            throw new Exception("Percentage has to be a float number between 0 and 100");
+            throw new System.Exception("Percentage has to be a float number between 0 and 100");
 
         //List here colors that will serve as milestones (linear interpolation between two consecutive colors)
         Color[] milestones = new Color[6];
@@ -74,6 +73,18 @@ public class ColorUtils
         MathUtils.Clamp(ref nearColorBlue, 0, 1);
 
         return new Color(nearColorRed, nearColorGreen, nearColorBlue, originalColor.a);
+    }
+
+    /**
+     * Return a random color
+     * **/
+    public static Color GetRandomColor(float opacity = 1.0f)
+    {
+        float r = Random.value;
+        float g = Random.value;
+        float b = Random.value;
+
+        return new Color(r, g, b, opacity);
     }
 }
 

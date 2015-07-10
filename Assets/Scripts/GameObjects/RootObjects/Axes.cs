@@ -85,8 +85,8 @@ public class Axes : MonoBehaviour
         circleAnimator.SetColor(Color.black);
 
         circleAnimator.SetInnerRadius(0);
-        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
         circleAnimator.SetOpacity(1);
-        circleAnimator.FadeTo(0, 0.3f);
+        circleAnimator.FadeTo(0, 0.3f, 0, ValueAnimator.InterpolationType.LINEAR, true);
     }
 }

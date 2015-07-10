@@ -39,6 +39,18 @@ public class BaseTriangle
     {
         return (m_points[0] + m_points[1] + m_points[2]) / 3.0f;
     }
+
+    public bool HasVertex(Vector2 vertex)
+    {
+        return MathUtils.AreVec2PointsEqual(m_points[0], vertex) || 
+               MathUtils.AreVec2PointsEqual(m_points[1], vertex) || 
+               MathUtils.AreVec2PointsEqual(m_points[2], vertex);
+    }
+
+    public bool ContainsPoint(Vector2 point)
+    {
+        return GeometryUtils.IsInsideTriangle(point, m_points[0], m_points[1], m_points[2]);
+    }
 }
 
 /**
@@ -413,12 +425,8 @@ public class ShapeTriangle : GridTriangle
  * **/
 public class BackgroundTriangle : BaseTriangle
 {
-    public bool m_doubleSided { get; set; } //1 or 2 faces to render this triangle
-    public Color m_frontColor { get; set; } //the color of the front face of this triangle (the 3 vertices share the same color)
-    public Color m_backColor { get; set; } //the color of the back face of this triangle (the 3 vertices share the same color)
-    public Color m_originalFrontColor { get; set; } //the color that this triangle face should have before being offset to m_frontColor
-    public Color m_originalBackColor { get; set; } //the color that this triangle face should have before being offset to m_backColor
-    private bool m_showingFrontFace; //is this triangle showing its front face
+    public Color m_color { get; set; } //the color of the front face of this triangle (the 3 vertices share the same color)
+    public Color m_originalColor { get; set; } //the color that this triangle face should have before being offset to m_frontColor
     private Vector3 m_flipAxis; //the axis the triangle is rotating around
     private float m_flipAngle; //the angle the triangle is rotated along its flip axis
     public int m_indexInColumn { get; set; }
@@ -427,18 +435,12 @@ public class BackgroundTriangle : BaseTriangle
     public float m_angle { get; set; } //the angle this triangle is rotated
 
     //Variables to handle color animation of this triangle
-    private Color m_frontFaceAnimationStartColor; //the color when the animation starts
-    private Color m_backFaceAnimationStartColor; //the color when the animation starts
-    private Color m_frontFaceAnimationEndColor; //the color when the animation ends
-    private Color m_backFaceAnimationEndColor; //the color when the animation ends
-    private bool m_frontFaceColorAnimating;//is this triangle currently animating its own color when switching its status
-    private bool m_backFaceColorAnimating;//is this triangle currently animating its own color when switching its status
-    private float m_frontFaceColorAnimationElapsedTime;
-    private float m_frontFaceColorAnimationDuration;
-    private float m_frontFaceColorAnimationDelay;
-    private float m_backFaceColorAnimationElapsedTime;
-    private float m_backFaceColorAnimationDuration;
-    private float m_backFaceColorAnimationDelay;
+    private Color m_animationStartColor; //the color when the animation starts
+    private Color m_animationEndColor; //the color when the animation ends
+    private bool m_colorAnimating;//is this triangle currently animating its own color when switching its status
+    private float m_colorAnimationElapsedTime;
+    private float m_colorAnimationDuration;
+    private float m_colorAnimationDelay;
 
     //Variables to handle flip animation of this triangle
     private bool m_flipping;
@@ -447,26 +449,11 @@ public class BackgroundTriangle : BaseTriangle
     private float m_flipAnimationDuration;
     private float m_flipAnimationDelay;
 
-    //public BackgroundTriangle(BackgroundTriangle other) : base(other)
-    //{
-    //    m_frontColor = other.m_frontColor;
-    //    m_backColor = other.m_backColor;
-    //    m_originalFrontColor = other.m_originalFrontColor;
-    //    m_originalBackColor = other.m_originalBackColor;
-    //    m_indexInColumn = other.m_indexInColumn;
-    //    m_parentColumn = other.m_parentColumn;
-
-    //    m_colorAnimating = other.m_colorAnimating;
-    //    m_colorAnimationElapsedTime = other.m_colorAnimationElapsedTime;
-    //    m_colorAnimationDuration = other.m_colorAnimationDuration;
-    //    m_colorAnimationDuration = other.m_colorAnimationDelay;
-    //}
-
     /**
      * Build an equilateral triangle with the given orientation passed through the angle variable
      * position
      * **/
-    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color frontColor, Color backColor) : base()
+    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color) : base()
     {
         m_edgeLength = edgeLength;
         m_angle = angle;
@@ -495,10 +482,8 @@ public class BackgroundTriangle : BaseTriangle
             m_points[i] += position;
         }
 
-        m_originalFrontColor = frontColor;
-        m_originalBackColor = backColor;
-        m_frontColor = frontColor;
-        m_backColor = backColor;
+        m_originalColor = color;
+        m_color = color;
     }
 
     /**
@@ -522,34 +507,15 @@ public class BackgroundTriangle : BaseTriangle
     /**
      * Update the colors array of the parent renderer
      * **/
-    public void UpdateParentRendererMeshColorsArray(bool bFrontFace = true, bool bBackFace = true)
+    public void UpdateParentRendererMeshColorsArray()
     {
         int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
-        if (!m_doubleSided)
-        {
-            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_frontColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_frontColor;
-            m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_frontColor;
-        }
-        else
-        {
-            if (bFrontFace)
-            {
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex] = m_frontColor;
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 1] = m_frontColor;
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 2] = m_frontColor;
-            }
-            if (bBackFace)
-            {
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 3] = m_backColor;
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 4] = m_backColor;
-                m_parentColumn.m_parentRenderer.m_meshColors[6 * triangleGlobalIndex + 5] = m_backColor;
-            }
-        }
+        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_color;
+        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_color;
+        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_color;        
 
-        if (bFrontFace || bBackFace)
-            m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
+        m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
     }
 
     /**
@@ -582,21 +548,9 @@ public class BackgroundTriangle : BaseTriangle
         //point1 += triangleCenter;
         //point2 += triangleCenter;
 
-        if (!m_doubleSided)
-        {
-            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
-            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
-            m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
-        }
-        else
-        {
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex] = point0;
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 1] = point1;
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 2] = point2;
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 3] = point0;
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 4] = point2;
-            m_parentColumn.m_parentRenderer.m_meshVertices[6 * triangleGlobalIndex + 5] = point1;
-        }
+        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
+        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
+        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
 
         m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
     }
@@ -604,39 +558,23 @@ public class BackgroundTriangle : BaseTriangle
     /**
      * Generate a color slightly different from original color
      * **/
-    public void GenerateColorFromOriginalColor(bool bFrontFace, float delta)
+    public void GenerateColorFromOriginalColor(float delta)
     {
-        if (bFrontFace)
-            m_frontColor = ColorUtils.GetRandomNearColor(m_originalFrontColor, delta);
-        else
-            m_backColor = ColorUtils.GetRandomNearColor(m_originalBackColor, delta);
+        m_color = ColorUtils.GetRandomNearColor(m_originalColor, delta);
     }
 
     /**
      * Start the color animation process
      * **/
-    public void StartColorAnimation(bool bFrontFace, Color toColor, float fDuration, float fDelay = 0.0f)
+    public void StartColorAnimation(Color toColor, float fDuration, float fDelay = 0.0f)
     {
-        if (bFrontFace)
-        {
-            m_frontFaceAnimationStartColor = m_frontColor;
-            m_frontFaceAnimationEndColor = toColor;
-            m_frontFaceColorAnimationElapsedTime = 0;
-            m_frontFaceColorAnimationDuration = fDuration;
-            m_frontFaceColorAnimationDelay = fDelay;
+        m_animationStartColor = m_color;
+        m_animationEndColor = toColor;
+        m_colorAnimationElapsedTime = 0;
+        m_colorAnimationDuration = fDuration;
+        m_colorAnimationDelay = fDelay;
 
-            m_frontFaceColorAnimating = true;
-        }
-        else
-        {
-            m_backFaceAnimationStartColor = m_backColor;
-            m_backFaceAnimationEndColor = toColor;
-            m_backFaceColorAnimationElapsedTime = 0;
-            m_backFaceColorAnimationDuration = fDuration;
-            m_backFaceColorAnimationDelay = fDelay;
-
-            m_backFaceColorAnimating = true;
-        }
+        m_colorAnimating = true;
     }    
 
     /**
@@ -644,46 +582,26 @@ public class BackgroundTriangle : BaseTriangle
      * **/
     public void AnimateColor(float dt)
     {
-        if (m_frontFaceColorAnimating)
+        if (m_colorAnimating)
         {
-            m_frontFaceColorAnimationElapsedTime += dt;
+            m_colorAnimationElapsedTime += dt;
 
-            if (m_frontFaceColorAnimationElapsedTime < m_frontFaceColorAnimationDelay)
+            if (m_colorAnimationElapsedTime < m_colorAnimationDelay)
                 return;
 
-            if (m_frontFaceColorAnimationElapsedTime >= m_frontFaceColorAnimationDuration + m_frontFaceColorAnimationDelay)
+            if (m_colorAnimationElapsedTime >= m_colorAnimationDuration + m_colorAnimationDelay)
             {
-                m_frontFaceColorAnimating = false;
-                m_frontColor = m_frontFaceAnimationEndColor;
+                m_colorAnimating = false;
+                m_color = m_animationEndColor;
             }
             else
             {
-                float timeRatio = (m_frontFaceColorAnimationElapsedTime - m_frontFaceColorAnimationDelay) / m_frontFaceColorAnimationDuration;
-                m_frontColor = Color.Lerp(m_frontFaceAnimationStartColor, m_frontFaceAnimationEndColor, timeRatio);
+                float timeRatio = (m_colorAnimationElapsedTime - m_colorAnimationDelay) / m_colorAnimationDuration;
+                m_color = Color.Lerp(m_animationStartColor, m_animationEndColor, timeRatio);
             }
 
-            UpdateParentRendererMeshColorsArray(true, false);
-        }
-        else if (m_backFaceColorAnimating)
-        {
-            m_backFaceColorAnimationElapsedTime += dt;
-
-            if (m_backFaceColorAnimationElapsedTime < m_backFaceColorAnimationDelay)
-                return;
-
-            if (m_backFaceColorAnimationElapsedTime >= m_backFaceColorAnimationDuration + m_backFaceColorAnimationDelay)
-            {
-                m_backFaceColorAnimating = false;
-                m_backColor = m_backFaceAnimationEndColor;
-            }
-            else
-            {
-                float timeRatio = (m_backFaceColorAnimationElapsedTime - m_backFaceColorAnimationDelay) / m_backFaceColorAnimationDuration;
-                m_backColor = Color.Lerp(m_backFaceAnimationStartColor, m_backFaceAnimationEndColor, timeRatio);
-            }
-
-            UpdateParentRendererMeshColorsArray(false, true);
-        }
+            UpdateParentRendererMeshColorsArray();
+        }       
     }
 
     /**
@@ -697,10 +615,6 @@ public class BackgroundTriangle : BaseTriangle
         m_flipAnimationElapsedTime = 0;
         m_flipAnimationDuration = fDuration;
         m_flipAnimationDelay = fDelay;
-
-        //m_flipAngle = 90;
-        //m_flipAxis = new Vector3(1, 0, 0);
-        //UpdateParentRendererMeshVerticesArray();
     }
 
     public void FlipAnimate(float dt)
@@ -717,7 +631,6 @@ public class BackgroundTriangle : BaseTriangle
         {
             m_flipping = false;
             m_flipAngle = (m_flipToAngle == 360) ? 0 : m_flipToAngle;
-            m_showingFrontFace = (m_flipAngle == 0);
         }
         else
         {
