@@ -196,7 +196,8 @@ public class GUIButton : MonoBehaviour
         if (m_ID == GUIButtonID.ID_OPTIONS_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            guiManager.ShowOptionsWindow();
+            guiManager.ShowSideButtonsOverlay();
+            //guiManager.ShowOptionsWindow();
         }
         else if (m_ID == GUIButtonID.ID_CREDITS_BUTTON)
         {
@@ -246,11 +247,12 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_CLOSE_BUTTON)
         {
             GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            if (guiManager.IsOptionsWindowShown())
-            {
-                guiManager.DismissOptionsWindow();
-            }
-            else if (guiManager.IsPauseWindowShown())
+            //if (guiManager.IsOptionsWindowShown())
+            //{
+            //    guiManager.DismissOptionsWindow();
+            //}
+            //else 
+            if (guiManager.IsPauseWindowShown())
             {
                 guiManager.DismissPauseWindow();
             }

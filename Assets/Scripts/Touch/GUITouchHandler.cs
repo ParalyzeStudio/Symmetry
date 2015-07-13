@@ -40,9 +40,9 @@ public class GUITouchHandler : TouchHandler
 
         bool bClickProcessed = false;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-        if (guiManager.IsOptionsWindowShown()) //an options window is displayed, process it on the window and swallow the click
+        /*if (guiManager.IsOptionsWindowShown()) //an options window is displayed, process it on the window and swallow the click
             HandleClickOnChildButtons(guiManager.m_optionsWindow, clickLocation);
-        else if (guiManager.IsPauseWindowShown()) //a pause window is displayed, process it on the window and swallow the click
+        else */if (guiManager.IsPauseWindowShown()) //a pause window is displayed, process it on the window and swallow the click
             HandleClickOnChildButtons(guiManager.m_pauseWindow, clickLocation);
         else
         {
@@ -84,10 +84,10 @@ public class GUITouchHandler : TouchHandler
         bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
         bgRenderer.GenerateChapterGradient();
         bgRenderer.GenerateTransitionGradients();
-        bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 5.0f);
+        bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 4.0f);
 
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 5.0f);
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 4.0f);
     }
 
     /**
@@ -130,20 +130,18 @@ public class GUITouchHandler : TouchHandler
         MainMenu mainMenu = (MainMenu) GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         //transform the click location in screen rect coordinates
-        clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
-        clickLocation.y = -clickLocation.y + screenSize.y;
+        //clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
+        //clickLocation.y = -clickLocation.y + screenSize.y;
 
-        //if (mainMenu.m_isPlayBannerDisplayed)
-        //{
-        //    Rect tapToPlayAreaRect = new Rect();
+        GameObject playButtonObject = mainMenu.m_playButton; 
+        Vector2 playButtonPosition = playButtonObject.transform.localPosition;
+        float playButtonOuterRadius = playButtonObject.GetComponent<HexagonMesh>().m_outerRadius;
 
-        //    tapToPlayAreaRect.width = screenSize.x;
-        //    tapToPlayAreaRect.height = 175.0f;
-        //    tapToPlayAreaRect.position = new Vector2(0, 0.5f * screenSize.y + 152.5f);
-
-        //    if (tapToPlayAreaRect.Contains(clickLocation))
-        //        OnClickPlay();
-        //}
+        if ((clickLocation - playButtonPosition).magnitude <= playButtonOuterRadius)
+        {
+            mainMenu.m_playButton.GetComponent<HexagonMeshAnimator>().AnimateInnerRadiusTo(0, 0.5f, 0.0f);
+            OnClickPlay();
+        }
     }
 
     /**

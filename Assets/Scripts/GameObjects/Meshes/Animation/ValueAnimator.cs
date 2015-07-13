@@ -8,7 +8,7 @@ public class ValueAnimator : MonoBehaviour
     {
         LINEAR = 1,
         SINUSOIDAL = 2,
-        EXPONENTIAL = 3
+        CUSTOM = 3 //use this for custom interpolation, but we have to redefine the UpdatePosition method with the appropriate interpolation function
     }
 
     //Variables to handle fading
@@ -37,6 +37,8 @@ public class ValueAnimator : MonoBehaviour
     protected Vector3 m_position;
     protected Vector3 m_fromPosition;
     protected Vector3 m_toPosition;
+    protected Vector3 m_translationDirection;
+    protected float m_translationLength;
     protected float m_translatingDuration;
     protected float m_translatingDelay;
     protected float m_translatingElapsedTime;
@@ -98,6 +100,9 @@ public class ValueAnimator : MonoBehaviour
         m_translating = true;
         m_fromPosition = m_position;
         m_toPosition = toPosition;
+        m_translationLength = (m_toPosition - m_fromPosition).magnitude;
+        m_translationDirection = (m_toPosition - m_fromPosition);
+        m_translationDirection /= m_translationLength;        
         m_translatingDuration = duration;
         m_translatingDelay = delay;
         m_translatingElapsedTime = 0;

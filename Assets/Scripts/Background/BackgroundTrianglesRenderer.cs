@@ -94,10 +94,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         m_triangleEdgeLength = 2 / Mathf.Sqrt(3) * m_triangleHeight;
 
         float fNumberOfTrianglesInColumn = screenSize.y / m_triangleEdgeLength;
-        m_numTrianglesPerColumn = Mathf.FloorToInt(fNumberOfTrianglesInColumn);
-        if (MathUtils.HasFractionalPart(fNumberOfTrianglesInColumn)) //fractional part: round to the next integer
-            m_numTrianglesPerColumn += 1;
-        m_numTrianglesPerColumn++; //add another triangle
+        m_numTrianglesPerColumn = Mathf.RoundToInt(fNumberOfTrianglesInColumn);
+        m_numTrianglesPerColumn += 2; //add 2 other triangles
         m_numTrianglesPerColumn *= 2; //multiply by 2 because there are 2 series of opposite trying forming one column
         int numberOfTriangles = NUM_COLUMNS * m_numTrianglesPerColumn;
 
@@ -116,6 +114,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         for (int i = 0; i != NUM_COLUMNS; i++)
         {
             BackgroundTriangleColumn column = new BackgroundTriangleColumn(this, i);
+            column.Capacity = m_numTrianglesPerColumn;
 
             for (int j = 0; j != m_numTrianglesPerColumn; j++)
             {
@@ -378,8 +377,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
         titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)
 
-        int titleOffsetX = 3;
-        int titleOffsetY = 3;
+        int titleOffsetX = 2;
+        int titleOffsetY = 4;
 
         //Add 9 triangles for letter F
         int iReferenceColumnIndex = 4 + titleOffsetX;
@@ -632,7 +631,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
 
         float toOffset = bFromMainMenu ? 2 * screenSize.y : 0; //transition gradient is 1 screen unit length
-        animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);    
+        //animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);    
+        animator.TranslateTo(new Vector3(0, toOffset, 0), 1.0f, fDuration, fDelay);
     }
 
     /**

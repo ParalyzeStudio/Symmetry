@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
 	<string tag="play" value="Touch to play"/>
+	<string tag="options" value="OPTIONS"/>
+	<string tag="about" value="ABOUT"/>
 	<string tag="chapter" value="CHAPTER"/>
 	<string tag="progress_bar_completion" value="completed"/>
 </strings>

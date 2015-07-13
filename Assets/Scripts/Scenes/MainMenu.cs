@@ -10,7 +10,7 @@ public class MainMenu : GUIScene
     public Material m_transpPositionColorMaterial;    
 
     //buttons
-    private GameObject m_playButton;
+    public GameObject m_playButton { get; set; }
     public GameObject m_optionsButtonObject { get; set; }
     public GameObject m_creditsButtonObject { get; set; }
 
@@ -53,237 +53,243 @@ public class MainMenu : GUIScene
         backgroundRenderer.RenderMainMenuTitle(bAnimated, fDelay);
     }
 
-     public void ShowPlayButton()
-     {
-         Vector2 screenSize = ScreenUtils.GetScreenSize();
+    public void ShowPlayButton()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-         //Center hexagon
-         m_playButton = (GameObject)Instantiate(m_hexagonPfb);
-         m_playButton.name = "PlayButton";
-         m_playButton.transform.parent = this.transform;
+        //Center hexagon
+        m_playButton = (GameObject)Instantiate(m_hexagonPfb);
+        m_playButton.name = "PlayButton";
+        m_playButton.transform.parent = this.transform;
 
-         BackgroundTriangle hexagonFarRightTriangle = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(-0.28f * screenSize.y, 
-                                                                                                                  BackgroundTrianglesRenderer.NUM_COLUMNS / 2, 
-                                                                                                                  180);
-         m_playButton.transform.localPosition = new Vector3(0, hexagonFarRightTriangle.GetCenter().y, GUI_BUTTONS_Z_VALUE);
+        BackgroundTriangle hexagonFarRightTriangle = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(-0.28f * screenSize.y,
+                                                                                                                 BackgroundTrianglesRenderer.NUM_COLUMNS / 2,
+                                                                                                                 180);
+        m_playButton.transform.localPosition = new Vector3(0, hexagonFarRightTriangle.GetCenter().y, GUI_BUTTONS_Z_VALUE);
 
-         //Set the correct material on it
-         Material hexagonMaterial = Instantiate(m_transpPositionColorMaterial);
+        //Set the correct material on it
+        Material hexagonMaterial = Instantiate(m_transpPositionColorMaterial);
 
-         //Build the mesh
-         HexagonMesh hexaMesh = m_playButton.GetComponent<HexagonMesh>();
-         hexaMesh.Init(hexagonMaterial);
-         float hexagonThickness = 30.0f;
-         float outerRadius = GetBackgroundRenderer().m_triangleEdgeLength;
+        //Build the mesh
+        HexagonMesh hexaMesh = m_playButton.GetComponent<HexagonMesh>();
+        hexaMesh.Init(hexagonMaterial);
+        float hexagonThickness = 30.0f;
+        float outerRadius = GetBackgroundRenderer().m_triangleEdgeLength;
 
-         HexagonMeshAnimator hexaMeshAnimator = m_playButton.GetComponent<HexagonMeshAnimator>();
-         hexaMeshAnimator.SetThickness(hexagonThickness, false);
-         hexaMeshAnimator.SetInnerRadius(outerRadius - hexagonThickness, true);
-         hexaMeshAnimator.SetColor(Color.white);
+        HexagonMeshAnimator hexaMeshAnimator = m_playButton.GetComponent<HexagonMeshAnimator>();
+        //hexaMeshAnimator.SetThickness(hexagonThickness, false);
+        hexaMeshAnimator.SetInnerRadius(outerRadius - hexagonThickness, true);
+        hexaMeshAnimator.SetOuterRadius(outerRadius, true);
+        hexaMeshAnimator.SetColor(Color.white);
 
-         //generate fading out hexagons
-         m_generatingFadingHexagons = true;
+        //generate fading out hexagons
+        m_generatingFadingHexagons = true;
 
-         //Show text above button
-         GameObject playTextObject = (GameObject)Instantiate(m_playTextPfb);
-         playTextObject.transform.localPosition = m_playButton.transform.localPosition + new Vector3(0, 2.0f * GetBackgroundRenderer().m_triangleEdgeLength, 0);
-         playTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("play");
-     }
+        //Show text above button
+        GameObject playTextObject = (GameObject)Instantiate(m_playTextPfb);
+        playTextObject.name = "PlayText";
+        playTextObject.transform.parent = this.transform;
+        playTextObject.transform.localPosition = m_playButton.transform.localPosition + new Vector3(0, 2.0f * GetBackgroundRenderer().m_triangleEdgeLength, 0);
+        playTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("play");
+    }
 
-     public void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)
-     {
-         m_hexagonAnimationDuration = fDuration;
-         m_hexagonAnimationElapsedTime = 0;
-         m_hexagonAnimationStartInnerRadius = hexagonStartInnerRadius;
-         m_hexagonAnimationEndInnerRadius = hexagonEndInnerRadius;
+    public void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)
+    {
+        m_hexagonAnimationDuration = fDuration;
+        m_hexagonAnimationElapsedTime = 0;
+        m_hexagonAnimationStartInnerRadius = hexagonStartInnerRadius;
+        m_hexagonAnimationEndInnerRadius = hexagonEndInnerRadius;
 
-         GameObject fadingHexagon = (GameObject)Instantiate(m_hexagonPfb);
-         fadingHexagon.transform.parent = this.transform;
-         fadingHexagon.transform.localPosition = m_playButton.transform.localPosition;
+        GameObject fadingHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        fadingHexagon.name = "FadingHexagon";
+        fadingHexagon.transform.parent = this.transform;
+        fadingHexagon.transform.localPosition = m_playButton.transform.localPosition;
 
-         HexagonMesh fadingHexagonMesh = fadingHexagon.GetComponent<HexagonMesh>();
-         fadingHexagonMesh.Init(Instantiate(m_transpPositionColorMaterial));
+        HexagonMesh fadingHexagonMesh = fadingHexagon.GetComponent<HexagonMesh>();
+        fadingHexagonMesh.Init(Instantiate(m_transpPositionColorMaterial));
 
-         HexagonMeshAnimator fadingHexagonAnimator = fadingHexagon.GetComponent<HexagonMeshAnimator>();
-         fadingHexagonAnimator.SetInnerRadius(hexagonStartInnerRadius);
-         fadingHexagonAnimator.SetThickness(thickness);
-         fadingHexagonAnimator.SetColor(color);
-         fadingHexagonAnimator.AnimateRadiusTo(hexagonEndInnerRadius, fDuration);
-         fadingHexagonAnimator.SetOpacity(1);
-         fadingHexagonAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-     }
+        HexagonMeshAnimator fadingHexagonAnimator = fadingHexagon.GetComponent<HexagonMeshAnimator>();
+        fadingHexagonAnimator.SetInnerRadius(hexagonStartInnerRadius);
+        fadingHexagonAnimator.SetOuterRadius(hexagonStartInnerRadius + thickness);
+        //fadingHexagonAnimator.SetThickness(thickness);
+        fadingHexagonAnimator.SetColor(color);
+        fadingHexagonAnimator.AnimateInnerRadiusTo(hexagonEndInnerRadius, fDuration);
+        fadingHexagonAnimator.AnimateOuterRadiusTo(hexagonEndInnerRadius + thickness, fDuration);
+        fadingHexagonAnimator.SetOpacity(1);
+        fadingHexagonAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+    }
 
-     ///**
-     // * Show the banner with the play button inside
-     // * **/
-     //public void ShowPlayBanner(bool bAnimated, float fDelay)
-     //{
-     //    Vector2 screenSize = ScreenUtils.GetScreenSize();
+    ///**
+    // * Show the banner with the play button inside
+    // * **/
+    //public void ShowPlayBanner(bool bAnimated, float fDelay)
+    //{
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-     //    m_playBannerObject = (GameObject)Instantiate(m_playBannerPfb);
-     //    m_playBannerObject.transform.parent = this.transform;
-     //    m_playBannerObject.transform.localPosition = new Vector3(0, -240.0f, PLAY_BANNER_Z_VALUE);
+    //    m_playBannerObject = (GameObject)Instantiate(m_playBannerPfb);
+    //    m_playBannerObject.transform.parent = this.transform;
+    //    m_playBannerObject.transform.localPosition = new Vector3(0, -240.0f, PLAY_BANNER_Z_VALUE);
 
-     //    ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
-     //    GameObject redFrameObject = childFrames[0].gameObject;
-     //    GameObject whiteFrameObject = childFrames[1].gameObject;
-     //    GameObject darkFrameObject = childFrames[2].gameObject;
+    //    ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
+    //    GameObject redFrameObject = childFrames[0].gameObject;
+    //    GameObject whiteFrameObject = childFrames[1].gameObject;
+    //    GameObject darkFrameObject = childFrames[2].gameObject;
 
-     //    GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
+    //    GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
 
-     //    TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
-     //    GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
-     //    GameObject backTriangleObject = childPlayTriangles[1].gameObject;
+    //    TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
+    //    GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
+    //    GameObject backTriangleObject = childPlayTriangles[1].gameObject;
 
-     //    //Red frame
-     //    float redFrameScaleDuration = 0.8f;
-     //    Vector3 redFramePosition = new Vector3(-0.5f * screenSize.x, 0, 0);
-     //    float redFrameHeight = 175.0f;
+    //    //Red frame
+    //    float redFrameScaleDuration = 0.8f;
+    //    Vector3 redFramePosition = new Vector3(-0.5f * screenSize.x, 0, 0);
+    //    float redFrameHeight = 175.0f;
 
-     //    ColorQuad redFrameColorQuad = redFrameObject.GetComponent<ColorQuad>();
-     //    redFrameColorQuad.InitQuadMesh();
+    //    ColorQuad redFrameColorQuad = redFrameObject.GetComponent<ColorQuad>();
+    //    redFrameColorQuad.InitQuadMesh();
 
-     //    MeshRenderer redFrameRenderer = redFrameObject.GetComponent<MeshRenderer>();
-     //    redFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
+    //    MeshRenderer redFrameRenderer = redFrameObject.GetComponent<MeshRenderer>();
+    //    redFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
-     //    ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
-     //    redFrameAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(219, 0, 47, 255)));
-     //    redFrameAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
-     //    redFrameAnimator.SetPosition(redFramePosition);
-     //    redFrameAnimator.SetScale(new Vector3(0, redFrameHeight, 1));
-     //    redFrameAnimator.ScaleTo(new Vector3(screenSize.x, redFrameHeight, 1), redFrameScaleDuration, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+    //    ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
+    //    redFrameAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(219, 0, 47, 255)));
+    //    redFrameAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
+    //    redFrameAnimator.SetPosition(redFramePosition);
+    //    redFrameAnimator.SetScale(new Vector3(0, redFrameHeight, 1));
+    //    redFrameAnimator.ScaleTo(new Vector3(screenSize.x, redFrameHeight, 1), redFrameScaleDuration, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
-     //    //White frame
-     //    Vector3 whiteFramePosition = new Vector3(0, -0.5f * redFrameHeight, 0);
-     //    float whiteFrameScaleDuration = 0.2f;
+    //    //White frame
+    //    Vector3 whiteFramePosition = new Vector3(0, -0.5f * redFrameHeight, 0);
+    //    float whiteFrameScaleDuration = 0.2f;
 
-     //    ColorQuad whiteFrameColorQuad = whiteFrameObject.GetComponent<ColorQuad>();
-     //    whiteFrameColorQuad.InitQuadMesh();
+    //    ColorQuad whiteFrameColorQuad = whiteFrameObject.GetComponent<ColorQuad>();
+    //    whiteFrameColorQuad.InitQuadMesh();
 
-     //    MeshRenderer whiteFrameRenderer = whiteFrameObject.GetComponent<MeshRenderer>();
-     //    whiteFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
+    //    MeshRenderer whiteFrameRenderer = whiteFrameObject.GetComponent<MeshRenderer>();
+    //    whiteFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
-     //    ColorQuadAnimator whiteFrameAnimator = whiteFrameObject.GetComponent<ColorQuadAnimator>();
-     //    whiteFrameAnimator.SetColor(Color.white);
-     //    whiteFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-     //    whiteFrameAnimator.SetPosition(whiteFramePosition);
-     //    whiteFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
-     //    whiteFrameAnimator.ScaleTo(new Vector3(screenSize.x, 4.0f, 1), whiteFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
+    //    ColorQuadAnimator whiteFrameAnimator = whiteFrameObject.GetComponent<ColorQuadAnimator>();
+    //    whiteFrameAnimator.SetColor(Color.white);
+    //    whiteFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+    //    whiteFrameAnimator.SetPosition(whiteFramePosition);
+    //    whiteFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
+    //    whiteFrameAnimator.ScaleTo(new Vector3(screenSize.x, 4.0f, 1), whiteFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
 
-     //    //Dark frame
-     //    Vector3 darkFramePosition = new Vector3(0, -0.5f * redFrameHeight, 1);
-     //    float darkFrameScaleDuration = 0.4f;
+    //    //Dark frame
+    //    Vector3 darkFramePosition = new Vector3(0, -0.5f * redFrameHeight, 1);
+    //    float darkFrameScaleDuration = 0.4f;
 
-     //    ColorQuad darkFrameColorQuad = darkFrameObject.GetComponent<ColorQuad>();
-     //    darkFrameColorQuad.InitQuadMesh();
+    //    ColorQuad darkFrameColorQuad = darkFrameObject.GetComponent<ColorQuad>();
+    //    darkFrameColorQuad.InitQuadMesh();
 
-     //    MeshRenderer darkFrameRenderer = darkFrameObject.GetComponent<MeshRenderer>();
-     //    darkFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
+    //    MeshRenderer darkFrameRenderer = darkFrameObject.GetComponent<MeshRenderer>();
+    //    darkFrameRenderer.sharedMaterial = Instantiate(m_playBannerMaterial);
 
-     //    ColorQuadAnimator darkFrameAnimator = darkFrameObject.AddComponent<ColorQuadAnimator>();
-     //    darkFrameAnimator.SetColor(Color.black);
-     //    darkFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-     //    darkFrameAnimator.SetPosition(darkFramePosition);
-     //    darkFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
-     //    darkFrameAnimator.ScaleTo(new Vector3(screenSize.x, 12.0f, 1), darkFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
+    //    ColorQuadAnimator darkFrameAnimator = darkFrameObject.AddComponent<ColorQuadAnimator>();
+    //    darkFrameAnimator.SetColor(Color.black);
+    //    darkFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
+    //    darkFrameAnimator.SetPosition(darkFramePosition);
+    //    darkFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
+    //    darkFrameAnimator.ScaleTo(new Vector3(screenSize.x, 12.0f, 1), darkFrameScaleDuration, fDelay + redFrameScaleDuration, ValueAnimator.InterpolationType.SINUSOIDAL);
 
-     //    //Play text label
-     //    float playButtonFadeDuration = 0.5f;
+    //    //Play text label
+    //    float playButtonFadeDuration = 0.5f;
 
-     //    playTextObject.transform.localPosition = new Vector3(0, 0, -1);
-     //    playTextObject.transform.parent = m_playBannerObject.transform;
+    //    playTextObject.transform.localPosition = new Vector3(0, 0, -1);
+    //    playTextObject.transform.parent = m_playBannerObject.transform;
 
-     //    TextMesh playTextMesh = playTextObject.GetComponent<TextMesh>();
-     //    playTextMesh.text = LanguageUtils.GetTranslationForTag("play");
-     //    Vector3 playTextMeshSize = playTextMesh.GetComponent<MeshRenderer>().bounds.size;
+    //    TextMesh playTextMesh = playTextObject.GetComponent<TextMesh>();
+    //    playTextMesh.text = LanguageUtils.GetTranslationForTag("play");
+    //    Vector3 playTextMeshSize = playTextMesh.GetComponent<MeshRenderer>().bounds.size;
 
-     //    TextMeshAnimator playTextAnimator = playTextObject.GetComponent<TextMeshAnimator>();
-     //    playTextAnimator.SetOpacity(0);
-     //    playTextAnimator.FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
+    //    TextMeshAnimator playTextAnimator = playTextObject.GetComponent<TextMeshAnimator>();
+    //    playTextAnimator.SetOpacity(0);
+    //    playTextAnimator.FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
 
-     //    //Play triangles
-     //    GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
-     //    playTrianglesObject.transform.localPosition = new Vector3(playTextMeshSize.x + 20.0f, 0, -1);
-     //    playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
+    //    //Play triangles
+    //    GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
+    //    playTrianglesObject.transform.localPosition = new Vector3(playTextMeshSize.x + 20.0f, 0, -1);
+    //    playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(1.0f, playButtonFadeDuration, fDelay + redFrameScaleDuration);
 
 
-     //    float triangleScale = 20.0f;
+    //    float triangleScale = 20.0f;
 
-     //    Vector3[] triangleVertices = new Vector3[3];
-     //    triangleVertices[0] = triangleScale * new Vector2(-0.5f, 1.0f);
-     //    triangleVertices[1] = triangleScale * new Vector2(-0.5f, -1.0f);
-     //    triangleVertices[2] = triangleScale * new Vector2(0.5f, 0.0f);
+    //    Vector3[] triangleVertices = new Vector3[3];
+    //    triangleVertices[0] = triangleScale * new Vector2(-0.5f, 1.0f);
+    //    triangleVertices[1] = triangleScale * new Vector2(-0.5f, -1.0f);
+    //    triangleVertices[2] = triangleScale * new Vector2(0.5f, 0.0f);
 
-     //    //Foreground triangle
-     //    Color frontTriangleColor = Color.white;
+    //    //Foreground triangle
+    //    Color frontTriangleColor = Color.white;
 
-     //    frontTriangleObject.transform.parent = frontTriangleObject.transform;
-     //    frontTriangleObject.transform.localPosition = new Vector3(0, 0, -1);
+    //    frontTriangleObject.transform.parent = frontTriangleObject.transform;
+    //    frontTriangleObject.transform.localPosition = new Vector3(0, 0, -1);
 
-     //    TriangleMesh triangleMesh = frontTriangleObject.GetComponent<TriangleMesh>();
-     //    triangleMesh.Init(Instantiate(m_playBannerMaterial));
-     //    triangleMesh.Render(triangleVertices, frontTriangleColor, false);
+    //    TriangleMesh triangleMesh = frontTriangleObject.GetComponent<TriangleMesh>();
+    //    triangleMesh.Init(Instantiate(m_playBannerMaterial));
+    //    triangleMesh.Render(triangleVertices, frontTriangleColor, false);
 
-     //    TriangleAnimator frontTriangleAnimator = frontTriangleObject.AddComponent<TriangleAnimator>();
-     //    frontTriangleAnimator.SetColor(frontTriangleColor);
-     //    frontTriangleAnimator.SetOpacity(0);
+    //    TriangleAnimator frontTriangleAnimator = frontTriangleObject.AddComponent<TriangleAnimator>();
+    //    frontTriangleAnimator.SetColor(frontTriangleColor);
+    //    frontTriangleAnimator.SetOpacity(0);
 
-     //    //Background triangle
-     //    Color backTriangleColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(50, 50, 50, 255));
+    //    //Background triangle
+    //    Color backTriangleColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(50, 50, 50, 255));
 
-     //    triangleMesh = backTriangleObject.AddComponent<TriangleMesh>();
-     //    triangleMesh.Init(Instantiate(m_playBannerMaterial));
-     //    triangleMesh.Render(triangleVertices, backTriangleColor, false);
+    //    triangleMesh = backTriangleObject.AddComponent<TriangleMesh>();
+    //    triangleMesh.Init(Instantiate(m_playBannerMaterial));
+    //    triangleMesh.Render(triangleVertices, backTriangleColor, false);
 
-     //    TriangleAnimator backTriangleAnimator = backTriangleObject.AddComponent<TriangleAnimator>();
-     //    backTriangleAnimator.SetOpacity(0);
-     //    backTriangleAnimator.TranslateTo(new Vector3(3, -3, 0), 0.3f, fDelay + redFrameScaleDuration + playButtonFadeDuration);
+    //    TriangleAnimator backTriangleAnimator = backTriangleObject.AddComponent<TriangleAnimator>();
+    //    backTriangleAnimator.SetOpacity(0);
+    //    backTriangleAnimator.TranslateTo(new Vector3(3, -3, 0), 0.3f, fDelay + redFrameScaleDuration + playButtonFadeDuration);
 
-     //    //Set the play banner as 'displayed' after animation ended
-     //    m_isPlayBannerAnimating = true;
-     //    m_playBannerAnimationDuration = fDelay + redFrameScaleDuration + playButtonFadeDuration;
-     //    m_playBannerAnimationElapsedTime = 0;
-     //}
+    //    //Set the play banner as 'displayed' after animation ended
+    //    m_isPlayBannerAnimating = true;
+    //    m_playBannerAnimationDuration = fDelay + redFrameScaleDuration + playButtonFadeDuration;
+    //    m_playBannerAnimationElapsedTime = 0;
+    //}
 
-     ///**
-     // * Removes the play banner with animation and eventually destroy it at the end of this animation
-     // * **/
-     //public void DismissPlayBanner()
-     //{
-     //    Vector2 screenSize = ScreenUtils.GetScreenSize();
+    ///**
+    // * Removes the play banner with animation and eventually destroy it at the end of this animation
+    // * **/
+    //public void DismissPlayBanner()
+    //{
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-     //    ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
-     //    GameObject redFrameObject = childFrames[0].gameObject;
-     //    GameObject whiteFrameObject = childFrames[1].gameObject;
-     //    GameObject darkFrameObject = childFrames[2].gameObject;
+    //    ColorQuad[] childFrames = m_playBannerObject.GetComponentsInChildren<ColorQuad>();
+    //    GameObject redFrameObject = childFrames[0].gameObject;
+    //    GameObject whiteFrameObject = childFrames[1].gameObject;
+    //    GameObject darkFrameObject = childFrames[2].gameObject;
 
-     //    GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
+    //    GameObject playTextObject = m_playBannerObject.GetComponentInChildren<TextMesh>().gameObject;
 
-     //    TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
-     //    GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
-     //    GameObject backTriangleObject = childPlayTriangles[1].gameObject;
+    //    TriangleMesh[] childPlayTriangles = m_playBannerObject.GetComponentsInChildren<TriangleMesh>();
+    //    GameObject frontTriangleObject = childPlayTriangles[0].gameObject;
+    //    GameObject backTriangleObject = childPlayTriangles[1].gameObject;
 
-     //    //white and dark frames
-     //    whiteFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.2f, 0.0f);
-     //    darkFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.4f, 0.0f);
+    //    //white and dark frames
+    //    whiteFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.2f, 0.0f);
+    //    darkFrameObject.GetComponent<ColorQuadAnimator>().ScaleTo(new Vector3(screenSize.x, 0, 1), 0.4f, 0.0f);
 
-     //    //red frame
-     //    ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
-     //    redFrameAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.0f));
-     //    redFrameAnimator.ScaleTo(new Vector3(0, redFrameAnimator.transform.localScale.y, redFrameAnimator.transform.localScale.z), 0.8f, 0.4f);
+    //    //red frame
+    //    ColorQuadAnimator redFrameAnimator = redFrameObject.GetComponent<ColorQuadAnimator>();
+    //    redFrameAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.0f));
+    //    redFrameAnimator.ScaleTo(new Vector3(0, redFrameAnimator.transform.localScale.y, redFrameAnimator.transform.localScale.z), 0.8f, 0.4f);
 
-     //    //Play triangles
-     //    GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
-     //    playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
+    //    //Play triangles
+    //    GameObject playTrianglesObject = frontTriangleObject.transform.parent.gameObject;
+    //    playTrianglesObject.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
 
-     //    //Play text
-     //    playTextObject.GetComponent<TextMeshAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
+    //    //Play text
+    //    playTextObject.GetComponent<TextMeshAnimator>().FadeTo(0.0f, 0.4f, 0.0f);
 
-     //    m_isPlayBannerDisplayed = false;
-     //}
+    //    m_isPlayBannerDisplayed = false;
+    //}
 
-     ///**
-     // * Show credits and options button
+    ///**
+    // * Show credits and options button
     // * **/
     //public void ShowButtons(bool bAnimated, float fDelay = 0.0f)
     //{
@@ -352,22 +358,22 @@ public class MainMenu : GUIScene
     //    creditsButtonAnimator.TranslateTo(creditsButtonFinalPosition, 0.5f, 0, ValueAnimator.InterpolationType.SINUSOIDAL);
     //}
 
-     public override void Update()
-     {
-         base.Update();
+    public override void Update()
+    {
+        base.Update();
 
-         if (m_generatingFadingHexagons)
-         {
-             float dt = Time.deltaTime;
+        if (m_generatingFadingHexagons)
+        {
+            float dt = Time.deltaTime;
 
-             m_hexagonAnimationElapsedTime += dt;
+            m_hexagonAnimationElapsedTime += dt;
 
-             if (m_hexagonAnimationElapsedTime > m_hexagonAnimationDuration)
-             {
-                 float hexagonStartRadius = 0.8f * GetBackgroundRenderer().m_triangleEdgeLength;
-                 LaunchAnimatedHexagonOnPlayButton(hexagonStartRadius, 2 * hexagonStartRadius, 5, Color.white, 2.0f);
-             }
-         }
-     }
+            if (m_hexagonAnimationElapsedTime > m_hexagonAnimationDuration)
+            {
+                float hexagonStartRadius = 0.8f * GetBackgroundRenderer().m_triangleEdgeLength;
+                LaunchAnimatedHexagonOnPlayButton(hexagonStartRadius, 2 * hexagonStartRadius, 5, Color.white, 2.0f);
+            }
+        }
+    }
 }
 

@@ -40,8 +40,8 @@ public class SceneManager : MonoBehaviour
         m_contentToDisplay = contentToDisplay;
 
         //animate frames between scenes
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.AnimateFrames(contentToDisplay, fAnimateFramesDelay);
+        //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        //guiManager.AnimateFrames(contentToDisplay, fAnimateFramesDelay);
 
         HideContent(m_displayedContent, 0.5f, fHideDelay);
         ShowContent(m_contentToDisplay, bShowWithAnimation, fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one

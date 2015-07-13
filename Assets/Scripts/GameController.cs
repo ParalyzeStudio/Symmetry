@@ -58,6 +58,7 @@ public class GameController : MonoBehaviour
 
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         ShowMainMenu();
+        guiManager.ShowSideButtons(true, 1.0f);
         //DebugShowChapters();
         //DebugShowLevels(1);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
