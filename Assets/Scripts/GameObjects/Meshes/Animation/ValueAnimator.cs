@@ -20,11 +20,11 @@ public class ValueAnimator : MonoBehaviour
     protected float m_fadingDelay;
     protected float m_fadingElapsedTime;
     protected InterpolationType m_fadingInterpolationType;
-    protected bool m_destroyObjectOnFinish;
+    protected bool m_destroyObjectOnFinishFading;
 
     //Variables to handle scaling
     protected bool m_scaling;
-    protected Vector3 m_scale;
+    public Vector3 m_scale;
     protected Vector3 m_fromScale;
     protected Vector3 m_toScale;
     protected float m_scalingDuration;
@@ -43,6 +43,7 @@ public class ValueAnimator : MonoBehaviour
     protected float m_translatingDelay;
     protected float m_translatingElapsedTime;
     protected InterpolationType m_translatingInterpolationType;
+    protected bool m_destroyObjectOnFinishTranslating;
 
     //Variables to handle rotating
     protected bool m_rotating;
@@ -81,7 +82,7 @@ public class ValueAnimator : MonoBehaviour
         m_fadingDelay = delay;
         m_fadingElapsedTime = 0;
         m_fadingInterpolationType = interpolType;
-        m_destroyObjectOnFinish = bDestroyObjectOnFinish;
+        m_destroyObjectOnFinishFading = bDestroyObjectOnFinish;
     }
 
     public void ScaleTo(Vector3 toScale, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
@@ -95,7 +96,7 @@ public class ValueAnimator : MonoBehaviour
         m_scalingInterpolationType = interpolType;
     }
 
-    public void TranslateTo(Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void TranslateTo(Vector3 toPosition, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyOnFinish = false)
     {
         m_translating = true;
         m_fromPosition = m_position;
@@ -107,6 +108,7 @@ public class ValueAnimator : MonoBehaviour
         m_translatingDelay = delay;
         m_translatingElapsedTime = 0;
         m_translatingInterpolationType = interpolType;
+        m_destroyObjectOnFinishTranslating = bDestroyOnFinish;
     }
 
     public void RotateTo(float toAngle, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
@@ -258,13 +260,14 @@ public class ValueAnimator : MonoBehaviour
 
     public virtual void OnFinishFading()
     {
-        if (m_destroyObjectOnFinish)
+        if (m_destroyObjectOnFinishFading)
             Destroy(this.gameObject);
     }
 
     public virtual void OnFinishTranslating()
     {
-
+        if (m_destroyObjectOnFinishTranslating)
+            Destroy(this.gameObject);
     }
 
     public virtual void OnFinishScaling()

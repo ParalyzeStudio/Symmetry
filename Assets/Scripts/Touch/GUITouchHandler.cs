@@ -7,24 +7,17 @@ public class GUITouchHandler : TouchHandler
         if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
         {
             GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-            if (guiManager.IsPauseWindowShown())
-            {
-                return true;
-            }
-            else
-            {
+            
+            GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
 
-                GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
-
-                for (int i = 0; i != allButtons.Length; i++)
+            for (int i = 0; i != allButtons.Length; i++)
+            {
+                if (allButtons[i].ContainsPoint(pointerLocation))
                 {
-                    if (allButtons[i].ContainsPoint(pointerLocation))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                return false;
             }
+            return false;
         }
 
         return true;
@@ -40,15 +33,16 @@ public class GUITouchHandler : TouchHandler
 
         bool bClickProcessed = false;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-        /*if (guiManager.IsOptionsWindowShown()) //an options window is displayed, process it on the window and swallow the click
-            HandleClickOnChildButtons(guiManager.m_optionsWindow, clickLocation);
-        else */if (guiManager.IsPauseWindowShown()) //a pause window is displayed, process it on the window and swallow the click
-            HandleClickOnChildButtons(guiManager.m_pauseWindow, clickLocation);
+        if (guiManager.m_sideButtonsOverlayDisplayed) //side buttons overlay is shown
+            HandleClickOnChildGUIButtons(guiManager.m_sideButtonsOverlay, clickLocation);
+        else if (false) //TODO check if pause overlay is displayed
+            //HandleClickOnChildGUIButtons(guiManager.m_pauseWindow, clickLocation);
+            ;
         else
         {
-            bClickProcessed = HandleClickOnChildButtons(this.gameObject, clickLocation);
+            bClickProcessed = HandleClickOnChildGUIButtons(this.gameObject, clickLocation);
             if (!bClickProcessed)
-                bClickProcessed = HandleClickOnChildButtons(currentScene.gameObject, clickLocation);
+                bClickProcessed = HandleClickOnChildGUIButtons(currentScene.gameObject, clickLocation);
             if (!bClickProcessed)
             {
                 if (sceneManager.m_displayedContent == SceneManager.DisplayContent.MENU)
@@ -105,7 +99,7 @@ public class GUITouchHandler : TouchHandler
     /**
      * Processes click on interface buttons that are children of the root object passes as parameter
      * **/
-    public bool HandleClickOnChildButtons(GameObject rootObject, Vector2 clickLocation)
+    public bool HandleClickOnChildGUIButtons(GameObject rootObject, Vector2 clickLocation)
     {
         GUIButton[] childButtons = rootObject.GetComponentsInChildren<GUIButton>();
         for (int iButtonIndex = 0; iButtonIndex != childButtons.Length; iButtonIndex++)
@@ -152,7 +146,7 @@ public class GUITouchHandler : TouchHandler
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         Chapters chapters = (Chapters)sceneManager.m_currentScene;
 
-        if (!HandleClickOnChildButtons(chapters.gameObject, clickLocation))
+        if (!HandleClickOnChildGUIButtons(chapters.gameObject, clickLocation))
         {
             BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
             float triangleHeight = bgRenderer.m_triangleHeight;
@@ -174,7 +168,7 @@ public class GUITouchHandler : TouchHandler
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
         Levels levels = (Levels)sceneManager.m_currentScene;
 
-        if (!HandleClickOnChildButtons(levels.gameObject, clickLocation))
+        if (!HandleClickOnChildGUIButtons(levels.gameObject, clickLocation))
         {
             for (int i = 0; i != levels.m_levelSlots.Length; i++)
             {

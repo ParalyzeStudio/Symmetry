@@ -28,6 +28,7 @@ public class GUIButton : MonoBehaviour
         ID_CREDITS_BUTTON,
         ID_MUSIC_BUTTON,
         ID_SOUND_BUTTON,
+        ID_RESET_BUTTON,
         ID_BACK_BUTTON,
         ID_CLOSE_BUTTON,
         ID_MENU_BUTTON,
@@ -53,7 +54,7 @@ public class GUIButton : MonoBehaviour
 
         if (skinMaterial != null)
         {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = skinMaterial;
+            SetSkinMaterial(skinMaterial);
         }
 
         if (m_skin != null)
@@ -140,7 +141,10 @@ public class GUIButton : MonoBehaviour
     public void SetSkinMaterial(Material material)
     {
         if (m_skin != null)
+        {
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = material;
+            m_skin.GetComponent<MeshRenderer>().sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
+        }
     }
 
     /**
@@ -193,15 +197,26 @@ public class GUIButton : MonoBehaviour
      * **/
     public virtual void OnClick()
     {
+        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        guiManager.m_selectedSideButtonID = m_ID;
+
         if (m_ID == GUIButtonID.ID_OPTIONS_BUTTON)
-        {
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            guiManager.ShowSideButtonsOverlay();
-            //guiManager.ShowOptionsWindow();
+        {            
+            if (!guiManager.m_sideButtonsOverlayDisplayed)
+                guiManager.ShowSideButtonsOverlay();
+            else
+            {
+                
+            }
         }
         else if (m_ID == GUIButtonID.ID_CREDITS_BUTTON)
         {
-            UnityEngine.Debug.Log("OnClick Credits");
+            if (!guiManager.m_sideButtonsOverlayDisplayed)
+                guiManager.ShowSideButtonsOverlay();
+            else
+            {
+
+            }
         }
         else if (m_ID == GUIButtonID.ID_MUSIC_BUTTON)
         {
@@ -210,11 +225,6 @@ public class GUIButton : MonoBehaviour
 
             PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_musicActive);
-
-            MeshRenderer skinMeshRenderer = m_skin.gameObject.GetComponent<MeshRenderer>();
-            Material onMaterial = m_skinOnMaterial;
-            Material offMaterial = m_skinOffMaterial;
-            skinMeshRenderer.material = soundManager.m_musicActive ? onMaterial : offMaterial;
         }
         else if (m_ID == GUIButtonID.ID_SOUND_BUTTON)
         {
@@ -223,16 +233,10 @@ public class GUIButton : MonoBehaviour
 
             PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
-
-            MeshRenderer skinMeshRenderer = m_skin.gameObject.GetComponent<MeshRenderer>();
-            Material onMaterial = m_skinOnMaterial;
-            Material offMaterial = m_skinOffMaterial;
-            skinMeshRenderer.material = soundManager.m_soundActive ? onMaterial : offMaterial;
         }
         else if (m_ID == GUIButtonID.ID_BACK_BUTTON)
         {
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
             if (displayedContent == SceneManager.DisplayContent.CHAPTERS)
             {
@@ -246,21 +250,20 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_BUTTON)
         {
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             //if (guiManager.IsOptionsWindowShown())
             //{
             //    guiManager.DismissOptionsWindow();
             //}
             //else 
-            if (guiManager.IsPauseWindowShown())
-            {
-                guiManager.DismissPauseWindow();
-            }
+            //if (guiManager.IsPauseWindowShown())
+            //{
+            //    guiManager.DismissPauseWindow();
+            //}
         }
         else if (m_ID == GUIButtonID.ID_MENU_BUTTON)
         {
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            guiManager.ShowPauseWindow();
+            //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            //guiManager.ShowPauseWindow();
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
@@ -276,8 +279,8 @@ public class GUIButton : MonoBehaviour
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f, 0.0f);
 
-            GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-            guiManager.DismissPauseWindow();
+            //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            //guiManager.DismissPauseWindow();
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS)
         {

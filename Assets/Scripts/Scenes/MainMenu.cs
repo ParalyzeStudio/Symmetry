@@ -5,9 +5,10 @@ public class MainMenu : GUIScene
     public const float TITLE_Z_VALUE = -200.0f;
     public const float GUI_BUTTONS_Z_VALUE = -10.0f;
 
+    //shared prefabs
+    public GameObject m_textMeshPfb;
+    public Material m_transpPositionColorMaterial;
     public GameObject m_hexagonPfb;
-    public GameObject m_playTextPfb;
-    public Material m_transpPositionColorMaterial;    
 
     //buttons
     public GameObject m_playButton { get; set; }
@@ -86,11 +87,15 @@ public class MainMenu : GUIScene
         m_generatingFadingHexagons = true;
 
         //Show text above button
-        GameObject playTextObject = (GameObject)Instantiate(m_playTextPfb);
+        GameObject playTextObject = (GameObject)Instantiate(m_textMeshPfb);
         playTextObject.name = "PlayText";
         playTextObject.transform.parent = this.transform;
         playTextObject.transform.localPosition = m_playButton.transform.localPosition + new Vector3(0, 2.0f * GetBackgroundRenderer().m_triangleEdgeLength, 0);
         playTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("play");
+
+        TextMeshAnimator playTextAnimator = playTextObject.GetComponent<TextMeshAnimator>();
+        playTextAnimator.SetColor(Color.white);
+        playTextAnimator.SetFontHeight(40);
     }
 
     public void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)

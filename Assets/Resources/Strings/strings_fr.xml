@@ -4,5 +4,8 @@
 	<string tag="options" value="OPTIONS"/>
 	<string tag="about" value="A PROPOS"/>
 	<string tag="chapter" value="CHAPITRE"/>
+	<string tag="music" value="MUSIQUE"/>
+	<string tag="sound" value="SON"/>
+	<string tag="reset" value="REINITIALISER"/>
 	<string tag="progress_bar_completion" value="complétés"/>
 </strings>
