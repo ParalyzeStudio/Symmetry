@@ -23,14 +23,16 @@ public class GUIButton : MonoBehaviour
 
     public enum GUIButtonID
     {
-        //Interface buttons
+        NONE = 0,
+
+        //Interface button
         ID_OPTIONS_BUTTON = 1,
         ID_CREDITS_BUTTON,
         ID_MUSIC_BUTTON,
         ID_SOUND_BUTTON,
         ID_RESET_BUTTON,
         ID_BACK_BUTTON,
-        ID_CLOSE_BUTTON,
+        ID_CLOSE_OVERLAY_BUTTON,
         ID_MENU_BUTTON,
         ID_RETRY_BUTTON,
         ID_HINTS_BUTTON,
@@ -201,12 +203,12 @@ public class GUIButton : MonoBehaviour
         guiManager.m_selectedSideButtonID = m_ID;
 
         if (m_ID == GUIButtonID.ID_OPTIONS_BUTTON)
-        {            
+        {
             if (!guiManager.m_sideButtonsOverlayDisplayed)
                 guiManager.ShowSideButtonsOverlay();
             else
             {
-                
+                guiManager.SwitchOverlayContent(GUIManager.OverlayDisplayedContent.OPTIONS);
             }
         }
         else if (m_ID == GUIButtonID.ID_CREDITS_BUTTON)
@@ -215,7 +217,7 @@ public class GUIButton : MonoBehaviour
                 guiManager.ShowSideButtonsOverlay();
             else
             {
-
+                guiManager.SwitchOverlayContent(GUIManager.OverlayDisplayedContent.CREDITS);
             }
         }
         else if (m_ID == GUIButtonID.ID_MUSIC_BUTTON)
@@ -248,17 +250,9 @@ public class GUIButton : MonoBehaviour
                 sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f, 0.5f);
             }
         }
-        else if (m_ID == GUIButtonID.ID_CLOSE_BUTTON)
+        else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
         {
-            //if (guiManager.IsOptionsWindowShown())
-            //{
-            //    guiManager.DismissOptionsWindow();
-            //}
-            //else 
-            //if (guiManager.IsPauseWindowShown())
-            //{
-            //    guiManager.DismissPauseWindow();
-            //}
+            guiManager.DismissSideButtonsOverlay();
         }
         else if (m_ID == GUIButtonID.ID_MENU_BUTTON)
         {

@@ -11,11 +11,23 @@ public class GameObjectAnimator : ValueAnimator
 
     public virtual Vector3 GetGameObjectSize()
     {
-        BoundingBoxCalculator optionsPanelBBoxCalculator = this.gameObject.GetComponent<BoundingBoxCalculator>();
-        if (optionsPanelBBoxCalculator != null)
-            return optionsPanelBBoxCalculator.m_bbox.size;
-        else
-            return this.transform.localScale;
+        MeshRenderer[] childRenderers = this.gameObject.GetComponentsInChildren<MeshRenderer>();
+        Bounds bounds = new Bounds();
+        for (int i = 0; i != childRenderers.Length; i++)
+        {
+            bounds.Encapsulate(childRenderers[i].bounds);
+        }
+
+        return bounds.size;
+
+        //MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        //BoundingBoxCalculator optionsPanelBBoxCalculator = this.gameObject.GetComponent<BoundingBoxCalculator>();
+        //if (meshRenderer != null)
+        //    return meshRenderer.bounds.size;
+        //else if (optionsPanelBBoxCalculator != null)
+        //    return optionsPanelBBoxCalculator.m_bbox.size;
+        //else
+        //    return this.transform.localScale;
     }
 
     /**

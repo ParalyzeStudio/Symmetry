@@ -59,20 +59,7 @@ public class HexagonMeshAnimator : GameObjectAnimator
         float fRadius = m_outerRadius + deltaRadius;
         SetOuterRadius(fRadius);
     }
-
-    //public void SetThickness(float thickness, bool bRenderCircle = true)
-    //{
-    //    m_thickness = thickness;
-    //    if (bRenderCircle)
-    //        RenderHexagon();
-    //}
-
-    //public void IncThickness(float deltaThickness)
-    //{
-    //    float fThickness = m_thickness + deltaThickness;
-    //    SetThickness(fThickness);
-    //}
-
+    
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);

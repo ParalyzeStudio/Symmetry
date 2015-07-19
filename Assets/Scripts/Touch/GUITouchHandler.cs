@@ -34,7 +34,16 @@ public class GUITouchHandler : TouchHandler
         bool bClickProcessed = false;
         GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
         if (guiManager.m_sideButtonsOverlayDisplayed) //side buttons overlay is shown
-            HandleClickOnChildGUIButtons(guiManager.m_sideButtonsOverlay, clickLocation);
+        {
+            if (!HandleClickOnChildGUIButtons(guiManager.m_sideButtonsOverlay, clickLocation))
+            {
+                //check if click is performed on one of the side buttons
+                GUIButton.GUIButtonID[] sideButtonsIDs = new GUIButton.GUIButtonID[2];
+                sideButtonsIDs[0] = GUIButton.GUIButtonID.ID_OPTIONS_BUTTON;
+                sideButtonsIDs[1] = GUIButton.GUIButtonID.ID_CREDITS_BUTTON;
+                HandleClickOnChildGUIButtons(this.gameObject, clickLocation, sideButtonsIDs);
+            }
+        }
         else if (false) //TODO check if pause overlay is displayed
             //HandleClickOnChildGUIButtons(guiManager.m_pauseWindow, clickLocation);
             ;
@@ -99,12 +108,29 @@ public class GUITouchHandler : TouchHandler
     /**
      * Processes click on interface buttons that are children of the root object passes as parameter
      * **/
-    public bool HandleClickOnChildGUIButtons(GameObject rootObject, Vector2 clickLocation)
+    public bool HandleClickOnChildGUIButtons(GameObject rootObject, Vector2 clickLocation, GUIButton.GUIButtonID[] m_filteredButtonIDs = null)
     {
         GUIButton[] childButtons = rootObject.GetComponentsInChildren<GUIButton>();
         for (int iButtonIndex = 0; iButtonIndex != childButtons.Length; iButtonIndex++)
         {
             GUIButton button = childButtons[iButtonIndex];
+
+            if (m_filteredButtonIDs != null) //check if this button belongs to the filtered buttons IDs list
+            {
+                bool filteredButtonID = false;
+                for (int i = 0; i != m_filteredButtonIDs.Length; i++)
+                {
+                    if (button.m_ID == m_filteredButtonIDs[i])
+                    {
+                        filteredButtonID = true;
+                        break;
+                    }
+                }
+
+                if (!filteredButtonID)
+                    continue;
+            }
+
             if (button.ContainsPoint(clickLocation))
             {
                 button.OnClick();

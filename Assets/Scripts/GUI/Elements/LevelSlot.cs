@@ -2,7 +2,6 @@
 
 public class LevelSlot : GUISlot
 {
-
     public int m_number { get; set; }
     public GameObject m_levelSlotNumberGameObject { get; set; }
 

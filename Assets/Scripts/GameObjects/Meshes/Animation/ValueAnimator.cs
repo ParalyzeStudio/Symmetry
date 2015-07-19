@@ -24,7 +24,7 @@ public class ValueAnimator : MonoBehaviour
 
     //Variables to handle scaling
     protected bool m_scaling;
-    public Vector3 m_scale;
+    protected Vector3 m_scale;
     protected Vector3 m_fromScale;
     protected Vector3 m_toScale;
     protected float m_scalingDuration;
@@ -69,6 +69,14 @@ public class ValueAnimator : MonoBehaviour
     //Store previous values to change them dynamically in inspector
     private float m_prevOpacity;
     private Color m_prevColor;
+
+    public void Awake()
+    {
+        m_opacity = 1;
+        m_prevOpacity = 1;
+        m_color = new Color(0, 0, 0, 255);
+        m_prevColor = m_color;
+    }
 
     public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyObjectOnFinish = false)
     {
@@ -444,8 +452,6 @@ public class ValueAnimator : MonoBehaviour
         //when we modify the opacity value directly in the inspector in edit mode
         if (m_prevOpacity != m_opacity)
         {
-            if (this is TriangleAnimator)
-                Debug.Log("m_prevOpacity:" + m_prevOpacity + " m_opacity:" + m_opacity);
             SetOpacity(m_opacity);
             return;
         }

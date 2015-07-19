@@ -24,17 +24,27 @@ public class GUIManager : MonoBehaviour
     //public GameObject m_optionsWindow { get; set; } //the actual options window
     public GameObject m_sideButtonsOverlay { get; set; }
     public bool m_sideButtonsOverlayDisplayed { get; set; }
-    public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
+
+    public enum OverlayDisplayedContent
+    {
+        NONE = 0,
+        OPTIONS,
+        CREDITS
+    }
+    public OverlayDisplayedContent m_overlayDisplayedContent { get; set; }
+    //public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
 
     //which side button is selected when showing the overlay
     public GUIButton.GUIButtonID m_selectedSideButtonID { get; set; }
 
     //side buttons overlay elements
+    public GameObject m_displayedContentHolder { get; set; }
     private GameObject m_optionsContentHolder;
     private GameObject m_creditsContentHolder;
 
     //Materials for GUI buttons    
     public Material m_skinBack;
+    public Material m_skinCloseOverlay;
     public Material m_skinSelectionArrow;
     public Material m_skinCredits;
     public Material m_skinLevels;
@@ -114,8 +124,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinBack;
         else if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
             skinMaterial = m_skinLevels;
-        else if (iID == GUIButton.GUIButtonID.ID_CLOSE_BUTTON)
-            ;
+        else if (iID == GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
+            skinMaterial = m_skinCloseOverlay;
         else if (iID == GUIButton.GUIButtonID.ID_COLOR_CHANGE)
             skinMaterial = m_skinColorChange;
         else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
@@ -406,6 +416,8 @@ public class GUIManager : MonoBehaviour
         if (m_sideButtonsOverlayDisplayed)
             return;
 
+        m_sideButtonsOverlayDisplayed = true;
+
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         float overlayTranslationDuration = 0.8f;
 
@@ -444,18 +456,20 @@ public class GUIManager : MonoBehaviour
         separationLineAnimator.SetScale(new Vector3(0.73f * screenSize.x, 4, 1));
         separationLineAnimator.SetColor(Color.white);
 
-        //build content holders
-        m_optionsContentHolder = new GameObject("OptionsContentHolder");
-        m_optionsContentHolder.transform.parent = m_sideButtonsOverlay.transform;
-        GameObjectAnimator optionsContentHolderAnimator = m_optionsContentHolder.AddComponent<GameObjectAnimator>();
-        optionsContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
+        //close button
+        GameObject closeButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON,
+                                                            new Vector2(128, 128),
+                                                            Color.black,
+                                                            Color.black);
+        closeButtonObject.name = "CloseButton";
+        closeButtonObject.transform.parent = m_sideButtonsOverlay.transform;
+        closeButtonObject.transform.localPosition = new Vector3(133 - 0.5f * screenSize.x, 0.5f * screenSize.y - 106, -1);
 
-        m_creditsContentHolder = new GameObject("CreditsContentHolder");
-        m_creditsContentHolder.transform.parent = m_sideButtonsOverlay.transform;
-        GameObjectAnimator creditsContentHolderAnimator = m_creditsContentHolder.AddComponent<GameObjectAnimator>();
-        creditsContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
 
-        ShowOverlayContent(false);
+        if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
+            ShowOverlayContent(OverlayDisplayedContent.OPTIONS, false);
+        else if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
+            ShowOverlayContent(OverlayDisplayedContent.CREDITS, false);        
     }
 
     /**
@@ -466,18 +480,21 @@ public class GUIManager : MonoBehaviour
         if (!m_sideButtonsOverlayDisplayed)
             return;
 
-         Vector2 screenSize = ScreenUtils.GetScreenSize();
+        m_sideButtonsOverlayDisplayed = false;
+        m_selectedSideButtonID = GUIButton.GUIButtonID.NONE;
+
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
         float overlayTranslationDuration = 0.8f;
 
         GameObjectAnimator overlayAnimator = m_sideButtonsOverlay.GetComponent<GameObjectAnimator>();
-        overlayAnimator.TranslateTo(new Vector3(0, screenSize.y, 0), overlayTranslationDuration, 0.0f, ValueAnimator.InterpolationType.SINUSOIDAL, true);
+        overlayAnimator.TranslateTo(new Vector3(0, -screenSize.y, SIDE_OVERLAY_Z_VALUE), overlayTranslationDuration, 0.0f, ValueAnimator.InterpolationType.SINUSOIDAL, true);
     }
 
     /**
      * Show the content for the currently selected side button ID
      * **/
-    public void ShowOverlayContent(bool bAnimated, float fDelay = 0.0f)
-    {
+    public void ShowOverlayContent(OverlayDisplayedContent displayedContent, bool bAnimated, float fDelay = 0.0f)
+    {  
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Build title
@@ -488,31 +505,29 @@ public class GUIManager : MonoBehaviour
         overlayTitleAnimator.SetColor(Color.white);
         overlayTitleAnimator.SetFontHeight(60);
 
-        GameObject contentHolder = null;
         //options content
-        if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
+        if (displayedContent == OverlayDisplayedContent.OPTIONS)
         {
-            contentHolder = m_optionsContentHolder;
-            overlayTitleObject.transform.parent = m_optionsContentHolder.transform;
-            overlayTitleTextMesh.text = LanguageUtils.GetTranslationForTag("options");
             BuildOptionsContent();
-            
+            m_displayedContentHolder = m_optionsContentHolder;
+            overlayTitleObject.transform.parent = m_optionsContentHolder.transform;
+            overlayTitleTextMesh.text = LanguageUtils.GetTranslationForTag("options");           
         }
         //credits content
-        else if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
+        else if (displayedContent == OverlayDisplayedContent.CREDITS)
         {
-            contentHolder = m_creditsContentHolder;
+            BuildCreditsContent();
+            m_displayedContentHolder = m_creditsContentHolder;
             overlayTitleObject.transform.parent = m_creditsContentHolder.transform;
             overlayTitleTextMesh.text = LanguageUtils.GetTranslationForTag("about");
-            BuildCreditsContent();
         }
         
         //set the position after setting the parent transform
         overlayTitleAnimator.SetPosition(new Vector3(0, 0.377f * screenSize.y, -1));
 
+        GameObjectAnimator contentHolderAnimator = m_displayedContentHolder.GetComponent<GameObjectAnimator>();
         if (bAnimated)
-        {
-            GameObjectAnimator contentHolderAnimator = contentHolder.GetComponent<GameObjectAnimator>();
+        {            
             contentHolderAnimator.SetPosition(new Vector3(screenSize.x, 0, 0));
             contentHolderAnimator.TranslateTo(Vector3.zero, 0.5f, 0.0f);
         }
@@ -521,19 +536,16 @@ public class GUIManager : MonoBehaviour
     /**
      * Dismiss the overlay content currently displayed
      * **/
-    private void DismissCurrentlyDisplayedOverlayContent()
+    public void DismissCurrentlyDisplayedOverlayContent()
     {
-        if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
-        {
-            GameObjectAnimator contentHolderAnimator = m_creditsContentHolder.GetComponent<GameObjectAnimator>();
-            contentHolderAnimator.FadeTo(0.0f, 0.2f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        }
+        GameObjectAnimator contentHolderAnimator = m_displayedContentHolder.GetComponent<GameObjectAnimator>();
+        contentHolderAnimator.FadeTo(0.0f, 0.2f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
-    public void SwitchOverlayContent()
+    public void SwitchOverlayContent(OverlayDisplayedContent newlyDisplayedContent)
     {
         DismissCurrentlyDisplayedOverlayContent();
-        ShowOverlayContent(true);        
+        ShowOverlayContent(newlyDisplayedContent, true);        
     }
 
     /**
@@ -544,23 +556,31 @@ public class GUIManager : MonoBehaviour
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         float horizontalGapBetweenButtons = 394.0f;
 
+        m_optionsContentHolder = new GameObject("OptionsContentHolder");
+        m_optionsContentHolder.transform.parent = m_sideButtonsOverlay.transform;
+        GameObjectAnimator optionsContentHolderAnimator = m_optionsContentHolder.AddComponent<GameObjectAnimator>();
+        optionsContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
+
         //sound button
-        Vector3 soundButtonPosition = new Vector3(-horizontalGapBetweenButtons, - 0.06f * screenSize.x, 0);
+        Vector3 soundButtonPosition = new Vector3(-horizontalGapBetweenButtons, - 0.06f * screenSize.x, -1);
         GameObject soundButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_SOUND_BUTTON, new Vector2(100.0f, 100.0f), Color.black, Color.black);
+        soundButtonObject.name = "SoundButton";
         soundButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator soundButtonAnimator = soundButtonObject.GetComponent<GameObjectAnimator>();
         soundButtonAnimator.SetPosition(soundButtonPosition);
 
         //music button
-        Vector3 musicButtonPosition = new Vector3(0, -0.06f * screenSize.x, 0);
+        Vector3 musicButtonPosition = new Vector3(0, -0.06f * screenSize.x, -1);
         GameObject musicButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MUSIC_BUTTON, new Vector2(128.0f, 128.0f), Color.black, Color.black);
+        musicButtonObject.name = "MusicButton";
         musicButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator musicButtonAnimator = musicButtonObject.GetComponent<GameObjectAnimator>();
         musicButtonAnimator.SetPosition(musicButtonPosition);
 
         //reset button
-        Vector3 resetButtonPosition = new Vector3(horizontalGapBetweenButtons, -0.06f * screenSize.x, 0);
+        Vector3 resetButtonPosition = new Vector3(horizontalGapBetweenButtons, -0.06f * screenSize.x, -1);
         GameObject resetButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RESET_BUTTON, new Vector2(100.0f, 100.0f), Color.black, Color.black);
+        resetButtonObject.name = "ResetButton";
         resetButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator resetButtonAnimator = resetButtonObject.GetComponent<GameObjectAnimator>();
         resetButtonAnimator.SetPosition(resetButtonPosition); 
@@ -568,6 +588,7 @@ public class GUIManager : MonoBehaviour
         //Build hexagons around every button skin
         Material transpWhiteMaterial = Instantiate(m_transpPositionColorMaterial);
         GameObject soundButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        soundButtonHexagon.name = "SoundButtonHexagon";
         soundButtonHexagon.transform.parent = m_optionsContentHolder.transform;
         HexagonMesh hexaMesh = soundButtonHexagon.GetComponent<HexagonMesh>();
         hexaMesh.Init(transpWhiteMaterial);
@@ -578,6 +599,7 @@ public class GUIManager : MonoBehaviour
         hexaMeshAnimator.SetPosition(soundButtonPosition);
 
         GameObject musicButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        musicButtonHexagon.name = "MusicButtonHexagon";
         musicButtonHexagon.transform.parent = m_optionsContentHolder.transform;
         hexaMesh = musicButtonHexagon.GetComponent<HexagonMesh>();
         hexaMesh.Init(transpWhiteMaterial);
@@ -588,6 +610,7 @@ public class GUIManager : MonoBehaviour
         hexaMeshAnimator.SetPosition(musicButtonPosition);
 
         GameObject resetButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        resetButtonHexagon.name = "ResetButtonHexagon";
         resetButtonHexagon.transform.parent = m_optionsContentHolder.transform;
         hexaMesh = resetButtonHexagon.GetComponent<HexagonMesh>();
         hexaMesh.Init(transpWhiteMaterial);
@@ -640,7 +663,10 @@ public class GUIManager : MonoBehaviour
      * **/
     private void BuildCreditsContent()
     {
-        
+        m_creditsContentHolder = new GameObject("CreditsContentHolder");
+        m_creditsContentHolder.transform.parent = m_sideButtonsOverlay.transform;
+        GameObjectAnimator creditsContentHolderAnimator = m_creditsContentHolder.AddComponent<GameObjectAnimator>();
+        creditsContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
     }
 
     /**

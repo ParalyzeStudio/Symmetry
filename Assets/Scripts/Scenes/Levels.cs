@@ -4,8 +4,11 @@ public class Levels : GUIScene
 {
     public const float LEVELS_SLOTS_Z_VALUE = -10.0f;
 
+    //Shared prefabs
+    public GameObject m_textMeshPfb;
+
+    //LevelSlot data
     public LevelSlot[] m_levelSlots { get; set; }
-    public GameObject m_levelSlotNumberTextPfb;
  
     /**
      * Shows this scene
@@ -192,10 +195,16 @@ public class Levels : GUIScene
 
             slot.m_blendColor = blendColor;
 
-            GameObject clonedLevelNumberTextObject = (GameObject)Instantiate(m_levelSlotNumberTextPfb);
+            GameObject clonedLevelNumberTextObject = (GameObject)Instantiate(m_textMeshPfb);
             clonedLevelNumberTextObject.GetComponent<TextMesh>().text = slot.m_number.ToString();
             clonedLevelNumberTextObject.transform.parent = levelsNumbersHolder.transform;
-            clonedLevelNumberTextObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(slot.GetCenter(), 0);
+
+            Vector3 numberPosition = GeometryUtils.BuildVector3FromVector2(slot.GetCenter(), 0);
+            if (slot.m_number >= 10)
+                numberPosition -= new Vector3(5.0f, 0, 0);
+            TextMeshAnimator numberAnimator = clonedLevelNumberTextObject.GetComponent<TextMeshAnimator>();
+            numberAnimator.SetFontHeight(0.8f * bgRenderer.m_triangleEdgeLength);
+            numberAnimator.SetPosition(numberPosition);
             slot.m_levelSlotNumberGameObject = clonedLevelNumberTextObject;
 
             slot.Show(blendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION);

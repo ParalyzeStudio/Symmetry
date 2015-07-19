@@ -3,21 +3,26 @@ using System.Collections.Generic;
 
 public class Chapters : GUIScene
 {
-    public const float CENTRAL_ITEM_Z_VALUE = -10.0f;
+    public const float CHAPTER_SLOT_Z_VALUE = -10.0f;
     public const float SELECTION_ARROWS_Z_VALUE = -10.0f;
+    public const float CHAPTER_SLOT_BACKGROUND_OPACITY = 0.5f;
 
-    public GameObject m_chaptersTextPfb;
-    public GameObject m_chaptersNumberPfb;
+    //shared prefabs
+    public GameObject m_textMeshPfb;
+    public GameObject m_hexagonMeshPfb;
+    public Material m_positionColorMaterial;
 
     public int m_displayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
 
     //Central item
-    private ChapterSlot m_chapterSlot;
-    private Vector3 m_centralItemPosition;
+    private GameObject m_chapterSlotObject;
+    private GameObject m_chapterSlotBackground;
+    private GameObject m_chapterSlotInfoContainer;
+    //private ChapterSlot m_chapterSlot;
+    private Vector3 m_chapterSlotPosition;
     public GameObject m_progressBarBgGameObject;
     public GameObject m_progressBarFillGameObject;
     public Material m_progressBarMaterial;
-    public GameObject m_progressBarCompletionPfb;
 
     //Show central item with delay
     private bool m_showingCentralItem;
@@ -38,7 +43,7 @@ public class Chapters : GUIScene
         guiManager.ShowBackButton(fDelay);
 
         //Show chapter slot
-        ShowChapterSlot(5.2f);
+        ShowChapterSlot(fDelay);
 
         //Show chapter selection arrows
         ShowSelectionArrows(true, fDelay);
@@ -53,32 +58,6 @@ public class Chapters : GUIScene
     {
         base.OnSceneDismissed();
     }
-
-    //public void ShowChapterSlotsWithAnimation()
-    //{
-    //    m_showChaptersCallRunning = false;
-
-    //    float slotAnimationDuration = 0.3f;
-
-    //    //Animate slot 1
-    //    GameObjectAnimator slotAnimator = m_chapterSlots[0].GetComponent<GameObjectAnimator>();
-    //    slotAnimator.FadeTo(1, slotAnimationDuration);
-
-    //    //Animate slot 2
-    //    slotAnimator = m_chapterSlots[1].GetComponent<GameObjectAnimator>();
-    //    slotAnimator.RotateTo(0, slotAnimationDuration, slotAnimationDuration);
-    //    slotAnimator.FadeTo(1, slotAnimationDuration, slotAnimationDuration);
-
-    //    //Animate slot 3
-    //    slotAnimator = m_chapterSlots[2].GetComponent<GameObjectAnimator>();
-    //    slotAnimator.RotateTo(0, slotAnimationDuration, 3 * slotAnimationDuration);
-    //    slotAnimator.FadeTo(1, slotAnimationDuration, 3 * slotAnimationDuration);
-
-    //    //Animate slot 4
-    //    slotAnimator = m_chapterSlots[3].GetComponent<GameObjectAnimator>();
-    //    slotAnimator.RotateTo(0, slotAnimationDuration, 2 * slotAnimationDuration);
-    //    slotAnimator.FadeTo(1, slotAnimationDuration, 2 * slotAnimationDuration);
-    //}
 
     /**
      * Callback used when the player has clicked on a chapter and wants to display levels
@@ -118,7 +97,7 @@ public class Chapters : GUIScene
         float backgroundTrianglesColumnWidth = screenSize.x / BackgroundTrianglesRenderer.NUM_COLUMNS;
         float leftArrowPositionX = 3.5f * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
         leftArrowPositionX -= 0.5f * screenSize.x;
-        leftArrowObject.transform.localPosition = new Vector3(leftArrowPositionX, m_centralItemPosition.y, SELECTION_ARROWS_Z_VALUE);
+        leftArrowObject.transform.localPosition = new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE);
 
         //Right selection arrow
         GameObject rightArrowObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT,
@@ -132,7 +111,7 @@ public class Chapters : GUIScene
 
         float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
         rightArrowPositionX -= 0.5f * screenSize.x;
-        rightArrowObject.transform.localPosition = new Vector3(rightArrowPositionX, m_centralItemPosition.y, SELECTION_ARROWS_Z_VALUE);
+        rightArrowObject.transform.localPosition = new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE);
 
         //flip the right arrow horizontally
         rightArrowObject.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward);
@@ -147,6 +126,9 @@ public class Chapters : GUIScene
         rightArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
     }
 
+    /**
+     * Show the clickable slot containing all chapter information
+     * **/
     public void ShowChapterSlot(float fDelay = 0.0f)
     {
         if (fDelay > 0)
@@ -158,145 +140,99 @@ public class Chapters : GUIScene
             return;
         }
 
-        if (m_chapterSlot == null)
+        if (m_chapterSlotObject == null)
         {
-            m_chapterSlot = new ChapterSlot();
-            m_chapterSlot.BuildTriangles();
+            m_chapterSlotObject = new GameObject("ChapterSlot");
+            m_chapterSlotObject.AddComponent<GameObjectAnimator>();
+            //m_chapterSlot.BuildTriangles();
         }
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Color slotBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
+        m_chapterSlotObject.transform.parent = this.transform;
 
-        //ShowCentralItemBackground();
+        float chapterSlotPositionY = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(0, BackgroundTrianglesRenderer.NUM_COLUMNS / 2, 180).GetCenter().y;
+        m_chapterSlotPosition = new Vector3(0, chapterSlotPositionY, CHAPTER_SLOT_Z_VALUE);
+
+        BuildCentralItemBackground();
         BuildCentralItemInformation();
 
-        m_chapterSlot.Show(slotBackgroundBlendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION, true, 0.5f);
+        //m_chapterSlotBackground.GetComponent<HexagonMeshAnimator>().SetOpacity(0.25f);
+
+        //Show chapter slot
+        float animationDuration = 0.5f;
+        ShowChapterSlotBackground(true, animationDuration + 0.5f);
+        ShowChapterSlotInformation(true, animationDuration + 0.5f);
+
+        GameObjectAnimator chapterSlotAnimator = m_chapterSlotObject.GetComponent<GameObjectAnimator>();
+        chapterSlotAnimator.SetPosition(m_chapterSlotPosition - new Vector3(0, 100.0f, 0));
+        chapterSlotAnimator.TranslateTo(m_chapterSlotPosition, animationDuration, fDelay, ValueAnimator.InterpolationType.LINEAR);
+
+        //m_chapterSlot.Show(slotBackgroundBlendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION, true, 0.5f);
     }
 
     /**
      * Show the main item containing chapter information
      * **/
-    //public void ShowCentralItemBackground(float fDuration = 1.0f, float fDelay = 0.0f)
-    //{
-    //    //Find triangles whose color needs to be modified in order to draw the item hexagon background
-    //    BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();        
+    public void BuildCentralItemBackground(float fDuration = 1.0f, float fDelay = 0.0f)
+    {
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        Color slotBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
 
-    //    List<BackgroundTriangle> centralItemsTriangles = new List<BackgroundTriangle>();
-    //    centralItemsTriangles.Capacity = 2 * 15 + 2 * 13 + 2 * 11 + 2 * 9;
+        m_chapterSlotBackground = (GameObject)Instantiate(m_hexagonMeshPfb);
+        m_chapterSlotBackground.name = "SlotBackground";
+        m_chapterSlotBackground.transform.parent = m_chapterSlotObject.transform;
 
-    //    //color to blend every triangle inside the item
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        HexagonMesh hexaMesh = m_chapterSlotBackground.GetComponent<HexagonMesh>();
+        hexaMesh.Init(Instantiate(m_positionColorMaterial));
 
-    //    //column 1
-    //    int columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2;
-    //    BackgroundTriangleColumn column = backgroundRenderer.m_triangleColumns[BackgroundTrianglesRenderer.NUM_COLUMNS / 2];
-    //    BackgroundTriangle triangle = backgroundRenderer.GetNearestTriangleToScreenYCenter(columnIndex, 180);
-    //    int referenceTriangleIndex = triangle.m_indexInColumn; //the index of the triangle taken as a reference for building the column
-    //    for (int i = referenceTriangleIndex - 7; i != referenceTriangleIndex + 8; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-
-    //    m_centralItemPosition = new Vector3(0, triangle.GetCenter().y, 0); //set the position of the central item according to its hexagon background centered triangles
-
-    //    //column -1
-    //    columnIndex--;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 7; i != referenceTriangleIndex + 8; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-
-    //    //column -2
-    //    columnIndex--;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 6; i != referenceTriangleIndex + 7; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-
-    //    //column -3
-    //    columnIndex--;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 5; i != referenceTriangleIndex + 6; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-
-    //    //column -4
-    //    columnIndex--;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 4; i != referenceTriangleIndex + 5; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-        
-    //    //column 2
-    //    columnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2 + 1;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 6; i != referenceTriangleIndex + 7; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }
-
-    //    //column 3
-    //    columnIndex++;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 5; i != referenceTriangleIndex + 6; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }             
-
-    //    //column 4
-    //    columnIndex++;
-    //    column = backgroundRenderer.m_triangleColumns[columnIndex];
-    //    for (int i = referenceTriangleIndex - 4; i != referenceTriangleIndex + 5; i++)
-    //    {
-    //        centralItemsTriangles.Add(column[i]);
-    //    }              
-
-    //    //blend all triangles
-    //    Color itemBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
-    //    for (int i = 0; i != centralItemsTriangles.Count; i++)
-    //    {
-    //        triangle = centralItemsTriangles[i];
-    //        Color toColor = Color.Lerp(triangle.m_frontColor, itemBackgroundBlendColor, 0.25f);
-    //        triangle.StartColorAnimation(true, toColor, fDuration, fDelay);
-    //    }
-    //}
+        HexagonMeshAnimator hexaMeshAnimator = m_chapterSlotBackground.GetComponent<HexagonMeshAnimator>();
+        hexaMeshAnimator.SetInnerRadius(0, false);
+        hexaMeshAnimator.SetOuterRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength);
+        hexaMeshAnimator.SetColor(slotBackgroundBlendColor);
+        hexaMeshAnimator.SetPosition(Vector3.zero);
+    }
 
     /**
      * Update the info inside the central item when a new chapter is displayed
      * **/
     public void BuildCentralItemInformation()
-    {
+    {        
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         Chapter displayedChapter = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
 
-        GameObject centralItemContainer = new GameObject("CentralItem");
-        centralItemContainer.transform.parent = this.transform;
-        centralItemContainer.transform.localPosition = new Vector3(0, 0, CENTRAL_ITEM_Z_VALUE);
-        GameObjectAnimator animator = centralItemContainer.AddComponent<GameObjectAnimator>();
+        m_chapterSlotInfoContainer = new GameObject("SlotInformation");
+        m_chapterSlotInfoContainer.transform.parent = m_chapterSlotObject.transform;
+        m_chapterSlotInfoContainer.transform.localPosition = new Vector3(0, 0, -1);
+        GameObjectAnimator animator = m_chapterSlotInfoContainer.AddComponent<GameObjectAnimator>();
 
-        m_chapterSlot.m_infoContainer = centralItemContainer;
+        //m_chapterSlot.m_infoContainer = centralItemContainer;
 
         BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
 
         //chapter title
-        GameObject clonedChapterTitle = (GameObject)Instantiate(m_chaptersTextPfb);
-        clonedChapterTitle.transform.parent = centralItemContainer.transform;
-        clonedChapterTitle.transform.localPosition = new Vector3(0, 1.5f * bgRenderer.m_triangleEdgeLength, 0);
+        GameObject clonedChapterTitle = (GameObject)Instantiate(m_textMeshPfb);
+        clonedChapterTitle.name = "ChapterText";
+        clonedChapterTitle.transform.parent = m_chapterSlotInfoContainer.transform;
 
         TextMesh chapterTitleTextMesh = clonedChapterTitle.GetComponent<TextMesh>();
         chapterTitleTextMesh.text = LanguageUtils.GetTranslationForTag("chapter");
 
+        TextMeshAnimator titleAnimator = clonedChapterTitle.GetComponent<TextMeshAnimator>();
+        titleAnimator.SetFontHeight(0.8f * bgRenderer.m_triangleEdgeLength);
+        titleAnimator.SetColor(Color.white);
+        titleAnimator.SetPosition(new Vector3(0, 1.5f * bgRenderer.m_triangleEdgeLength, 0));
+
         //chapter number
-        GameObject clonedChapterNumber = (GameObject)Instantiate(m_chaptersNumberPfb);
-        clonedChapterNumber.transform.parent = centralItemContainer.transform;
-        clonedChapterNumber.transform.localPosition = new Vector3(0, 0.2f * bgRenderer.m_triangleEdgeLength, 0);
+        GameObject clonedChapterNumber = (GameObject)Instantiate(m_textMeshPfb);
+        clonedChapterNumber.name = "NumberText";
+        clonedChapterNumber.transform.parent = m_chapterSlotInfoContainer.transform;
 
         TextMesh chapterNumberTextMesh = clonedChapterNumber.GetComponent<TextMesh>();
-        chapterNumberTextMesh.text = (m_displayedChapterIndex + 1).ToString();
+        chapterNumberTextMesh.text = LanguageUtils.GetLatinNumberForNumber(m_displayedChapterIndex + 1);
+
+        TextMeshAnimator numberAnimator = clonedChapterNumber.GetComponent<TextMeshAnimator>();
+        numberAnimator.SetFontHeight(bgRenderer.m_triangleEdgeLength);
+        numberAnimator.SetColor(Color.white);
+        numberAnimator.SetPosition(new Vector3(0, 0.2f * bgRenderer.m_triangleEdgeLength, 0));
 
         //Display Lock or progress bar
         if (displayedChapter.IsLocked())
@@ -312,7 +248,60 @@ public class Chapters : GUIScene
      * **/
     public void DismissChapterSlot(bool bDismissBackground, bool bAnimated = true, float fDuration = 1.0f, float fDelay = 0.0f)
     {
-        m_chapterSlot.Dismiss(bDismissBackground, bAnimated, fDuration, fDelay);
+        if (bDismissBackground)
+        {
+            GameObjectAnimator slotAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
+            if (bAnimated)
+                slotAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, true);
+            else
+            {
+                Destroy(m_chapterSlotObject);
+                m_chapterSlotObject = null;
+            }
+        }
+        else
+        {
+            GameObjectAnimator slotInfoAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
+            if (bAnimated)
+                slotInfoAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, true);
+            else
+            {
+                Destroy(m_chapterSlotInfoContainer);
+                m_chapterSlotInfoContainer = null;
+            }
+        }
+
+        //m_chapterSlotObject.Dismiss(bDismissBackground, bAnimated, fDuration, fDelay);
+    }
+
+    /**
+     * Show the chapter slot hexagon background 
+     * **/
+    public void ShowChapterSlotBackground(bool bAnimated, float fDuration, float fDelay = 0.0f)
+    {
+        HexagonMeshAnimator slotBackgroundAnimator = m_chapterSlotBackground.GetComponent<HexagonMeshAnimator>();
+        if (bAnimated)
+        {
+            slotBackgroundAnimator.SetOpacity(0);
+            slotBackgroundAnimator.FadeTo(CHAPTER_SLOT_BACKGROUND_OPACITY, fDuration, fDelay);
+        }
+        else
+            slotBackgroundAnimator.SetOpacity(CHAPTER_SLOT_BACKGROUND_OPACITY);
+    }
+
+    /**
+     * Show the chapter slot hexagon background 
+     * **/
+    public void ShowChapterSlotInformation(bool bAnimated, float fDuration, float fDelay = 0.0f)
+    {
+        GameObjectAnimator slotInfoContainerAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
+        if (bAnimated)
+        {
+            slotInfoContainerAnimator.SetOpacity(0);
+            slotInfoContainerAnimator.FadeTo(1.0f, fDuration, fDelay);
+        }
+        else
+            slotInfoContainerAnimator.SetOpacity(1);
     }
 
     ///**
@@ -347,12 +336,15 @@ public class Chapters : GUIScene
         BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
 
         GameObject progressBar = new GameObject("ProgressBar");
-        progressBar.transform.parent = m_chapterSlot.m_infoContainer.transform;
-        progressBar.transform.localPosition = new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0);
+        progressBar.transform.parent = m_chapterSlotInfoContainer.transform;
+
+        GameObjectAnimator progressBarAnimator = progressBar.AddComponent<GameObjectAnimator>();
+        progressBarAnimator.SetPosition(new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0));
 
         float progressBarWidth = 5.5f * bgRenderer.m_triangleHeight;
+        progressBarWidth = 352;
         float progressBarHeight = 20.0f;
-        float ratio = 0.64f;
+        float ratio = 0.5f;
 
         Material progressBarBgMaterial = Instantiate(m_progressBarMaterial);
         Material progressBarFillMaterial = Instantiate(m_progressBarMaterial);
@@ -368,6 +360,7 @@ public class Chapters : GUIScene
         colorQuad.InitQuadMesh();
 
         ColorQuadAnimator progressBarBgAnimator = clonedProgressBarBg.GetComponent<ColorQuadAnimator>();
+        progressBarBgAnimator.SetPosition(Vector3.zero);
         progressBarBgAnimator.SetScale(new Vector3(progressBarWidth, progressBarHeight, 1));
         Color bgColor = GetCurrentlyDisplayedChapter().GetThemeColors()[3];
         progressBarBgAnimator.SetColor(bgColor);
@@ -383,24 +376,25 @@ public class Chapters : GUIScene
         colorQuad.InitQuadMesh();
 
         ColorQuadAnimator progressBarFillAnimator = clonedProgressBarFill.GetComponent<ColorQuadAnimator>();
-        progressBarFillAnimator.SetPosition(new Vector3(-0.5f * progressBarWidth, 0, -1));
         progressBarFillAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
+        progressBarFillAnimator.SetPosition(new Vector3(-0.5f * progressBarWidth, 0, -1));
         progressBarFillAnimator.SetScale(new Vector3(ratio * progressBarWidth, progressBarHeight, 1));
         progressBarFillAnimator.SetColor(Color.white);
 
         //completion info
-        GameObject clonedCompletionTextObject = Instantiate(m_progressBarCompletionPfb);
+        GameObject clonedCompletionTextObject = Instantiate(m_textMeshPfb);
         clonedCompletionTextObject.transform.parent = progressBar.transform;
-        clonedCompletionTextObject.transform.localPosition = new Vector3(0.5f * progressBarWidth, -0.5f * progressBarHeight - 30.0f, 0);
 
         TextMesh completionTextMesh = clonedCompletionTextObject.GetComponent<TextMesh>();
         completionTextMesh.text = (ratio * 100) + "% " + LanguageUtils.GetTranslationForTag("progress_bar_completion");
 
         TextMeshAnimator completionTextAnimator = clonedCompletionTextObject.GetComponent<TextMeshAnimator>();
+        float fontHeight = 0.33f * bgRenderer.m_triangleEdgeLength;
+        completionTextAnimator.SetFontHeight(fontHeight);
+        completionTextAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
+        completionTextAnimator.SetPosition(new Vector3(0.5f * progressBarWidth, -0.5f * progressBarHeight - fontHeight - 15.0f, 0));        
         completionTextAnimator.SetColor(Color.white);
-    }
-
- 
+    }    
 
     /**
      * Show lock icon and with a description on how to unlock the chapter
