@@ -3,12 +3,19 @@
 public class Levels : GUIScene
 {
     public const float LEVELS_SLOTS_Z_VALUE = -10.0f;
+    public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.5f;
 
     //Shared prefabs
     public GameObject m_textMeshPfb;
+    public GameObject m_hexagonMeshPfb;
+    public Material m_positionColorMaterial;
+    private Material m_slotBackgroundMaterial;
+
+    //Level slots
+    public GameObject[] m_levelSlots;
 
     //LevelSlot data
-    public LevelSlot[] m_levelSlots { get; set; }
+    //public LevelSlot[] m_levelSlots { get; set; }
  
     /**
      * Shows this scene
@@ -115,111 +122,257 @@ public class Levels : GUIScene
     //}
 
     /**
-     * Show clickable level slots
-     * Build them starting from center line by line (line2, line1 and line3 in that order)
+     * Build the slots for every level in that chapter
      * **/
     public void ShowLevelsSlots(float fDelay = 0.0f)
     {
-        m_levelSlots = new LevelSlot[15]; //TODO replace 15 by the value from the Chapter object
+        int iLevelCount = 15;
+        m_levelSlots = new GameObject[iLevelCount];
+        m_slotBackgroundMaterial = Instantiate(m_positionColorMaterial);
 
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        //build center slot
+        GameObject slot = BuildLevelSlotForNumber(8);
+        float line2PositionY = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(0, BackgroundTrianglesRenderer.NUM_COLUMNS / 2, 180).GetCenter().y;
+        Vector3 slotPosition = new Vector3(0, line2PositionY, LEVELS_SLOTS_Z_VALUE);
 
-        int iReferenceColumnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2; //immediate column on the right of middle vertical line
-        int iLine2ReferenceTriangleIndex = bgRenderer.GetNearestTriangleToScreenYPosition(0, iReferenceColumnIndex, 180).m_indexInColumn;
+        GameObjectAnimator slotAnimator = slot.GetComponent<GameObjectAnimator>();
+        slotAnimator.SetPosition(slotPosition);
 
-        //build the center slot (number 8/15)
-        LevelSlot slot = new LevelSlot(8);
-        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine2ReferenceTriangleIndex);
         m_levelSlots[7] = slot;
 
         //build slots above and below the center slot (number 3/15 and 13/15)
-        slot = new LevelSlot(3);
-        int iLine1ReferenceTriangleIndex = iLine2ReferenceTriangleIndex - 8;
-        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine1ReferenceTriangleIndex);
+        slot = BuildLevelSlotForNumber(3);
+        float line1PositionY = line2PositionY + 4 * GetBackgroundRenderer().m_triangleEdgeLength;
+        slotPosition = new Vector3(0, line1PositionY, LEVELS_SLOTS_Z_VALUE);
+
+        slotAnimator = slot.GetComponent<GameObjectAnimator>();
+        slotAnimator.SetPosition(slotPosition);
+
         m_levelSlots[2] = slot;
 
-        slot = new LevelSlot(13);
-        int iLine3ReferenceTriangleIndex = iLine2ReferenceTriangleIndex + 8;
-        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine3ReferenceTriangleIndex);
+        slot = BuildLevelSlotForNumber(13);
+        float line3PositionY = line2PositionY - 4 * GetBackgroundRenderer().m_triangleEdgeLength;
+        slotPosition = new Vector3(0, line3PositionY, LEVELS_SLOTS_Z_VALUE);
+
+        slotAnimator = slot.GetComponent<GameObjectAnimator>();
+        slotAnimator.SetPosition(slotPosition);
+
         m_levelSlots[12] = slot;
 
-        //build remaining slots line by line
+        //build other slots line by line
         for (int iLineIdx = 0; iLineIdx != 3; iLineIdx++)
         {
-            LevelSlot referenceSlot;
-            int iReferenceTriangleIndex;
+            int referenceLevelNumber;
+            float referenceLinePositionY;
             if (iLineIdx == 0)
             {
-                referenceSlot = m_levelSlots[2];
-                iReferenceTriangleIndex = iLine1ReferenceTriangleIndex;
+                referenceLevelNumber = 3;
+                referenceLinePositionY = line1PositionY;
             }
             else if (iLineIdx == 1)
             {
-                referenceSlot = m_levelSlots[7];
-                iReferenceTriangleIndex = iLine2ReferenceTriangleIndex;
+                referenceLevelNumber = 8;
+                referenceLinePositionY = line2PositionY;
             }
             else
             {
-                referenceSlot = m_levelSlots[12];
-                iReferenceTriangleIndex = iLine3ReferenceTriangleIndex;
+                referenceLevelNumber = 13;
+                referenceLinePositionY = line3PositionY;
             }
 
             //build slots on the left of reference slotIndex            
-            slot = new LevelSlot(referenceSlot.m_number - 1);
-            slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex - 4, iReferenceTriangleIndex);
-            m_levelSlots[referenceSlot.m_number - 2] = slot;
-            slot = new LevelSlot(referenceSlot.m_number - 2);
-            slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex - 8, iReferenceTriangleIndex);
-            m_levelSlots[referenceSlot.m_number - 3] = slot;
+            slot = BuildLevelSlotForNumber(referenceLevelNumber - 1);
+            slotAnimator = slot.GetComponent<GameObjectAnimator>();
+            slotPosition = new Vector3(-4 * GetBackgroundRenderer().m_triangleHeight, referenceLinePositionY, LEVELS_SLOTS_Z_VALUE);
+            slotAnimator.SetPosition(slotPosition);
+            m_levelSlots[referenceLevelNumber - 2] = slot;
+
+            slot = BuildLevelSlotForNumber(referenceLevelNumber - 2);
+            slotAnimator = slot.GetComponent<GameObjectAnimator>();
+            slotPosition = new Vector3(-8 * GetBackgroundRenderer().m_triangleHeight, referenceLinePositionY, LEVELS_SLOTS_Z_VALUE);
+            slotAnimator.SetPosition(slotPosition);
+            m_levelSlots[referenceLevelNumber - 3] = slot;
 
             //and on the right
-            slot = new LevelSlot(referenceSlot.m_number + 1);
-            slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex + 4, iReferenceTriangleIndex);
-            m_levelSlots[referenceSlot.m_number] = slot;
-            slot = new LevelSlot(referenceSlot.m_number + 2);
-            slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex + 8, iReferenceTriangleIndex);
-            m_levelSlots[referenceSlot.m_number + 1] = slot;
+            slot = BuildLevelSlotForNumber(referenceLevelNumber + 1);
+            slotAnimator = slot.GetComponent<GameObjectAnimator>();
+            slotPosition = new Vector3(4 * GetBackgroundRenderer().m_triangleHeight, referenceLinePositionY, LEVELS_SLOTS_Z_VALUE);
+            slotAnimator.SetPosition(slotPosition);
+            m_levelSlots[referenceLevelNumber] = slot;
+
+            slot = BuildLevelSlotForNumber(referenceLevelNumber + 2);
+            slotAnimator = slot.GetComponent<GameObjectAnimator>();
+            slotPosition = new Vector3(8 * GetBackgroundRenderer().m_triangleHeight, referenceLinePositionY, LEVELS_SLOTS_Z_VALUE);
+            slotAnimator.SetPosition(slotPosition);
+            m_levelSlots[referenceLevelNumber + 1] = slot;
         }
 
-        //Set the blend color and the correct number for every slot
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Chapter parentChapter = levelManager.m_currentChapter;
-        Color blendColor = parentChapter.GetThemeColors()[2];
-        GameObject levelsNumbersHolder = new GameObject("LevelsNumbersHolder");
-        levelsNumbersHolder.transform.parent = this.transform;
-        levelsNumbersHolder.transform.localPosition = new Vector3(0, 0, LEVELS_SLOTS_Z_VALUE);
-
+        //animate slots
+        float animationDuration = 0.5f;
         for (int i = 0; i != m_levelSlots.Length; i++)
         {
-            slot = m_levelSlots[i];
+            GameObject levelSlotObject = m_levelSlots[i];
 
-            slot.m_blendColor = blendColor;
+            //slotAnimator = m_levelSlots[i].GetComponent<GameObjectAnimator>();
+            //slotAnimator.SetOpacity(1);
+            //slotAnimator.FadeTo(1.0f, animationDuration, fDelay);
 
-            GameObject clonedLevelNumberTextObject = (GameObject)Instantiate(m_textMeshPfb);
-            clonedLevelNumberTextObject.GetComponent<TextMesh>().text = slot.m_number.ToString();
-            clonedLevelNumberTextObject.transform.parent = levelsNumbersHolder.transform;
+            HexagonMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<HexagonMeshAnimator>();
+            TextMeshAnimator levelSlotNumberAnimator = levelSlotObject.GetComponentInChildren<TextMeshAnimator>();
 
-            Vector3 numberPosition = GeometryUtils.BuildVector3FromVector2(slot.GetCenter(), 0);
-            if (slot.m_number >= 10)
-                numberPosition -= new Vector3(5.0f, 0, 0);
-            TextMeshAnimator numberAnimator = clonedLevelNumberTextObject.GetComponent<TextMeshAnimator>();
-            numberAnimator.SetFontHeight(0.8f * bgRenderer.m_triangleEdgeLength);
-            numberAnimator.SetPosition(numberPosition);
-            slot.m_levelSlotNumberGameObject = clonedLevelNumberTextObject;
+            levelSlotBackgroundAnimator.SetOpacity(0);
+            levelSlotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, animationDuration, 0.0f);
 
-            slot.Show(blendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION);
-        }       
+            levelSlotNumberAnimator.SetOpacity(0);
+            levelSlotNumberAnimator.FadeTo(1.0f, animationDuration, 0.0f);
+        }
     }
 
-    public void OnClickLevelSlot(int iLevelSlotIndex)
+    public GameObject BuildLevelSlotForNumber(int iLevelNumber)
     {
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.DismissBackButton();
+        GameObject slot = new GameObject("Slot" + iLevelNumber);
+        slot.transform.parent = this.transform;
+        GameObjectAnimator slotAnimator = slot.AddComponent<GameObjectAnimator>();
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        levelManager.SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
+        //Background
+        Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
 
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
+        GameObject slotBackground = (GameObject)Instantiate(m_hexagonMeshPfb);
+        slotBackground.name = "SlotBackground";
+        slotBackground.transform.parent = slot.transform;
+
+        HexagonMesh slotBgHexaMesh = slotBackground.GetComponent<HexagonMesh>();
+        slotBgHexaMesh.Init(m_slotBackgroundMaterial);
+        
+        HexagonMeshAnimator slotBgAnimator = slotBackground.GetComponent<HexagonMeshAnimator>();
+        slotBgAnimator.SetInnerRadius(0, false);
+        slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
+        slotBgAnimator.SetColor(slotColor);
+
+        //number
+        GameObject levelNumberObject = (GameObject)Instantiate(m_textMeshPfb);
+        levelNumberObject.name = "SlotNumber";
+        levelNumberObject.transform.parent = slot.transform;
+
+        TextMesh numberTextMesh = levelNumberObject.GetComponent<TextMesh>();
+        numberTextMesh.text = iLevelNumber.ToString();
+
+        TextMeshAnimator numberAnimator = levelNumberObject.GetComponent<TextMeshAnimator>();
+        numberAnimator.SetFontHeight(0.8f * GetBackgroundRenderer().m_triangleEdgeLength);
+        numberAnimator.SetColor(Color.white);
+
+        //make some adjustements on number x-position
+        if (iLevelNumber == 11)
+            numberAnimator.SetPosition(new Vector3(-3.0f, 0, -1));
+        else if (iLevelNumber >= 10)
+            numberAnimator.SetPosition(new Vector3(-5.0f, 0, -1));
+        else
+            numberAnimator.SetPosition(new Vector3(0, 0, -1));
+
+        return slot;
+    }
+
+    ///**
+    // * Show clickable level slots
+    // * Build them starting from center line by line (line2, line1 and line3 in that order)
+    // * **/
+    //public void ShowLevelsSlots(float fDelay = 0.0f)
+    //{
+    //    m_levelSlots = new LevelSlot[15]; //TODO replace 15 by the value from the Chapter object
+
+    //    BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+
+    //    int iReferenceColumnIndex = BackgroundTrianglesRenderer.NUM_COLUMNS / 2; //immediate column on the right of middle vertical line
+    //    int iLine2ReferenceTriangleIndex = bgRenderer.GetNearestTriangleToScreenYPosition(0, iReferenceColumnIndex, 180).m_indexInColumn;
+
+    //    //build the center slot (number 8/15)
+    //    LevelSlot slot = new LevelSlot(8);
+    //    slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine2ReferenceTriangleIndex);
+    //    m_levelSlots[7] = slot;
+
+    //    //build slots above and below the center slot (number 3/15 and 13/15)
+    //    slot = new LevelSlot(3);
+    //    int iLine1ReferenceTriangleIndex = iLine2ReferenceTriangleIndex - 8;
+    //    slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine1ReferenceTriangleIndex);
+    //    m_levelSlots[2] = slot;
+
+    //    slot = new LevelSlot(13);
+    //    int iLine3ReferenceTriangleIndex = iLine2ReferenceTriangleIndex + 8;
+    //    slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex, iLine3ReferenceTriangleIndex);
+    //    m_levelSlots[12] = slot;
+
+    //    //build remaining slots line by line
+    //    for (int iLineIdx = 0; iLineIdx != 3; iLineIdx++)
+    //    {
+    //        LevelSlot referenceSlot;
+    //        int iReferenceTriangleIndex;
+    //        if (iLineIdx == 0)
+    //        {
+    //            referenceSlot = m_levelSlots[2];
+    //            iReferenceTriangleIndex = iLine1ReferenceTriangleIndex;
+    //        }
+    //        else if (iLineIdx == 1)
+    //        {
+    //            referenceSlot = m_levelSlots[7];
+    //            iReferenceTriangleIndex = iLine2ReferenceTriangleIndex;
+    //        }
+    //        else
+    //        {
+    //            referenceSlot = m_levelSlots[12];
+    //            iReferenceTriangleIndex = iLine3ReferenceTriangleIndex;
+    //        }
+
+    //        //build slots on the left of reference slotIndex            
+    //        slot = new LevelSlot(referenceSlot.m_number - 1);
+    //        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex - 4, iReferenceTriangleIndex);
+    //        m_levelSlots[referenceSlot.m_number - 2] = slot;
+    //        slot = new LevelSlot(referenceSlot.m_number - 2);
+    //        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex - 8, iReferenceTriangleIndex);
+    //        m_levelSlots[referenceSlot.m_number - 3] = slot;
+
+    //        //and on the right
+    //        slot = new LevelSlot(referenceSlot.m_number + 1);
+    //        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex + 4, iReferenceTriangleIndex);
+    //        m_levelSlots[referenceSlot.m_number] = slot;
+    //        slot = new LevelSlot(referenceSlot.m_number + 2);
+    //        slot.BuildTrianglesFromFarRightTriangle(iReferenceColumnIndex + 8, iReferenceTriangleIndex);
+    //        m_levelSlots[referenceSlot.m_number + 1] = slot;
+    //    }
+
+    //    //Set the blend color and the correct number for every slot
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    Chapter parentChapter = levelManager.m_currentChapter;
+    //    Color blendColor = parentChapter.GetThemeColors()[2];
+    //    GameObject levelsNumbersHolder = new GameObject("LevelsNumbersHolder");
+    //    levelsNumbersHolder.transform.parent = this.transform;
+    //    levelsNumbersHolder.transform.localPosition = new Vector3(0, 0, LEVELS_SLOTS_Z_VALUE);
+
+    //    for (int i = 0; i != m_levelSlots.Length; i++)
+    //    {
+    //        slot = m_levelSlots[i];
+
+    //        slot.m_blendColor = blendColor;
+
+    //        GameObject clonedLevelNumberTextObject = (GameObject)Instantiate(m_textMeshPfb);
+    //        clonedLevelNumberTextObject.GetComponent<TextMesh>().text = slot.m_number.ToString();
+    //        clonedLevelNumberTextObject.transform.parent = levelsNumbersHolder.transform;
+
+    //        Vector3 numberPosition = GeometryUtils.BuildVector3FromVector2(slot.GetCenter(), 0);
+    //        if (slot.m_number >= 10)
+    //            numberPosition -= new Vector3(5.0f, 0, 0);
+    //        TextMeshAnimator numberAnimator = clonedLevelNumberTextObject.GetComponent<TextMeshAnimator>();
+    //        numberAnimator.SetFontHeight(0.8f * bgRenderer.m_triangleEdgeLength);
+    //        numberAnimator.SetPosition(numberPosition);
+    //        slot.m_levelSlotNumberGameObject = clonedLevelNumberTextObject;
+
+    //        slot.Show(blendColor, GUISlot.BLEND_COLOR_DEFAULT_PROPORTION);
+    //    }       
+    //}
+
+    public void OnClickLevelSlot(int iLevelSlotIndex)
+    {        
+        GetGUIManager().DismissBackButton();
+        GetLevelManager().SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
     }
 }

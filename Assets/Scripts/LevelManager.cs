@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class LevelManager : MonoBehaviour
 {
     public const int CHAPTERS_COUNT = 8;
-    public const int LEVELS_PER_CHAPTER = 16;
+    public const int LEVELS_PER_CHAPTER = 15;
 
     public Chapter[] m_chapters { get; set; }
 

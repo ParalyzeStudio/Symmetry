@@ -39,8 +39,7 @@ public class Chapters : GUIScene
         chaptersAnimator.SetOpacity(1);
 
         //Display back button
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.ShowBackButton(fDelay);
+        GetGUIManager().ShowBackButton(fDelay);
 
         //Show chapter slot
         ShowChapterSlot(fDelay);
@@ -68,11 +67,8 @@ public class Chapters : GUIScene
 
         int iChapterNumber = m_displayedChapterIndex + 1;
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        levelManager.SetCurrentChapterByNumber(iChapterNumber);
-
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
+        GetLevelManager().SetCurrentChapterByNumber(iChapterNumber);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
     }
 
     /**
@@ -81,14 +77,13 @@ public class Chapters : GUIScene
     public void ShowSelectionArrows(bool bAnimated, float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         //Left selection arrow
-        GameObject leftArrowObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
-                                                                     new Vector2(128.0f, 128.0f),
-                                                                     Color.black,
-                                                                     Color.black);
+        GameObject leftArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
+                                                                          new Vector2(128.0f, 128.0f),
+                                                                          Color.black,
+                                                                          Color.black);
 
         leftArrowObject.name = "LeftSelectionArrow";
 
@@ -100,10 +95,10 @@ public class Chapters : GUIScene
         leftArrowObject.transform.localPosition = new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE);
 
         //Right selection arrow
-        GameObject rightArrowObject = guiManager.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT,
-                                                                      new Vector2(128.0f, 128.0f),
-                                                                      Color.black,
-                                                                      Color.black);
+        GameObject rightArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT,
+                                                                           new Vector2(128.0f, 128.0f),
+                                                                           Color.black,
+                                                                           Color.black);
 
         rightArrowObject.name = "RightSelectionArrow";
 
@@ -174,8 +169,7 @@ public class Chapters : GUIScene
      * **/
     public void BuildCentralItemBackground(float fDuration = 1.0f, float fDelay = 0.0f)
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Color slotBackgroundBlendColor = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
+        Color slotBackgroundBlendColor = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
 
         m_chapterSlotBackground = (GameObject)Instantiate(m_hexagonMeshPfb);
         m_chapterSlotBackground.name = "SlotBackground";
@@ -196,8 +190,7 @@ public class Chapters : GUIScene
      * **/
     public void BuildCentralItemInformation()
     {        
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Chapter displayedChapter = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
+        Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
 
         m_chapterSlotInfoContainer = new GameObject("SlotInformation");
         m_chapterSlotInfoContainer.transform.parent = m_chapterSlotObject.transform;
@@ -409,8 +402,7 @@ public class Chapters : GUIScene
      * **/
     public void UpdateBackgroundGradient(float fDuration = 1.0f, float fDelay = 0.0f)
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        Chapter displayedChapter = levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
+        Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
 
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
 
@@ -429,8 +421,7 @@ public class Chapters : GUIScene
      * **/
     public Chapter GetCurrentlyDisplayedChapter()
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        return levelManager.GetChapterForNumber(m_displayedChapterIndex + 1);
+        return GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
     }
 
     /**

@@ -6,7 +6,12 @@ public class GUIScene : MonoBehaviour
     private float m_dismissSceneElapsedTime;
     private float m_dismissSceneDelay;
     private float m_dismissSceneDuration;
+
+    //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
+    protected GUIManager m_guiManager;
     protected BackgroundTrianglesRenderer m_backgroundRenderer;
+    protected LevelManager m_levelManager;
+    protected SceneManager m_sceneManager;
 
     public virtual void Init()
     {
@@ -41,12 +46,40 @@ public class GUIScene : MonoBehaviour
         Destroy(this.gameObject);
     }
 
+
+    /**
+     * Getters for global instances
+     * **/
+    public GUIManager GetGUIManager()
+    {
+        if (m_guiManager == null)
+            m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+
+        return m_guiManager;
+    }
+
     public BackgroundTrianglesRenderer GetBackgroundRenderer()
     {
         if (m_backgroundRenderer == null)
             m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
 
         return m_backgroundRenderer;
+    }
+
+    public LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        return m_levelManager;
+    }
+
+    public SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+
+        return m_sceneManager;
     }
 
     public virtual void Update()

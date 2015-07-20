@@ -196,14 +196,14 @@ public class GUITouchHandler : TouchHandler
 
         if (!HandleClickOnChildGUIButtons(levels.gameObject, clickLocation))
         {
-            for (int i = 0; i != levels.m_levelSlots.Length; i++)
-            {
-                if (levels.m_levelSlots[i].ContainsPoint(clickLocation))
-                {
-                    levels.OnClickLevelSlot(i);
-                    break;
-                }
-            }
+            //for (int i = 0; i != levels.m_levelSlots.Length; i++)
+            //{
+            //    if (levels.m_levelSlots[i].ContainsPoint(clickLocation))
+            //    {
+            //        levels.OnClickLevelSlot(i);
+            //        break;
+            //    }
+            //}
         }
     }
 

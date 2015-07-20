@@ -6,6 +6,7 @@ public class GameObjectAnimator : ValueAnimator
 
     public virtual void Awake()
     {
+        base.Awake();
         m_pivotPoint = new Vector3(0.5f, 0.5f, 0.5f);
     }
 
