@@ -9,7 +9,7 @@ public class Chapters : GUIScene
 
     //shared prefabs
     public GameObject m_textMeshPfb;
-    public GameObject m_hexagonMeshPfb;
+    public GameObject m_circleMeshPfb;
     public Material m_positionColorMaterial;
 
     public int m_displayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
@@ -46,6 +46,19 @@ public class Chapters : GUIScene
 
         //Show chapter selection arrows
         ShowSelectionArrows(true, fDelay);
+
+        GameObject debugCircleMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
+
+        CircleMesh circleMesh = debugCircleMeshObject.GetComponent<CircleMesh>();
+        circleMesh.Init(Instantiate(m_positionColorMaterial));
+
+        CircleMeshAnimator circleMeshAnimator = debugCircleMeshObject.GetComponent<CircleMeshAnimator>();
+        circleMeshAnimator.SetPosition(new Vector3(0,0,-50));
+        circleMeshAnimator.SetNumSegments(6, true);
+        //circleMeshAnimator.SetInnerRadius(0);
+        //circleMeshAnimator.SetInnerRadius(0);
+
+
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)
@@ -171,16 +184,17 @@ public class Chapters : GUIScene
     {
         Color slotBackgroundBlendColor = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1).GetThemeColors()[2];
 
-        m_chapterSlotBackground = (GameObject)Instantiate(m_hexagonMeshPfb);
+        m_chapterSlotBackground = (GameObject)Instantiate(m_circleMeshPfb);
         m_chapterSlotBackground.name = "SlotBackground";
         m_chapterSlotBackground.transform.parent = m_chapterSlotObject.transform;
 
-        HexagonMesh hexaMesh = m_chapterSlotBackground.GetComponent<HexagonMesh>();
+        CircleMesh hexaMesh = m_chapterSlotBackground.GetComponent<CircleMesh>();
         hexaMesh.Init(Instantiate(m_positionColorMaterial));
 
-        HexagonMeshAnimator hexaMeshAnimator = m_chapterSlotBackground.GetComponent<HexagonMeshAnimator>();
+        CircleMeshAnimator hexaMeshAnimator = m_chapterSlotBackground.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
         hexaMeshAnimator.SetInnerRadius(0, false);
-        hexaMeshAnimator.SetOuterRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength);
+        hexaMeshAnimator.SetOuterRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength, true);
         hexaMeshAnimator.SetColor(slotBackgroundBlendColor);
         hexaMeshAnimator.SetPosition(Vector3.zero);
     }
@@ -272,7 +286,7 @@ public class Chapters : GUIScene
      * **/
     public void ShowChapterSlotBackground(bool bAnimated, float fDuration, float fDelay = 0.0f)
     {
-        HexagonMeshAnimator slotBackgroundAnimator = m_chapterSlotBackground.GetComponent<HexagonMeshAnimator>();
+        CircleMeshAnimator slotBackgroundAnimator = m_chapterSlotBackground.GetComponent<CircleMeshAnimator>();
         if (bAnimated)
         {
             slotBackgroundAnimator.SetOpacity(0);

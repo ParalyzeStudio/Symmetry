@@ -49,8 +49,6 @@ public class GameController : MonoBehaviour
         //Init the GUIManager
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         guiManager.Init();
-        //guiManager.AnimateFrames(SceneManager.DisplayContent.MENU, 2.3f);
-        //guiManager.AnimateFrames(SceneManager.DisplayContent.LEVELS, 2.3f);
 
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
         bgRenderer.Init();
@@ -270,6 +268,6 @@ public class GameController : MonoBehaviour
      * **/
     public void OnFinishEndingLevelVictory()
     {
-        m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 2.0f, 3.0f, 2.0f); //restart the level
+        m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 2.0f, 3.0f); //restart the level
     }
 }

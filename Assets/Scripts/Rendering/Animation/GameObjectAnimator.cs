@@ -4,7 +4,7 @@ public class GameObjectAnimator : ValueAnimator
 {
     protected Vector3 m_pivotPoint; //the pivot point of this game object
 
-    public virtual void Awake()
+    public override void Awake()
     {
         base.Awake();
         m_pivotPoint = new Vector3(0.5f, 0.5f, 0.5f);
@@ -20,15 +20,6 @@ public class GameObjectAnimator : ValueAnimator
         }
 
         return bounds.size;
-
-        //MeshRenderer meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-        //BoundingBoxCalculator optionsPanelBBoxCalculator = this.gameObject.GetComponent<BoundingBoxCalculator>();
-        //if (meshRenderer != null)
-        //    return meshRenderer.bounds.size;
-        //else if (optionsPanelBBoxCalculator != null)
-        //    return optionsPanelBBoxCalculator.m_bbox.size;
-        //else
-        //    return this.transform.localScale;
     }
 
     /**

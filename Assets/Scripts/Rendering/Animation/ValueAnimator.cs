@@ -70,7 +70,13 @@ public class ValueAnimator : MonoBehaviour
     private float m_prevOpacity;
     private Color m_prevColor;
 
-    public void Awake()
+    //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
+    protected GUIManager m_guiManager;
+    protected BackgroundTrianglesRenderer m_backgroundRenderer;
+    protected LevelManager m_levelManager;
+    protected SceneManager m_sceneManager;
+
+    public virtual void Awake()
     {
         m_opacity = 1;
         m_prevOpacity = 1;
@@ -468,5 +474,40 @@ public class ValueAnimator : MonoBehaviour
         UpdateRotation(dt);
         UpdateScale(dt);
         UpdateColor(dt);
+    }
+
+    /**
+     * Getters for global instances
+     * **/
+    public GUIManager GetGUIManager()
+    {
+        if (m_guiManager == null)
+            m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+
+        return m_guiManager;
+    }
+
+    public BackgroundTrianglesRenderer GetBackgroundRenderer()
+    {
+        if (m_backgroundRenderer == null)
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+
+        return m_backgroundRenderer;
+    }
+
+    public LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        return m_levelManager;
+    }
+
+    public SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+
+        return m_sceneManager;
     }
 }

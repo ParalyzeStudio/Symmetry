@@ -9,8 +9,6 @@ public class ShapeAnimator : GameObjectAnimator
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         shapeRenderer.SetColor(m_color);
-
-        //shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override void SetColor(Color color)
@@ -19,8 +17,6 @@ public class ShapeAnimator : GameObjectAnimator
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
         shapeRenderer.SetColor(color);
-
-        //shapeRenderer.Render(false, ShapeRenderer.RenderFaces.DOUBLE_SIDED, false, true);
     }
 
     public override Vector3 GetGameObjectSize()
@@ -54,7 +50,7 @@ public class ShapeAnimator : GameObjectAnimator
             }
         }
 
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         Vector2 objectSize = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(maxCoords) - gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(minCoords);
         return GeometryUtils.BuildVector3FromVector2(objectSize, 1);
     }

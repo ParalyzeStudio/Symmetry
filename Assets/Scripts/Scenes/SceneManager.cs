@@ -35,16 +35,16 @@ public class SceneManager : MonoBehaviour
     /**
      * Replace a scene with another
      * **/
-    public void SwitchDisplayedContent(DisplayContent contentToDisplay, bool bShowWithAnimation = true, float fHideDelay = 0.0f, float fShowDelay = 0.0f, float fAnimateFramesDelay = 0.0f)
+    public void SwitchDisplayedContent(DisplayContent contentToDisplay, 
+                                       bool bAnimated = true, 
+                                       float fHideDuration = 0.5f, 
+                                       float fHideDelay = 0.0f, 
+                                       float fShowDelay = 0.0f)
     {
         m_contentToDisplay = contentToDisplay;
 
-        //animate frames between scenes
-        //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        //guiManager.AnimateFrames(contentToDisplay, fAnimateFramesDelay);
-
-        HideContent(m_displayedContent, 0.5f, fHideDelay);
-        ShowContent(m_contentToDisplay, bShowWithAnimation, fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one
+        HideContent(m_displayedContent, bAnimated, fHideDuration, fHideDelay);
+        ShowContent(m_contentToDisplay, bAnimated, fHideDuration + fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one
     }
 
     /**
@@ -101,9 +101,13 @@ public class SceneManager : MonoBehaviour
     /**
      * Hide the specified scene passed as parameter
      * **/
-    public void HideContent(DisplayContent contentToHide, float fDuration, float fDelay = 0.0f)
+    public void HideContent(DisplayContent contentToHide, bool bAnimated, float fDuration, float fDelay = 0.0f)
     {
-        m_currentScene.Dismiss(fDuration, fDelay);
+        if (bAnimated)
+            m_currentScene.Dismiss(fDuration, fDelay);
+        else
+            Destroy(m_currentScene.gameObject);
+
         m_currentScene = null;
         m_displayedContent = DisplayContent.NONE;
     }

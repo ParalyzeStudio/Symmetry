@@ -11,7 +11,7 @@ public class GUIManager : MonoBehaviour
     public GameObject m_colorQuadPfb;
     public Material m_transpPositionColorMaterial;
     public GameObject m_textMeshPfb;
-    public GameObject m_hexagonPfb;
+    public GameObject m_circleMeshPfb;
 
     //buttons prefabs
     public GameObject m_GUIDiamondShapeButtonPfb; //the prefab to create a diamond-shaped gui button with default skin, background and shadow
@@ -67,7 +67,6 @@ public class GUIManager : MonoBehaviour
     public void Init()
     {
         //m_optionsWindow = null;
-        BuildFrames();
     }
 
     /**
@@ -250,108 +249,7 @@ public class GUIManager : MonoBehaviour
     //public bool IsPauseWindowShown()
     //{
     //    return m_pauseWindow != null;
-    //}
-
-    /**
-     * Build frames that will be animated through scenes
-     * **/
-    public void BuildFrames()
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
-        GameObject topFrame = (GameObject)Instantiate(m_GUIFramePfb);
-        GameObject middleFrame = (GameObject)Instantiate(m_GUIFramePfb);
-
-        topFrame.transform.parent = framesHolder.transform;
-        middleFrame.transform.parent = framesHolder.transform;
-
-        //set the height of those frames to zero
-        GameObjectAnimator topFrameAnimator = topFrame.GetComponent<GameObjectAnimator>();
-        GameObjectAnimator middleFrameAnimator = middleFrame.GetComponent<GameObjectAnimator>();
-        topFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
-        middleFrameAnimator.SetScale(new Vector3(screenSize.x, 0, 1));
-
-        //init material for both frames
-        middleFrame.GetComponent<TintColorMaterialAssignment>().InitMeshRendererMaterial();
-        topFrame.GetComponent<TintColorMaterialAssignment>().InitMeshRendererMaterial();
-
-        //set the color
-        topFrameAnimator.SetColor(m_framesColors[0]);
-        middleFrameAnimator.SetColor(m_framesColors[1]);
-    }
-
-    ///**
-    // * Animate frames for the specified menu scene
-    // * **/
-    //public void AnimateFrames(SceneManager.DisplayContent contentToDisplay, float fDelay = 0.0f)
-    //{
-    //    return; //disable
-
-    //    GameObject framesHolder = GameObject.FindGameObjectWithTag("FramesHolder");
-    //    GUIFrameAnimator[] framesAnimators = framesHolder.GetComponentsInChildren<GUIFrameAnimator>();
-    //    GUIFrameAnimator topFrameAnimator = framesAnimators[0];
-    //    GUIFrameAnimator middleFrameAnimator = framesAnimators[1];
-
-    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-    //    if (contentToDisplay == SceneManager.DisplayContent.MENU)
-    //    {
-    //        //framesHolder.transform.position = new Vector3(0, 0, -5);
-           
-    //        //GameObject axesHolder = GameObject.FindGameObjectWithTag("MainMenuAxes");
-    //        //float distanceToScreenTopBorder = 0.5f * screenSize.y - axesHolder.transform.position.y;
-    //        //float topFrameHeight = 2 * distanceToScreenTopBorder;
-
-            
-    //        //topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        //topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-    //        //Vector3 fromScale = new Vector3(screenSize.x, 0, 1);
-    //        //Vector3 toScale = new Vector3(screenSize.x, topFrameHeight, 1);
-    //        //topFrameAnimator.SetScale(fromScale);
-    //        //topFrameAnimator.ScaleTo(toScale, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-
-    //        //float middleFrameHeight = topFrameHeight + 0.23f * screenSize.y;
-      
-    //        //middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        //middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, 0));
-    //        //fromScale = new Vector3(screenSize.x, 0, 1);
-    //        //toScale = new Vector3(screenSize.x, middleFrameHeight, 1);
-    //        //middleFrameAnimator.SetScale(fromScale);
-    //        //middleFrameAnimator.ScaleTo(toScale, 1.2f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-    //    }
-    //    else if (contentToDisplay == SceneManager.DisplayContent.CHAPTERS || contentToDisplay == SceneManager.DisplayContent.LEVELS)
-    //    {
-    //        //animate top frame
-    //        topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-    //        Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-    //        topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-
-    //        //animate middle frame
-    //        middleFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        middleFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-    //        Vector3 middleFrameSize = middleFrameAnimator.GetGameObjectSize();
-    //        middleFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0, middleFrameSize.z), 0.6f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-    //    }
-    //    else if (contentToDisplay == SceneManager.DisplayContent.LEVEL_INTRO)
-    //    {
-    //        //animate top frame
-    //        topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-    //        Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-    //        topFrameAnimator.ScaleTo(new Vector3(screenSize.x, screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-    //    }
-    //    else if (contentToDisplay == SceneManager.DisplayContent.GAME)
-    //    {
-    //        //animate top frame
-    //        topFrameAnimator.UpdatePivotPoint(new Vector3(0.5f, 1.0f, 0.5f));
-    //        topFrameAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y, -1));
-    //        Vector3 topFrameSize = topFrameAnimator.GetGameObjectSize();
-    //        topFrameAnimator.ScaleTo(new Vector3(screenSize.x, 0.144f * screenSize.y, topFrameSize.z), 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-    //        topFrameAnimator.ColorChangeTo(new Color(0.69f, 0.24f, 0.24f, 1), 0.8f, fDelay); 
-    //    }
-    //}
+    //}    
 
     /**
      * Show options, credits button on the left side of the screen
@@ -587,35 +485,38 @@ public class GUIManager : MonoBehaviour
 
         //Build hexagons around every button skin
         Material transpWhiteMaterial = Instantiate(m_transpPositionColorMaterial);
-        GameObject soundButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        GameObject soundButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
         soundButtonHexagon.name = "SoundButtonHexagon";
         soundButtonHexagon.transform.parent = m_optionsContentHolder.transform;
-        HexagonMesh hexaMesh = soundButtonHexagon.GetComponent<HexagonMesh>();
+        CircleMesh hexaMesh = soundButtonHexagon.GetComponent<CircleMesh>();
         hexaMesh.Init(transpWhiteMaterial);
-        HexagonMeshAnimator hexaMeshAnimator = soundButtonHexagon.GetComponent<HexagonMeshAnimator>();
-        hexaMeshAnimator.SetInnerRadius(96);
+        CircleMeshAnimator hexaMeshAnimator = soundButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
         hexaMeshAnimator.SetOuterRadius(102, true);
         hexaMeshAnimator.SetColor(Color.white);
         hexaMeshAnimator.SetPosition(soundButtonPosition);
 
-        GameObject musicButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        GameObject musicButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
         musicButtonHexagon.name = "MusicButtonHexagon";
         musicButtonHexagon.transform.parent = m_optionsContentHolder.transform;
-        hexaMesh = musicButtonHexagon.GetComponent<HexagonMesh>();
+        hexaMesh = musicButtonHexagon.GetComponent<CircleMesh>();
         hexaMesh.Init(transpWhiteMaterial);
-        hexaMeshAnimator = musicButtonHexagon.GetComponent<HexagonMeshAnimator>();
-        hexaMeshAnimator.SetInnerRadius(96);
+        hexaMeshAnimator = musicButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
         hexaMeshAnimator.SetOuterRadius(102, true);
         hexaMeshAnimator.SetColor(Color.white);
         hexaMeshAnimator.SetPosition(musicButtonPosition);
 
-        GameObject resetButtonHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        GameObject resetButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
         resetButtonHexagon.name = "ResetButtonHexagon";
         resetButtonHexagon.transform.parent = m_optionsContentHolder.transform;
-        hexaMesh = resetButtonHexagon.GetComponent<HexagonMesh>();
+        hexaMesh = resetButtonHexagon.GetComponent<CircleMesh>();
         hexaMesh.Init(transpWhiteMaterial);
-        hexaMeshAnimator = resetButtonHexagon.GetComponent<HexagonMeshAnimator>();
-        hexaMeshAnimator.SetInnerRadius(96);
+        hexaMeshAnimator = resetButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
         hexaMeshAnimator.SetOuterRadius(102, true);
         hexaMeshAnimator.SetColor(Color.white);
         hexaMeshAnimator.SetPosition(resetButtonPosition);

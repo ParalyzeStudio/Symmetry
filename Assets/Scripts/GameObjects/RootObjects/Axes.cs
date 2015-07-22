@@ -75,17 +75,17 @@ public class Axes : MonoBehaviour
         GameObject clonedCircle = (GameObject)Instantiate(m_circlePfb);
         //clonedCircle.transform.parent = this.transform;
         clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
-        ColorCircleMesh circleMesh = clonedCircle.GetComponent<ColorCircleMesh>();
+        CircleMesh circleMesh = clonedCircle.GetComponent<CircleMesh>();
         circleMesh.Init(m_circleMaterialInstance);
 
-        CircleAnimator circleAnimator = clonedCircle.GetComponent<CircleAnimator>();
-        circleAnimator.SetInnerRadius(0);
-        circleAnimator.SetThickness(2);
-        circleAnimator.SetNumSegments(64);
+        CircleMeshAnimator circleAnimator = clonedCircle.GetComponent<CircleMeshAnimator>();
+        circleAnimator.SetNumSegments(64, false);
+        circleAnimator.SetInnerRadius(0, false);
+        circleAnimator.SetOuterRadius(2, true);
         circleAnimator.SetColor(Color.black);
 
-        circleAnimator.SetInnerRadius(0);
-        circleAnimator.AnimateRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+        circleAnimator.AnimateInnerRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+        circleAnimator.AnimateOuterRadiusTo(22, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
         circleAnimator.SetOpacity(1);
         circleAnimator.FadeTo(0, 0.3f, 0, ValueAnimator.InterpolationType.LINEAR, true);
     }

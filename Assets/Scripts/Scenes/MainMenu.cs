@@ -8,7 +8,7 @@ public class MainMenu : GUIScene
     //shared prefabs
     public GameObject m_textMeshPfb;
     public Material m_transpPositionColorMaterial;
-    public GameObject m_hexagonPfb;
+    public GameObject m_circleMeshPfb;
 
     //buttons
     public GameObject m_playButton { get; set; }
@@ -59,7 +59,7 @@ public class MainMenu : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Center hexagon
-        m_playButton = (GameObject)Instantiate(m_hexagonPfb);
+        m_playButton = (GameObject)Instantiate(m_circleMeshPfb);
         m_playButton.name = "PlayButton";
         m_playButton.transform.parent = this.transform;
 
@@ -72,13 +72,13 @@ public class MainMenu : GUIScene
         Material hexagonMaterial = Instantiate(m_transpPositionColorMaterial);
 
         //Build the mesh
-        HexagonMesh hexaMesh = m_playButton.GetComponent<HexagonMesh>();
+        CircleMesh hexaMesh = m_playButton.GetComponent<CircleMesh>();
         hexaMesh.Init(hexagonMaterial);
         float hexagonThickness = 30.0f;
         float outerRadius = GetBackgroundRenderer().m_triangleEdgeLength;
 
-        HexagonMeshAnimator hexaMeshAnimator = m_playButton.GetComponent<HexagonMeshAnimator>();
-        //hexaMeshAnimator.SetThickness(hexagonThickness, false);
+        CircleMeshAnimator hexaMeshAnimator = m_playButton.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
         hexaMeshAnimator.SetInnerRadius(outerRadius - hexagonThickness, true);
         hexaMeshAnimator.SetOuterRadius(outerRadius, true);
         hexaMeshAnimator.SetColor(Color.white);
@@ -105,18 +105,18 @@ public class MainMenu : GUIScene
         m_hexagonAnimationStartInnerRadius = hexagonStartInnerRadius;
         m_hexagonAnimationEndInnerRadius = hexagonEndInnerRadius;
 
-        GameObject fadingHexagon = (GameObject)Instantiate(m_hexagonPfb);
+        GameObject fadingHexagon = (GameObject)Instantiate(m_circleMeshPfb);
         fadingHexagon.name = "FadingHexagon";
         fadingHexagon.transform.parent = this.transform;
         fadingHexagon.transform.localPosition = m_playButton.transform.localPosition;
 
-        HexagonMesh fadingHexagonMesh = fadingHexagon.GetComponent<HexagonMesh>();
+        CircleMesh fadingHexagonMesh = fadingHexagon.GetComponent<CircleMesh>();
         fadingHexagonMesh.Init(Instantiate(m_transpPositionColorMaterial));
 
-        HexagonMeshAnimator fadingHexagonAnimator = fadingHexagon.GetComponent<HexagonMeshAnimator>();
-        fadingHexagonAnimator.SetInnerRadius(hexagonStartInnerRadius);
-        fadingHexagonAnimator.SetOuterRadius(hexagonStartInnerRadius + thickness);
-        //fadingHexagonAnimator.SetThickness(thickness);
+        CircleMeshAnimator fadingHexagonAnimator = fadingHexagon.GetComponent<CircleMeshAnimator>();
+        fadingHexagonAnimator.SetNumSegments(6, false);
+        fadingHexagonAnimator.SetInnerRadius(hexagonStartInnerRadius, false);
+        fadingHexagonAnimator.SetOuterRadius(hexagonStartInnerRadius + thickness, true);
         fadingHexagonAnimator.SetColor(color);
         fadingHexagonAnimator.AnimateInnerRadiusTo(hexagonEndInnerRadius, fDuration);
         fadingHexagonAnimator.AnimateOuterRadiusTo(hexagonEndInnerRadius + thickness, fDuration);

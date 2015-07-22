@@ -18,8 +18,12 @@ public class TouchHandler : MonoBehaviour
 //    protected Vector2 m_prevPointerLocation;
     protected Vector2 m_pointerDownPointerLocation;
 
+    //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
+    protected GUIManager m_guiManager;
+    protected BackgroundTrianglesRenderer m_backgroundRenderer;
+    protected LevelManager m_levelManager;
+    protected SceneManager m_sceneManager;
     private TouchManager m_touchManager;
-    private SceneManager m_sceneManager;
 
     public virtual void Awake()
     {
@@ -187,12 +191,38 @@ public class TouchHandler : MonoBehaviour
 //#endif
 //    }
 
+    /**
+     * Getters for global instances
+     * **/
     public TouchManager GetTouchManager()
     {
         if (m_touchManager == null)
             m_touchManager = GameObject.FindGameObjectWithTag("TouchManager").GetComponent<TouchManager>();
 
         return m_touchManager;
+    }
+    public GUIManager GetGUIManager()
+    {
+        if (m_guiManager == null)
+            m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+
+        return m_guiManager;
+    }
+
+    public BackgroundTrianglesRenderer GetBackgroundRenderer()
+    {
+        if (m_backgroundRenderer == null)
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+
+        return m_backgroundRenderer;
+    }
+
+    public LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        return m_levelManager;
     }
 
     public SceneManager GetSceneManager()

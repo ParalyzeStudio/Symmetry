@@ -28,14 +28,10 @@ public class GUITouchHandler : TouchHandler
      * **/
     protected override void OnClick(Vector2 clickLocation)
     {
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        GUIScene currentScene = sceneManager.m_currentScene;
-
         bool bClickProcessed = false;
-        GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-        if (guiManager.m_sideButtonsOverlayDisplayed) //side buttons overlay is shown
+        if (GetGUIManager().m_sideButtonsOverlayDisplayed) //side buttons overlay is shown
         {
-            if (!HandleClickOnChildGUIButtons(guiManager.m_sideButtonsOverlay, clickLocation))
+            if (!HandleClickOnChildGUIButtons(GetGUIManager().m_sideButtonsOverlay, clickLocation))
             {
                 //check if click is performed on one of the side buttons
                 GUIButton.GUIButtonID[] sideButtonsIDs = new GUIButton.GUIButtonID[2];
@@ -51,26 +47,26 @@ public class GUITouchHandler : TouchHandler
         {
             bClickProcessed = HandleClickOnChildGUIButtons(this.gameObject, clickLocation);
             if (!bClickProcessed)
-                bClickProcessed = HandleClickOnChildGUIButtons(currentScene.gameObject, clickLocation);
+                bClickProcessed = HandleClickOnChildGUIButtons(GetSceneManager().m_currentScene.gameObject, clickLocation);
             if (!bClickProcessed)
             {
-                if (sceneManager.m_displayedContent == SceneManager.DisplayContent.MENU)
+                if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.MENU)
                 {
                     HandleClickOnMainMenu(clickLocation);
                 }
-                else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.CHAPTERS)
+                else if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.CHAPTERS)
                 {
                     HandleClickOnChapters(clickLocation);
                 }
-                else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.LEVELS)
+                else if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.LEVELS)
                 {
                     HandleClickOnLevels(clickLocation);
                 }
-                else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.LEVEL_INTRO)
+                else if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.LEVEL_INTRO)
                 {
                     HandleClickOnLevelIntro(clickLocation);
                 }
-                else if (sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
+                else if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
                 {
                     HandleClickOnGame(clickLocation);
                 }
@@ -102,7 +98,7 @@ public class GUITouchHandler : TouchHandler
         //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
         //sceneAnimator.FadeTo(0, 0.7f);
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f, 0.7f);
+        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f);
     }
 
     /**
@@ -155,11 +151,11 @@ public class GUITouchHandler : TouchHandler
 
         GameObject playButtonObject = mainMenu.m_playButton; 
         Vector2 playButtonPosition = playButtonObject.transform.localPosition;
-        float playButtonOuterRadius = playButtonObject.GetComponent<HexagonMesh>().m_outerRadius;
+        float playButtonOuterRadius = playButtonObject.GetComponent<CircleMeshAnimator>().m_outerRadius;
 
         if ((clickLocation - playButtonPosition).magnitude <= playButtonOuterRadius)
         {
-            mainMenu.m_playButton.GetComponent<HexagonMeshAnimator>().AnimateInnerRadiusTo(0, 0.5f, 0.0f);
+            mainMenu.m_playButton.GetComponent<CircleMeshAnimator>().AnimateInnerRadiusTo(0, 0.5f, 0.0f);
             OnClickPlay();
         }
     }
@@ -181,8 +177,7 @@ public class GUITouchHandler : TouchHandler
                 clickLocation.y >= -4 * triangleHeight && clickLocation.y <= 4 * triangleHeight)
             {
                 chapters.OnClickChapterSlot();
-            }
-                
+            }                
         }
     }
 
@@ -191,11 +186,22 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnLevels(Vector2 clickLocation)
     {
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        Levels levels = (Levels)sceneManager.m_currentScene;
+        Levels levels = (Levels)GetSceneManager().m_currentScene;
 
+        float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         if (!HandleClickOnChildGUIButtons(levels.gameObject, clickLocation))
         {
+            for (int i = 0; i != levels.m_levelSlots.Length; i++)
+            {
+                Vector3 slotPosition = levels.m_levelSlots[i].transform.position;
+
+                if (clickLocation.x >= slotPosition.x - triangleHeight && clickLocation.x <= slotPosition.x + triangleHeight &&
+                   clickLocation.y >= slotPosition.y - triangleHeight && clickLocation.y <= slotPosition.y + triangleHeight)
+                {
+                    levels.OnClickLevelSlot(i);
+                }
+            }
+
             //for (int i = 0; i != levels.m_levelSlots.Length; i++)
             //{
             //    if (levels.m_levelSlots[i].ContainsPoint(clickLocation))

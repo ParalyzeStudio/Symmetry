@@ -1,23 +1,23 @@
 ﻿using UnityEngine;
 
-public class HexagonMeshAnimator : GameObjectAnimator
+[ExecuteInEditMode]
+public class CircleMeshAnimator : GameObjectAnimator
 {
-    //public float m_thickness { get; set; }
-    public float m_innerRadius { get; set; }
-    public float m_outerRadius { get; set; }
+    //inner and outer radiuses of the circle
+    //public float m_innerRadius { get; set; }
+    //public float m_outerRadius { get; set; }
 
-    //thickness animation
-    protected bool m_animatingThickness;
-    protected float m_fromThickness;
-    protected float m_toThickness;
-    protected float m_thicknessAnimationDuration;
-    protected float m_thicknessAnimationDelay;
-    protected float m_thicknessAnimationElapsedTime;
-    protected InterpolationType m_thicknessAnimationInterpolationType;
+    public float m_innerRadius;
+    public float m_outerRadius;
+
+    private float m_prevInnerRadius;
+    private float m_prevOuterRadius;
+
+    //number of segments in this circle
+    public int m_numSegments { get; set; }
 
     //inner radius animation
     protected bool m_animatingInnerRadius;
-    //protected bool m_maintainThicknessOnInnerRadiusAnimation;
     protected float m_fromInnerRadius;
     protected float m_toInnerRadius;
     protected float m_innerRadiusAnimationDuration;
@@ -38,7 +38,7 @@ public class HexagonMeshAnimator : GameObjectAnimator
     {
         m_innerRadius = radius;
         if (bRenderCircle)
-            RenderHexagon();
+            RenderCircle();
     }
 
     public virtual void IncInnerRadius(float deltaRadius)
@@ -51,7 +51,7 @@ public class HexagonMeshAnimator : GameObjectAnimator
     {
         m_outerRadius = radius;
         if (bRenderCircle)
-            RenderHexagon();
+            RenderCircle();
     }
 
     public virtual void IncOuterRadius(float deltaRadius)
@@ -59,27 +59,34 @@ public class HexagonMeshAnimator : GameObjectAnimator
         float fRadius = m_outerRadius + deltaRadius;
         SetOuterRadius(fRadius);
     }
-    
+
+    public void SetNumSegments(int numSegments, bool bRenderCircle = true)
+    {
+        m_numSegments = numSegments;
+        if (bRenderCircle)
+            RenderCircle();
+    }
+
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);
 
-        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
-        hexaMesh.SetColor(m_color);
+        CircleMesh circleMesh = this.GetComponent<CircleMesh>();
+        circleMesh.SetColor(m_color);
     }
 
     public override void SetColor(Color color)
     {
         base.SetColor(color);
 
-        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
-        hexaMesh.SetColor(color);
+        CircleMesh circleMesh = this.GetComponent<CircleMesh>();
+        circleMesh.SetColor(color);
     }
 
-    public void RenderHexagon()
+    public void RenderCircle()
     {
-        HexagonMesh hexaMesh = this.GetComponent<HexagonMesh>();
-        hexaMesh.Render(m_innerRadius, m_outerRadius, m_color);
+        CircleMesh circle = this.GetComponent<CircleMesh>();
+        circle.Render(m_innerRadius, m_outerRadius, m_color, m_numSegments, m_angle);
     }
 
     public void AnimateInnerRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
@@ -109,20 +116,6 @@ public class HexagonMeshAnimator : GameObjectAnimator
         m_outerRadiusAnimationElapsedTime = 0;
         m_outerRadiusAnimationInterpolationType = interpolType;
     }
-
-    //public void AnimateThicknessTo(float toThickness, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
-    //{
-    //    if (m_thickness == toThickness)
-    //        return;
-
-    //    m_animatingThickness = true;
-    //    m_fromThickness = m_thickness;
-    //    m_toThickness = toThickness;
-    //    m_thicknessAnimationDuration = duration;
-    //    m_thicknessAnimationDelay = delay;
-    //    m_thicknessAnimationElapsedTime = 0;
-    //    m_thicknessAnimationInterpolationType = interpolType;
-    //}
 
     protected void UpdateInnerRadius(float dt)
     {
@@ -186,36 +179,19 @@ public class HexagonMeshAnimator : GameObjectAnimator
         }
     }
 
-    //protected void UpdateThickness(float dt)
-    //{
-    //    if (m_animatingThickness)
-    //    {
-    //        bool inDelay = (m_thicknessAnimationElapsedTime < m_thicknessAnimationDelay);
-    //        m_thicknessAnimationElapsedTime += dt;
-    //        if (m_thicknessAnimationElapsedTime >= m_thicknessAnimationDelay)
-    //        {
-    //            if (inDelay) //we were in delay previously
-    //            {
-    //                dt = m_thicknessAnimationElapsedTime - m_thicknessAnimationDelay;
-    //            }
-    //            float effectiveElapsedTime = m_thicknessAnimationElapsedTime - m_thicknessAnimationDelay;
-    //            float deltaThickness = 0;
-    //            float thicknessVariation = m_toThickness - m_fromThickness;
-    //            if (m_thicknessAnimationInterpolationType == InterpolationType.LINEAR)
-    //                deltaThickness = dt / m_thicknessAnimationDuration * thicknessVariation;
-    //            else if (m_thicknessAnimationInterpolationType == InterpolationType.SINUSOIDAL)
-    //                deltaThickness = thicknessVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_thicknessAnimationDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_fadingDuration)));
+    /***
+     * Callbacks
+     * */
 
-    //            if (effectiveElapsedTime > m_thicknessAnimationDuration)
-    //            {
-    //                SetThickness(m_toThickness);
-    //                m_animatingThickness = false;
-    //            }
-    //            else
-    //                IncThickness(deltaThickness);
-    //        }
-    //    }
-    //}
+    public virtual void OnFinishAnimatingInnerRadius()
+    {
+        
+    }
+
+    public virtual void OnFinishAnimatingOuterRadius()
+    {
+        
+    }
 
     protected override void Update()
     {
@@ -224,5 +200,17 @@ public class HexagonMeshAnimator : GameObjectAnimator
         float dt = Time.deltaTime;
         UpdateInnerRadius(dt);
         UpdateOuterRadius(dt);
+
+        if (m_prevInnerRadius != m_innerRadius)
+        {
+            m_prevInnerRadius = m_innerRadius;
+            SetInnerRadius(m_innerRadius);
+        }
+
+        if (m_prevOuterRadius != m_outerRadius)
+        {
+            m_prevOuterRadius = m_outerRadius;
+            SetOuterRadius(m_outerRadius);
+        }
     }
 }

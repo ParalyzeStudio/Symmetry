@@ -242,12 +242,12 @@ public class GUIButton : MonoBehaviour
             SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
             if (displayedContent == SceneManager.DisplayContent.CHAPTERS)
             {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f);
                 guiManager.DismissBackButton();
             }
             else if (displayedContent == SceneManager.DisplayContent.LEVELS)
             {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f, 0.5f);
+                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f);
             }
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
@@ -262,7 +262,7 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f);
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f);
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {
@@ -271,7 +271,7 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
         {
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f, 0.0f);
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f);
 
             //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             //guiManager.DismissPauseWindow();

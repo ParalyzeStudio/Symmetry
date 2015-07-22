@@ -7,7 +7,7 @@ public class Levels : GUIScene
 
     //Shared prefabs
     public GameObject m_textMeshPfb;
-    public GameObject m_hexagonMeshPfb;
+    public GameObject m_circleMeshPfb;
     public Material m_positionColorMaterial;
     private Material m_slotBackgroundMaterial;
 
@@ -217,7 +217,7 @@ public class Levels : GUIScene
             //slotAnimator.SetOpacity(1);
             //slotAnimator.FadeTo(1.0f, animationDuration, fDelay);
 
-            HexagonMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<HexagonMeshAnimator>();
+            CircleMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<CircleMeshAnimator>();
             TextMeshAnimator levelSlotNumberAnimator = levelSlotObject.GetComponentInChildren<TextMeshAnimator>();
 
             levelSlotBackgroundAnimator.SetOpacity(0);
@@ -237,14 +237,15 @@ public class Levels : GUIScene
         //Background
         Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
 
-        GameObject slotBackground = (GameObject)Instantiate(m_hexagonMeshPfb);
+        GameObject slotBackground = (GameObject)Instantiate(m_circleMeshPfb);
         slotBackground.name = "SlotBackground";
         slotBackground.transform.parent = slot.transform;
 
-        HexagonMesh slotBgHexaMesh = slotBackground.GetComponent<HexagonMesh>();
+        CircleMesh slotBgHexaMesh = slotBackground.GetComponent<CircleMesh>();
         slotBgHexaMesh.Init(m_slotBackgroundMaterial);
-        
-        HexagonMeshAnimator slotBgAnimator = slotBackground.GetComponent<HexagonMeshAnimator>();
+
+        CircleMeshAnimator slotBgAnimator = slotBackground.GetComponent<CircleMeshAnimator>();
+        slotBgAnimator.SetNumSegments(6, false);
         slotBgAnimator.SetInnerRadius(0, false);
         slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
         slotBgAnimator.SetColor(slotColor);
@@ -370,9 +371,52 @@ public class Levels : GUIScene
     //}
 
     public void OnClickLevelSlot(int iLevelSlotIndex)
-    {        
-        GetGUIManager().DismissBackButton();
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        //Set the level in the LevelManager
         GetLevelManager().SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
+
+        //Transition black screen
+        Vector2 slotPosition = m_levelSlots[iLevelSlotIndex].transform.position;
+
+        float[] distancesToScreenVertices = new float[4];
+        distancesToScreenVertices[0] = (slotPosition - new Vector2(-0.5f * screenSize.x, 0.5f * screenSize.y)).magnitude; //distance to the top-left vertex
+        distancesToScreenVertices[1] = (slotPosition - new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y)).magnitude; //distance to the top-right vertex
+        distancesToScreenVertices[2] = (slotPosition - new Vector2(0.5f * screenSize.x, -0.5f * screenSize.y)).magnitude; //distance to the bottom-right vertex
+        distancesToScreenVertices[3] = (slotPosition - new Vector2(-0.5f * screenSize.x, -0.5f * screenSize.y)).magnitude; //distance to the bottom-left vertex
+        float maxDistanceToScreenVertices = Mathf.Max(distancesToScreenVertices);
+
+        //float[] distancesToScreenBorders = new float[4];
+        //distancesToScreenBorders[0] = slotPosition.x + 0.5f * screenSize.x; //distance to the left border
+        //distancesToScreenBorders[1] = 0.5f * screenSize.x - slotPosition.x; //distance to the right border
+        //distancesToScreenBorders[2] = slotPosition.y + 0.5f * screenSize.y; //distance to the bottom border
+        //distancesToScreenBorders[3] = 0.5f * screenSize.y - slotPosition.y; //distance to the top border
+        //float maxDistanceToScreenBorders = Mathf.Max(distancesToScreenBorders);
+
+
+        GameObject hexagonMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
+
+        CircleMesh hexaMesh = hexagonMeshObject.GetComponent<CircleMesh>();
+        hexaMesh.Init(Instantiate(m_positionColorMaterial));
+        
+        //remove the CircleMeshAnimator and add an ApertureTransitionAnimator instead
+        CircleMeshAnimator hexaMeshAnimator = hexagonMeshObject.GetComponent<CircleMeshAnimator>();
+        Destroy(hexaMeshAnimator);
+
+        hexaMeshAnimator = hexagonMeshObject.AddComponent<ApertureTransitionAnimator>();
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, false);
+        hexaMeshAnimator.SetOuterRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, true);
+        hexaMeshAnimator.SetPosition(new Vector3(slotPosition.x, slotPosition.y, -50));
+        hexaMeshAnimator.SetColor(Color.black);
+
+        hexaMeshAnimator.AnimateInnerRadiusTo(0, 0.5f);
+
+        //Load and display LevelIntro scene
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.5f, 1.1f);
+
+        //GetGUIManager().DismissBackButton();
+        //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
     }
 }
