@@ -9,7 +9,9 @@ public class ApertureTransitionAnimator : CircleMeshAnimator
         base.OnFinishAnimatingInnerRadius();
 
         Debug.Log("end APERTURE");
-        //GetSceneManager().SwitchDisplayedContent(m_toSceneContent, false);
+
+        AnimateInnerRadiusTo(m_outerRadius, 0.5f, 0.0f, InterpolationType.SINUSOIDAL, true);
+        GetSceneManager().SwitchDisplayedContent(m_toSceneContent, false);
     }
 }
 

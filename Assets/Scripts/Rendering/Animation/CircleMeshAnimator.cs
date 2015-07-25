@@ -24,6 +24,7 @@ public class CircleMeshAnimator : GameObjectAnimator
     protected float m_innerRadiusAnimationDelay;
     protected float m_innerRadiusAnimationElapsedTime;
     protected InterpolationType m_innerRadiusAnimationInterpolationType;
+    protected bool m_innerRadiusAnimationDestroyOnFinish;
 
     //outer radius animation
     protected bool m_animatingOuterRadius;
@@ -33,6 +34,7 @@ public class CircleMeshAnimator : GameObjectAnimator
     protected float m_outerRadiusAnimationDelay;
     protected float m_outerRadiusAnimationElapsedTime;
     protected InterpolationType m_outerRadiusAnimationInterpolationType;
+    protected bool m_outerRadiusAnimationDestroyOnFinish;
 
     public void SetInnerRadius(float radius, bool bRenderCircle = true)
     {
@@ -89,7 +91,7 @@ public class CircleMeshAnimator : GameObjectAnimator
         circle.Render(m_innerRadius, m_outerRadius, m_color, m_numSegments, m_angle);
     }
 
-    public void AnimateInnerRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void AnimateInnerRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyOnFinish = false)
     {
         if (m_innerRadius == toRadius)
             return;
@@ -101,9 +103,10 @@ public class CircleMeshAnimator : GameObjectAnimator
         m_innerRadiusAnimationDelay = delay;
         m_innerRadiusAnimationElapsedTime = 0;
         m_innerRadiusAnimationInterpolationType = interpolType;
+        m_innerRadiusAnimationDestroyOnFinish = bDestroyOnFinish;
     }
 
-    public void AnimateOuterRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    public void AnimateOuterRadiusTo(float toRadius, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyOnFinish = false)
     {
         if (m_outerRadius == toRadius)
             return;
@@ -115,12 +118,13 @@ public class CircleMeshAnimator : GameObjectAnimator
         m_outerRadiusAnimationDelay = delay;
         m_outerRadiusAnimationElapsedTime = 0;
         m_outerRadiusAnimationInterpolationType = interpolType;
+        m_outerRadiusAnimationDestroyOnFinish = bDestroyOnFinish;
     }
 
     protected void UpdateInnerRadius(float dt)
     {
         if (m_animatingInnerRadius)
-        {
+        {   
             bool inDelay = (m_innerRadiusAnimationElapsedTime < m_innerRadiusAnimationDelay);
             m_innerRadiusAnimationElapsedTime += dt;
             if (m_innerRadiusAnimationElapsedTime >= m_innerRadiusAnimationDelay)
@@ -132,15 +136,17 @@ public class CircleMeshAnimator : GameObjectAnimator
                 float effectiveElapsedTime = m_innerRadiusAnimationElapsedTime - m_innerRadiusAnimationDelay;
                 float deltaRadius = 0;
                 float radiusVariation = m_toInnerRadius - m_fromInnerRadius;
+
                 if (m_innerRadiusAnimationInterpolationType == InterpolationType.LINEAR)
                     deltaRadius = dt / m_innerRadiusAnimationDuration * radiusVariation;
                 else if (m_innerRadiusAnimationInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaRadius = radiusVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_innerRadiusAnimationDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_fadingDuration)));
+                    deltaRadius = radiusVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_innerRadiusAnimationDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_innerRadiusAnimationDuration)));
 
                 if (effectiveElapsedTime > m_innerRadiusAnimationDuration)
                 {
                     SetInnerRadius(m_toInnerRadius);
                     m_animatingInnerRadius = false;
+                    OnFinishAnimatingInnerRadius();
                 }
                 else
                     IncInnerRadius(deltaRadius);
@@ -166,12 +172,13 @@ public class CircleMeshAnimator : GameObjectAnimator
                 if (m_outerRadiusAnimationInterpolationType == InterpolationType.LINEAR)
                     deltaRadius = dt / m_outerRadiusAnimationDuration * radiusVariation;
                 else if (m_outerRadiusAnimationInterpolationType == InterpolationType.SINUSOIDAL)
-                    deltaRadius = radiusVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_outerRadiusAnimationDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_fadingDuration)));
+                    deltaRadius = radiusVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_outerRadiusAnimationDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_outerRadiusAnimationDuration)));
 
                 if (effectiveElapsedTime > m_outerRadiusAnimationDuration)
                 {
                     SetOuterRadius(m_toOuterRadius);
-                    m_animatingInnerRadius = false;
+                    m_animatingOuterRadius = false;
+                    OnFinishAnimatingOuterRadius();
                 }
                 else
                     IncOuterRadius(deltaRadius);
@@ -185,12 +192,14 @@ public class CircleMeshAnimator : GameObjectAnimator
 
     public virtual void OnFinishAnimatingInnerRadius()
     {
-        
+        if (m_innerRadiusAnimationDestroyOnFinish)
+            Destroy(this.gameObject);  
     }
 
     public virtual void OnFinishAnimatingOuterRadius()
     {
-        
+        if (m_outerRadiusAnimationDestroyOnFinish)
+            Destroy(this.gameObject);
     }
 
     protected override void Update()

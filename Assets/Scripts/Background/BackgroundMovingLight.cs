@@ -19,7 +19,7 @@ public class BackgroundMovingLight : UVQuad
     public bool m_finished { get; set; } //did this light reach one of the screen border
     public bool m_evacuated { get; set; } //does this light needs to be evacuated from parent renderer lights list
 
-    public override void InitQuadMesh()
+    protected override void InitQuadMesh()
     {
         base.InitQuadMesh();
 

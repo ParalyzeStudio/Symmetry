@@ -2,8 +2,8 @@
 
 public class GUIButton : MonoBehaviour
 {
-    protected BaseQuad m_shadow;
-    protected BaseQuad m_background;
+    protected ColorQuad m_shadow;
+    protected ColorQuad m_background;
     protected UVQuad m_skin;
 
     public Vector2 m_size { get; set; }
@@ -51,29 +51,24 @@ public class GUIButton : MonoBehaviour
     {
         BaseQuad[] childrenQuads = this.GetComponentsInChildren<BaseQuad>();
         m_skin = (childrenQuads.Length > 0) ? (UVQuad) childrenQuads[0] : null;
-        m_background = (childrenQuads.Length > 1) ? childrenQuads[1] : null;
-        m_shadow = (childrenQuads.Length > 2) ? childrenQuads[2] : null;
-
-        if (skinMaterial != null)
-        {
-            SetSkinMaterial(skinMaterial);
-        }
+        m_background = (childrenQuads.Length > 1) ? (ColorQuad) childrenQuads[1] : null;
+        m_shadow = (childrenQuads.Length > 2) ? (ColorQuad) childrenQuads[2] : null;
 
         if (m_skin != null)
         {
-            m_skin.InitQuadMesh();
+            m_skin.Init(skinMaterial);
             m_skin.transform.localPosition = new Vector3(0,0,-2);
         }
 
         if (m_background != null)
         {
-            m_background.InitQuadMesh();
+            m_background.Init();
             m_background.transform.localPosition = new Vector3(0,0,-1);
         }
 
         if (m_shadow != null)
         {
-            m_shadow.InitQuadMesh();
+            m_shadow.Init();
             m_shadow.transform.localPosition = new Vector3(0,0,0);
         }
 
@@ -109,11 +104,24 @@ public class GUIButton : MonoBehaviour
     }
 
     /**
+     * Tint the skin
+     * **/
+    public void SetSkinTintColor(Color skinTintColor)
+    {
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        skinAnimator.SetColor(skinTintColor);
+    }
+
+    /**
      * Set the background color
      * **/
     public virtual void SetBackgroundColor(Color backgroundColor)
     {
-
+        if (m_background != null)
+        {
+            ColorQuadAnimator backgroundAnimator = m_background.GetComponent<ColorQuadAnimator>();
+            backgroundAnimator.SetColor(backgroundColor);
+        }
     }
 
     /**
@@ -121,7 +129,11 @@ public class GUIButton : MonoBehaviour
      * **/
     public virtual void SetShadowColor(Color shadowColor)
     {
-
+        if (m_shadow != null)
+        {
+            ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
+            shadowAnimator.SetColor(shadowColor);
+        }
     }
 
     /**

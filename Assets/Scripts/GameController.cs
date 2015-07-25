@@ -57,8 +57,9 @@ public class GameController : MonoBehaviour
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         //ShowMainMenu();
         guiManager.ShowSideButtons(true, 1.0f);
-        DebugShowChapters();
+        //DebugShowChapters();
         //DebugShowLevels(1);
+        DebugShowSpecificLevel(1, 1, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -71,6 +72,9 @@ public class GameController : MonoBehaviour
         m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 0.5f);
     }
 
+    /**
+     * Tmp method to jump directly to chapters scene
+     * **/
     public void DebugShowChapters()
     {
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
@@ -79,6 +83,9 @@ public class GameController : MonoBehaviour
         m_sceneManager.ShowContent(SceneManager.DisplayContent.CHAPTERS, true, 0.5f);
     }
 
+    /**
+     * Tmp method to jump directly to levels scene
+     * **/
     public void DebugShowLevels(int iChapterNumber)
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
@@ -87,7 +94,22 @@ public class GameController : MonoBehaviour
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
         bgRenderer.Offset(2 * ScreenUtils.GetScreenSize().y);
 
-        m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);        
+        m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);
+    }
+
+    /**
+     * Tmp method to jump directly to game scene (with level intro scene optionally)
+     * **/
+    public void DebugShowSpecificLevel(int iChapterNumber, int iLevelNumber, bool bShowLevelIntro = true)
+    {
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        levelManager.SetCurrentChapterByNumber(iChapterNumber);
+        levelManager.SetLevelOnCurrentChapter(iLevelNumber);
+
+        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        bgRenderer.Offset(2 * ScreenUtils.GetScreenSize().y);
+
+        m_sceneManager.ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, true, 0.5f);
     }
 
     protected void Update()

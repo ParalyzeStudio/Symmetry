@@ -2,16 +2,13 @@
 
 public class ColorQuad : BaseQuad
 {
-    public override void InitQuadMesh()
+    public void Init()
     {
-        base.InitQuadMesh();
+        InitQuadMesh();
 
         //init the array of colors
         Color[] colors = new Color[4];
         GetComponent<MeshFilter>().sharedMesh.colors = colors;
-
-        //Init the color of the quad to black
-        SetColor(Color.black);
     }
 
     /**

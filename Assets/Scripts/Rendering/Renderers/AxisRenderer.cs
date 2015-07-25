@@ -44,46 +44,46 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildElements(Vector2 startPosition, bool bGridPoints)
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
-        if (bGridPoints)
-        {
-            m_endpoint1GridPosition = startPosition;
-            m_endpoint2GridPosition = startPosition;
+        //GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        //if (bGridPoints)
+        //{
+        //    m_endpoint1GridPosition = startPosition;
+        //    m_endpoint2GridPosition = startPosition;
 
-            m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
-            m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
-        }
-        else
-        {
-            m_endpoint1Position = startPosition;
-            m_endpoint2Position = startPosition;
+        //    m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
+        //    m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
+        //}
+        //else
+        //{
+        //    m_endpoint1Position = startPosition;
+        //    m_endpoint2Position = startPosition;
 
-            m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
-            m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
-        }
+        //    m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
+        //    m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
+        //}
 
-        GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
-        m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, gameScene.m_axes.m_axisSegmentMaterialInstance, Color.black);
-        m_axisSegment.transform.parent = this.gameObject.transform;
+        //GameObject clonedAxisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
+        //m_axisSegment = clonedAxisSegmentObject.GetComponent<AxisSegment>();
+        //m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, gameScene.m_axes.m_axisSegmentMaterialInstance, Color.black);
+        //m_axisSegment.transform.parent = this.gameObject.transform;
 
-        MeshRenderer axisSegmentMeshRenderer = clonedAxisSegmentObject.GetComponent<MeshRenderer>();
-        Material clonedAxisSegmentMaterial = (Material) Instantiate(m_axisSegmentMaterial);
-        axisSegmentMeshRenderer.sharedMaterial = clonedAxisSegmentMaterial;
+        //MeshRenderer axisSegmentMeshRenderer = clonedAxisSegmentObject.GetComponent<MeshRenderer>();
+        //Material clonedAxisSegmentMaterial = (Material) Instantiate(m_axisSegmentMaterial);
+        //axisSegmentMeshRenderer.sharedMaterial = clonedAxisSegmentMaterial;
 
-        m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
-        m_endpoint1.transform.parent = this.gameObject.transform;
-        UVQuad endpoint1Quad = m_endpoint1.GetComponent<UVQuad>();
-        endpoint1Quad.InitQuadMesh();
-        GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();
-        endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
+        //m_endpoint1 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
+        //m_endpoint1.transform.parent = this.gameObject.transform;
+        //UVQuad endpoint1Quad = m_endpoint1.GetComponent<UVQuad>();
+        //endpoint1Quad.Init();
+        //GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();
+        //endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
 
-        m_endpoint2 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
-        m_endpoint2.transform.parent = this.gameObject.transform;
-        UVQuad endpoint2Quad = m_endpoint2.GetComponent<UVQuad>();
-        endpoint2Quad.InitQuadMesh();
-        GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
-        endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+        //m_endpoint2 = (GameObject)Instantiate(m_symmetryAxisEndpointPfb);
+        //m_endpoint2.transform.parent = this.gameObject.transform;
+        //UVQuad endpoint2Quad = m_endpoint2.GetComponent<UVQuad>();
+        //endpoint2Quad.InitQuadMesh();
+        //GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
+        //endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
     }
 
     /**

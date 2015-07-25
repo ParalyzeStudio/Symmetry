@@ -349,7 +349,6 @@ public class Chapters : GUIScene
         progressBarAnimator.SetPosition(new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0));
 
         float progressBarWidth = 5.5f * bgRenderer.m_triangleHeight;
-        progressBarWidth = 352;
         float progressBarHeight = 20.0f;
         float ratio = 0.5f;
 
@@ -364,7 +363,7 @@ public class Chapters : GUIScene
         meshRenderer.sharedMaterial = progressBarBgMaterial;
 
         ColorQuad colorQuad = clonedProgressBarBg.GetComponent<ColorQuad>();
-        colorQuad.InitQuadMesh();
+        colorQuad.Init();
 
         ColorQuadAnimator progressBarBgAnimator = clonedProgressBarBg.GetComponent<ColorQuadAnimator>();
         progressBarBgAnimator.SetPosition(Vector3.zero);
@@ -380,7 +379,7 @@ public class Chapters : GUIScene
         meshRenderer.sharedMaterial = progressBarFillMaterial;
 
         colorQuad = clonedProgressBarFill.GetComponent<ColorQuad>();
-        colorQuad.InitQuadMesh();
+        colorQuad.Init();
 
         ColorQuadAnimator progressBarFillAnimator = clonedProgressBarFill.GetComponent<ColorQuadAnimator>();
         progressBarFillAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));

@@ -67,8 +67,8 @@ public class ValueAnimator : MonoBehaviour
     protected InterpolationType m_colorChangingInterpolationType;
 
     //Store previous values to change them dynamically in inspector
-    private float m_prevOpacity;
-    private Color m_prevColor;
+    protected float m_prevOpacity;
+    protected Color m_prevColor;
 
     //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
     protected GUIManager m_guiManager;
@@ -80,7 +80,7 @@ public class ValueAnimator : MonoBehaviour
     {
         m_opacity = 1;
         m_prevOpacity = 1;
-        m_color = new Color(0, 0, 0, 255);
+        m_color = Color.black;
         m_prevColor = m_color;
     }
 

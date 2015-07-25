@@ -259,9 +259,11 @@ public class GUIManager : MonoBehaviour
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
 
+        Vector2 sideButtonSize = new Vector2(1.7f * bgRenderer.m_triangleHeight, 1.7f * bgRenderer.m_triangleHeight);
+
         //Credits button
         GameObject creditsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CREDITS_BUTTON,
-                                                              new Vector2(128.0f, 128.0f),
+                                                              sideButtonSize,
                                                               ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
                                                               Color.black);
         creditsButtonObject.name = "CreditsButton";
@@ -276,7 +278,7 @@ public class GUIManager : MonoBehaviour
 
         //Options button
         GameObject optionsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
-                                                              new Vector2(128.0f, 128.0f),
+                                                              sideButtonSize,
                                                               ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
                                                               Color.black);
         optionsButtonObject.name = "OptionsButton";
@@ -291,11 +293,11 @@ public class GUIManager : MonoBehaviour
 
         if (bAnimated)
         {
-            Vector3 creditsButtonFromPosition = new Vector3(-0.5f * bgRenderer.m_triangleHeight - 0.5f * screenSize.x, creditsButtonYPosition, SIDE_OVERLAY_Z_VALUE - 1);
+            Vector3 creditsButtonFromPosition = new Vector3(-2.0f * bgRenderer.m_triangleHeight - 0.5f * screenSize.x, creditsButtonYPosition, SIDE_OVERLAY_Z_VALUE - 1);
             creditsButtonAnimator.SetPosition(creditsButtonFromPosition);
             creditsButtonAnimator.TranslateTo(creditsButtonFinalPosition, 0.8f, fDelay + 0.4f, ValueAnimator.InterpolationType.SINUSOIDAL);
 
-            Vector3 optionsButtonFromPosition = new Vector3(-0.5f * bgRenderer.m_triangleHeight - 0.5f * screenSize.x, optionsButtonYPosition, SIDE_OVERLAY_Z_VALUE - 1);
+            Vector3 optionsButtonFromPosition = new Vector3(-2.0f * bgRenderer.m_triangleHeight - 0.5f * screenSize.x, optionsButtonYPosition, SIDE_OVERLAY_Z_VALUE - 1);
             optionsButtonAnimator.SetPosition(optionsButtonFromPosition);
             optionsButtonAnimator.TranslateTo(optionsButtonFinalPosition, 0.8f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
         }
@@ -332,7 +334,7 @@ public class GUIManager : MonoBehaviour
         overlayBackgroundObject.transform.parent = m_sideButtonsOverlay.transform;
 
         ColorQuad overlayBackgroundQuad = overlayBackgroundObject.GetComponent<ColorQuad>();
-        overlayBackgroundQuad.InitQuadMesh();
+        overlayBackgroundQuad.Init();
         overlayBackgroundQuad.GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_transpPositionColorMaterial);
 
         ColorQuadAnimator overlayBackgroundAnimator = overlayBackgroundObject.GetComponent<ColorQuadAnimator>();
@@ -346,7 +348,7 @@ public class GUIManager : MonoBehaviour
         separationLineObject.transform.parent = m_sideButtonsOverlay.transform;
 
         ColorQuad separationLineQuad = separationLineObject.GetComponent<ColorQuad>();
-        separationLineQuad.InitQuadMesh();
+        separationLineQuad.Init();
         separationLineQuad.GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_transpPositionColorMaterial);
 
         ColorQuadAnimator separationLineAnimator = separationLineObject.GetComponent<ColorQuadAnimator>();

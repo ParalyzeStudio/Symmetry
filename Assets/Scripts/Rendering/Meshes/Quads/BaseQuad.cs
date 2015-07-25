@@ -2,7 +2,7 @@
 
 public class BaseQuad : MonoBehaviour
 {
-    public virtual void InitQuadMesh()
+    protected virtual void InitQuadMesh()
     {
         Mesh mesh = new Mesh();
         mesh.name = "BaseQuad";

@@ -5,25 +5,31 @@ public class UVQuad : BaseQuad
     public Vector4 m_textureRange { get; set; }
     public TextureWrapMode m_textureWrapMode { get; set; }
 
-    public override void InitQuadMesh()
+    public void Init(Material material = null)
+    {
+        InitQuadMesh();
+        
+        if (material != null)
+            SetMaterial(material);
+    }
+
+    protected override void InitQuadMesh()
     {
         base.InitQuadMesh();
-        GetComponent<MeshFilter>().sharedMesh.name = "UVQuad";
+
+        MeshFilter meshFilter = GetComponent<MeshFilter>();
+        meshFilter.sharedMesh.name = "UVQuad";
 
         //set UVs
         Vector2[] uvs = new Vector2[4];
-        GetComponent<MeshFilter>().sharedMesh.uv = uvs;
+        meshFilter.sharedMesh.uv = uvs;
         UpdateUVs();
 
         //Set default texture range
-        SetTextureRange(new Vector4(0,0,1,1));
+        SetTextureRange(new Vector4(0, 0, 1, 1));
 
         //set default wrap mode to CLAMP
         SetTextureWrapMode(TextureWrapMode.Clamp);
-
-        //set default tint color to white
-        TexturedQuadAnimator quadAnimator = this.GetComponent<TexturedQuadAnimator>();
-        quadAnimator.SetColor(Color.white);
     }
 
     protected void UpdateUVs()

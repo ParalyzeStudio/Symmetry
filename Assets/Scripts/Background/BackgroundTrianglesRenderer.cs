@@ -490,7 +490,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 GameObject newLightObject = (GameObject)Instantiate(m_pointLightPfb);
                 newLightObject.transform.parent = this.gameObject.transform; //add the light object as the child of the background triangles renderer object
                 light = newLightObject.GetComponent<BackgroundMovingLight>();
-                light.InitQuadMesh();
+                light.Init();
                 m_pointLightsObjects[iPointLightIdx] = newLightObject;
                 bReplaceLight = true;
             }

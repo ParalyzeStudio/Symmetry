@@ -404,17 +404,18 @@ public class Levels : GUIScene
         CircleMeshAnimator hexaMeshAnimator = hexagonMeshObject.GetComponent<CircleMeshAnimator>();
         Destroy(hexaMeshAnimator);
 
-        hexaMeshAnimator = hexagonMeshObject.AddComponent<ApertureTransitionAnimator>();
-        hexaMeshAnimator.SetNumSegments(6, false);
-        hexaMeshAnimator.SetInnerRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, false);
-        hexaMeshAnimator.SetOuterRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, true);
-        hexaMeshAnimator.SetPosition(new Vector3(slotPosition.x, slotPosition.y, -50));
-        hexaMeshAnimator.SetColor(Color.black);
+        ApertureTransitionAnimator apertureAnimator = hexagonMeshObject.AddComponent<ApertureTransitionAnimator>();
+        apertureAnimator.SetNumSegments(6, false);
+        apertureAnimator.SetInnerRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, false);
+        apertureAnimator.SetOuterRadius(2 / Mathf.Sqrt(3) * maxDistanceToScreenVertices, true);
+        apertureAnimator.SetPosition(new Vector3(slotPosition.x, slotPosition.y, -50));
+        apertureAnimator.SetColor(Color.black);
 
-        hexaMeshAnimator.AnimateInnerRadiusTo(0, 0.5f);
+        apertureAnimator.m_toSceneContent = SceneManager.DisplayContent.LEVEL_INTRO;
+        apertureAnimator.AnimateInnerRadiusTo(0, 0.5f);
 
         //Load and display LevelIntro scene
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.5f, 1.1f);
+        //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.5f, 1.1f);
 
         //GetGUIManager().DismissBackButton();
         //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);

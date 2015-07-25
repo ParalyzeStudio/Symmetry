@@ -22,16 +22,15 @@ public class GUIQuadButton : MonoBehaviour
         m_skin = (children.Length > 1) ? children[1].gameObject.GetComponent<UVQuad>() : null;
         m_shadow = (children.Length > 2) ? children[2].gameObject.GetComponent<UVQuad>() : null;
 
-        if (skinMaterial != null)
+        if (m_skin != null)
         {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = skinMaterial;
+            m_skin.Init();
+            if (skinMaterial != null)
+                m_skin.GetComponent<MeshRenderer>().sharedMaterial = skinMaterial;
         }
 
-        if (m_skin != null)
-        m_skin.InitQuadMesh();
-
         if (m_shadow != null)
-            m_shadow.InitQuadMesh();
+            m_shadow.Init();
     }
 
     /**

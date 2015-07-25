@@ -5,13 +5,16 @@ using System;
 [ExecuteInEditMode]
 public class Grid : MonoBehaviour
 {
+    //Shared prefabs
+    public GameObject m_texQuadPfb;
+    public Material m_gridAnchorMaterial;
+
     public List<GameObject> m_anchors { get; set; }
     public Vector2 m_gridSize { get; set; }
     public int m_numLines { get; set; }
     public int m_numColumns { get; set; }
     public float m_gridSpacing { get; set; }
-    public GameObject m_gridAnchorPfb;
-    public GameObject m_gridConstraintAnchorPfb;
+    //public GameObject m_gridConstraintAnchorPfb;
 
     private Color m_gridColor;
 
@@ -89,12 +92,12 @@ public class Grid : MonoBehaviour
                 }
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
-                GameObject clonedGridAnchor = (GameObject)Instantiate(m_gridAnchorPfb, anchorLocalPosition, Quaternion.identity);
+                GameObject clonedGridAnchor = (GameObject)Instantiate(m_texQuadPfb, anchorLocalPosition, Quaternion.identity);
                 clonedGridAnchor.transform.parent = this.transform;
                 clonedGridAnchor.transform.localPosition = anchorLocalPosition;
 
                 UVQuad gridAnchorQuad = clonedGridAnchor.GetComponent<UVQuad>();
-                gridAnchorQuad.InitQuadMesh();
+                gridAnchorQuad.Init(m_gridAnchorMaterial);
                 TexturedQuadAnimator anchorAnimator = clonedGridAnchor.GetComponent<TexturedQuadAnimator>();
                 anchorAnimator.SetColor(m_gridColor);
                 m_anchors.Add(clonedGridAnchor);
