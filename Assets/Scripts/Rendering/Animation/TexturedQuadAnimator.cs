@@ -4,8 +4,7 @@ public class TexturedQuadAnimator : GameObjectAnimator
 {
     public override void Awake()
     {
-        m_opacity = 1;
-        m_prevOpacity = 1;
+        base.Awake();
         m_color = Color.white;
         m_prevColor = m_color;
     }

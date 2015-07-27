@@ -168,6 +168,8 @@ public class GameController : MonoBehaviour
      * **/
     public bool IsVictory()
     {
+        return false; //TODO remove this line
+
         //First we check if one of the shapes intersects a contour
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
@@ -228,6 +230,8 @@ public class GameController : MonoBehaviour
      * **/
     public bool IsDefeat()
     {
+        return false; //TODO remove this line
+
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
 
         if (!gameScene.m_isShown)

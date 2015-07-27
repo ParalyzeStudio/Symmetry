@@ -9,23 +9,16 @@ public class Grid : MonoBehaviour
     public GameObject m_texQuadPfb;
     public Material m_gridAnchorMaterial;
 
-    public List<GameObject> m_anchors { get; set; }
+    public GameObject[] m_anchors { get; set; }
     public Vector2 m_gridSize { get; set; }
     public int m_numLines { get; set; }
     public int m_numColumns { get; set; }
     public float m_gridSpacing { get; set; }
     //public GameObject m_gridConstraintAnchorPfb;
 
-    private Color m_gridColor;
-
-    public void Awake()
-    {
-        m_anchors = new List<GameObject>();
-    }
-
     public void Build()
     {
-        m_gridColor = Color.black;
+        SetGridColor(Color.white);       
 
         //Get the number of min lines and min columns we want for this level
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
@@ -34,6 +27,7 @@ public class Grid : MonoBehaviour
         int minNumColumns = currentLevel.m_gridMinNumColumns;
         int exactNumLines = currentLevel.m_gridExactNumLines;
         int exactNumColumns = currentLevel.m_gridExactNumColumns;
+        m_anchors = new GameObject[exactNumLines * exactNumColumns];
 
         //get the screen viewport dimensions
         float fCameraSize = Camera.main.orthographicSize;
@@ -92,15 +86,19 @@ public class Grid : MonoBehaviour
                 }
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
-                GameObject clonedGridAnchor = (GameObject)Instantiate(m_texQuadPfb, anchorLocalPosition, Quaternion.identity);
+                GameObject clonedGridAnchor = (GameObject)Instantiate(m_texQuadPfb);
                 clonedGridAnchor.transform.parent = this.transform;
-                clonedGridAnchor.transform.localPosition = anchorLocalPosition;
 
                 UVQuad gridAnchorQuad = clonedGridAnchor.GetComponent<UVQuad>();
                 gridAnchorQuad.Init(m_gridAnchorMaterial);
+                int iAnchorIndex = (iColumnNumber - 1) * exactNumLines + (iLineNumber - 1);
+
                 TexturedQuadAnimator anchorAnimator = clonedGridAnchor.GetComponent<TexturedQuadAnimator>();
-                anchorAnimator.SetColor(m_gridColor);
-                m_anchors.Add(clonedGridAnchor);
+                anchorAnimator.SetScale(new Vector3(8, 8, 1));
+                anchorAnimator.SetPosition(anchorLocalPosition);
+
+
+                m_anchors[iAnchorIndex] = clonedGridAnchor;
             }
         }
     }
@@ -208,7 +206,7 @@ public class Grid : MonoBehaviour
     public Vector2 GetAnchorGridCoordinates(GameObject anchor)
     {
         int iAnchorIndex = -1;
-        for (int i = 0; i != m_anchors.Count; i++)
+        for (int i = 0; i != m_anchors.Length; i++)
         {
             if (m_anchors[i] == anchor)
             {
@@ -225,7 +223,7 @@ public class Grid : MonoBehaviour
      * **/
     public Vector2 GetAnchorGridCoordinatesForAnchorIndex(int iAnchorIndex)
     {
-        if (iAnchorIndex < 0 || iAnchorIndex >= m_anchors.Count)
+        if (iAnchorIndex < 0 || iAnchorIndex >= m_anchors.Length)
             return Vector2.zero;
 
         return new Vector2(iAnchorIndex % m_numColumns + 1, iAnchorIndex / m_numColumns + 1);
@@ -240,7 +238,7 @@ public class Grid : MonoBehaviour
 
         float sqrMinDistance = float.MaxValue;
         int iMinDistanceAnchorIndex = -1;
-        for (int iAnchorIndex = 0; iAnchorIndex != m_anchors.Count; iAnchorIndex++)
+        for (int iAnchorIndex = 0; iAnchorIndex != m_anchors.Length; iAnchorIndex++)
         {
             Vector2 gridAnchorLocalPosition = m_anchors[iAnchorIndex].transform.position - gameObject.transform.position;
             float dx = localPosition.x - gridAnchorLocalPosition.x;
@@ -264,6 +262,14 @@ public class Grid : MonoBehaviour
             return GetPointGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
         else
             return Vector2.zero;
+    }
+
+    /**
+     * Set the color of each grid anchor by setting the _Color parameter on their shared material
+     * **/
+    public void SetGridColor(Color color)
+    {
+        m_gridAnchorMaterial.SetColor("_Color", color);
     }
 
     ///**

@@ -3,16 +3,14 @@ using System.Collections.Generic;
 
 public class Counter : MonoBehaviour
 {
+    //shared prefabs
+    public Material m_positionColorMaterial;
+
     public GameObject m_counterElementPfb;
     public List<CounterElement> m_elements { get; set; }
 
     public int m_reachedCounterElementNumber { get; set; } //the number of the counter element that we reached and whose current status is marked as CURRENT
                                                            //if counter has just been built, set this number to 0 (no current element)
-
-    public Material m_elementSkinOnMaterial;
-    public Material m_elementSkinOffMaterial;
-    public Material m_elementShadowMaterial;
-    public Material m_elementOverlayMaterial;
 
     public void Init()
     {
@@ -22,10 +20,10 @@ public class Counter : MonoBehaviour
     public void Build()
     {
         //First clone materials that will be passed to each counter element
-        Material clonedShadowMaterial = (Material)Instantiate(m_elementShadowMaterial);
-        Material clonedSkinOnMaterial = (Material)Instantiate(m_elementSkinOnMaterial);
-        Material clonedSkinOffMaterial = (Material)Instantiate(m_elementSkinOffMaterial);
-        Material clonedOverlayMaterial = (Material)Instantiate(m_elementOverlayMaterial);
+        Material clonedShadowMaterial = (Material)Instantiate(m_positionColorMaterial);
+        Material clonedSkinOnMaterial = (Material)Instantiate(m_positionColorMaterial);
+        Material clonedSkinOffMaterial = (Material)Instantiate(m_positionColorMaterial);
+        Material clonedOverlayMaterial = (Material)Instantiate(m_positionColorMaterial);
 
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 

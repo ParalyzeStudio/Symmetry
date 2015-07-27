@@ -394,7 +394,6 @@ public class Levels : GUIScene
         //distancesToScreenBorders[3] = 0.5f * screenSize.y - slotPosition.y; //distance to the top border
         //float maxDistanceToScreenBorders = Mathf.Max(distancesToScreenBorders);
 
-
         GameObject hexagonMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
 
         CircleMesh hexaMesh = hexagonMeshObject.GetComponent<CircleMesh>();

@@ -127,9 +127,9 @@ public class AxisRenderer : MonoBehaviour
     public bool TryToSnapAxisEndpointToClosestAnchor()
     {
         GameScene gameScene = this.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
-        List<GameObject> gridAnchors = gameScene.m_grid.m_anchors;
+        GameObject[] gridAnchors = gameScene.m_grid.m_anchors;
 
-        for (int anchorIndex = 0; anchorIndex != gridAnchors.Count; anchorIndex++)
+        for (int anchorIndex = 0; anchorIndex != gridAnchors.Length; anchorIndex++)
         {
             GameObject snapAnchor = gridAnchors[anchorIndex];
 

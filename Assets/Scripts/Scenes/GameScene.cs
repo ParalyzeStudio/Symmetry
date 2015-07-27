@@ -60,10 +60,10 @@ public class GameScene : GUIScene
         GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         sceneAnimator.SetOpacity(1.0f);
 
-        //ShowGrid(fDelay);
+        ShowGrid(fDelay);
         //ShowActionButtons(fDelay);
         ShowInterfaceButtons(fDelay);
-        //ShowCounter(fDelay);
+        ShowCounter(fDelay);
         //ShowOutlines(fDelay);
         //ShowInitialShapes(fDelay);
         //m_axes = this.gameObject.GetComponentInChildren<Axes>();
@@ -127,23 +127,28 @@ public class GameScene : GUIScene
         GameObjectAnimator holderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
         holderAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - 0.5f * interfaceButtonSize.y - distanceToTopBorder, INTERFACE_BUTTONS_Z_VALUE));
 
-
         //menu button
-        GameObject menuButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        pauseButtonObject.name = "PauseButton";
+        pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
-        GameObjectAnimator menuButtonAnimator = menuButtonObject.GetComponent<GameObjectAnimator>();
-        float menuButtonPositionX = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
-        menuButtonAnimator.SetPosition(new Vector3(menuButtonPositionX, 0, 0));
+        GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
+        float pauseButtonPositionX = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
+        pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, 0, 0));
 
         //retry button
         GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        retryButtonObject.name = "RetryButton";
+        retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
         GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
-        float retryBtnPositionX = menuButtonPositionX - distanceBetweenButtons - interfaceButtonSize.x;
+        float retryBtnPositionX = pauseButtonPositionX - distanceBetweenButtons - interfaceButtonSize.x;
         retryButtonAnimator.SetPosition(new Vector3(retryBtnPositionX, 0, 0));
 
         //hints button
-        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        hintsButtonObject.name = "HintsButton";
+        hintsButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
         GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
         float hintsBtnPositionX = retryBtnPositionX - distanceBetweenButtons - interfaceButtonSize.x;

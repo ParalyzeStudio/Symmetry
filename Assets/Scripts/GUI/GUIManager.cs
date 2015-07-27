@@ -54,7 +54,7 @@ public class GUIManager : MonoBehaviour
     public Material m_skinReset;
     public Material m_skinHints;
     public Material m_skinRetry;
-    public Material m_skinMenu;
+    public Material m_skinPause;
     public Material m_skinColorChange;
     public Material m_GUIButtonBackground;
     public Material m_GUIButtonShadow;
@@ -140,7 +140,7 @@ public class GUIManager : MonoBehaviour
         else if (iID == GUIButton.GUIButtonID.ID_RESET_BUTTON)
             skinMaterial = m_skinReset;
         else if (iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
-            skinMaterial = m_skinMenu;
+            skinMaterial = m_skinPause;
         else if (iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON)
             skinMaterial = m_skinRetry;
         else if (iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS || iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
