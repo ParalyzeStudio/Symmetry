@@ -159,3 +159,20 @@ public class Contour : List<Vector2>
     }
 }
 
+/**
+ * Same as contour but with the possibility to set a color on each segment of it
+ * **/
+public class ColoredContour : Contour
+{
+    public Color[] m_segmentsColors { get; set; }
+
+    /**
+     * Set colors on the left and on the right of the vertex (following the order of vertices)
+     * coloring both segments containing that vertex
+     * **/
+    public void SetColorForVertex(int iVertexIdx, Color leftColor, Color rightColor)
+    {
+        m_segmentsColors[(iVertexIdx > 0) ? (iVertexIdx - 1) : (m_segmentsColors.Length - 1)] = leftColor;
+        m_segmentsColors[(iVertexIdx < m_segmentsColors.Length - 1) ? (iVertexIdx + 1) : 0] = rightColor;  
+    }
+}

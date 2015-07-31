@@ -14,12 +14,14 @@ public class GUIManager : MonoBehaviour
     public GameObject m_circleMeshPfb;
 
     //buttons prefabs
-    public GameObject m_GUIDiamondShapeButtonPfb; //the prefab to create a diamond-shaped gui button with default skin, background and shadow
-    public GameObject m_GUISkinOnlyButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
+    public GameObject m_GUIButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
+    public GameObject m_actionButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
     public GameObject m_pauseWindowPfb; //the prefab needed to instantiate the pause window
     public GameObject m_GUIFramePfb; //the prefab containing a background frame
     public GameObject m_backButtonPfb; //the prefab for the back button
+
+    public Material m_plainWhiteMaterial { get; set; } //use this shared material to draw plain white meshes
 
     //public GameObject m_optionsWindow { get; set; } //the actual options window
     public GameObject m_sideButtonsOverlay { get; set; }
@@ -55,7 +57,7 @@ public class GUIManager : MonoBehaviour
     public Material m_skinHints;
     public Material m_skinRetry;
     public Material m_skinPause;
-    public Material m_skinColorChange;
+    public Material m_skinColorFilter;
     public Material m_GUIButtonBackground;
     public Material m_GUIButtonShadow;
 
@@ -67,48 +69,50 @@ public class GUIManager : MonoBehaviour
     public void Init()
     {
         //m_optionsWindow = null;
+        m_plainWhiteMaterial = Instantiate(m_transpPositionColorMaterial);
     }
 
     /**
      * Create a GUI Button object with the specified 
      * -ID
      * -size
-     * -background color if applicable
-     * -shadow color if applicable
      * -in case a material could not be determined for the ID,
      *  force eventually a material for the skin (if the button has several materials for instance force one of them)
      * **/
-    public GameObject CreateGUIButtonForID(GUIButton.GUIButtonID iID, Vector2 size, Color backgroundColor, Color shadowColor, Material forcedSkinMaterial = null)
+    public GameObject CreateGUIButtonForID(GUIButton.GUIButtonID iID, Vector2 size, Material forcedSkinMaterial = null)
     {
-        GameObject buttonObject;
-        if (false) //todo list diamond shapes button IDs here
-        {
-            buttonObject = (GameObject)Instantiate(m_GUIDiamondShapeButtonPfb);
-        }
-        else
-            buttonObject = (GameObject)Instantiate(m_GUISkinOnlyButtonPfb);
-            
-
-        GUIButton button = buttonObject.GetComponent<GUIButton>();
-        button.Init(forcedSkinMaterial);
-        button.m_ID = iID;
-
-        //Set the size of the button
-        button.SetSize(size);
-
-        //Set the color for background and shadow if applicable
-        button.SetBackgroundColor(backgroundColor);
-        button.SetShadowColor(shadowColor);
-        
-        //Materials for background and shadow
-        Material clonedBackgroundMaterial = Instantiate(m_GUIButtonBackground);
-        Material clonedShadowMaterial = Instantiate(m_GUIButtonShadow);
+        GameObject buttonObject = (GameObject)Instantiate(m_GUIButtonPfb);
 
         //Set the relevant skin material for the specified button ID
-        if (forcedSkinMaterial == null)
-            button.SetSkinMaterial(GetClonedSkinMaterialForID(iID));
-        button.SetBackgroundMaterial(clonedBackgroundMaterial);
-        button.SetShadowMaterial(clonedShadowMaterial);
+        Material buttonSkinMaterial = (forcedSkinMaterial == null) ? GetClonedSkinMaterialForID(iID)  : forcedSkinMaterial;
+        GUIButton button = buttonObject.GetComponent<GUIButton>();
+        button.Init(buttonSkinMaterial, Color.white);
+        button.m_ID = iID;
+
+        //Set the size of the button skin
+        button.SetSize(size);
+
+        //add an animator
+        buttonObject.AddComponent<GameObjectAnimator>();
+
+        return buttonObject;
+    }
+
+    /**
+     * Same as previous method but for an action button
+     * **/
+    public GameObject CreateActionButtonForID(GUIButton.GUIButtonID iID, Vector2 size, ActionButton.Location location, Material forcedSkinMaterial = null)
+    {
+        GameObject buttonObject = (GameObject)Instantiate(m_actionButtonPfb);
+
+        //Set the relevant skin material for the specified button ID
+        Material buttonSkinMaterial = (forcedSkinMaterial == null) ? GetClonedSkinMaterialForID(iID) : forcedSkinMaterial;
+        ActionButton button = buttonObject.GetComponent<ActionButton>();
+        button.Init(buttonSkinMaterial, Color.white, location);
+        button.m_ID = iID;
+
+        //Set the size of the button skin
+        button.SetSize(size);
 
         //add an animator
         buttonObject.AddComponent<GameObjectAnimator>();
@@ -125,8 +129,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinLevels;
         else if (iID == GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
             skinMaterial = m_skinCloseOverlay;
-        else if (iID == GUIButton.GUIButtonID.ID_COLOR_CHANGE)
-            skinMaterial = m_skinColorChange;
+        else if (iID == GUIButton.GUIButtonID.ID_COLOR_FILTER)
+            skinMaterial = m_skinColorFilter;
         else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
             skinMaterial = m_skinCredits;
         else if (iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON)
@@ -263,9 +267,7 @@ public class GUIManager : MonoBehaviour
 
         //Credits button
         GameObject creditsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CREDITS_BUTTON,
-                                                              sideButtonSize,
-                                                              ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
-                                                              Color.black);
+                                                              sideButtonSize);
         creditsButtonObject.name = "CreditsButton";
 
         creditsButtonObject.transform.parent = this.transform;
@@ -278,9 +280,7 @@ public class GUIManager : MonoBehaviour
 
         //Options button
         GameObject optionsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
-                                                              sideButtonSize,
-                                                              ColorUtils.GetColorFromRGBAVector4(new Color(255.0f, 0, 0, 255.0f)),
-                                                              Color.black);
+                                                              sideButtonSize);
         optionsButtonObject.name = "OptionsButton";
 
         optionsButtonObject.transform.parent = this.transform;
@@ -334,8 +334,7 @@ public class GUIManager : MonoBehaviour
         overlayBackgroundObject.transform.parent = m_sideButtonsOverlay.transform;
 
         ColorQuad overlayBackgroundQuad = overlayBackgroundObject.GetComponent<ColorQuad>();
-        overlayBackgroundQuad.Init();
-        overlayBackgroundQuad.GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_transpPositionColorMaterial);
+        overlayBackgroundQuad.Init(Instantiate(m_transpPositionColorMaterial));
 
         ColorQuadAnimator overlayBackgroundAnimator = overlayBackgroundObject.GetComponent<ColorQuadAnimator>();
         overlayBackgroundAnimator.SetPosition(Vector3.zero);
@@ -348,8 +347,7 @@ public class GUIManager : MonoBehaviour
         separationLineObject.transform.parent = m_sideButtonsOverlay.transform;
 
         ColorQuad separationLineQuad = separationLineObject.GetComponent<ColorQuad>();
-        separationLineQuad.Init();
-        separationLineQuad.GetComponent<MeshRenderer>().sharedMaterial = Instantiate(m_transpPositionColorMaterial);
+        separationLineQuad.Init(Instantiate(m_transpPositionColorMaterial));
 
         ColorQuadAnimator separationLineAnimator = separationLineObject.GetComponent<ColorQuadAnimator>();
         separationLineAnimator.SetPosition(new Vector3(0, 0.29f * screenSize.y, -1));
@@ -358,9 +356,7 @@ public class GUIManager : MonoBehaviour
 
         //close button
         GameObject closeButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON,
-                                                            new Vector2(128, 128),
-                                                            Color.black,
-                                                            Color.black);
+                                                            new Vector2(128, 128));
         closeButtonObject.name = "CloseButton";
         closeButtonObject.transform.parent = m_sideButtonsOverlay.transform;
         closeButtonObject.transform.localPosition = new Vector3(133 - 0.5f * screenSize.x, 0.5f * screenSize.y - 106, -1);
@@ -463,7 +459,7 @@ public class GUIManager : MonoBehaviour
 
         //sound button
         Vector3 soundButtonPosition = new Vector3(-horizontalGapBetweenButtons, - 0.06f * screenSize.x, -1);
-        GameObject soundButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_SOUND_BUTTON, new Vector2(100.0f, 100.0f), Color.black, Color.black);
+        GameObject soundButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_SOUND_BUTTON, new Vector2(100.0f, 100.0f));
         soundButtonObject.name = "SoundButton";
         soundButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator soundButtonAnimator = soundButtonObject.GetComponent<GameObjectAnimator>();
@@ -471,7 +467,7 @@ public class GUIManager : MonoBehaviour
 
         //music button
         Vector3 musicButtonPosition = new Vector3(0, -0.06f * screenSize.x, -1);
-        GameObject musicButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MUSIC_BUTTON, new Vector2(128.0f, 128.0f), Color.black, Color.black);
+        GameObject musicButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MUSIC_BUTTON, new Vector2(128.0f, 128.0f));
         musicButtonObject.name = "MusicButton";
         musicButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator musicButtonAnimator = musicButtonObject.GetComponent<GameObjectAnimator>();
@@ -479,7 +475,7 @@ public class GUIManager : MonoBehaviour
 
         //reset button
         Vector3 resetButtonPosition = new Vector3(horizontalGapBetweenButtons, -0.06f * screenSize.x, -1);
-        GameObject resetButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RESET_BUTTON, new Vector2(100.0f, 100.0f), Color.black, Color.black);
+        GameObject resetButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RESET_BUTTON, new Vector2(100.0f, 100.0f));
         resetButtonObject.name = "ResetButton";
         resetButtonObject.transform.parent = m_optionsContentHolder.transform;
         GameObjectAnimator resetButtonAnimator = resetButtonObject.GetComponent<GameObjectAnimator>();
@@ -584,9 +580,7 @@ public class GUIManager : MonoBehaviour
             Vector2 screenSize = ScreenUtils.GetScreenSize();
 
             GameObject backButtonObject = this.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_BUTTON,
-                                                                    new Vector2(128.0f, 128.0f),
-                                                                    Color.black,
-                                                                    Color.black);
+                                                                    new Vector2(128.0f, 128.0f));
             backButtonObject.name = "BackButton";
 
             backButtonObject.transform.parent = this.gameObject.transform;

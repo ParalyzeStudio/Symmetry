@@ -189,6 +189,11 @@ public class ValueAnimator : MonoBehaviour
         OnPositionChanged();
     }
 
+    public virtual Vector3 GetPosition()
+    {
+        return m_position;
+    }
+
     public virtual void SetRotationAngle(float angle)
     {
         m_angle = angle;

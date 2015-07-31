@@ -2,8 +2,6 @@
 
 public class GUIButton : MonoBehaviour
 {
-    protected ColorQuad m_shadow;
-    protected ColorQuad m_background;
     protected UVQuad m_skin;
 
     public Vector2 m_size { get; set; }
@@ -11,6 +9,9 @@ public class GUIButton : MonoBehaviour
     //In case button has to change textures between its on/off states
     public Material m_skinOnMaterial;
     public Material m_skinOffMaterial;
+
+    //Color that will tint the skin texture
+    public Color m_skinTintColor { get; set; }
 
     public enum ButtonState
     {
@@ -21,11 +22,13 @@ public class GUIButton : MonoBehaviour
 
     public ButtonState m_state { get; set; }
 
+    private GUIManager m_guiManager;
+
     public enum GUIButtonID
     {
         NONE = 0,
 
-        //Interface button
+        //Interface buttons
         ID_OPTIONS_BUTTON = 1,
         ID_CREDITS_BUTTON,
         ID_MUSIC_BUTTON,
@@ -41,37 +44,30 @@ public class GUIButton : MonoBehaviour
         ID_CHAPTER_SELECTION_ARROW_NEXT,
 
         //Action buttons
-        ID_COLOR_CHANGE,
-        ID_MODE_CHANGE
+        ID_AXIS_SYMMETRY_TWO_SIDES,
+        ID_AXIS_SYMMETRY_ONE_SIDE,
+        ID_POINT_SYMMETRY,
+        ID_MOVE_SHAPE,
+        ID_OPERATION_ADD,
+        ID_OPERATION_SUBSTRACT,
+        ID_COLOR_FILTER
     }
 
     public GUIButtonID m_ID;
 
-    public virtual void Init(Material skinMaterial = null)
+    public virtual void Init(Material skinMaterial, Color tintColor)
     {
         BaseQuad[] childrenQuads = this.GetComponentsInChildren<BaseQuad>();
         m_skin = (childrenQuads.Length > 0) ? (UVQuad) childrenQuads[0] : null;
-        m_background = (childrenQuads.Length > 1) ? (ColorQuad) childrenQuads[1] : null;
-        m_shadow = (childrenQuads.Length > 2) ? (ColorQuad) childrenQuads[2] : null;
 
         if (m_skin != null)
         {
             m_skin.Init(skinMaterial);
-            m_skin.transform.localPosition = new Vector3(0,0,-2);
-        }
 
-        if (m_background != null)
-        {
-            m_background.Init();
-            m_background.transform.localPosition = new Vector3(0,0,-1);
+            TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+            skinAnimator.SetPosition(new Vector3(0,0,-2));
+            skinAnimator.SetColor(tintColor);
         }
-
-        if (m_shadow != null)
-        {
-            m_shadow.Init();
-            m_shadow.transform.localPosition = new Vector3(0,0,0);
-        }
-
     }
 
     public static GUIButton FindInObjectChildrenForID(GameObject parentObject, GUIButtonID id)
@@ -95,12 +91,7 @@ public class GUIButton : MonoBehaviour
     {
         m_size = size;
 
-        Transform[] childTransforms = this.gameObject.GetComponentsInChildren<Transform>();
-        for (int i = 0; i != childTransforms.Length; i++)
-        {
-            if (childTransforms[i] != this.transform)
-                childTransforms[i].transform.localScale = GeometryUtils.BuildVector3FromVector2(size, 1);
-        }
+        m_skin.GetComponent<TexturedQuadAnimator>().SetScale(GeometryUtils.BuildVector3FromVector2(size, 1));
     }
 
     /**
@@ -110,30 +101,6 @@ public class GUIButton : MonoBehaviour
     {
         TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
         skinAnimator.SetColor(skinTintColor);
-    }
-
-    /**
-     * Set the background color
-     * **/
-    public virtual void SetBackgroundColor(Color backgroundColor)
-    {
-        if (m_background != null)
-        {
-            ColorQuadAnimator backgroundAnimator = m_background.GetComponent<ColorQuadAnimator>();
-            backgroundAnimator.SetColor(backgroundColor);
-        }
-    }
-
-    /**
-     * Set the shadow color
-     * **/
-    public virtual void SetShadowColor(Color shadowColor)
-    {
-        if (m_shadow != null)
-        {
-            ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
-            shadowAnimator.SetColor(shadowColor);
-        }
     }
 
     /**
@@ -162,24 +129,6 @@ public class GUIButton : MonoBehaviour
     }
 
     /**
-     * Set a material to the background Quad
-     * **/
-    public void SetBackgroundMaterial(Material material)
-    {
-        if (m_background != null)
-            m_background.GetComponent<MeshRenderer>().sharedMaterial = material;
-    }
-
-    /**
-     * Set a material to the shadow Quad
-     * **/
-    public void SetShadowMaterial(Material material)
-    {
-        if (m_shadow != null)
-            m_shadow.GetComponent<MeshRenderer>().sharedMaterial = material;
-    }
-
-    /**
      * Callback called when button is pressed for the first time
      * **/
     public virtual bool OnPress()
@@ -189,6 +138,9 @@ public class GUIButton : MonoBehaviour
             m_state = ButtonState.PRESSED;
             return true;
         }
+
+        //Tint the skin (which color is often white) a bit darker
+        m_skin.SetTintColor(new Color(0.95f, 0.95f, 0.95f, 1.0f));
 
         return false;
     }
@@ -203,6 +155,10 @@ public class GUIButton : MonoBehaviour
             m_state = ButtonState.IDLE;
             return true;
         }
+
+        //Reset to the default skin color
+        m_skin.SetTintColor(Color.white);
+
         return false;
     }
 
@@ -312,5 +268,13 @@ public class GUIButton : MonoBehaviour
                 chapters.ShowChapterSlot(1.0f); //build a new container for diplaying chapter info
             }
         }
+    }
+
+    protected GUIManager GetGUIManager()
+    {
+        if (m_guiManager == null)
+            m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+
+        return m_guiManager;
     }
 }

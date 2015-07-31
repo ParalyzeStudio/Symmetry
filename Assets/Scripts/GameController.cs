@@ -6,6 +6,9 @@ public class GameController : MonoBehaviour
 {
     private LevelManager m_levelManager; //variable to store the levelManager that is used in the update loop
     private SceneManager m_sceneManager; //same thing for the scene manager
+    private GUIManager m_guiManager; //same thing for the GUI manager
+    private PersistentDataManager m_persistentDataManager;
+    private BackgroundTrianglesRenderer m_backgroundRenderer;
 
     public Vector2 m_designScreenSize; //the design screen size that can be set in the inspector
 
@@ -26,11 +29,17 @@ public class GameController : MonoBehaviour
 
     private GameStatus m_gameStatus;
 
+    protected void Awake()
+    {
+        m_levelManager = null;
+        m_sceneManager = null;
+        m_guiManager = null;
+        m_persistentDataManager = null;
+        m_backgroundRenderer = null;
+    }
+
     protected void Start()
     {
-        m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-
         //Set up background fill color
         //GameObject backgroundObject = GameObject.FindGameObjectWithTag("Background");
         //ColorQuad fillQuad = backgroundObject.GetComponentInChildren<ColorQuad>();
@@ -40,23 +49,20 @@ public class GameController : MonoBehaviour
         //fillQuadAnimator.gameObject.transform.localScale = ScreenUtils.GetScreenSize();
 
         //parse xml levels files
-        m_levelManager.ParseAllLevels();
+        GetLevelManager().ParseAllLevels();
 
         //Init persistent data on first application launch
-        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
-        persistentDataManager.CreateAndInitAllLevelData();
+        GetPersistentManager().CreateAndInitAllLevelData();
 
         //Init the GUIManager
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
-        guiManager.Init();
+        GetGUIManager().Init();
 
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
         bgRenderer.Init();
         bgRenderer.gameObject.transform.localPosition = new Vector3(0, 0, BackgroundTrianglesRenderer.BACKGROUND_TRIANGLES_Z_VALUE);
 
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         //ShowMainMenu();
-        guiManager.ShowSideButtons(true, 1.0f);
         //DebugShowChapters();
         //DebugShowLevels(1);
         DebugShowSpecificLevel(1, 1, false);
@@ -69,7 +75,9 @@ public class GameController : MonoBehaviour
 
     public void ShowMainMenu()
     {
-        m_sceneManager.ShowContent(SceneManager.DisplayContent.MENU, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.MENU, true, 0.5f);
+
+        GetGUIManager().ShowSideButtons(true, 1.0f);
     }
 
     /**
@@ -77,10 +85,9 @@ public class GameController : MonoBehaviour
      * **/
     public void DebugShowChapters()
     {
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        bgRenderer.Offset(2 * ScreenUtils.GetScreenSize().y);
+        GetBackgroundRenderer().Offset(2 * ScreenUtils.GetScreenSize().y);
 
-        m_sceneManager.ShowContent(SceneManager.DisplayContent.CHAPTERS, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.CHAPTERS, true, 0.5f);
     }
 
     /**
@@ -88,13 +95,11 @@ public class GameController : MonoBehaviour
      * **/
     public void DebugShowLevels(int iChapterNumber)
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
-        levelManager.SetCurrentChapterByNumber(iChapterNumber);
+        GetLevelManager().SetCurrentChapterByNumber(iChapterNumber);
 
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        bgRenderer.Offset(2 * ScreenUtils.GetScreenSize().y);
+        GetBackgroundRenderer().Offset(2 * ScreenUtils.GetScreenSize().y);
 
-        m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);
     }
 
     /**
@@ -102,14 +107,13 @@ public class GameController : MonoBehaviour
      * **/
     public void DebugShowSpecificLevel(int iChapterNumber, int iLevelNumber, bool bShowLevelIntro = true)
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        LevelManager levelManager = GetLevelManager();
         levelManager.SetCurrentChapterByNumber(iChapterNumber);
         levelManager.SetLevelOnCurrentChapter(iLevelNumber);
 
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
-        bgRenderer.Offset(2 * ScreenUtils.GetScreenSize().y);
+        GetBackgroundRenderer().Offset(2 * ScreenUtils.GetScreenSize().y);
 
-        m_sceneManager.ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, true, 0.5f);
+        GetSceneManager().ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, true, 0.5f);
     }
 
     protected void Update()
@@ -171,7 +175,7 @@ public class GameController : MonoBehaviour
         return false; //TODO remove this line
 
         //First we check if one of the shapes intersects a contour
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
 
         if (!gameScene.m_isShown)
             return false;
@@ -232,7 +236,7 @@ public class GameController : MonoBehaviour
     {
         return false; //TODO remove this line
 
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
 
         if (!gameScene.m_isShown)
             return false;
@@ -255,13 +259,13 @@ public class GameController : MonoBehaviour
         if (gameStatus == GameStatus.VICTORY)
         {
             Debug.Log("EndLevel VICTORY");
-            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
             gameScene.m_grid.Dismiss(2.0f, 1.0f);
-            gameScene.m_outlines.Dismiss(2.0f, 1.0f);
+            gameScene.m_outlines.Dismiss(true, 2.0f, 1.0f);
             gameScene.DismissInterfaceButtons(2.0f, 1.0f);
             gameScene.DismissActionButtons(2.0f, 1.0f);
 
-            LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            LevelManager levelManager = GetLevelManager();
             int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
             if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
             {
@@ -277,14 +281,13 @@ public class GameController : MonoBehaviour
             }
 
             //Save the status of this level to preferences
-            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
-            persistentDataManager.SetLevelDone(currentLevelNumber);
+            GetPersistentManager().SetLevelDone(currentLevelNumber);
 
         }
         else if (gameStatus == GameStatus.DEFEAT)
         {
             Debug.Log("EndLevel DEFEAT");
-            //m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
+            //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
         }
     }
 
@@ -294,6 +297,46 @@ public class GameController : MonoBehaviour
      * **/
     public void OnFinishEndingLevelVictory()
     {
-        m_sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 2.0f, 3.0f); //restart the level
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 2.0f, 3.0f); //restart the level
+    }
+
+    public SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+
+        return m_sceneManager;
+    }
+
+    public GUIManager GetGUIManager()
+    {
+        if (m_guiManager == null)
+            m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+
+        return m_guiManager;
+    }
+
+    public LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+
+        return m_levelManager;
+    }
+
+    public PersistentDataManager GetPersistentManager()
+    {
+        if (m_persistentDataManager == null)
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+
+        return m_persistentDataManager;
+    }
+
+    public BackgroundTrianglesRenderer GetBackgroundRenderer()
+    {
+        if (m_backgroundRenderer == null)
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+
+        return m_backgroundRenderer;
     }
 }

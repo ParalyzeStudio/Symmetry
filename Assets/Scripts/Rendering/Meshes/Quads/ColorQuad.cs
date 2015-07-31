@@ -2,13 +2,15 @@
 
 public class ColorQuad : BaseQuad
 {
-    public void Init()
+    public void Init(Material material = null)
     {
         InitQuadMesh();
 
         //init the array of colors
         Color[] colors = new Color[4];
         GetComponent<MeshFilter>().sharedMesh.colors = colors;
+
+        GetComponent<MeshRenderer>().sharedMaterial = material;
     }
 
     /**

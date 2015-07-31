@@ -94,9 +94,7 @@ public class Chapters : GUIScene
 
         //Left selection arrow
         GameObject leftArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
-                                                                          new Vector2(128.0f, 128.0f),
-                                                                          Color.black,
-                                                                          Color.black);
+                                                                          new Vector2(128.0f, 128.0f));
 
         leftArrowObject.name = "LeftSelectionArrow";
 
@@ -109,9 +107,7 @@ public class Chapters : GUIScene
 
         //Right selection arrow
         GameObject rightArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT,
-                                                                           new Vector2(128.0f, 128.0f),
-                                                                           Color.black,
-                                                                           Color.black);
+                                                                           new Vector2(128.0f, 128.0f));
 
         rightArrowObject.name = "RightSelectionArrow";
 
@@ -359,11 +355,8 @@ public class Chapters : GUIScene
         GameObject clonedProgressBarBg = Instantiate(m_progressBarBgGameObject);
         clonedProgressBarBg.transform.parent = progressBar.transform;
 
-        MeshRenderer meshRenderer = clonedProgressBarBg.GetComponent<MeshRenderer>();
-        meshRenderer.sharedMaterial = progressBarBgMaterial;
-
         ColorQuad colorQuad = clonedProgressBarBg.GetComponent<ColorQuad>();
-        colorQuad.Init();
+        colorQuad.Init(progressBarBgMaterial);
 
         ColorQuadAnimator progressBarBgAnimator = clonedProgressBarBg.GetComponent<ColorQuadAnimator>();
         progressBarBgAnimator.SetPosition(Vector3.zero);
@@ -375,11 +368,8 @@ public class Chapters : GUIScene
         GameObject clonedProgressBarFill = Instantiate(m_progressBarBgGameObject);
         clonedProgressBarFill.transform.parent = progressBar.transform;
 
-        meshRenderer = clonedProgressBarFill.GetComponent<MeshRenderer>();
-        meshRenderer.sharedMaterial = progressBarFillMaterial;
-
         colorQuad = clonedProgressBarFill.GetComponent<ColorQuad>();
-        colorQuad.Init();
+        colorQuad.Init(progressBarFillMaterial);
 
         ColorQuadAnimator progressBarFillAnimator = clonedProgressBarFill.GetComponent<ColorQuadAnimator>();
         progressBarFillAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));

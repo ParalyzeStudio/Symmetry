@@ -37,7 +37,7 @@ public class Outlines : MonoBehaviour
 
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                outlineSegment.Build(gridPointA, gridPointB, Color.white);
+                outlineSegment.Build(gridPointA, gridPointB, Color.white); //TODO replace white color by contour segment color
                 outlineSegment.transform.parent = outlineObject.transform;
             }
 
@@ -66,12 +66,26 @@ public class Outlines : MonoBehaviour
     }
 
     /**
-     * Fades out the outlines (when a level ends for instance)
+     * Show the outlines holder
      * **/
-    public void Dismiss(float fDuration, float fDelay)
+    public void Show(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
     {
         GameObjectAnimator outlinesAnimator = this.GetComponent<GameObjectAnimator>();
-        outlinesAnimator.FadeTo(0, fDuration, fDelay);
+        if (bAnimated)
+            outlinesAnimator.FadeTo(1, fDuration, fDelay);
+        else
+            outlinesAnimator.SetOpacity(1);
+    }
+
+    /**
+     * Dismiss the outlines holder (when a level ends for instance)
+     * **/
+    public void Dismiss(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
+    {
+        GameObjectAnimator outlinesAnimator = this.GetComponent<GameObjectAnimator>();
+        if (bAnimated)
+            outlinesAnimator.FadeTo(0, fDuration, fDelay);
+        else
+            outlinesAnimator.SetOpacity(1);
     }
 }
-

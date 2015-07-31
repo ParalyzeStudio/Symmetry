@@ -6,7 +6,8 @@ public class CounterElement : MonoBehaviour
     public const float SKIN_Z_VALUE = 0.0f;
     public const float OVERLAY_Z_VALUE = -1.0f;
 
-    public GameObject m_baseQuadElementPfb;
+    //shared prefabs
+    public GameObject m_colorQuadPfb;
 
     private GameObject m_overlay; //the overlay that is displayed on the current action
     private GameObject m_skin; //the skin of this element
@@ -54,9 +55,12 @@ public class CounterElement : MonoBehaviour
         m_overlayColor = new Color(0,0,0,1);
     }
 
+    /**
+     * Init the skin and shadow quads of this counter element
+     * **/
     private void InitSkinAndShadow()
     {
-        m_skin = Instantiate(m_baseQuadElementPfb);
+        m_skin = Instantiate(m_colorQuadPfb);
         m_skin.GetComponent<ColorQuad>().Init();
         m_skin.transform.parent = this.gameObject.transform;
         ColorQuadAnimator skinAnimator = m_skin.GetComponent<ColorQuadAnimator>();
@@ -67,7 +71,7 @@ public class CounterElement : MonoBehaviour
         skinAnimator.SetColor(m_skinColor);
         SetStatus(CounterElementStatus.WAITING);
 
-        m_shadow = Instantiate(m_baseQuadElementPfb);
+        m_shadow = Instantiate(m_colorQuadPfb);
         m_shadow.transform.parent = this.gameObject.transform;
         m_shadow.GetComponent<ColorQuad>().Init();
         ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
@@ -79,6 +83,25 @@ public class CounterElement : MonoBehaviour
         m_shadow.GetComponent<MeshRenderer>().sharedMaterial = m_shadowMaterial;
     }
 
+    /**
+     * Init the overlay quad of this counter element
+     * **/
+    private void InitOverlay()
+    {
+        m_overlay = Instantiate(m_colorQuadPfb);
+        m_overlay.transform.parent = this.transform;
+        m_overlay.GetComponent<ColorQuad>().Init(m_overlayMaterial);
+        ColorQuadAnimator overlayAnimator = m_overlay.GetComponent<ColorQuadAnimator>();
+        overlayAnimator.SetRotationAxis(Vector3.forward);
+        overlayAnimator.SetRotationAngle(45);
+        overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
+        overlayAnimator.SetPosition(new Vector3(0, 6, OVERLAY_Z_VALUE));
+        overlayAnimator.SetColor(m_overlayColor);
+    }
+
+    /**
+     * Set the status (CURRENT, DONE or WAITING) and rebuild it if necessary
+     * **/
     public void SetStatus(CounterElementStatus status)
     {
         m_status = status;
@@ -94,16 +117,7 @@ public class CounterElement : MonoBehaviour
         {
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
 
-            m_overlay = Instantiate(m_baseQuadElementPfb);
-            m_overlay.transform.parent = this.transform;
-            m_overlay.GetComponent<ColorQuad>().Init();
-            m_overlay.GetComponent<MeshRenderer>().sharedMaterial = m_overlayMaterial;
-            ColorQuadAnimator overlayAnimator = m_overlay.GetComponent<ColorQuadAnimator>();
-            overlayAnimator.SetRotationAxis(Vector3.forward);
-            overlayAnimator.SetRotationAngle(45);
-            overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
-            overlayAnimator.SetPosition(new Vector3(0, 6, OVERLAY_Z_VALUE));
-            overlayAnimator.SetColor(m_overlayColor);
+            InitOverlay();
         }
         else if (status == CounterElementStatus.DONE)
         {

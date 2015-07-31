@@ -13,17 +13,13 @@ public class GameScene : GUIScene
     public const float AXES_Z_VALUE = -210.0f;
 
     //public GameObject m_gridAnchorSelectedPfb;
+    public GameObject m_radialGradientPfb;
 
     public Grid m_grid { get; set; }
     public Counter m_counter { get; set; }
     public Outlines m_outlines { get; set; }
     public Shapes m_shapes { get; set; }
     public Axes m_axes { get; set; }
-
-    //interface buttons prefabs
-    public GameObject m_menuBtnPfb;
-    public GameObject m_retryBtnPfb;
-    public GameObject m_hintsBtnPfb;
 
     //holders
     public GameObject m_actionButtonsHolder { get; set; }
@@ -60,14 +56,37 @@ public class GameScene : GUIScene
         GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         sceneAnimator.SetOpacity(1.0f);
 
+        //Display the grid
         ShowGrid(fDelay);
-        //ShowActionButtons(fDelay);
+        
+        //Display interface buttons (pause, retry and hints)
         ShowInterfaceButtons(fDelay);
+
+        //Display action counter
         ShowCounter(fDelay);
-        //ShowOutlines(fDelay);
+
+        //Show outlines (if applicable)
+        ShowOutlines(fDelay);
+
+        //Show available symmetry axes
+        ShowAvailableAxes();
+
+        //Show action buttons
+        ShowActionButtons();
+
         //ShowInitialShapes(fDelay);
         //m_axes = this.gameObject.GetComponentInChildren<Axes>();
         //m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
+
+        GameObject radialGradientBackground = Instantiate(m_radialGradientPfb);
+        radialGradientBackground.transform.parent = this.transform;
+        radialGradientBackground.transform.localPosition = new Vector3(0,0,-5.1f);
+        radialGradientBackground.transform.localScale = GeometryUtils.BuildVector3FromVector2(ScreenUtils.GetScreenSize(), 1);
+
+        GradientQuad gradientQuad = radialGradientBackground.GetComponent<GradientQuad>();
+        gradientQuad.InitRadial(ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255)),
+                                ColorUtils.GetColorFromRGBAVector4(new Vector4(64,12,26,255)),
+                                500);
 
         m_isShown = true;
     }
@@ -128,7 +147,7 @@ public class GameScene : GUIScene
         holderAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - 0.5f * interfaceButtonSize.y - distanceToTopBorder, INTERFACE_BUTTONS_Z_VALUE));
 
         //menu button
-        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
         pauseButtonObject.name = "PauseButton";
         pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
@@ -137,7 +156,7 @@ public class GameScene : GUIScene
         pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, 0, 0));
 
         //retry button
-        GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
         retryButtonObject.name = "RetryButton";
         retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
@@ -146,7 +165,7 @@ public class GameScene : GUIScene
         retryButtonAnimator.SetPosition(new Vector3(retryBtnPositionX, 0, 0));
 
         //hints button
-        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize, Color.black, Color.black);
+        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
         hintsButtonObject.name = "HintsButton";
         hintsButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
 
@@ -207,7 +226,54 @@ public class GameScene : GUIScene
 
         GameObjectAnimator outlinesAnimator = m_outlines.gameObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetOpacity(0);
-        outlinesAnimator.FadeTo(1, 0.5f, fDelay);
+        m_outlines.Show(true, 0.5f, fDelay);
+    }
+
+    /**
+     * Draw small icons to show the constraints on axes that the player can draw
+     * **/
+    private void ShowAvailableAxes()
+    {
+
+    }
+
+    /**
+     * Build the 3 action buttons that appear on the left side of the screen
+     * -First button allows player to switch between action modes (symmetry types or shape translation)
+     * -Second button is for modifying the behavior of color symmetrization (addition or soustraction)
+     * -Third button is for picking a color that will apply to the symmetry done by the user by filtering shapes that are not of that specific color
+     * **/
+    private void ShowActionButtons()
+    {
+        Vector2 actionButtonSkinSize = new Vector2(128,128);
+
+        //Show top button
+        GameObject topActionButton = GetGUIManager().CreateActionButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
+                                                                             actionButtonSkinSize,
+                                                                             ActionButton.Location.TOP);
+
+        topActionButton.name = "TopActionBtn";
+        topActionButton.transform.parent = this.transform;
+
+        //Show middle button
+        GameObject middleActionButton = GetGUIManager().CreateActionButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
+                                                                                actionButtonSkinSize,
+                                                                                ActionButton.Location.MIDDLE);
+
+        middleActionButton.name = "MiddleActionBtn";
+        middleActionButton.transform.parent = this.transform;
+
+        //Show bottom button
+        GameObject bottomActionButton = GetGUIManager().CreateActionButtonForID(GUIButton.GUIButtonID.ID_OPTIONS_BUTTON,
+                                                                                actionButtonSkinSize,
+                                                                                ActionButton.Location.BOTTOM);
+
+        bottomActionButton.name = "BottomActionBtn";
+        bottomActionButton.transform.parent = this.transform;
+
+        topActionButton.GetComponent<ActionButton>().Show();
+        middleActionButton.GetComponent<ActionButton>().Show();
+        bottomActionButton.GetComponent<ActionButton>().Show();
     }
 
     /**
@@ -245,82 +311,7 @@ public class GameScene : GUIScene
         //GameObject shapeObject = m_shapes.m_shapesObj[0];
         //Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
         //Shapes.PerformFusionOnShape(fusionShape);
-
-        DebugIssues();
-    }
-
-    public void DebugIssues()
-    {
-        ///DEBUG
-        //Contour debugContourShape1 = new Contour();
-
-        //debugContourShape1.Add(new Vector2(2, 4));
-        //debugContourShape1.Add(new Vector2(2, 1));
-        //debugContourShape1.Add(new Vector2(6, 1));
-        //debugContourShape1.Add(new Vector2(6, 4));
-
-        //Shape debugShape1 = new Shape(debugContourShape1);
-
-        //Contour debugContourShape2 = new Contour();
-        //debugContourShape2.Add(new Vector2(4, 4));
-        //debugContourShape2.Add(new Vector2(3, 3));
-        //debugContourShape2.Add(new Vector2(4, 2));
-        //debugContourShape2.Add(new Vector2(5, 3));
-        //Shape debugShape2 = new Shape(debugContourShape2);
-
-        //List<Shape> debugResultingShapes = ClippingBooleanOperations.ShapesOperation(debugShape1, debugShape2, ClipperLib.ClipType.ctDifference);
-
-        //for (int i = 0; i != debugResultingShapes.Count; i++)
-        //{
-        //    debugResultingShapes[i].m_color = new Color(1, 0, 0, 0.5f);
-        //    m_shapes.CreateShapeObjectFromData(debugResultingShapes[i]);
-        //}
-
-        /*******************************/
-        //Contour debugContourShape1 = new Contour();
-
-        //debugContourShape1.Add(new Vector2(4, 4));
-        //debugContourShape1.Add(new Vector2(2, 4));
-        //debugContourShape1.Add(new Vector2(2, 1));
-        //debugContourShape1.Add(new Vector2(6, 1));
-        //debugContourShape1.Add(new Vector2(6, 4));
-
-        //debugContourShape1.RemoveAlignedVertices();
-
-        //List<Contour> debugHoles = new List<Contour>();
-        //Contour debugHoleShape1 = new Contour();
-
-        //debugHoleShape1.Add(new Vector2(4, 4));
-        //debugHoleShape1.Add(new Vector2(5, 3));
-        //debugHoleShape1.Add(new Vector2(4, 2));
-        //debugHoleShape1.Add(new Vector2(3, 3));
-        //debugHoles.Add(debugHoleShape1);
-
-        //Shape debugShape1 = new Shape(debugContourShape1, debugHoles);
-        //debugShape1.Triangulate();
-        //debugShape1.m_color = new Color(1, 0, 0, 0.5f);
-        //m_shapes.CreateShapeObjectFromData(debugShape1);
-
-        /*******************************/
-        //Debug.Log(debugResultingShapes.Count);
-
-        //Contour debugContour = new Contour();
-        //debugContour.Capacity = 11;
-        //debugContour.Add(new Vector2(1, 2));
-        //debugContour.Add(new Vector2(2, 3));
-        //debugContour.Add(new Vector2(3, 2));
-        //debugContour.Add(new Vector2(4, 3));
-        //debugContour.Add(new Vector2(5, 2));
-        //debugContour.Add(new Vector2(6, 3));
-        //debugContour.Add(new Vector2(7, 2));
-        //debugContour.Add(new Vector2(6, 1));
-        //debugContour.Add(new Vector2(5, 2));
-        //debugContour.Add(new Vector2(4, 1));
-        //debugContour.Add(new Vector2(3, 2));
-        //debugContour.Add(new Vector2(2, 1));
-
-        //List<Contour> splitContours = ClippingBooleanOperations.SplitContour(debugContour);
-    }
+    }    
 
     /**
      * Method that tells if one of the symmetry HUDButton is selected
@@ -361,9 +352,7 @@ public class GameScene : GUIScene
         topRightDirection.Normalize();
         bottomRightDirection.Normalize();
         bottomLeftDirection.Normalize();
-        topLeftDirection.Normalize();
-
-        
+        topLeftDirection.Normalize();        
 
         List<Vector2> directions = new List<Vector2>();
 
