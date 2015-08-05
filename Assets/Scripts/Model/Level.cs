@@ -9,7 +9,7 @@ public class Level
     public string m_name { get; set; }
     public List<DottedOutline> m_outlines { get; set; }
     public List<Shape> m_initialShapes { get; set; }
-    public List<string> m_actionButtonsTags { get; set; }
+    public List<string> m_axisConstraints { get; set; }
     public int m_maxActions { get; set; }
     public int m_gridMinNumLines { get; set; }
     public int m_gridMinNumColumns { get; set; }
@@ -21,7 +21,7 @@ public class Level
     {
         m_outlines = new List<DottedOutline>();
         m_initialShapes = new List<Shape>();
-        m_actionButtonsTags = new List<string>();
+        m_axisConstraints = new List<string>();
 
         m_gridMinNumLines = 0;
         m_gridMinNumColumns = 0;

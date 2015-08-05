@@ -131,24 +131,26 @@ public class SimplifiedRoundedSegment : TexturedSegment
         mesh.uv = meshUVs;
     }
 
-    public override void SetPointA(Vector2 pointB, bool bGridPoint = false)
+    public override void SetPointA(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
     {
         m_pointB = pointB;
 
         if (bGridPoint)
             TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
 
-        RenderInternal(true, false, false);
+        if (bRenderSegment)
+            RenderInternal(true, false, false);
     }
 
-    public override void SetPointB(Vector2 pointB, bool bGridPoint = false)
+    public override void SetPointB(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
     {
         m_pointB = pointB;
 
         if (bGridPoint)
             TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
 
-        RenderInternal(true, false, false);
+        if (bRenderSegment)
+            RenderInternal(true, false, false);
     }
 
     public override void SetThickness(float thickness)

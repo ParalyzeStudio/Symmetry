@@ -69,7 +69,9 @@ public class GridTouchHandler : TouchHandler
         {
             //try to snap, if not just render the axis normally
             if (!axisRenderer.TryToSnapAxisEndpointToClosestAnchor())
+            {
                 axisRenderer.Render(axisRenderer.m_endpoint1Position, pointerLocation, false);
+            }
         }
 
         return true;
@@ -87,11 +89,11 @@ public class GridTouchHandler : TouchHandler
         {
             AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
 
-            if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
-            {
-                Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
-                symmetrizer.SymmetrizeByAxis();
-            }
+            //if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
+            //{
+            //    Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+            //    symmetrizer.SymmetrizeByAxis();
+            //}
 
             //remove the axis from the axes list and destroy the object
             gameScene.m_axes.RemoveAxis(currentAxis);

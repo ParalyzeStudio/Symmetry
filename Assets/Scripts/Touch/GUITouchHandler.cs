@@ -5,9 +5,7 @@ public class GUITouchHandler : TouchHandler
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
-        {
-            GUIManager guiManager = this.gameObject.GetComponent<GUIManager>();
-            
+        {            
             GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
 
             for (int i = 0; i != allButtons.Length; i++)
@@ -79,14 +77,13 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickPlay()
     {
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+        BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
         bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
         bgRenderer.GenerateChapterGradient();
         bgRenderer.GenerateTransitionGradients();
         bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 4.0f);
 
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 4.0f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 4.0f);
     }
 
     /**
@@ -97,8 +94,7 @@ public class GUITouchHandler : TouchHandler
         //GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
         //sceneAnimator.FadeTo(0, 0.7f);
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f);
     }
 
     /**
@@ -143,7 +139,8 @@ public class GUITouchHandler : TouchHandler
     public void HandleClickOnMainMenu(Vector2 clickLocation)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        MainMenu mainMenu = (MainMenu) GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+
+        MainMenu mainMenu = (MainMenu) GetSceneManager().m_currentScene;
 
         //transform the click location in screen rect coordinates
         //clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
@@ -165,8 +162,7 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnChapters(Vector2 clickLocation)
     {     
-        SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-        Chapters chapters = (Chapters)sceneManager.m_currentScene;
+        Chapters chapters = (Chapters)GetSceneManager().m_currentScene;
 
         if (!HandleClickOnChildGUIButtons(chapters.gameObject, clickLocation))
         {

@@ -4,6 +4,9 @@ public class ColorSegment : Segment
 {
     protected Color m_color; //the color of the segment
 
+    protected Color[] m_meshColors;
+    protected bool m_meshColorsDirty;
+
     protected virtual void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateColor = true)
     {
         base.RenderInternal(bUpdateVertices, bUpdateIndices);
@@ -13,13 +16,14 @@ public class ColorSegment : Segment
             Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
 
             int colorsLength = mesh.vertices.Length;
-            Color[] colors = new Color[colorsLength];
+            if (m_meshColors == null)
+                m_meshColors = new Color[colorsLength];
             for (int i = 0; i != colorsLength; i++)
             {
-                colors[i] = m_color;
+                m_meshColors[i] = m_color;
             }
 
-            mesh.colors = colors;
+            m_meshColorsDirty = true;
         }
     }
 
@@ -36,6 +40,20 @@ public class ColorSegment : Segment
     public virtual void SetColor(Color color)
     {
         RenderInternal(false, false, true);
+    }
+
+
+    public override void Update()
+    {
+        base.Update();
+        if (m_segmentMesh != null)
+        {
+            if (m_meshColorsDirty)
+            {
+                m_segmentMesh.colors = m_meshColors;
+                m_meshColorsDirty = false;
+            }
+        }
     }
 }
 

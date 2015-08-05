@@ -3,7 +3,6 @@
 /**
  * Use this class to render a segment with one color and possible rounded endpoints
  * **/
-
 public class Segment : MonoBehaviour
 {
     protected Vector2 m_pointA; //first point of the segment
@@ -17,6 +16,14 @@ public class Segment : MonoBehaviour
     protected float m_angle;
 
     public const int DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE = 16;
+
+    //mesh arrays
+    protected Mesh m_segmentMesh;
+    protected Vector3[] m_meshVertices;
+    protected int[] m_meshIndices;
+    protected bool m_meshVerticesDirty;
+    protected bool m_meshIndicesDirty;
+    private int m_prevNumVertices;
 
     /**
      * Renders the segment with rounded endpoints
@@ -38,100 +45,100 @@ public class Segment : MonoBehaviour
 
         //Build the actual mesh if it doesnt exist
         MeshFilter meshFilter = GetComponent<MeshFilter>();
-        Mesh roundedSegmentMesh = meshFilter.sharedMesh;
-        if (roundedSegmentMesh == null)
-        {
-            roundedSegmentMesh = new Mesh();
-            roundedSegmentMesh.name = "RoundedSegmentMesh";
-        }
+        InitSegmentMesh();        
 
         if (bUpdateVertices)
         {
             int numVertices = (m_numSegmentsPerHalfCircle <= 1) ? 4 : 2 * (m_numSegmentsPerHalfCircle + 1);
-            Vector3[] meshVertices = new Vector3[numVertices];
+            if (m_meshVertices == null || numVertices != m_prevNumVertices)
+            {
+                m_meshVertices = new Vector3[numVertices];
+                m_prevNumVertices = numVertices;
+            }
 
             //Build vertices
             //left vertices
-            meshVertices[0] = localPointA - new Vector3(0, 0.5f * m_thickness, 0);
-            meshVertices[1] = localPointA + new Vector3(0, 0.5f * m_thickness, 0);
+            m_meshVertices[0] = localPointA - new Vector3(0, 0.5f * m_thickness, 0);
+            m_meshVertices[1] = localPointA + new Vector3(0, 0.5f * m_thickness, 0);
             for (int i = 2; i != numVertices / 2; i++)
             {
                 float vertexAngle = Mathf.PI / 2.0f + i * Mathf.PI / (float)m_numSegmentsPerHalfCircle;
-                meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
-                meshVertices[i] += localPointA;
+                m_meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
+                m_meshVertices[i] += localPointA;
             }
 
             //right vertices
-            meshVertices[numVertices / 2] = localPointB - new Vector3(0, 0.5f * m_thickness, 0);
-            meshVertices[numVertices / 2 + 1] = localPointB + new Vector3(0, 0.5f * m_thickness, 0);
+            m_meshVertices[numVertices / 2] = localPointB - new Vector3(0, 0.5f * m_thickness, 0);
+            m_meshVertices[numVertices / 2 + 1] = localPointB + new Vector3(0, 0.5f * m_thickness, 0);
             for (int i = numVertices / 2 + 2; i != numVertices; i++)
             {
                 int offsetIndex = i - numVertices / 2 - 2;
                 float vertexAngle = Mathf.PI / 2.0f - offsetIndex * Mathf.PI / (float)m_numSegmentsPerHalfCircle;
-                meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
-                meshVertices[i] += localPointB;
+                m_meshVertices[i] = 0.5f * m_thickness * new Vector3(Mathf.Cos(vertexAngle), Mathf.Sin(vertexAngle), 0);
+                m_meshVertices[i] += localPointB;
             }
 
-            roundedSegmentMesh.vertices = meshVertices;
-
-            //build normals
-            Vector3[] normals = new Vector3[numVertices];
-            for (int i = 0; i != numVertices; i++)
-            {
-                normals[i] = Vector3.forward;
-            }
-            roundedSegmentMesh.normals = normals;
+            m_meshVerticesDirty = true;
 
             //build triangles
             if (bUpdateIndices)
             {
                 int numTriangles = numVertices - 2;
-                int[] meshIndices = new int[3 * numTriangles];
+                m_meshIndices = new int[3 * numTriangles];
 
                 if (numTriangles > 2)
                 {
                     //left rounded endpoint
                     for (int i = 0; i != (numTriangles / 2 - 1); i++)
                     {
-                        meshIndices[3 * i] = 0;
-                        meshIndices[3 * i + 1] = i + 2;
-                        meshIndices[3 * i + 2] = i + 1;
+                        m_meshIndices[3 * i] = 0;
+                        m_meshIndices[3 * i + 1] = i + 2;
+                        m_meshIndices[3 * i + 2] = i + 1;
                     }
 
                     //right rounded endpoint
                     for (int i = (numTriangles / 2 - 1); i != (numTriangles - 2); i++)
                     {
                         int offsetIndex = i - (numTriangles / 2 - 1);
-                        meshIndices[3 * i] = numVertices / 2;
-                        meshIndices[3 * i + 1] = numVertices / 2 + offsetIndex + 1;
-                        meshIndices[3 * i + 2] = numVertices / 2 + offsetIndex + 2;
+                        m_meshIndices[3 * i] = numVertices / 2;
+                        m_meshIndices[3 * i + 1] = numVertices / 2 + offsetIndex + 1;
+                        m_meshIndices[3 * i + 2] = numVertices / 2 + offsetIndex + 2;
                     }
 
                     //central segment
-                    meshIndices[3 * (numTriangles - 2)] = 0;
-                    meshIndices[3 * (numTriangles - 2) + 1] = 1;
-                    meshIndices[3 * (numTriangles - 2) + 2] = numVertices / 2 + 1;
-                    meshIndices[3 * (numTriangles - 1)] = 0;
-                    meshIndices[3 * (numTriangles - 1) + 1] = numVertices / 2 + 1;
-                    meshIndices[3 * (numTriangles - 1) + 2] = numVertices / 2;
+                    m_meshIndices[3 * (numTriangles - 2)] = 0;
+                    m_meshIndices[3 * (numTriangles - 2) + 1] = 1;
+                    m_meshIndices[3 * (numTriangles - 2) + 2] = numVertices / 2 + 1;
+                    m_meshIndices[3 * (numTriangles - 1)] = 0;
+                    m_meshIndices[3 * (numTriangles - 1) + 1] = numVertices / 2 + 1;
+                    m_meshIndices[3 * (numTriangles - 1) + 2] = numVertices / 2;
                 }
                 else
                 {
                     //only the central segment
-                    meshIndices[0] = 0;
-                    meshIndices[1] = 1;
-                    meshIndices[2] = 3;
-                    meshIndices[3] = 0;
-                    meshIndices[4] = 3;
-                    meshIndices[5] = 2;
+                    m_meshIndices[0] = 0;
+                    m_meshIndices[1] = 1;
+                    m_meshIndices[2] = 3;
+                    m_meshIndices[3] = 0;
+                    m_meshIndices[4] = 3;
+                    m_meshIndices[5] = 2;
                 }
 
-                roundedSegmentMesh.triangles = meshIndices;
+                m_meshIndicesDirty = true;
             }
+        }
+    }
 
-            //Set the mesh to the MeshFilter component
-
-            meshFilter.sharedMesh = roundedSegmentMesh;
+    /**
+     * Creates the segment mesh if not done already
+     * **/
+    private void InitSegmentMesh()
+    {
+        if (m_segmentMesh == null)
+        {
+            m_segmentMesh = new Mesh();
+            m_segmentMesh.name = "SegmentMesh";
+            GetComponent<MeshFilter>().sharedMesh = m_segmentMesh;
         }
     }
 
@@ -181,27 +188,29 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointA. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointA(Vector2 pointA, bool bGridPoint = false)
+    public virtual void SetPointA(Vector2 pointA, bool bGridPoint = false, bool bRenderSegment = true)
     {
         m_pointA = pointA;
 
         if (bGridPoint)
             TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
 
-        RenderInternal(true, false);
+        if (bRenderSegment)
+            RenderInternal(true, false);
     }
 
     /**
      * Set new coordinates for pointB. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointB(Vector2 pointB, bool bGridPoint = false)
+    public virtual void SetPointB(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
     {
         m_pointB = pointB;
 
         if (bGridPoint)            
             TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
 
-        RenderInternal(true, false);
+        if (bRenderSegment)
+            RenderInternal(true, false);
     }
 
     /**
@@ -294,4 +303,21 @@ public class Segment : MonoBehaviour
     //    //set the size
     //    this.transform.localScale = new Vector3(m_length, m_thickness, this.transform.localScale.z);
     //}
+
+    public virtual void Update()
+    {
+        if (m_segmentMesh != null)
+        { 
+            if (m_meshVerticesDirty)
+            {
+                m_segmentMesh.vertices = m_meshVertices;
+                m_meshVerticesDirty = false;
+            }
+            if (m_meshIndicesDirty)
+            {
+                m_segmentMesh.triangles = m_meshIndices;
+                m_meshIndicesDirty = false;
+            }
+        }
+    }
 }

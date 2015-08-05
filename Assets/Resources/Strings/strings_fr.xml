@@ -8,4 +8,13 @@
 	<string tag="sound" value="SON"/>
 	<string tag="reset" value="REINITIALISER"/>
 	<string tag="progress_bar_completion" value="complétés"/>
-</strings>
+	
+	<!-- Action buttons-->
+	<string tag="action_symmetry_two_sides" value="SYM 2 SIDES"/>
+	<string tag="action_symmetry_one_side" value="SYM 1 SIDE"/>
+	<string tag="action_point_symmetry" value="POINT SYM"/>
+	<string tag="action_move_shape" value="MOVE SHAPE"/>
+	<string tag="action_operation_addition" value="ADDITION"/>
+	<string tag="action_operation_substraction" value="SUBSTRACTION"/>
+	<string tag="action_color_filter" value="COLOR FILTER"/>
+</strings> 

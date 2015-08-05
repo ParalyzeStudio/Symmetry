@@ -5,12 +5,11 @@ public class Axes : MonoBehaviour
 {
     public List<GameObject> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
-    public Material m_axisSegmentMaterial;
-    public Material m_axisSegmentMaterialInstance { get; set; }
 
+    //snap animation
     public GameObject m_circlePfb;
-    public Material m_circleMaterial;
-    private Material m_circleMaterialInstance;
+    public Material m_positionColorMaterial;
+    private Material m_circleMaterial;
 
     public void Awake()
     {
@@ -19,8 +18,7 @@ public class Axes : MonoBehaviour
 
     public void Start()
     {
-        m_axisSegmentMaterialInstance = (Material)Instantiate(m_axisSegmentMaterial);
-        m_circleMaterialInstance = (Material)Instantiate(m_circleMaterial);
+        m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
     public GameObject BuildAxis(Vector2 gridStartPosition)
@@ -76,13 +74,13 @@ public class Axes : MonoBehaviour
         //clonedCircle.transform.parent = this.transform;
         clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
         CircleMesh circleMesh = clonedCircle.GetComponent<CircleMesh>();
-        circleMesh.Init(m_circleMaterialInstance);
+        circleMesh.Init(m_circleMaterial);
 
         CircleMeshAnimator circleAnimator = clonedCircle.GetComponent<CircleMeshAnimator>();
         circleAnimator.SetNumSegments(64, false);
         circleAnimator.SetInnerRadius(0, false);
         circleAnimator.SetOuterRadius(2, true);
-        circleAnimator.SetColor(Color.black);
+        circleAnimator.SetColor(Color.white);
 
         circleAnimator.AnimateInnerRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
         circleAnimator.AnimateOuterRadiusTo(22, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);

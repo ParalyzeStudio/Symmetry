@@ -6,8 +6,9 @@ using System;
 public class Grid : MonoBehaviour
 {
     //Shared prefabs
-    public GameObject m_texQuadPfb;
-    public Material m_gridAnchorMaterial;
+    public GameObject m_circleMeshPfb;
+    public Material m_positionColorMaterial;
+    private Material m_gridAnchorMaterial;
 
     public GameObject[] m_anchors { get; set; }
     public Vector2 m_gridSize { get; set; }
@@ -17,9 +18,7 @@ public class Grid : MonoBehaviour
     //public GameObject m_gridConstraintAnchorPfb;
 
     public void Build()
-    {
-        SetGridColor(Color.white);       
-
+    {   
         //Get the number of min lines and min columns we want for this level
         LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
         Level currentLevel = levelManager.m_currentLevel;
@@ -59,6 +58,9 @@ public class Grid : MonoBehaviour
         Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
         this.gameObject.transform.localPosition = gridPosition;
 
+        //Build anchors
+        m_gridAnchorMaterial = Instantiate(m_positionColorMaterial);
+
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {
             for (int iColumnNumber = 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
@@ -86,17 +88,19 @@ public class Grid : MonoBehaviour
                 }
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
-                GameObject clonedGridAnchor = (GameObject)Instantiate(m_texQuadPfb);
+                GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
                 clonedGridAnchor.transform.parent = this.transform;
 
-                UVQuad gridAnchorQuad = clonedGridAnchor.GetComponent<UVQuad>();
+                CircleMesh gridAnchorQuad = clonedGridAnchor.GetComponent<CircleMesh>();
                 gridAnchorQuad.Init(m_gridAnchorMaterial);
                 int iAnchorIndex = (iColumnNumber - 1) * exactNumLines + (iLineNumber - 1);
 
-                TexturedQuadAnimator anchorAnimator = clonedGridAnchor.GetComponent<TexturedQuadAnimator>();
-                anchorAnimator.SetScale(new Vector3(8, 8, 1));
+                CircleMeshAnimator anchorAnimator = clonedGridAnchor.GetComponent<CircleMeshAnimator>();
+                anchorAnimator.SetNumSegments(4, false);
+                anchorAnimator.SetInnerRadius(0, false);
+                anchorAnimator.SetOuterRadius(4, true);
                 anchorAnimator.SetPosition(anchorLocalPosition);
-
+                anchorAnimator.SetColor(Color.white);
 
                 m_anchors[iAnchorIndex] = clonedGridAnchor;
             }
@@ -262,14 +266,6 @@ public class Grid : MonoBehaviour
             return GetPointGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
         else
             return Vector2.zero;
-    }
-
-    /**
-     * Set the color of each grid anchor by setting the _Color parameter on their shared material
-     * **/
-    public void SetGridColor(Color color)
-    {
-        m_gridAnchorMaterial.SetColor("_Color", color);
     }
 
     ///**

@@ -263,7 +263,6 @@ public class GameController : MonoBehaviour
             gameScene.m_grid.Dismiss(2.0f, 1.0f);
             gameScene.m_outlines.Dismiss(true, 2.0f, 1.0f);
             gameScene.DismissInterfaceButtons(2.0f, 1.0f);
-            gameScene.DismissActionButtons(2.0f, 1.0f);
 
             LevelManager levelManager = GetLevelManager();
             int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;

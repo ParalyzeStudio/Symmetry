@@ -157,7 +157,6 @@ public class LevelManager : MonoBehaviour
                 shapeColor.r = float.Parse(strSplitColor[0]);
                 shapeColor.g = float.Parse(strSplitColor[1]);
                 shapeColor.b = float.Parse(strSplitColor[2]);
-                shapeColor.a = float.Parse(strSplitColor[3]);
                 shape.m_color = shapeColor;
 
                 //Contour
@@ -202,15 +201,15 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        //Parse action buttons tags
+        //Parse axis constraints
         XMLNodeList actionsNodeList = levelNode.GetNodeList("actions>0>action");
         if (actionsNodeList != null)
         {
-            level.m_actionButtonsTags.Capacity = actionsNodeList.Count;
+            level.m_axisConstraints.Capacity = actionsNodeList.Count;
             foreach (XMLNode actionNode in actionsNodeList)
             {
                 string actionTag = actionNode.GetValue("@tag");
-                level.m_actionButtonsTags.Add(actionTag);
+                level.m_axisConstraints.Add(actionTag);
             }
         }
 

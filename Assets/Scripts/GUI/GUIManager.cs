@@ -57,6 +57,14 @@ public class GUIManager : MonoBehaviour
     public Material m_skinHints;
     public Material m_skinRetry;
     public Material m_skinPause;
+
+    //Materials for action buttons
+    public Material m_skinSymmetryTwoSides;
+    public Material m_skinSymmetryOneSide;
+    public Material m_skinPointSymmetry;
+    public Material m_skinMoveShape;
+    public Material m_skinOperationAdd;
+    public Material m_skinOperationSubstract;
     public Material m_skinColorFilter;
     public Material m_GUIButtonBackground;
     public Material m_GUIButtonShadow;
@@ -101,15 +109,13 @@ public class GUIManager : MonoBehaviour
     /**
      * Same as previous method but for an action button
      * **/
-    public GameObject CreateActionButtonForID(GUIButton.GUIButtonID iID, Vector2 size, ActionButton.Location location, Material forcedSkinMaterial = null)
+    public GameObject CreateActionButton(Vector2 size, ActionButton.Location location, GUIButton.GUIButtonID[] childIDs)
     {
         GameObject buttonObject = (GameObject)Instantiate(m_actionButtonPfb);
 
         //Set the relevant skin material for the specified button ID
-        Material buttonSkinMaterial = (forcedSkinMaterial == null) ? GetClonedSkinMaterialForID(iID) : forcedSkinMaterial;
         ActionButton button = buttonObject.GetComponent<ActionButton>();
-        button.Init(buttonSkinMaterial, Color.white, location);
-        button.m_ID = iID;
+        button.Init(Color.white, location, childIDs);
 
         //Set the size of the button skin
         button.SetSize(size);
@@ -128,9 +134,7 @@ public class GUIManager : MonoBehaviour
         else if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
             skinMaterial = m_skinLevels;
         else if (iID == GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
-            skinMaterial = m_skinCloseOverlay;
-        else if (iID == GUIButton.GUIButtonID.ID_COLOR_FILTER)
-            skinMaterial = m_skinColorFilter;
+            skinMaterial = m_skinCloseOverlay;        
         else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
             skinMaterial = m_skinCredits;
         else if (iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON)
@@ -149,8 +153,25 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinRetry;
         else if (iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS || iID == GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
             skinMaterial = m_skinSelectionArrow;
+        else if (iID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES)
+            skinMaterial = m_skinSymmetryTwoSides;
+        else if (iID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE)
+            skinMaterial = m_skinSymmetryOneSide;
+        else if (iID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
+            skinMaterial = m_skinPointSymmetry;
+        else if (iID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
+            skinMaterial = m_skinMoveShape;
+        else if (iID == GUIButton.GUIButtonID.ID_OPERATION_ADD)
+            skinMaterial = m_skinOperationAdd;
+        else if (iID == GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT)
+            skinMaterial = m_skinOperationSubstract;
+        else if (iID == GUIButton.GUIButtonID.ID_COLOR_FILTER)
+            skinMaterial = m_skinColorFilter;
         else
             skinMaterial = m_skinOptions;
+
+        if (skinMaterial == null)
+            skinMaterial = m_skinCloseOverlay;
 
         return Instantiate(skinMaterial);
     }

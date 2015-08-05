@@ -26,15 +26,22 @@ public class ActionButton : GUIButton
     }
     private Location m_location;
 
-    public void Init(Material skinMaterial, Color tintColor, Location location)
+    //the list of IDs this button is cycling on
+    public GUIButton.GUIButtonID[] m_childIDs { get; set; }
+    public int m_currentChildIdIndex { get; set; }
+
+    public void Init(Color tintColor, Location location, GUIButton.GUIButtonID[] childIDs)
     {
-        base.Init(skinMaterial, tintColor);
-        m_location = location;
+         m_location = location;
+        m_childIDs = childIDs;
 
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //Set the default button ID
-        SetDefaultButtonID();
+        //set the first ID as default
+        m_ID = m_childIDs[0];
+        Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
+
+        base.Init(defaultSkinMaterial, tintColor);
 
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         buttonAnimator.SetPosition(new Vector3(-100.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
@@ -131,14 +138,16 @@ public class ActionButton : GUIButton
         m_buttonNameObject.transform.parent = this.transform;
 
         TextMesh nameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
-        nameTextMesh.text = GetButtonNameForID(m_ID);
+        nameTextMesh.text = GetButtonName();
 
         Vector3 nameTextMeshPosition = new Vector3(0, -115, 0);
         TextMeshAnimator nameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
         nameAnimator.SetFontHeight(24);
         nameAnimator.SetColor(Color.white);
-        nameAnimator.SetPosition(nameTextMeshPosition - new Vector3(0.0f, 50.0f, 0.0f));
-        nameAnimator.TranslateTo(nameTextMeshPosition, 0.5f, 0.5f);
+        nameAnimator.SetPosition(nameTextMeshPosition - new Vector3(0.0f, 10.0f, 0.0f));
+        nameAnimator.TranslateTo(nameTextMeshPosition, 0.3f, 0.5f);
+        nameAnimator.SetOpacity(0);
+        nameAnimator.FadeTo(1.0f, 0.3f, 0.5f);
     }
 
     ///**
@@ -151,6 +160,22 @@ public class ActionButton : GUIButton
     //{
 
     //}
+
+    /**
+     * Switch to next button child ID if possible
+     * **/
+    public void UpdateButtonToNextID()
+    {
+        if (m_childIDs.Length > 1)
+        {
+            if (m_currentChildIdIndex == m_childIDs.Length - 1)
+                m_currentChildIdIndex = 0;
+            else
+                m_currentChildIdIndex++;
+
+            UpdateButtonID(m_childIDs[m_currentChildIdIndex]);
+        }
+    }
 
     /**
      * Update the ID of this button
@@ -208,27 +233,73 @@ public class ActionButton : GUIButton
     /**
      * Get the name of the displayed button ID
      * **/
-    public string GetButtonNameForID(GUIButtonID iID)
+    public string GetButtonName()
     {
-        switch (iID)
+        string buttonName = null;
+        switch (m_ID)
         {
             case GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES:
-                return LanguageUtils.GetTranslationForTag("symmetry_two_sides");
+                buttonName = LanguageUtils.GetTranslationForTag("action_symmetry_two_sides");
+                break;
             case GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_symmetry_one_side");
+                break;
             case GUIButtonID.ID_POINT_SYMMETRY:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_point_symmetry");
+                break;
             case GUIButtonID.ID_MOVE_SHAPE:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_move_shape");
+                break;
             case GUIButtonID.ID_OPERATION_ADD:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_operation_addition");
+                break;
             case GUIButtonID.ID_OPERATION_SUBSTRACT:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_operation_substraction");
+                break;
             case GUIButtonID.ID_COLOR_FILTER:
-                return LanguageUtils.GetTranslationForTag("symmetry_one_side");
+                buttonName = LanguageUtils.GetTranslationForTag("action_color_filter");
+                break;
             default:
-                return null;
+                buttonName = "DEFAULT";
+                break;
         }
+
+        if (buttonName == null)
+            buttonName = "EMPTY NAME";
+
+        //Add lines if button name is too long
+        int lettersPerLine = 6;
+        int currentLineLength = 0;
+        string[] splitName = buttonName.Split();
+
+        if (splitName.Length > 1)
+        {
+            buttonName = "";
+
+            for (int i = 0; i != splitName.Length; i++)
+            {
+                string word = splitName[i];
+                if (word.Length + currentLineLength > lettersPerLine)
+                {
+                    buttonName += "\n";
+                    buttonName += word;
+                    currentLineLength = word.Length;
+                }
+                else
+                {
+                    buttonName += " ";
+                    buttonName += word;
+                    currentLineLength += (word.Length + 1); //adds a space
+                }
+            }
+        }
+
+        return buttonName;
+    }
+
+    public override void OnClick()
+    {
+        UpdateButtonToNextID();
     }
 
     /**
@@ -245,7 +316,8 @@ public class ActionButton : GUIButton
                 m_buttonNameUpdatePending = false;
 
                 TextMesh buttonNameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
-                buttonNameTextMesh.text = GetButtonNameForID(m_ID);
+                buttonNameTextMesh.text = GetButtonName();
+                Debug.Log("buttonName:" + GetButtonName());
 
                 TextMeshAnimator buttonNameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
                 buttonNameAnimator.FadeTo(1.0f, 0.25f);
