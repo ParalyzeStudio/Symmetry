@@ -7,9 +7,15 @@ public class TouchManager : MonoBehaviour
 
     public bool m_touchDeactivated { get; set; }
 
-#if UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR
+
+
+
+#if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
+    protected int m_touchCount;
+#elif UNITY_STANDALONE || UNITY_WEBPLAYER
     protected bool m_mouseButtonPressed;
 #endif
+
     public Vector2 m_prevPointerLocation { get; set; }
     public Vector2 m_pointerDeltaLocation { get; set; }
 
@@ -28,6 +34,11 @@ public class TouchManager : MonoBehaviour
     {
         m_sceneManager = null;
         m_guiManager = null;
+#if UNITY_IPHONE || UNITY_ANDROID || UNITY_WINRT || UNITY_BLACKBERRY //touch devices
+        m_touchCount = 0;
+#elif UNITY_STANDALONE || UNITY_WEBPLAYER
+    m_mouseButtonPressed = false;
+#endif
     }
 
     /**
@@ -47,38 +58,32 @@ public class TouchManager : MonoBehaviour
         if (Input.touchCount == 1)
         {
             Touch touch = Input.GetTouch(0);
-            touchLocation = Camera.main.ScreenToWorldPoint(touch.position);
+            pointerLocation = Camera.main.ScreenToWorldPoint(touch.position);
 
-            if (!m_selected)
+            if (m_touchCount == 0) //first press = OnPointerDown
             {
-                Rect touchAreaRect = new Rect();
-                Vector2 position = transform.position;
-                touchAreaRect.position = position - 0.5f * m_touchArea;
-                touchAreaRect.width = m_touchArea.x;
-                touchAreaRect.height = m_touchArea.y;
-                if (touchAreaRect.Contains(touchLocation))
+                eventType = PointerEventType.POINTER_DOWN;
+                m_prevPointerLocation = pointerLocation;
+            }
+            else //other presses = OnPointerMove
+            {
+                m_pointerDeltaLocation = pointerLocation - m_prevPointerLocation;
+                if (m_pointerDeltaLocation.sqrMagnitude >= MOVE_EPSILON)
                 {
-                    OnPointerDown(touchLocation);
+                    eventType = PointerEventType.POINTER_MOVE;
+                    m_prevPointerLocation = pointerLocation;
                 }
             }
-            else
-            {
-                Vector2 delta = Vector2.zero;
-                OnPointerMove(touchLocation, ref delta);
-            }
-            m_prevPointerLocation = touchLocation;
         }
         else if (Input.touchCount == 0)
         {
-            if (m_selected)
-                OnPointerUp();
+            if (m_touchCount == 1) //we switched from a press state to a release state
+            {
+                eventType = PointerEventType.POINTER_UP;
+            }
         }
-        //TODO handle the case of 2 touches
-        else if (Input.touchCount == 2)
-        {
-
-        }
-#elif UNITY_STANDALONE || UNITY_WEBPLAYER || UNITY_EDITOR //devices with mouse
+        m_touchCount = Input.touchCount;
+#elif UNITY_STANDALONE || UNITY_WEBPLAYER //devices with mouse
 
         if (Input.GetMouseButton(0))
         {
@@ -108,8 +113,6 @@ public class TouchManager : MonoBehaviour
                 m_mouseButtonPressed = false;
             }
         }
-
-
 #endif
 
         if (eventType != PointerEventType.NONE)
@@ -127,12 +130,12 @@ public class TouchManager : MonoBehaviour
                     gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
 
                     //or the shapes
-                    //List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
-                    //for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
-                    //{
-                    //    ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
-                    //    shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
-                    //}
+                    List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
+                    for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
+                    {
+                        ShapeTouchHandler shapeTouchHandler = shapeObjects[iShapeIdx].GetComponent<ShapeTouchHandler>();
+                        shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                    }
                 }
             }
         }

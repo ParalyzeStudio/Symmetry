@@ -66,7 +66,6 @@ public class PersistentDataManager : MonoBehaviour
             }
             catch (FileNotFoundException)
             {
-                Debug.Log("CREATING LEVEL DATA FILE " + iLevelNumber);
                 LevelData defaultLevelData = new LevelData(iLevelNumber);
                 SaveLevelDataToFile(defaultLevelData);
             }
@@ -101,6 +100,7 @@ public class PersistentDataManager : MonoBehaviour
         }
         catch (Exception)
         {
+            Debug.Log("+++++failed to open or create the file at location: " + Application.persistentDataPath + "/level_" + levelData.m_absNumber + ".dat");
             return false; //failed to open or create the file
         }
 

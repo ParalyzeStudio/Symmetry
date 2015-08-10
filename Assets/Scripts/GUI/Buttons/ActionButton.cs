@@ -6,10 +6,16 @@ public class ActionButton : GUIButton
 
     //shared prefabs
     public GameObject m_colorQuadPfb;
+    public GameObject m_texQuadPfb;
     public GameObject m_circleMeshPfb;
     public GameObject m_textMeshPfb;
 
-    protected GameObject m_background;
+    //class specific prefabs
+    public Material m_actionButtonFrameMaterial;
+    public Material m_actionButtonShadowMaterial;
+
+    //protected GameObject m_background;
+    protected UVQuad m_background;
     protected UVQuad m_shadow;
     protected GameObject m_buttonNameObject;
 
@@ -32,7 +38,7 @@ public class ActionButton : GUIButton
 
     public void Init(Color tintColor, Location location, GUIButton.GUIButtonID[] childIDs)
     {
-         m_location = location;
+        m_location = location;
         m_childIDs = childIDs;
 
         Vector2 screenSize = ScreenUtils.GetScreenSize();
@@ -46,46 +52,71 @@ public class ActionButton : GUIButton
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         buttonAnimator.SetPosition(new Vector3(-100.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
 
-        Material plainWhiteMaterial = GetGUIManager().m_plainWhiteMaterial;
+        //Material plainWhiteMaterial = GetGUIManager().m_plainWhiteMaterial;
+
 
         //Build the background
-        m_background = new GameObject("Background");
-        m_background.transform.parent = this.transform;
+        GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
+        buttonBackgroundObject.name = "Background";
+        buttonBackgroundObject.transform.parent = this.transform;
 
-        GameObjectAnimator backgroundAnimator = m_background.AddComponent<GameObjectAnimator>();
-        backgroundAnimator.SetPosition(Vector3.zero);
+        m_background = buttonBackgroundObject.GetComponent<UVQuad>();
+        m_background.Init(m_actionButtonFrameMaterial);
 
-        //diamond
-        float diamondSize = 150;
-        float diamondThickness = 10.0f;
+        TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
+        backgroundAnimator.SetScale(new Vector2(256, 256));
+        backgroundAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 23, 76, 255)));
+        backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
 
-        GameObject diamondMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
-        diamondMeshObject.transform.parent = m_background.transform;
-        
-        CircleMesh diamondMesh = diamondMeshObject.GetComponent<CircleMesh>();
-        diamondMesh.Init(plainWhiteMaterial);
+        //Build the shadow
+        GameObject buttonShadowObject = Instantiate(m_texQuadPfb);
+        buttonShadowObject.name = "Shadow";
+        buttonShadowObject.transform.parent = this.transform;
 
-        CircleMeshAnimator diamondMeshAnimator = diamondMeshObject.GetComponent<CircleMeshAnimator>();
-        diamondMeshAnimator.SetNumSegments(4, false); //diamond = 4 edges        
-        diamondMeshAnimator.SetOuterRadius(0.5f * diamondSize, false);
-        diamondMeshAnimator.SetInnerRadius(0.5f * diamondSize - diamondThickness, true); //thickness: 14
-        diamondMeshAnimator.SetPosition(Vector3.zero);
-        diamondMeshAnimator.SetColor(tintColor);
+        m_shadow = buttonShadowObject.GetComponent<UVQuad>();
+        m_shadow.Init(m_actionButtonShadowMaterial);
 
-        //segment
-        GameObject segmentObject = (GameObject)Instantiate(m_colorQuadPfb);
-        segmentObject.transform.parent = m_background.transform;
+        TexturedQuadAnimator shadowAnimator = m_shadow.GetComponent<TexturedQuadAnimator>();
+        shadowAnimator.SetScale(new Vector2(256, 256));
+        shadowAnimator.SetPosition(new Vector3(0, -8, 0));
+        shadowAnimator.SetColor(Color.white);
 
-        ColorQuad segmentQuad = segmentObject.GetComponent<ColorQuad>();
-        segmentQuad.Init(plainWhiteMaterial);
+        ////Build the background
+        //m_background = new GameObject("Background");
+        //m_background.transform.parent = this.transform;
 
-        ColorQuadAnimator segmentQuadAnimator = segmentObject.GetComponent<ColorQuadAnimator>();
-        segmentQuadAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
-        segmentQuadAnimator.SetPosition(new Vector3(-0.5f * (diamondSize - diamondThickness), 0, 0));
-        segmentQuadAnimator.SetScale(new Vector3(100.0f, 7.0f, 1)); //set the segment long enough
-        segmentQuadAnimator.SetColor(tintColor);
+        //GameObjectAnimator backgroundAnimator = m_background.AddComponent<GameObjectAnimator>();
+        //backgroundAnimator.SetPosition(Vector3.zero);
 
-        //TODO build the shadow
+        ////diamond
+        //float diamondSize = 150;
+        //float diamondThickness = 10.0f;
+
+        //GameObject diamondMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
+        //diamondMeshObject.transform.parent = m_background.transform;
+
+        //CircleMesh diamondMesh = diamondMeshObject.GetComponent<CircleMesh>();
+        //diamondMesh.Init(plainWhiteMaterial);
+
+        //CircleMeshAnimator diamondMeshAnimator = diamondMeshObject.GetComponent<CircleMeshAnimator>();
+        //diamondMeshAnimator.SetNumSegments(4, false); //diamond = 4 edges        
+        //diamondMeshAnimator.SetOuterRadius(0.5f * diamondSize, false);
+        //diamondMeshAnimator.SetInnerRadius(0.5f * diamondSize - diamondThickness, true); //thickness: 14
+        //diamondMeshAnimator.SetPosition(Vector3.zero);
+        //diamondMeshAnimator.SetColor(tintColor);
+
+        ////segment
+        //GameObject segmentObject = (GameObject)Instantiate(m_colorQuadPfb);
+        //segmentObject.transform.parent = m_background.transform;
+
+        //ColorQuad segmentQuad = segmentObject.GetComponent<ColorQuad>();
+        //segmentQuad.Init(plainWhiteMaterial);
+
+        //ColorQuadAnimator segmentQuadAnimator = segmentObject.GetComponent<ColorQuadAnimator>();
+        //segmentQuadAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
+        //segmentQuadAnimator.SetPosition(new Vector3(-0.5f * (diamondSize - diamondThickness), 0, 0));
+        //segmentQuadAnimator.SetScale(new Vector3(100.0f, 7.0f, 1)); //set the segment long enough
+        //segmentQuadAnimator.SetColor(tintColor);
     }
 
     /**
@@ -317,7 +348,6 @@ public class ActionButton : GUIButton
 
                 TextMesh buttonNameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
                 buttonNameTextMesh.text = GetButtonName();
-                Debug.Log("buttonName:" + GetButtonName());
 
                 TextMeshAnimator buttonNameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
                 buttonNameAnimator.FadeTo(1.0f, 0.25f);

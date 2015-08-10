@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 1" number="1">
 	<counter maxActions="1"/>
-	<grid exactNumColumns="9" exactNumLines="7" maxGridSpacing="100"/>
+	<grid exactNumColumns="9" exactNumLines="7" maxGridSpacing="150"/>
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
@@ -28,7 +28,7 @@
 			</contour>
 		</shape>
 		
-		<shape color="1,1,0">
+<!--		<shape color="1,1,0">
 			<contour>
 				<point column="6" line="3"/>
 				<point column="10" line="3"/>
@@ -46,7 +46,7 @@
 			</contour>
 		</shape>
 			
-<!-- 		<shape color="0,1,0">
+ 		<shape color="0,1,0">
 			<contour>
 				<point column="4" line="5"/>
 				<point column="2" line="5"/>
@@ -62,6 +62,7 @@
 	</shapes>
 	<actions>
 		<action tag="SYMMETRY_AXIS_VERTICAL"/>
+		<action tag="SYMMETRY_AXES_DIAGONALS"/>
 		<!-- 		
 		<action tag="SYMMETRY_AXIS_HORIZONTAL"/>
 		<action tag="SYMMETRY_AXIS_VERTICAL"/>

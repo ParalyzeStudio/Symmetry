@@ -7,10 +7,10 @@ public class UVQuad : BaseQuad
 
     public void Init(Material material = null)
     {
-        InitQuadMesh();
-        
         if (material != null)
             SetMaterial(material);
+
+        InitQuadMesh();
     }
 
     protected override void InitQuadMesh()

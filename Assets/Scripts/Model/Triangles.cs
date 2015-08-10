@@ -433,6 +433,7 @@ public class BackgroundTriangle : BaseTriangle
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public float m_edgeLength { get; set; }
     public float m_angle { get; set; } //the angle this triangle is rotated
+    public float m_contourThickness { get; set; }
 
     //Variables to handle color animation of this triangle
     private Color m_animationStartColor; //the color when the animation starts
@@ -451,14 +452,18 @@ public class BackgroundTriangle : BaseTriangle
 
     /**
      * Build an equilateral triangle with the given orientation passed through the angle variable
-     * position
+     * The triangle can have an inner contour, in this case set the contourThickness to a strictly positive value
      * **/
-    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color) : base()
+    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color, float contourThickness = 0) : base()
     {
         m_edgeLength = edgeLength;
         m_angle = angle;
+        m_contourThickness = contourThickness;
 
-        float H = Mathf.Sqrt(3) / 2 * edgeLength * 1.0f;
+        float H = Mathf.Sqrt(3) / 2 * edgeLength;
+        float maxContourThickness = 2 / 3.0f * H;
+        if (contourThickness > maxContourThickness)
+            contourThickness = maxContourThickness;
 
         Vector2 bisector0 = new Vector2(1, 0); //angle 0
         Vector2 bisector1 = new Vector2(-0.5f, -Mathf.Sqrt(3) / 2); //angle -2 * PI / 3

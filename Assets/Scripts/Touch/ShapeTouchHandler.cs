@@ -5,12 +5,15 @@ public class ShapeTouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
-        //First we verify if we entered the move shape mode
-        //if (!m_gameScene.IsMoveShapeHUDButtonSelected())
-        //    return false;
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
-        //Get the triangles of this shape from the MeshFilter
-        return GetComponent<ShapeRenderer>().m_shape.ContainsWorldPoint(pointerLocation);
+        GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
+        if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
+        {
+            //Get the triangles of this shape from the MeshFilter
+            return GetComponent<ShapeRenderer>().m_shape.ContainsWorldPoint(pointerLocation);
+        }
+        return false;
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)

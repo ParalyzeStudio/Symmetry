@@ -118,6 +118,7 @@ public class GameController : MonoBehaviour
 
     protected void Update()
     {
+        return;
         if (m_sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
         {
             GameStatus gameStatus = GetGameStatus();

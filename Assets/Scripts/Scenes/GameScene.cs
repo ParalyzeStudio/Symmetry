@@ -245,15 +245,15 @@ public class GameScene : GUIScene
 
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
 
-        /** TMP **/
-        axisConstraints = new List<string>();
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL);
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_VERTICAL);
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_STRAIGHT);
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT);
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT);
-        axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_DIAGONALS);
-        /** TMP **/
+        ///** TMP **/
+        //axisConstraints = new List<string>();
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL);
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_VERTICAL);
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_STRAIGHT);
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT);
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT);
+        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_DIAGONALS);
+        ///** TMP **/
 
         float horizontalDistanceBetweenIcons = 65.0f;
         Vector2 iconSize = new Vector2(64, 64);
@@ -296,8 +296,8 @@ public class GameScene : GUIScene
                                                                      ActionButton.Location.TOP,
                                                                      childIDs);
 
-        m_topActionButton.name = "TopActionBtn";
-        m_topActionButton.transform.parent = this.transform;
+        buttonObject.name = "TopActionBtn";
+        buttonObject.transform.parent = this.transform;
 
         m_topActionButton = buttonObject.GetComponent<ActionButton>();
 
@@ -402,21 +402,21 @@ public class GameScene : GUIScene
         bottomLeftDirection.Normalize();
         topLeftDirection.Normalize();
 
-        /***
-         * TMP DEBUG: unlock all directions
-         * ***/
-        AddConstrainedDirection(rightDirection);
-        AddConstrainedDirection(bottomDirection);
-        AddConstrainedDirection(leftDirection);
-        AddConstrainedDirection(topDirection);
-        AddConstrainedDirection(topRightDirection);
-        AddConstrainedDirection(bottomRightDirection);
-        AddConstrainedDirection(bottomLeftDirection);
-        AddConstrainedDirection(topLeftDirection);
-        return;
-        /***
-         * 
-         * ***/
+        ///***
+        // * TMP DEBUG: unlock all directions
+        // * ***/
+        //AddConstrainedDirection(rightDirection);
+        //AddConstrainedDirection(bottomDirection);
+        //AddConstrainedDirection(leftDirection);
+        //AddConstrainedDirection(topDirection);
+        //AddConstrainedDirection(topRightDirection);
+        //AddConstrainedDirection(bottomRightDirection);
+        //AddConstrainedDirection(bottomLeftDirection);
+        //AddConstrainedDirection(topLeftDirection);
+        //return;
+        ///***
+        // * 
+        // * ***/
 
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
         for (int i = 0; i != axisConstraints.Count; i++)

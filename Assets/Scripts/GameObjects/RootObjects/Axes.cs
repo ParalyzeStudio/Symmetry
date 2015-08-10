@@ -27,6 +27,11 @@ public class Axes : MonoBehaviour
         newAxis.transform.parent = this.gameObject.transform;
         newAxis.transform.localPosition = Vector3.zero;
 
+        //Set the symmetry type
+        Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
+        GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
+        symmetrizer.SetSymmetryTypeFromActionButtonID(parentScene.GetActionButtonID(ActionButton.Location.TOP));
+
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
         axisRenderer.BuildElements(gridStartPosition, true);

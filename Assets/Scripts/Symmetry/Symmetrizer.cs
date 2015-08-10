@@ -4,24 +4,19 @@ using System.Collections.Generic;
 
 public class Symmetrizer : MonoBehaviour 
 {
-    //public enum SymmetryType
-    //{
-    //    NONE,
-    //    SYMMETRY_AXIS_HORIZONTAL, //axis are horizontal
-    //    SYMMETRY_AXIS_VERTICAL, //axis are vertical
-    //    SYMMETRY_AXES_STRAIGHT, //axis are either horizontal or vertical
-    //    SYMMETRY_AXIS_DIAGONAL_LEFT, //axis is diagonal (45 degrees) passing through top left hand corner
-    //    SYMMETRY_AXIS_DIAGONAL_RIGHT, //axis is diagonal (45 degrees) passing through bottom left hand corner
-    //    SYMMETRY_AXES_DIAGONALS, //both diagonals
-    //    SYMMETRY_AXES_ALL, //both straight and diagonal axes
-    //    SYMMETRY_POINT,
-    //    SUBTRACTION_AXIS,
-    //    SUBTRACTION_POINT
-    //};
-
-    public void Start()
+    public enum SymmetryType
     {
+        NONE = 0,
+        SYMMETRY_AXES_TWO_SIDES,
+        SYMMETRY_AXES_ONE_SIDE, //both straight and diagonal axes
+        SYMMETRY_POINT,
+    };
 
+    private SymmetryType m_symmetryType;
+
+    public void Awake()
+    {
+        m_symmetryType = SymmetryType.NONE;
     }
 
     public void SymmetrizeByAxis()
@@ -33,18 +28,24 @@ public class Symmetrizer : MonoBehaviour
         Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
         List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
         List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
+        //ribbon vertices = bottom-left, bottom-right, top-left, top-right
         Vector2[] ribbonVertices = new Vector2[4] {line1GridBoxIntersections[0], line1GridBoxIntersections[1], line2GridBoxIntersections[0], line2GridBoxIntersections[1]};
 
         //Extract triangles
-        List<List<ShapeTriangle>> leftTriangles, rightTriangles;
-        ExtractTrianglesOnBothSidesOfAxis(ribbonVertices, out leftTriangles, out rightTriangles);
+        List<List<ShapeTriangle>> leftTriangles = null;
+        List<List<ShapeTriangle>> rightTriangles = null;
+
+        if (m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+            ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles);
+        else if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+            ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles, true , false);
 
         //Rebuild shapes from those lists of triangles
         Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
         Vector3 axisDirection = axisRenderer.GetAxisDirection();
 
         Shape shapeData = null;
-        if (leftTriangles.Count > 0)
+        if (leftTriangles != null && leftTriangles.Count > 0)
         {
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
             {
@@ -70,7 +71,7 @@ public class Symmetrizer : MonoBehaviour
             }
         }
 
-        if (rightTriangles.Count > 0)
+        if (rightTriangles != null && rightTriangles.Count > 0)
         {
             for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
             {
@@ -110,21 +111,10 @@ public class Symmetrizer : MonoBehaviour
 
     }
 
-    public void SymmetrizeSubtractionByAxis()
-    {
-
-    }
-
-    public void SymmetrizeSubtractionByPoint()
-    {
-
-    }
-
     /**
-     * Creates a copy of all shape triangles on both sides of the axis of symmetry axis into 2 newly created shapes 
-     * that will be symmetrized.
+     * Creates a copy of triangles that are on a specific side (or both sides) of this axis
      * **/
-    private void ExtractTrianglesOnBothSidesOfAxis(Vector2[] ribbonVertices, out List<List<ShapeTriangle>> leftTriangles, out List<List<ShapeTriangle>> rightTriangles)
+    private void ExtractTrianglesSeparatedByAxis(Vector2[] ribbonVertices, out List<List<ShapeTriangle>> leftTriangles, out List<List<ShapeTriangle>> rightTriangles, bool bExtractLeftTriangles = true, bool bExtractRightTriangles = true)
     {
         AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
         Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
@@ -158,15 +148,25 @@ public class Symmetrizer : MonoBehaviour
                                                         false);
 
         //... finally on the left and right side of the axis itself
-        leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
-                                                   axisRenderer.m_endpoint2GridPosition,
-                                                   extractedTriangles,
-                                                   true);
+        if (bExtractLeftTriangles)
+        {
+            leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
+                                                       axisRenderer.m_endpoint2GridPosition,
+                                                       extractedTriangles,
+                                                       true);
+        }
+        else
+            leftTriangles = null;
 
-        rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
-                                                    axisRenderer.m_endpoint2GridPosition,
-                                                    extractedTriangles,
-                                                    false);
+        if (bExtractRightTriangles)
+        {
+            rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
+                                                        axisRenderer.m_endpoint2GridPosition,
+                                                        extractedTriangles,
+                                                        false);
+        }
+        else
+            rightTriangles = null;
     }
 
     /**
@@ -357,49 +357,46 @@ public class Symmetrizer : MonoBehaviour
 
             }
 
-            reflectedTriangles.Add(reflectedTriangle);
-
-            
+            reflectedTriangles.Add(reflectedTriangle);            
         }
 
-        //trim parts of the shape that are outside the grid
+        //trim triangles that are outside of the ribbon
         reflectedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[0],
-                                               ribbonVertices[2],
-                                               reflectedTriangles,
-                                               false);
+                                                        ribbonVertices[1],
+                                                        reflectedTriangles,
+                                                        true);
 
-        reflectedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[1],
-                                               ribbonVertices[3],
-                                               reflectedTriangles,
-                                               true);
+        reflectedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[2],
+                                                        ribbonVertices[3],
+                                                        reflectedTriangles,
+                                                        false);
 
-        //List<List<ShapeTriangle> extractedTriangles = ExtractTrianglesOnLineSide(line1GridBoxIntersections[1],
-        //                                                line2GridBoxIntersections[1],
-        //                                                extractedTriangles,
-        //                                            false);
 
-        if (reflectedTriangles == null)
-            return null;
+        //TODO trim parts of the shape that are outside the grid
+
         return reflectedTriangles;
     }
 
-    //public SymmetryType GetSymmetryTypeForActionTag(string strActionTag)
-    //{
-    //    if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXES_ALL))
-    //        return SymmetryType.SYMMETRY_AXES_ALL;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_LEFT))
-    //        return SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXIS_DIAGONAL_RIGHT))
-    //        return SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXIS_HORIZONTAL))
-    //        return SymmetryType.SYMMETRY_AXIS_HORIZONTAL;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXIS_VERTICAL))
-    //        return SymmetryType.SYMMETRY_AXIS_VERTICAL;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXES_STRAIGHT))
-    //        return SymmetryType.SYMMETRY_AXES_STRAIGHT;
-    //    else if (strActionTag.Equals(GameScene.ACTION_TAG_SYMMETRY_AXES_DIAGONALS))
-    //        return SymmetryType.SYMMETRY_AXES_DIAGONALS;
-    //    else
-    //        return SymmetryType.NONE;
-    //}
+    /**
+     * Set the symmetry type for this axis based on the currently selected action button ID
+     * **/
+    public void SetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)
+    {
+        if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES)
+            m_symmetryType = SymmetryType.SYMMETRY_AXES_TWO_SIDES;
+        else if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE)
+            m_symmetryType = SymmetryType.SYMMETRY_AXES_ONE_SIDE;
+        else if (buttonID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
+            m_symmetryType = SymmetryType.SYMMETRY_POINT;
+        else
+            m_symmetryType = SymmetryType.NONE;
+    }
+
+    /**
+     * Return the axis symmetry type
+     * **/
+    public SymmetryType GetSymmetryType()
+    {
+        return m_symmetryType;
+    }
 }

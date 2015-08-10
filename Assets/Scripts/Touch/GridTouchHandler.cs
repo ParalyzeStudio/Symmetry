@@ -10,20 +10,26 @@ public class GridTouchHandler : TouchHandler
     {
         //First we verify if we entered the move shape mode
         GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
-        //if (!gameScene.IsSymmetryHUDButtonSelected())
-        //    return false;
 
-        Grid grid = gameScene.m_grid;
-        Vector2 gridSize = grid.m_gridSize;
-        Vector2 gridPosition = this.gameObject.transform.position;
+        GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
+        if (topActionID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES ||
+            topActionID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE ||
+            topActionID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
+        {
+            Grid grid = gameScene.m_grid;
+            Vector2 gridSize = grid.m_gridSize;
+            Vector2 gridPosition = this.gameObject.transform.position;
 
-        float borderThickness = 0.5f * grid.m_gridSpacing;
-        Vector2 gridMax = gridPosition + 0.5f * gridSize + new Vector2(borderThickness, borderThickness);
-        Vector2 gridMin = gridPosition - 0.5f * gridSize - new Vector2(borderThickness, borderThickness);
+            float borderThickness = 0.5f * grid.m_gridSpacing;
+            Vector2 gridMax = gridPosition + 0.5f * gridSize + new Vector2(borderThickness, borderThickness);
+            Vector2 gridMin = gridPosition - 0.5f * gridSize - new Vector2(borderThickness, borderThickness);
 
-        return pointerLocation.x <= gridMax.x && pointerLocation.x >= gridMin.x
-               &&
-               pointerLocation.y <= gridMax.y && pointerLocation.y >= gridMin.y;
+            return pointerLocation.x <= gridMax.x && pointerLocation.x >= gridMin.x
+                   &&
+                   pointerLocation.y <= gridMax.y && pointerLocation.y >= gridMin.y;
+        }
+
+        return false;
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)
@@ -35,10 +41,11 @@ public class GridTouchHandler : TouchHandler
         Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);        
         Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
         float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
-        if (distanceToAnchor < m_axisCreationMinDistance)
-        {
+
+        //if (distanceToAnchor < m_axisCreationMinDistance)
+        //{
             gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
-        }
+        //}
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -60,6 +67,7 @@ public class GridTouchHandler : TouchHandler
         float projectionLength;
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
         pointerLocation = axisRenderer.m_endpoint1Position + constrainedDirection * projectionLength;
+
 
         if (axisRenderer.isAxisSnapped())
         {
@@ -89,11 +97,11 @@ public class GridTouchHandler : TouchHandler
         {
             AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
 
-            //if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
-            //{
-            //    Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
-            //    symmetrizer.SymmetrizeByAxis();
-            //}
+            if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
+            {
+                Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+                symmetrizer.SymmetrizeByAxis();
+            }
 
             //remove the axis from the axes list and destroy the object
             gameScene.m_axes.RemoveAxis(currentAxis);
