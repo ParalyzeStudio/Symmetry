@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
@@ -14,6 +13,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public bool m_meshBuilt { get; set; }
     public float m_triangleEdgeLength { get; set; }
     public float m_triangleHeight { get; set; }
+    public float m_triangleContourThickness { get; set; }
+    private int m_numVerticesPerTriangle;
+    private int m_numIndicesPerTriangle;
 
     //min and max values of triangles centers y-coordinates of this mesh
     public float m_meshMinY { get; set; }
@@ -68,7 +70,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         GenerateChapterGradient();
         GenerateTransitionGradients();
 
-        BuildMesh();
+        BuildMesh(0.138f);
 
         //init the position of the animator to 0
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
@@ -80,7 +82,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Build triangles to fill in the whole screen
      * **/
-    public void BuildMesh()
+    public void BuildMesh(float triangleContourPercentage)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -90,7 +92,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         GetComponent<MeshFilter>().sharedMesh = m_mesh;
 
         //Fill data using triangles columns
-        m_triangleHeight = screenSize.x / (float) NUM_COLUMNS;
+        m_triangleHeight = screenSize.x / (float)NUM_COLUMNS;
         m_triangleEdgeLength = 2 / Mathf.Sqrt(3) * m_triangleHeight;
 
         float fNumberOfTrianglesInColumn = screenSize.y / m_triangleEdgeLength;
@@ -99,71 +101,31 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         m_numTrianglesPerColumn *= 2; //multiply by 2 because there are 2 series of opposite trying forming one column
         int numberOfTriangles = NUM_COLUMNS * m_numTrianglesPerColumn;
 
-        //Set up correct sizes for mesh arrays
-        int numVerticesPerTriangle = 3;
-        m_meshVertices = new Vector3[numVerticesPerTriangle * numberOfTriangles]; //6 vertices per triangle because 2 sides of different colors
-        m_meshTriangles = new int[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
-        m_meshColors = new Color[numVerticesPerTriangle * numberOfTriangles]; //double sided triangles
-        m_meshVerticesDirty = true;
-        m_meshTrianglesDirty = true;
-        m_meshColorsDirty = true;
+        //Calculate the thickness of the contour for every triangle
+        m_triangleContourThickness = triangleContourPercentage * 1 / 3.0f * m_triangleHeight;
 
-        float columnHeight = 0.5f * (m_numTrianglesPerColumn + 1) * m_triangleEdgeLength;
-        float columnOffset = 0.5f * (columnHeight - screenSize.y);
+        //Set up correct sizes for mesh arrays
+        m_numVerticesPerTriangle = (triangleContourPercentage > 0) ? 15: 3; //3 quads (4 vertices) for edges and inner triangle (3 vertices)
+        m_numIndicesPerTriangle = (triangleContourPercentage > 0) ? 21 : 3; //3 quads (6 indices) for edges and inner triangle (3 indices)
+        m_meshVertices = new Vector3[m_numVerticesPerTriangle * numberOfTriangles];
+        m_meshTriangles = new int[m_numIndicesPerTriangle * numberOfTriangles];
+        m_meshColors = new Color[m_numVerticesPerTriangle * numberOfTriangles];
 
         for (int i = 0; i != NUM_COLUMNS; i++)
         {
             BackgroundTriangleColumn column = new BackgroundTriangleColumn(this, i);
-            column.Capacity = m_numTrianglesPerColumn;
-
-            for (int j = 0; j != m_numTrianglesPerColumn; j++)
-            {
-                float trianglePositionY = screenSize.y - 0.5f * (j + 1) * m_triangleEdgeLength + columnOffset;
-                trianglePositionY -= 0.5f * screenSize.y;
-
-                float triangleAngle;
-                float trianglePositionX;
-                if (i % 2 == 0)
-                {
-                    triangleAngle = (j % 2 == 0) ? 0 : 180;
-                    trianglePositionX = (j % 2 == 0) ? (1 / 3.0f + i) * m_triangleHeight : (2 / 3.0f + i) * m_triangleHeight;
-                }
-                else
-                {
-                    triangleAngle = (j % 2 == 0) ? 180 : 0;
-                    trianglePositionX = (j % 2 == 0) ? (2 / 3.0f + i) * m_triangleHeight : (1 / 3.0f + i) * m_triangleHeight;
-                }
-                trianglePositionX -= 0.5f * screenSize.x;
-
-                Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
-                Color triangleColor = ColorUtils.GetRandomNearColor(GetColorAtPosition(trianglePosition), 0.02f);
-                BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), m_triangleEdgeLength, triangleAngle, triangleColor);
-                triangle.m_indexInColumn = j;
-                triangle.m_parentColumn = column;
-                column.Add(triangle);
-
-                //Fill in the mesh
-                int triangleGlobalIndex = i * m_numTrianglesPerColumn + j;
-                int triangleFirstVertexIndex = numVerticesPerTriangle * triangleGlobalIndex;
-
-                //vertices                
-                m_meshVertices[triangleFirstVertexIndex] = triangle.m_points[0];
-                m_meshVertices[triangleFirstVertexIndex + 1] = triangle.m_points[1];
-                m_meshVertices[triangleFirstVertexIndex + 2] = triangle.m_points[2];
-
-                //indices
-                m_meshTriangles[triangleFirstVertexIndex] = triangleFirstVertexIndex;
-                m_meshTriangles[triangleFirstVertexIndex + 1] = triangleFirstVertexIndex + 1;
-                m_meshTriangles[triangleFirstVertexIndex + 2] = triangleFirstVertexIndex + 2;
-
-                //colors
-                m_meshColors[triangleFirstVertexIndex] = triangleColor;
-                m_meshColors[triangleFirstVertexIndex + 1] = triangleColor;
-                m_meshColors[triangleFirstVertexIndex + 2] = triangleColor;
-            }
+            column.Build();            
 
             m_triangleColumns.Add(column);
         }
+
+        //Now that all triangles are built, create relations between them
+
+
+        //Declare vertices as 'dirty' to make a first refresh of the mesh
+        m_meshVerticesDirty = true;
+        m_meshTrianglesDirty = true;
+        m_meshColorsDirty = true;            
 
         //Instantiate a new material
         Material clonedMaterial = (Material)Instantiate(m_triangleMaterial);
@@ -266,40 +228,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         return Color.white; //just return the color we want as background color
     }
 
-    ///**
-    // * Updates the colors array for the specific column
-    // * **/
-    //public void UpdateMeshColorsArrayForColumn(BackgroundTriangleColumn column)
-    //{
-    //    for (int iTriangleIdx = 0; iTriangleIdx != column.Count; iTriangleIdx++)
-    //    {
-    //        BackgroundTriangle triangle = column[iTriangleIdx];
-
-    //        int triangleGlobalIndex = column.m_index * column.Count + iTriangleIdx;
-
-    //        //colors
-    //        m_meshColors[3 * triangleGlobalIndex] = triangle.m_frontColor;
-    //        m_meshColors[3 * triangleGlobalIndex + 1] = triangle.m_frontColor;
-    //        m_meshColors[3 * triangleGlobalIndex + 2] = triangle.m_frontColor;
-    //        m_meshColors[3 * triangleGlobalIndex + 3] = triangle.m_backColor;
-    //        m_meshColors[3 * triangleGlobalIndex + 4] = triangle.m_backColor;
-    //        m_meshColors[3 * triangleGlobalIndex + 5] = triangle.m_backColor;
-    //    }
-
-    //    m_meshColorsDirty = true;
-    //}
-
-    ///**
-    //* Same thing that UpdateMeshColorsArrayForColumn() but for all columns instead
-    //* **/
-    //public void UpdateMeshColorsArrayForAllColumns()
-    //{
-    //    for (int iColumnIdx = 0; iColumnIdx != m_triangleColumns.Count; iColumnIdx++)
-    //    {
-    //        UpdateMeshColorsArrayForColumn(m_triangleColumns[iColumnIdx]);
-    //    }
-    //}
-
     public void UpdateMeshData()
     {
         if (m_meshVerticesDirty)
@@ -373,6 +301,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public void DrawMainMenuTitle(bool bAnimated)
     {
+        return;
+
         //List all triangles inside the title
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
         titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)
@@ -596,19 +526,19 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Flip all triangles
      * **/
-    public void FlipAllTriangles(float fFlipDuration, float fFlipGlobalDelay)
-    {
-        for (int i = 0; i != NUM_COLUMNS; i++)
-        {
-            for (int j = 0; j != m_numTrianglesPerColumn; j++)
-            {
-                float fRelativeDelay = Random.value * 1.0f;
+    //public void FlipAllTriangles(float fFlipDuration, float fFlipGlobalDelay)
+    //{
+    //    for (int i = 0; i != NUM_COLUMNS; i++)
+    //    {
+    //        for (int j = 0; j != m_numTrianglesPerColumn; j++)
+    //        {
+    //            float fRelativeDelay = Random.value * 1.0f;
 
-                BackgroundTriangle triangle = m_triangleColumns[i][j];
-                triangle.StartFlipAnimation(new Vector3(1, 0, 0), fFlipDuration, fFlipGlobalDelay + fRelativeDelay);
-            }
-        }
-    }
+    //            BackgroundTriangle triangle = m_triangleColumns[i][j];
+    //            triangle.StartFlipAnimation(new Vector3(1, 0, 0), fFlipDuration, fFlipGlobalDelay + fRelativeDelay);
+    //        }
+    //    }
+    //}
 
     /**
      * Offset vertically all columns 
@@ -666,84 +596,103 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         return nearestTriangle;
     }
 
-    public Vector2 GetMostCenteredMeshPoint()
-    {
-        float minDistance = float.MaxValue;
-        Vector2 mostCenteredPoint = m_triangleColumns[0][0].m_points[0];
-
-        int meshTrianglesCount = NUM_COLUMNS * m_numTrianglesPerColumn;
-        List<Vector2> testedPoints = new List<Vector2>(); //store points that have already been tested        
-        testedPoints.Capacity = meshTrianglesCount / 3;
-        testedPoints.Add(mostCenteredPoint); //add the first point
-
-        for (int i = 0; i != m_triangleColumns.Count; i++)
-        {
-            for (int j = 0; j != m_triangleColumns[i].Count; j++)
-            {
-                BackgroundTriangle triangle = m_triangleColumns[i][j];
-                for (int iPointIdx = 0; iPointIdx != 3; iPointIdx++)
-                {
-                    Vector2 point = triangle.m_points[iPointIdx];
-                    bool bPointAlreadyTested = false;
-                    for (int k = 0; k != testedPoints.Count; k++)
-                    {
-                        if (point.Equals(testedPoints[k]))
-                        {
-                            bPointAlreadyTested = true;
-                            break;
-                        }
-                    }
-
-                    if (!bPointAlreadyTested)
-                    {
-                        testedPoints.Add(point);
-                        float distanceToScreenCenter = point.magnitude;
-                        if (distanceToScreenCenter < minDistance)
-                        {
-                            minDistance = distanceToScreenCenter;
-                            mostCenteredPoint = point;
-                        }
-                    }
-                }
-            }
-        }
-
-        return mostCenteredPoint;
-    }
-
     /**
      * Return all triangles surrounding a mesh point (6 triangles forming an hexagon in case of equilateral triangles)
      * **/
-    public BackgroundTriangle[] GetTrianglesAroundMeshPoint(Vector2 point)
+    //public BackgroundTriangle[] GetTrianglesAroundMeshPoint(Vector2 point)
+    //{
+    //    int iNumSurroundingTriangles = 6; //hexagon
+    //    BackgroundTriangle[] surroundingTriangles = new BackgroundTriangle[iNumSurroundingTriangles];
+
+    //    int iSurroundingTriangleIdx = 0;
+    //    for (int i = 0; i != m_triangleColumns.Count; i++)
+    //    {
+    //        for (int j = 0; j != m_triangleColumns[i].Count; j++)
+    //        {
+    //            BackgroundTriangle triangle = m_triangleColumns[i][j];
+    //            if (triangle.HasVertex(point))
+    //            {
+    //                surroundingTriangles[iSurroundingTriangleIdx] = triangle;
+    //                if (++iSurroundingTriangleIdx > iNumSurroundingTriangles - 1) //we found all triangles
+    //                {
+    //                    return surroundingTriangles;
+    //                }
+    //            }
+    //        }
+    //    }
+
+    //    return surroundingTriangles;
+    //}
+
+    /**
+     * Adds a quad to this mesh by populating the vertices array starting at 'verticesArrayIndex'
+     * and the triangles array starting at 'trianglesArrayIndex'
+     * **/
+    public void AddQuadToMesh(int verticesArrayIndex, int trianglesArrayIndex, Vector2 a, Vector2 b, Vector2 c, Vector2 d, Color color)
     {
-        Stopwatch sw = new Stopwatch();
+        m_meshVertices[verticesArrayIndex] = a;
+        m_meshVertices[verticesArrayIndex + 1] = b;
+        m_meshVertices[verticesArrayIndex + 2] = c;
+        m_meshVertices[verticesArrayIndex + 3] = d;
+        m_meshTriangles[trianglesArrayIndex] = verticesArrayIndex;
+        m_meshTriangles[trianglesArrayIndex + 1] = verticesArrayIndex + 1;
+        m_meshTriangles[trianglesArrayIndex + 2] = verticesArrayIndex + 2;
+        m_meshTriangles[trianglesArrayIndex + 3] = verticesArrayIndex;
+        m_meshTriangles[trianglesArrayIndex + 4] = verticesArrayIndex + 2;
+        m_meshTriangles[trianglesArrayIndex + 5] = verticesArrayIndex + 3;
+        m_meshColors[verticesArrayIndex] = color;
+        m_meshColors[verticesArrayIndex + 1] = color;
+        m_meshColors[verticesArrayIndex + 2] = color;
+        m_meshColors[verticesArrayIndex + 3] = color;
+    }
 
-        sw.Start();
-
-        int iNumSurroundingTriangles = 6; //hexagon
-        BackgroundTriangle[] surroundingTriangles = new BackgroundTriangle[iNumSurroundingTriangles];
-
-        int iSurroundingTriangleIdx = 0;
-        for (int i = 0; i != m_triangleColumns.Count; i++)
+    /**
+     * Adds a triangle to this mesh by populating the vertices array starting at 'verticesArrayIndex'
+     * and the triangles array starting at 'trianglesArrayIndex'
+     * **/
+    public void AddTriangleToMesh(int verticesArrayIndex, int trianglesArrayIndex, Vector2 a, Vector2 b, Vector2 c, Color color)
+    {
+        m_meshVertices[verticesArrayIndex] = a;
+        m_meshVertices[verticesArrayIndex + 1] = b;
+        try
         {
-            for (int j = 0; j != m_triangleColumns[i].Count; j++)
-            {
-                BackgroundTriangle triangle = m_triangleColumns[i][j];
-                if (triangle.HasVertex(point))
-                {
-                    surroundingTriangles[iSurroundingTriangleIdx] = triangle;
-                    if (++iSurroundingTriangleIdx > iNumSurroundingTriangles - 1) //we found all triangles
-                    {
-                        sw.Stop();
-
-                        UnityEngine.Debug.Log("Elapsed:" + sw.Elapsed.TotalMilliseconds);
-                        return surroundingTriangles;
-                    }
-                }
-            }
+            m_meshVertices[verticesArrayIndex + 2] = c;
         }
+        catch (System.IndexOutOfRangeException e)
+        {
+            Debug.Log("verticesArrayIndex:" + verticesArrayIndex);
+        }
+        m_meshTriangles[trianglesArrayIndex] = verticesArrayIndex;
+        m_meshTriangles[trianglesArrayIndex + 1] = verticesArrayIndex + 1;
+        m_meshTriangles[trianglesArrayIndex + 2] = verticesArrayIndex + 2;
+        m_meshColors[verticesArrayIndex] = color;
+        m_meshColors[verticesArrayIndex + 1] = color;
+        m_meshColors[verticesArrayIndex + 2] = color;
+    }
 
-        return surroundingTriangles;
+    /**
+     * Return the global index of the triangle in the mesh
+     * For instance in a mesh with 20 triangles per column the 3rd triangle of the 2th column has the index 22
+     * **/
+    public int GetTriangleGlobalIndex(int columnIndex, int triangleRelativeIndex)
+    {
+        return columnIndex * m_numTrianglesPerColumn + triangleRelativeIndex;
+    }
+
+    /**
+     * Return the index of the first vertex of the triangle determined by 'columnIndex' and 'triangleRelativeIndex' in the vertices array
+     * **/
+    public int GetTriangleFirstVerticesArrayIndex(int columnIndex, int triangleRelativeIndex)
+    {
+        return GetTriangleGlobalIndex(columnIndex, triangleRelativeIndex) * m_numVerticesPerTriangle;
+    }
+
+    /**
+     * Return the index of the first index of the triangle determined by 'columnIndex' and 'triangleRelativeIndex' in the triangles array
+     * **/
+    public int GetTriangleFirstTrianglesArrayIndex(int columnIndex, int triangleRelativeIndex)
+    {
+        return GetTriangleGlobalIndex(columnIndex, triangleRelativeIndex) * m_numVerticesPerTriangle;
     }
 
     /**

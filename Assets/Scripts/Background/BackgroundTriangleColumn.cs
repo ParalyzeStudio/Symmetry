@@ -25,6 +25,133 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         m_index = index;
     }
 
+    public void Build()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        int numTriangles = m_parentRenderer.m_numTrianglesPerColumn;
+        float triangleEdgeLength = m_parentRenderer.m_triangleEdgeLength;
+        float triangleHeight = m_parentRenderer.m_triangleHeight;
+        float triangleContourThickness = m_parentRenderer.m_triangleContourThickness;
+
+        this.Capacity = numTriangles;
+        float columnHeight = 0.5f * (numTriangles + 1) * triangleEdgeLength;
+        float columnOffset = 0.5f * (columnHeight - screenSize.y);
+
+        for (int j = 0; j != numTriangles; j++)
+        {
+            float trianglePositionY = screenSize.y - 0.5f * (j + 1) * triangleEdgeLength + columnOffset;
+            trianglePositionY -= 0.5f * screenSize.y;
+
+            float triangleAngle;
+            float trianglePositionX;
+            if (m_index % 2 == 0)
+            {
+                triangleAngle = (j % 2 == 0) ? 0 : 180;
+                trianglePositionX = (j % 2 == 0) ? (1 / 3.0f + m_index) * triangleHeight : (2 / 3.0f + m_index) * triangleHeight;
+            }
+            else
+            {
+                triangleAngle = (j % 2 == 0) ? 180 : 0;
+                trianglePositionX = (j % 2 == 0) ? (2 / 3.0f + m_index) * triangleHeight : (1 / 3.0f + m_index) * triangleHeight;
+            }
+            trianglePositionX -= 0.5f * screenSize.x;
+
+            Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
+            Color triangleColor = ColorUtils.GetRandomNearColor(m_parentRenderer.GetColorAtPosition(trianglePosition), 0.02f);
+            BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor, triangleContourThickness);
+            triangle.m_indexInColumn = j;
+            triangle.m_parentColumn = this;
+            this.Add(triangle);
+
+            //Fill in the mesh
+            int numVerticesPerTriangle = (triangleContourThickness > 0) ? 15: 3; //3 quads (4 vertices) for edges and inner triangle (3 vertices)
+            int numIndicesPerTriangle = (triangleContourThickness > 0) ? 21 : 6; //3 quads (6 indices) for edges and inner triangle (3 indices)
+            int triangleGlobalIndex = m_index * numTriangles + j;
+            int verticesArrayIndex = numVerticesPerTriangle * triangleGlobalIndex;
+            int trianglesArrayIndex = numIndicesPerTriangle * triangleGlobalIndex;
+ 
+            //edge1
+            m_parentRenderer.AddQuadToMesh(verticesArrayIndex, trianglesArrayIndex, triangle.m_points[2], triangle.m_points[0], triangle.m_points[3], triangle.m_points[5], new Color(0,0,0,0));
+            //edge2
+            m_parentRenderer.AddQuadToMesh(verticesArrayIndex + 4, trianglesArrayIndex + 6, triangle.m_points[0], triangle.m_points[1], triangle.m_points[4], triangle.m_points[3], new Color(0, 0, 0, 0));
+            //edge3
+            m_parentRenderer.AddQuadToMesh(verticesArrayIndex + 8, trianglesArrayIndex + 12, triangle.m_points[1], triangle.m_points[2], triangle.m_points[5], triangle.m_points[4], new Color(0, 0, 0, 0));
+            //inner triangle
+            m_parentRenderer.AddTriangleToMesh(verticesArrayIndex + 12, trianglesArrayIndex + 18, triangle.m_points[3], triangle.m_points[4], triangle.m_points[5], triangleColor);
+            
+            //Set relations between neighbor triangles
+            //Start with edge3 (horizontal neigbors)
+            if (m_index > 0)
+            {
+                if (triangle.m_angle == 0)
+                {
+                    BackgroundTriangle leftNeighborTriangle = m_parentRenderer.m_triangleColumns[m_index - 1][j];
+                    triangle.SetEdge3Neighbor(leftNeighborTriangle); //left neighbor has the same relative index than the current triangle
+                    leftNeighborTriangle.SetEdge3Neighbor(triangle); //do the same operation in the opposite direction
+                }
+            }
+
+            //then with edge1 and edge2 (vertical neighbors inside one column)
+            if (j > 0 && j < numTriangles)
+            {
+                BackgroundTriangle topNeighbor = this[j - 1];
+
+                if (triangle.m_angle == 0) //edge1 is top edge, edge2 is bottom edge
+                {
+                    triangle.SetEdge1Neighbor(topNeighbor);
+                    topNeighbor.SetEdge1Neighbor(triangle);
+                }
+                else //angle == 180, edge1 is bottom edges and edge2 is top edge
+                {
+                    triangle.SetEdge2Neighbor(topNeighbor);
+                    topNeighbor.SetEdge2Neighbor(triangle);
+                }
+            }
+        }
+    }
+
+    /**
+     * Set relations between neighbor triangles
+     * **/
+    //public void SetNeighborTrianglesRelations()
+    //{
+    //    for (int i = 0; i != this.Count; i++)
+    //    {
+    //        BackgroundTriangle triangle = this[i];
+
+    //        //Start with edge3 (horizontal neigbors)
+    //        if (m_index > 0)
+    //        {
+    //            if (triangle.m_angle == 0)
+    //            {
+    //                BackgroundTriangle leftNeighborTriangle = m_parentRenderer.m_triangleColumns[m_index - 1][j];
+    //                triangle.SetEdge3Neighbor(leftNeighborTriangle); //left neighbor has the same relative index than the current triangle
+    //                leftNeighborTriangle.SetEdge3Neighbor(triangle); //do the same operation in the opposite direction
+    //            }
+    //        }
+
+    //        //then with edge1 and edge2 (vertical neighbors inside one column)
+    //        if (j > 0 && j < numTriangles - 1)
+    //        {
+    //            Debug.Log(j);
+    //            BackgroundTriangle topNeighbor = this[j - 1];
+    //            BackgroundTriangle bottomNeighbor = this[j + 1];
+
+    //            if (triangle.m_angle == 0) //edge1 is top edge, edge2 is bottom edge
+    //            {
+    //                triangle.SetEdge1Neighbor(topNeighbor);
+    //                triangle.SetEdge2Neighbor(bottomNeighbor);
+    //            }
+    //            else //angle == 180, edge1 is bottom edges and edge2 is top edge
+    //            {
+    //                triangle.SetEdge1Neighbor(bottomNeighbor);
+    //                triangle.SetEdge2Neighbor(topNeighbor);
+    //            }
+    //        }
+    //    }
+    //}
+
     /**
      * Apply gradient to this column
      * This will modify the color of every triangle faces (front or back) starting from top (gradient startColor) to bottom (gradient endColor)
@@ -68,7 +195,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         for (int iTriangleIdx = 0; iTriangleIdx != this.Count; iTriangleIdx++)
         {
             this[iTriangleIdx].AnimateColor(dt);
-            this[iTriangleIdx].FlipAnimate(dt);
+            //this[iTriangleIdx].FlipAnimate(dt);
         }
     }
 

@@ -435,6 +435,11 @@ public class BackgroundTriangle : BaseTriangle
     public float m_angle { get; set; } //the angle this triangle is rotated
     public float m_contourThickness { get; set; }
 
+    //neighbors of this triangle;
+    private BackgroundTriangle m_edge1Neighbor;
+    private BackgroundTriangle m_edge2Neighbor;
+    private BackgroundTriangle m_edge3Neighbor;
+
     //Variables to handle color animation of this triangle
     private Color m_animationStartColor; //the color when the animation starts
     private Color m_animationEndColor; //the color when the animation ends
@@ -460,35 +465,126 @@ public class BackgroundTriangle : BaseTriangle
         m_angle = angle;
         m_contourThickness = contourThickness;
 
-        float H = Mathf.Sqrt(3) / 2 * edgeLength;
-        float maxContourThickness = 2 / 3.0f * H;
-        if (contourThickness > maxContourThickness)
-            contourThickness = maxContourThickness;
-
+        //the 3 bisectors of this triangle
         Vector2 bisector0 = new Vector2(1, 0); //angle 0
         Vector2 bisector1 = new Vector2(-0.5f, -Mathf.Sqrt(3) / 2); //angle -2 * PI / 3
         Vector2 bisector2 = new Vector2(-0.5f, Mathf.Sqrt(3) / 2); //angle 2 * PI / 3
 
-        m_points[0] = 2 / 3.0f * H * bisector0;
-        m_points[1] = 2 / 3.0f * H * bisector1;
-        m_points[2] = 2 / 3.0f * H * bisector2;
+        float H = Mathf.Sqrt(3) / 2 * edgeLength;
+        float maxContourThickness = 1 / 3.0f * H;
+        if (contourThickness > maxContourThickness) //contour so large that this triangle is formed by 3 colored triangles, remove this case
+        {
+            throw new System.Exception("Contour is bigger than 1/3 of the bisector");
+        }
+        else
+        {
+            if (contourThickness == 0) //no contour, this case should not happen but deal with it anyway
+            {
+                m_points[0] = 2 / 3.0f * H * bisector0;
+                m_points[1] = 2 / 3.0f * H * bisector1;
+                m_points[2] = 2 / 3.0f * H * bisector2;
+            }
+            else //we have a valid inner contour
+            {
+                m_points = new Vector2[6];
+
+                //outer vertices
+                m_points[0] = 2 / 3.0f * H * bisector0;
+                m_points[1] = 2 / 3.0f * H * bisector1;
+                m_points[2] = 2 / 3.0f * H * bisector2;
+
+                //inner vertices
+                m_points[3] = m_points[0] - 2 * contourThickness / Mathf.Sqrt(3) * bisector0;
+                m_points[4] = m_points[1] - 2 * contourThickness / Mathf.Sqrt(3) * bisector1;
+                m_points[5] = m_points[2] - 2 * contourThickness / Mathf.Sqrt(3) * bisector2;
+            }
+        }              
 
         if (angle != 0)
         {
-            for (int i = 0; i != 3; i++)
+            for (int i = 0; i != m_points.Length; i++)
             {
                 m_points[i] = Quaternion.AngleAxis(angle, Vector3.forward) * m_points[i];
             }
         }
 
         //Switch to global position
-        for (int i = 0; i != 3; i++)
+        for (int i = 0; i != m_points.Length; i++)
         {
             m_points[i] += position;
         }
 
         m_originalColor = color;
         m_color = color;
+    }
+
+    public void SetEdge1Neighbor(BackgroundTriangle neighbor)
+    {
+        m_edge1Neighbor = neighbor;
+        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+        float dist = (rDist + gDist + bDist) / 3.0f;
+        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        SetEdge1Color(edgeColor);
+    }
+
+    public void SetEdge2Neighbor(BackgroundTriangle neighbor)
+    {
+        m_edge2Neighbor = neighbor;
+        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+        float dist = (rDist + gDist + bDist) / 3.0f;
+        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        SetEdge2Color(edgeColor);
+    }
+
+    public void SetEdge3Neighbor(BackgroundTriangle neighbor)
+    {
+        m_edge3Neighbor = neighbor;
+        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+        float dist = (rDist + gDist + bDist) / 3.0f;
+        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        SetEdge3Color(edgeColor);
+    }
+
+    private void SetEdge1Color(Color color)
+    {
+        BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
+
+        int edge1FirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn);
+        parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex] = color;
+        parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex + 1] = color;
+        parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex + 2] = color;
+        parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex + 3] = color;
+    }
+
+    private void SetEdge2Color(Color color)
+    {
+        BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
+
+        int edge2FirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn) + 4;
+        parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex] = color;
+        parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex + 1] = color;
+        parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex + 2] = color;
+        parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex + 3] = color;
+    }
+
+    private void SetEdge3Color(Color color)
+    {
+        BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
+
+        int edge3FirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn) + 8;
+        parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex] = color;
+        parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 1] = color;
+        parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 2] = color;
+        parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 3] = color;
     }
 
     /**
@@ -514,13 +610,13 @@ public class BackgroundTriangle : BaseTriangle
      * **/
     public void UpdateParentRendererMeshColorsArray()
     {
-        int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
+        //int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
-        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_color;
-        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_color;
-        m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_color;        
+        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_color;
+        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_color;
+        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_color;        
 
-        m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
+        //m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
     }
 
     /**
@@ -528,36 +624,36 @@ public class BackgroundTriangle : BaseTriangle
      * **/
     public void UpdateParentRendererMeshVerticesArray()
     {
-        int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
+        //int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
 
-        //transform each triangle points with the flip rotation
-        Vector3 triangleCenter = this.GetCenter();
-        Vector3 point0 = m_points[0];
-        Vector3 point1 = m_points[1];
-        Vector3 point2 = m_points[2];
+        ////transform each triangle points with the flip rotation
+        //Vector3 triangleCenter = this.GetCenter();
+        //Vector3 point0 = m_points[0];
+        //Vector3 point1 = m_points[1];
+        //Vector3 point2 = m_points[2];
         
-        ////switch to local space
-        //point0 -= triangleCenter;
-        //point1 -= triangleCenter;
-        //point2 -= triangleCenter;
+        //////switch to local space
+        ////point0 -= triangleCenter;
+        ////point1 -= triangleCenter;
+        ////point2 -= triangleCenter;
 
-        ////rotate points in local space
-        //Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
+        //////rotate points in local space
+        ////Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
 
-        //point0 = triangleRotation * point0;
-        //point1 = triangleRotation * point1;
-        //point2 = triangleRotation * point2;
+        ////point0 = triangleRotation * point0;
+        ////point1 = triangleRotation * point1;
+        ////point2 = triangleRotation * point2;
 
-        ////switch back to global space
-        //point0 += triangleCenter;
-        //point1 += triangleCenter;
-        //point2 += triangleCenter;
+        //////switch back to global space
+        ////point0 += triangleCenter;
+        ////point1 += triangleCenter;
+        ////point2 += triangleCenter;
 
-        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
-        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
-        m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
+        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
+        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
+        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
 
-        m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
+        //m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
     }
 
     /**
@@ -612,39 +708,39 @@ public class BackgroundTriangle : BaseTriangle
     /**
      * Start the flipping animation process
      * **/
-    public void StartFlipAnimation(Vector2 axis, float fDuration, float fDelay = 0.0f)
-    {
-        m_flipping = true;
-        m_flipAxis = axis;
-        m_flipToAngle = (m_flipAngle == 0) ? 180 : 360;
-        m_flipAnimationElapsedTime = 0;
-        m_flipAnimationDuration = fDuration;
-        m_flipAnimationDelay = fDelay;
-    }
+    //public void StartFlipAnimation(Vector2 axis, float fDuration, float fDelay = 0.0f)
+    //{
+    //    m_flipping = true;
+    //    m_flipAxis = axis;
+    //    m_flipToAngle = (m_flipAngle == 0) ? 180 : 360;
+    //    m_flipAnimationElapsedTime = 0;
+    //    m_flipAnimationDuration = fDuration;
+    //    m_flipAnimationDelay = fDelay;
+    //}
 
-    public void FlipAnimate(float dt)
-    {
-        if (!m_flipping)
-            return;
+    //public void FlipAnimate(float dt)
+    //{
+    //    if (!m_flipping)
+    //        return;
 
-        m_flipAnimationElapsedTime += dt;
+    //    m_flipAnimationElapsedTime += dt;
 
-        if (m_flipAnimationElapsedTime < m_flipAnimationDelay)
-            return;
+    //    if (m_flipAnimationElapsedTime < m_flipAnimationDelay)
+    //        return;
 
-        if (m_flipAnimationElapsedTime >= m_flipAnimationDuration + m_flipAnimationDelay)
-        {
-            m_flipping = false;
-            m_flipAngle = (m_flipToAngle == 360) ? 0 : m_flipToAngle;
-        }
-        else
-        {
-            float deltaAngle = (dt / m_flipAnimationDuration) * 180.0f;
-            m_flipAngle += deltaAngle;
-        }
+    //    if (m_flipAnimationElapsedTime >= m_flipAnimationDuration + m_flipAnimationDelay)
+    //    {
+    //        m_flipping = false;
+    //        m_flipAngle = (m_flipToAngle == 360) ? 0 : m_flipToAngle;
+    //    }
+    //    else
+    //    {
+    //        float deltaAngle = (dt / m_flipAnimationDuration) * 180.0f;
+    //        m_flipAngle += deltaAngle;
+    //    }
 
-        UpdateParentRendererMeshVerticesArray();
-    }
+    //    UpdateParentRendererMeshVerticesArray();
+    //}
 
     public void Offset(float dy)
     {
