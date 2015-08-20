@@ -119,9 +119,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
             m_triangleColumns.Add(column);
         }
 
-        //Now that all triangles are built, create relations between them
-
-
         //Declare vertices as 'dirty' to make a first refresh of the mesh
         m_meshVerticesDirty = true;
         m_meshTrianglesDirty = true;
@@ -403,106 +400,106 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }
     }
 
-    public void ProcessPointLights()
-    {
-        if (!m_meshBuilt)
-            return;
+    //public void ProcessPointLights()
+    //{
+    //    if (!m_meshBuilt)
+    //        return;
 
-        //replace all dead lights
-        for (int iPointLightIdx = 0; iPointLightIdx != m_pointLightsObjects.Length; iPointLightIdx++)
-        {
-            GameObject lightObject = m_pointLightsObjects[iPointLightIdx];
+    //    //replace all dead lights
+    //    for (int iPointLightIdx = 0; iPointLightIdx != m_pointLightsObjects.Length; iPointLightIdx++)
+    //    {
+    //        GameObject lightObject = m_pointLightsObjects[iPointLightIdx];
             
-            bool bReplaceLight = false;
-            BackgroundMovingLight light;
-            if (lightObject == null)
-            {
-                GameObject newLightObject = (GameObject)Instantiate(m_pointLightPfb);
-                newLightObject.transform.parent = this.gameObject.transform; //add the light object as the child of the background triangles renderer object
-                light = newLightObject.GetComponent<BackgroundMovingLight>();
-                light.Init();
-                m_pointLightsObjects[iPointLightIdx] = newLightObject;
-                bReplaceLight = true;
-            }
-            else
-            {
-                light = lightObject.GetComponent<BackgroundMovingLight>();
-                if (light.m_evacuated)
-                    bReplaceLight = true;
-            }
+    //        bool bReplaceLight = false;
+    //        BackgroundMovingLight light;
+    //        if (lightObject == null)
+    //        {
+    //            GameObject newLightObject = (GameObject)Instantiate(m_pointLightPfb);
+    //            newLightObject.transform.parent = this.gameObject.transform; //add the light object as the child of the background triangles renderer object
+    //            light = newLightObject.GetComponent<BackgroundMovingLight>();
+    //            light.Init();
+    //            m_pointLightsObjects[iPointLightIdx] = newLightObject;
+    //            bReplaceLight = true;
+    //        }
+    //        else
+    //        {
+    //            light = lightObject.GetComponent<BackgroundMovingLight>();
+    //            if (light.m_evacuated)
+    //                bReplaceLight = true;
+    //        }
             
-            if (bReplaceLight) //this light is dead create a new one
-            {
-                Vector2 screenSize = ScreenUtils.GetScreenSize();
+    //        if (bReplaceLight) //this light is dead create a new one
+    //        {
+    //            Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-                //Find a random screen side and a location on that side where this light comes from
-                Vector2 lightStartPosition = Vector2.zero;
-                Vector2 lightPointDirection = Vector2.zero;
+    //            //Find a random screen side and a location on that side where this light comes from
+    //            Vector2 lightStartPosition = Vector2.zero;
+    //            Vector2 lightPointDirection = Vector2.zero;
 
-                float randomValue = Random.value;
-                if (false/*randomValue <= 0.33f*/) //left side
-                {
-                    int randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
+    //            float randomValue = Random.value;
+    //            if (false/*randomValue <= 0.33f*/) //left side
+    //            {
+    //                int randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
                     
-                    lightStartPosition.x = -0.5f * screenSize.x;
-                    lightStartPosition.y = (0.5f + randomRow) * m_triangleEdgeLength;
-                    lightStartPosition.y = screenSize.y - lightStartPosition.y; //reverse the Y-coordinates
-                    lightStartPosition.y -= 0.5f * screenSize.y; //offset it
+    //                lightStartPosition.x = -0.5f * screenSize.x;
+    //                lightStartPosition.y = (0.5f + randomRow) * m_triangleEdgeLength;
+    //                lightStartPosition.y = screenSize.y - lightStartPosition.y; //reverse the Y-coordinates
+    //                lightStartPosition.y -= 0.5f * screenSize.y; //offset it
 
-                    float randomDirectionNumber = Mathf.FloorToInt(Random.value + 1);
-                    if (randomDirectionNumber == 0) //PI / 6
-                        lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, 0.5f);
-                    else //1 ==> -PI / 6
-                        lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
-                }
-                else if (true/*randomValue > 0.33f && randomValue <= 0.66f*/) //top side
-                {
-                    int randomColumn = Mathf.FloorToInt(Random.value * (m_triangleColumns.Count) - 2) + 1;
+    //                float randomDirectionNumber = Mathf.FloorToInt(Random.value + 1);
+    //                if (randomDirectionNumber == 0) //PI / 6
+    //                    lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, 0.5f);
+    //                else //1 ==> -PI / 6
+    //                    lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
+    //            }
+    //            else if (true/*randomValue > 0.33f && randomValue <= 0.66f*/) //top side
+    //            {
+    //                int randomColumn = Mathf.FloorToInt(Random.value * (m_triangleColumns.Count) - 2) + 1;
 
-                    lightStartPosition.y = 0.5f * screenSize.y;
-                    if (randomColumn % 2 == 0) //even column: offset the start position by half a triangle edge length
-                        lightStartPosition.y += 0.5f * m_triangleEdgeLength;
-                    lightStartPosition.x = randomColumn * Mathf.Sqrt(3) / 2 * m_triangleEdgeLength;                    
-                    lightStartPosition.x -= 0.5f * screenSize.x;
+    //                lightStartPosition.y = 0.5f * screenSize.y;
+    //                if (randomColumn % 2 == 0) //even column: offset the start position by half a triangle edge length
+    //                    lightStartPosition.y += 0.5f * m_triangleEdgeLength;
+    //                lightStartPosition.x = randomColumn * Mathf.Sqrt(3) / 2 * m_triangleEdgeLength;                    
+    //                lightStartPosition.x -= 0.5f * screenSize.x;
 
-                    float randomDirectionNumber = Mathf.FloorToInt(Random.value + 2);
-                    //if (randomDirectionNumber == 0) //-PI / 6
-                    //    lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
-                    //else if (randomDirectionNumber == 1) //-5 * PI / 6
-                    //    lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
-                    //else //-PI / 2
-                        lightPointDirection = new Vector2(0, -1.0f);
-                }
-                else if (false /*randomValue > 0.66f*/) //right side
-                {
-                    int randomRow;
-                    if (NUM_COLUMNS % 2 == 1)
-                        randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
-                    else
-                        randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2)) + 1;
+    //                float randomDirectionNumber = Mathf.FloorToInt(Random.value + 2);
+    //                //if (randomDirectionNumber == 0) //-PI / 6
+    //                //    lightPointDirection = new Vector2(Mathf.Sqrt(3) / 2, -0.5f);
+    //                //else if (randomDirectionNumber == 1) //-5 * PI / 6
+    //                //    lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
+    //                //else //-PI / 2
+    //                    lightPointDirection = new Vector2(0, -1.0f);
+    //            }
+    //            else if (false /*randomValue > 0.66f*/) //right side
+    //            {
+    //                int randomRow;
+    //                if (NUM_COLUMNS % 2 == 1)
+    //                    randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2));
+    //                else
+    //                    randomRow = Mathf.FloorToInt(Random.value * (m_triangleColumns[0].Count / 2.0f - 2)) + 1;
 
-                    lightStartPosition.x = 0.5f * screenSize.x;
-                    lightStartPosition.y = ((NUM_COLUMNS % 2 == 1) ? randomRow : 0.5f + randomRow) * m_triangleEdgeLength;
-                    lightStartPosition.y = screenSize.y - lightStartPosition.y; //reverse the Y-coordinates
-                    lightStartPosition.y -= 0.5f * screenSize.y; //offset it
+    //                lightStartPosition.x = 0.5f * screenSize.x;
+    //                lightStartPosition.y = ((NUM_COLUMNS % 2 == 1) ? randomRow : 0.5f + randomRow) * m_triangleEdgeLength;
+    //                lightStartPosition.y = screenSize.y - lightStartPosition.y; //reverse the Y-coordinates
+    //                lightStartPosition.y -= 0.5f * screenSize.y; //offset it
 
-                    float randomDirectionNumber = Mathf.FloorToInt(Random.value + 1);
-                    if (randomDirectionNumber == 0) //PI / 6
-                        lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, 0.5f);
-                    else //1 ==> -PI / 6
-                        lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
-                }
+    //                float randomDirectionNumber = Mathf.FloorToInt(Random.value + 1);
+    //                if (randomDirectionNumber == 0) //PI / 6
+    //                    lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, 0.5f);
+    //                else //1 ==> -PI / 6
+    //                    lightPointDirection = new Vector2(-Mathf.Sqrt(3) / 2, -0.5f);
+    //            }
 
-                light.m_finished = false;
-                light.m_evacuated = false;
-                light.m_startPoint = lightStartPosition;
-                light.m_currentPoint = lightStartPosition;
-                light.m_pointSpeed = 100;
-                light.m_pointDirection = lightPointDirection;
-                light.m_segmentLength = m_triangleEdgeLength;
-            }
-        }
-    }
+    //            light.m_finished = false;
+    //            light.m_evacuated = false;
+    //            light.m_startPoint = lightStartPosition;
+    //            light.m_currentPoint = lightStartPosition;
+    //            light.m_pointSpeed = 100;
+    //            light.m_pointDirection = lightPointDirection;
+    //            light.m_segmentLength = m_triangleEdgeLength;
+    //        }
+    //    }
+    //}
 
     /**
      * Apply a gradient to all triangles at once
@@ -654,14 +651,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     {
         m_meshVertices[verticesArrayIndex] = a;
         m_meshVertices[verticesArrayIndex + 1] = b;
-        try
-        {
-            m_meshVertices[verticesArrayIndex + 2] = c;
-        }
-        catch (System.IndexOutOfRangeException e)
-        {
-            Debug.Log("verticesArrayIndex:" + verticesArrayIndex);
-        }
+        m_meshVertices[verticesArrayIndex + 2] = c;
         m_meshTriangles[trianglesArrayIndex] = verticesArrayIndex;
         m_meshTriangles[trianglesArrayIndex + 1] = verticesArrayIndex + 1;
         m_meshTriangles[trianglesArrayIndex + 2] = verticesArrayIndex + 2;

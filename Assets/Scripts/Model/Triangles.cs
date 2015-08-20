@@ -521,40 +521,61 @@ public class BackgroundTriangle : BaseTriangle
     public void SetEdge1Neighbor(BackgroundTriangle neighbor)
     {
         m_edge1Neighbor = neighbor;
-        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-        float dist = (rDist + gDist + bDist) / 3.0f;
-        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        Color edgeColor;
+        if (neighbor != null)
+        {
+            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+            float dist = (rDist + gDist + bDist) / 3.0f;
+            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        }
+        else
+            edgeColor = m_color; //set the edge color the same as the inner triangle
+
         SetEdge1Color(edgeColor);
     }
 
     public void SetEdge2Neighbor(BackgroundTriangle neighbor)
     {
         m_edge2Neighbor = neighbor;
-        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-        float dist = (rDist + gDist + bDist) / 3.0f;
-        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        Color edgeColor;
+        if (neighbor != null)
+        {
+            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+            float dist = (rDist + gDist + bDist) / 3.0f;
+            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        }
+        else
+            edgeColor = m_color; //set the edge color the same as the inner triangle
+
         SetEdge2Color(edgeColor);
     }
 
     public void SetEdge3Neighbor(BackgroundTriangle neighbor)
     {
         m_edge3Neighbor = neighbor;
-        float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-        float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-        float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-        float dist = (rDist + gDist + bDist) / 3.0f;
-        Color edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-        edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        Color edgeColor;
+        if (neighbor != null)
+        {
+            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
+            float dist = (rDist + gDist + bDist) / 3.0f;
+            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+        }
+        else
+            edgeColor = m_color; //set the edge color the same as the inner triangle
+        
         SetEdge3Color(edgeColor);
     }
 
-    private void SetEdge1Color(Color color)
+    public void SetEdge1Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
 
@@ -565,7 +586,7 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex + 3] = color;
     }
 
-    private void SetEdge2Color(Color color)
+    public void SetEdge2Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
 
@@ -576,7 +597,7 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex + 3] = color;
     }
 
-    private void SetEdge3Color(Color color)
+    public void SetEdge3Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
 
@@ -585,6 +606,22 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 1] = color;
         parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 2] = color;
         parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 3] = color;
+    }
+
+    public void SetInnerTriangleColor(Color color)
+    {
+        BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
+
+        int innerTriangleFirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn) + 12;
+        parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex] = color;
+        parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex + 1] = color;
+        parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex + 2] = color;
+    }
+
+    public void UpdateTriangleMainColor(Color color)
+    {
+        SetInnerTriangleColor(color);
+
     }
 
     /**
@@ -631,7 +668,7 @@ public class BackgroundTriangle : BaseTriangle
         //Vector3 point0 = m_points[0];
         //Vector3 point1 = m_points[1];
         //Vector3 point2 = m_points[2];
-        
+
         //////switch to local space
         ////point0 -= triangleCenter;
         ////point1 -= triangleCenter;
@@ -746,8 +783,9 @@ public class BackgroundTriangle : BaseTriangle
     {
         Vector2 offset = new Vector2(0, dy);
 
-        m_points[0] += offset;
-        m_points[1] += offset;
-        m_points[2] += offset;
+        for (int i = 0; i != m_points.Length; i++)
+        {
+            m_points[i] += offset;
+        }
     }
 }
