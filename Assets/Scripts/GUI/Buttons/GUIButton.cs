@@ -34,7 +34,6 @@ public class GUIButton : MonoBehaviour
         ID_MUSIC_BUTTON,
         ID_SOUND_BUTTON,
         ID_RESET_BUTTON,
-        ID_BACK_BUTTON,
         ID_CLOSE_OVERLAY_BUTTON,
         ID_MENU_BUTTON,
         ID_RETRY_BUTTON,
@@ -203,20 +202,6 @@ public class GUIButton : MonoBehaviour
 
             PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
-        }
-        else if (m_ID == GUIButtonID.ID_BACK_BUTTON)
-        {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
-            SceneManager.DisplayContent displayedContent = sceneManager.m_displayedContent;
-            if (displayedContent == SceneManager.DisplayContent.CHAPTERS)
-            {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.MENU, false, 0.0f, 0.5f);
-                guiManager.DismissBackButton();
-            }
-            else if (displayedContent == SceneManager.DisplayContent.LEVELS)
-            {
-                sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false, 0.0f, 0.5f);
-            }
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
         {

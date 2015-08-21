@@ -78,9 +78,9 @@ public class GUITouchHandler : TouchHandler
     public void OnClickPlay()
     {
         BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
-        bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
-        bgRenderer.GenerateChapterGradient();
-        bgRenderer.GenerateTransitionGradients();
+        //bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
+        //bgRenderer.GenerateChapterGradient();
+        //bgRenderer.GenerateTransitionGradients();
         bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 4.0f);
 
         GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 4.0f);
@@ -152,7 +152,7 @@ public class GUITouchHandler : TouchHandler
 
         if ((clickLocation - playButtonPosition).magnitude <= playButtonOuterRadius)
         {
-            mainMenu.m_playButton.GetComponent<CircleMeshAnimator>().AnimateInnerRadiusTo(0, 0.5f, 0.0f);
+            mainMenu.DismissPlayButton();
             OnClickPlay();
         }
     }

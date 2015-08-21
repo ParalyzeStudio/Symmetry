@@ -73,7 +73,6 @@ public abstract class GUISlot : Object
             else
             {
                 triangle.m_color = toColor;
-                triangle.UpdateParentRendererMeshColorsArray();
             }
         }
     }
@@ -98,7 +97,6 @@ public abstract class GUISlot : Object
             else
             {
                 triangle.m_color = toColor;
-                triangle.UpdateParentRendererMeshColorsArray();
             }
         }
     }

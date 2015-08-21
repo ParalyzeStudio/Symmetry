@@ -666,57 +666,6 @@ public class BackgroundTriangle : BaseTriangle
     }
 
     /**
-     * Update the colors array of the parent renderer
-     * **/
-    public void UpdateParentRendererMeshColorsArray()
-    {
-        //int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
-
-        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex] = m_color;
-        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 1] = m_color;
-        //m_parentColumn.m_parentRenderer.m_meshColors[3 * triangleGlobalIndex + 2] = m_color;        
-
-        //m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
-    }
-
-    /**
-     * Update the vertices array of the parent renderer
-     * **/
-    public void UpdateParentRendererMeshVerticesArray()
-    {
-        //int triangleGlobalIndex = m_parentColumn.m_index * m_parentColumn.m_parentRenderer.m_numTrianglesPerColumn + m_indexInColumn;
-
-        ////transform each triangle points with the flip rotation
-        //Vector3 triangleCenter = this.GetCenter();
-        //Vector3 point0 = m_points[0];
-        //Vector3 point1 = m_points[1];
-        //Vector3 point2 = m_points[2];
-
-        //////switch to local space
-        ////point0 -= triangleCenter;
-        ////point1 -= triangleCenter;
-        ////point2 -= triangleCenter;
-
-        //////rotate points in local space
-        ////Quaternion triangleRotation = Quaternion.AngleAxis(m_flipAngle, m_flipAxis);
-
-        ////point0 = triangleRotation * point0;
-        ////point1 = triangleRotation * point1;
-        ////point2 = triangleRotation * point2;
-
-        //////switch back to global space
-        ////point0 += triangleCenter;
-        ////point1 += triangleCenter;
-        ////point2 += triangleCenter;
-
-        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex] = point0;
-        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 1] = point1;
-        //m_parentColumn.m_parentRenderer.m_meshVertices[3 * triangleGlobalIndex + 2] = point2;
-
-        //m_parentColumn.m_parentRenderer.m_meshVerticesDirty = true;
-    }
-
-    /**
      * Generate a color slightly different from original color
      * **/
     public void GenerateColorFromOriginalColor(float delta)
@@ -760,8 +709,6 @@ public class BackgroundTriangle : BaseTriangle
                 float timeRatio = (m_colorAnimationElapsedTime - m_colorAnimationDelay) / m_colorAnimationDuration;
                 m_color = Color.Lerp(m_animationStartColor, m_animationEndColor, timeRatio);
             }
-
-            UpdateParentRendererMeshColorsArray();
         }       
     }
 

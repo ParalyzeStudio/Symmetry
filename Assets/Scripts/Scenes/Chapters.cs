@@ -38,27 +38,11 @@ public class Chapters : GUIScene
         GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
         chaptersAnimator.SetOpacity(1);
 
-        //Display back button
-        GetGUIManager().ShowBackButton(fDelay);
-
         //Show chapter slot
         ShowChapterSlot(fDelay);
 
         //Show chapter selection arrows
         ShowSelectionArrows(true, fDelay);
-
-        GameObject debugCircleMeshObject = (GameObject)Instantiate(m_circleMeshPfb);
-
-        CircleMesh circleMesh = debugCircleMeshObject.GetComponent<CircleMesh>();
-        circleMesh.Init(Instantiate(m_positionColorMaterial));
-
-        CircleMeshAnimator circleMeshAnimator = debugCircleMeshObject.GetComponent<CircleMeshAnimator>();
-        circleMeshAnimator.SetPosition(new Vector3(0,0,-50));
-        circleMeshAnimator.SetNumSegments(6, true);
-        //circleMeshAnimator.SetInnerRadius(0);
-        //circleMeshAnimator.SetInnerRadius(0);
-
-
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)
@@ -405,18 +389,18 @@ public class Chapters : GUIScene
      * **/
     public void UpdateBackgroundGradient(float fDuration = 1.0f, float fDelay = 0.0f)
     {
-        Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
+       // Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
 
-        BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+       // BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
 
-        Gradient gradient = new Gradient();
-        gradient.CreateRadial(bgRenderer.m_chaptersGradient.m_radialGradientCenter,
-                              960,
-                              displayedChapter.GetThemeColors()[0],
-                              displayedChapter.GetThemeColors()[1]);
+       // Gradient gradient = new Gradient();
+       // gradient.CreateRadial(bgRenderer.m_chaptersGradient.m_radialGradientCenter,
+       //                       960,
+       //                       displayedChapter.GetThemeColors()[0],
+       //                       displayedChapter.GetThemeColors()[1]);
 
-       bgRenderer.m_chaptersGradient = gradient;
-       bgRenderer.ApplyGradient(gradient, 0.02f, true, fDuration, fDelay, 0.0f);
+       //bgRenderer.m_chaptersGradient = gradient;
+       //bgRenderer.ApplyGradient(gradient, 0.02f, true, fDuration, fDelay, 0.0f);
     }
 
     /**

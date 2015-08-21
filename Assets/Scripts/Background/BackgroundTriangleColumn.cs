@@ -58,7 +58,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             trianglePositionX -= 0.5f * screenSize.x;
 
             Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
-            Color triangleColor = ColorUtils.GetRandomNearColor(m_parentRenderer.GetColorAtPosition(trianglePosition), 0.02f);
+            Color triangleColor = ColorUtils.GetRandomNearColor(m_parentRenderer.m_mainMenuGradient.GetColorAtPosition(trianglePosition), 0.02f);
             BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor, triangleContourThickness);
             triangle.m_indexInColumn = j;
             triangle.m_parentColumn = this;
@@ -142,6 +142,13 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                 topNeighbor.SetEdge2Neighbor(triangle);
             }
         }
+        else
+        {
+            if (triangle.m_angle == 0) //edge1 is top edge
+                triangle.SetEdge1Neighbor(null);
+            else
+                triangle.SetEdge2Neighbor(null);
+        }           
     }
 
     /**
@@ -174,7 +181,9 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             else
             {
                 triangle.GenerateColorFromOriginalColor(localTriangleVariance);
-                triangle.UpdateParentRendererMeshColorsArray();
+                triangle.SetInnerTriangleColor(triangle.m_color);
+                SetVerticalTopNeighbor(triangle);
+                SetHorizontalLeftNeighbor(triangle);
             }
         }
     }
@@ -288,7 +297,8 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                     trianglePositionY -= 0.5f * screenSize.y;
                 }
                 Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
-                Color triangleColor = m_parentRenderer.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
+                
+                Color triangleColor = m_parentRenderer.m_mainMenuGradient.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
                 BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY),
                                                                      triangleEdgeLength,
                                                                      triangleAngle,

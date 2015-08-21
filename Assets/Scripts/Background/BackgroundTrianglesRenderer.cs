@@ -37,9 +37,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     //gradients
     public float m_verticalOffset { get; set; } //the offset generated when translating background across gradients
     public Gradient m_mainMenuGradient { get; set; }
-    public List<Gradient> m_transitionGradients { get; set; }
+    //public List<Gradient> m_transitionGradients { get; set; }
     public Gradient m_chaptersGradient { get; set; }
-    public float m_transitionGradientLength;
+    //public float m_transitionGradientLength;
 
     ////gradients animation
     //private bool m_offsetting;
@@ -64,11 +64,11 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
     public void Init()
     {
-        m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
+        //m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
 
         GenerateMainMenuGradient();
         GenerateChapterGradient();
-        GenerateTransitionGradients();
+        //GenerateTransitionGradients();
 
         BuildMesh(0.138f);
 
@@ -139,7 +139,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(18, 75, 89, 255));
-        Color gradientEndColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(98, 127, 134, 255));
+        //Color gradientEndColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(98, 127, 134, 255));
+        Color gradientEndColor = Color.white;
 
         if (m_mainMenuGradient == null)
             m_mainMenuGradient = new Gradient();
@@ -152,31 +153,31 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Generate the gradient that will join main menu gradient and chapter gradient
      * **/
-    public void GenerateTransitionGradients()
-    {
-        m_transitionGradients = new List<Gradient>();
-        m_transitionGradients.Capacity = NUM_COLUMNS;
+    //public void GenerateTransitionGradients()
+    //{
+    //    m_transitionGradients = new List<Gradient>();
+    //    m_transitionGradients.Capacity = NUM_COLUMNS;
 
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
 
-        Color gradientStartColor = m_mainMenuGradient.m_linearGradientEndColor;
+    //    Color gradientStartColor = m_mainMenuGradient.m_linearGradientEndColor;
 
-        for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
-        {
-            float xPosition = iColumnIdx * m_triangleHeight + 0.5f * m_triangleHeight;
-            xPosition -= 0.5f * screenSize.x;
-            float yPosition = m_mainMenuGradient.m_linearGradientEndPoint.y - m_transitionGradientLength;
-            Color gradientEndColor = m_chaptersGradient.GetColorAtPosition(new Vector2(xPosition, yPosition));
+    //    for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
+    //    {
+    //        float xPosition = iColumnIdx * m_triangleHeight + 0.5f * m_triangleHeight;
+    //        xPosition -= 0.5f * screenSize.x;
+    //        float yPosition = m_mainMenuGradient.m_linearGradientEndPoint.y - m_transitionGradientLength;
+    //        Color gradientEndColor = m_chaptersGradient.GetColorAtPosition(new Vector2(xPosition, yPosition));
 
-            Gradient gradient = new Gradient();
-            gradient.CreateLinear(m_mainMenuGradient.m_linearGradientEndPoint,
-                                  m_mainMenuGradient.m_linearGradientEndPoint - new Vector2(0, m_transitionGradientLength),
-                                  gradientStartColor,
-                                  gradientEndColor);
-            m_transitionGradients.Add(gradient);
-        }
-    }
+    //        Gradient gradient = new Gradient();
+    //        gradient.CreateLinear(m_mainMenuGradient.m_linearGradientEndPoint,
+    //                              m_mainMenuGradient.m_linearGradientEndPoint - new Vector2(0, m_transitionGradientLength),
+    //                              gradientStartColor,
+    //                              gradientEndColor);
+    //        m_transitionGradients.Add(gradient);
+    //    }
+    //}
 
     /**
      * Generate the radial gradient for the chapters background
@@ -193,28 +194,11 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
         if (m_chaptersGradient == null)
             m_chaptersGradient = new Gradient();
-        Vector2 chaptersGradientCenter = m_mainMenuGradient.m_linearGradientEndPoint - new Vector2(0, m_transitionGradientLength + 0.5f * screenSize.y);
+        Vector2 chaptersGradientCenter = m_mainMenuGradient.m_linearGradientEndPoint - new Vector2(0, - 0.5f * screenSize.y);
         m_chaptersGradient.CreateRadial(chaptersGradientCenter,
                                         960,
                                         gradientInnerColor,
                                         gradientOuterColor);
-    }
-
-    public Color GetColorAtPosition(Vector2 position)
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        if (position.y >= m_mainMenuGradient.m_linearGradientEndPoint.y)
-            return m_mainMenuGradient.GetColorAtPosition(position);
-        else if (position.y < m_mainMenuGradient.m_linearGradientEndPoint.y && position.y > m_mainMenuGradient.m_linearGradientEndPoint.y - m_transitionGradientLength)
-        {
-            int iColumnIndex = Mathf.FloorToInt((position.x + 0.5f * screenSize.x) / m_triangleHeight);
-            return m_transitionGradients[iColumnIndex].GetColorAtPosition(position);
-        }
-        else if (position.y <= m_mainMenuGradient.m_linearGradientStartPoint.y - m_transitionGradientLength)
-            return m_chaptersGradient.GetColorAtPosition(position);
-
-        return Color.black;
     }
 
     /**
@@ -249,12 +233,10 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         for (int iColumnIdx = 0; iColumnIdx != NUM_COLUMNS; iColumnIdx++)
         {
             BackgroundTriangleColumn column = m_triangleColumns[iColumnIdx];
-
-            //float randomRelativeDelay = Random.value;            
-            //column.ApplyGradient(m_mainMenuGradient, true, 0.02f, true, 0.75f, fDelay + randomRelativeDelay, 0.05f);
-
-            column.ApplyGradient(m_mainMenuGradient, 0.02f, true, 0.75f, fDelay);
+            column.ApplyGradient(m_mainMenuGradient, 0.02f, bAnimated, 0.75f, fDelay);
         }
+
+        m_meshColorsDirty = true;
 
         //Modify the colors of some triangles to make the title appear
         //RenderMainMenuTitle(bAnimated, fDelay + 5.0f);
@@ -395,8 +377,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
                 triangle.StartColorAnimation(destinationColor, 2.0f, randomDelay);
             else
                 triangle.m_color = destinationColor;
-
-            triangle.UpdateParentRendererMeshColorsArray();
         }
     }
 
@@ -557,8 +537,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
 
-        float toOffset = bFromMainMenu ? 2 * screenSize.y : 0; //transition gradient is 1 screen unit length
-        //animator.TranslateTo(new Vector3(0, toOffset, 0), fDuration, fDelay);    
+        float toOffset = bFromMainMenu ? 0.5f * screenSize.y : 0; //transition gradient is 1 screen unit length 
         animator.TranslateTo(new Vector3(0, toOffset, 0), 1.0f, fDuration, fDelay);
     }
 

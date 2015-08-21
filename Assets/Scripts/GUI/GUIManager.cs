@@ -19,7 +19,6 @@ public class GUIManager : MonoBehaviour
     public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
     public GameObject m_pauseWindowPfb; //the prefab needed to instantiate the pause window
     public GameObject m_GUIFramePfb; //the prefab containing a background frame
-    public GameObject m_backButtonPfb; //the prefab for the back button
 
     public Material m_plainWhiteMaterial { get; set; } //use this shared material to draw plain white meshes
 
@@ -44,8 +43,7 @@ public class GUIManager : MonoBehaviour
     private GameObject m_optionsContentHolder;
     private GameObject m_creditsContentHolder;
 
-    //Materials for GUI buttons    
-    public Material m_skinBack;
+    //Materials for GUI buttons
     public Material m_skinCloseOverlay;
     public Material m_skinSelectionArrow;
     public Material m_skinCredits;
@@ -129,9 +127,7 @@ public class GUIManager : MonoBehaviour
     public Material GetClonedSkinMaterialForID(GUIButton.GUIButtonID iID)
     {
         Material skinMaterial = null;
-        if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON)
-            skinMaterial = m_skinBack;
-        else if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
+        if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
             skinMaterial = m_skinLevels;
         else if (iID == GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
             skinMaterial = m_skinCloseOverlay;        
@@ -587,40 +583,5 @@ public class GUIManager : MonoBehaviour
         m_creditsContentHolder.transform.parent = m_sideButtonsOverlay.transform;
         GameObjectAnimator creditsContentHolderAnimator = m_creditsContentHolder.AddComponent<GameObjectAnimator>();
         creditsContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
-    }
-
-    /**
-     * Shows the back button that is shared across scenes
-     * If it's already shown do nothing
-     * **/
-    public void ShowBackButton(float fDelay = 0.0f)
-    {
-        GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
-        if (backButton == null)
-        {
-            Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-            GameObject backButtonObject = this.CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_BUTTON,
-                                                                    new Vector2(128.0f, 128.0f));
-            backButtonObject.name = "BackButton";
-
-            backButtonObject.transform.parent = this.gameObject.transform;
-            backButtonObject.transform.localPosition = new Vector3(-0.5f * screenSize.x + 110.0f, 0.5f * screenSize.y - 90.0f, -20.0f);
-
-            //Fade in button
-            GameObjectAnimator backButtonAnimator = backButtonObject.GetComponent<GameObjectAnimator>();
-            backButtonAnimator.SetOpacity(0);
-            backButtonAnimator.FadeTo(1, 0.5f, fDelay);
-        }
-    }
-
-    /**
-     * Dismisses the back button
-     * **/
-    public void DismissBackButton()
-    {
-        //GUIButton backButton = GUIButton.FindInObjectChildrenForID(this.gameObject, GUIButton.GUIButtonID.ID_BACK_BUTTON);
-        //if (backButton != null)
-        //    Destroy(backButton.gameObject);
     }
 }

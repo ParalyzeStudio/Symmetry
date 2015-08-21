@@ -15,6 +15,9 @@ public class MainMenu : GUIScene
     public GameObject m_optionsButtonObject { get; set; }
     public GameObject m_creditsButtonObject { get; set; }
 
+    //play text
+    private GameObject m_playTextObject;
+
     //variables to handle the generation of fading hexagon on play button
     private float m_hexagonAnimationStartInnerRadius;
     private float m_hexagonAnimationEndInnerRadius;
@@ -30,7 +33,7 @@ public class MainMenu : GUIScene
         base.Show(bAnimated, fDelay);
 
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
-        //backgroundRenderer.RenderForMainMenu(bAnimated, fDelay);
+        backgroundRenderer.RenderForMainMenu(false, fDelay);
         //backgroundRenderer.RenderForChapter(bAnimated, fDelay);
 
         GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
@@ -87,15 +90,22 @@ public class MainMenu : GUIScene
         m_generatingFadingHexagons = true;
 
         //Show text above button
-        GameObject playTextObject = (GameObject)Instantiate(m_textMeshPfb);
-        playTextObject.name = "PlayText";
-        playTextObject.transform.parent = this.transform;
-        playTextObject.transform.localPosition = m_playButton.transform.localPosition + new Vector3(0, 2.0f * GetBackgroundRenderer().m_triangleEdgeLength, 0);
-        playTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("play");
+        m_playTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        m_playTextObject.name = "PlayText";
+        m_playTextObject.transform.parent = this.transform;
+        m_playTextObject.transform.localPosition = m_playButton.transform.localPosition + new Vector3(0, 2.0f * GetBackgroundRenderer().m_triangleEdgeLength, 0);
+        m_playTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("play");
 
-        TextMeshAnimator playTextAnimator = playTextObject.GetComponent<TextMeshAnimator>();
+        TextMeshAnimator playTextAnimator = m_playTextObject.GetComponent<TextMeshAnimator>();
         playTextAnimator.SetColor(Color.white);
         playTextAnimator.SetFontHeight(40);
+    }
+
+    public void DismissPlayButton()
+    {
+        m_playButton.GetComponent<CircleMeshAnimator>().FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        m_playTextObject.GetComponent<TextMeshAnimator>().FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        m_generatingFadingHexagons = false;
     }
 
     public void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)
