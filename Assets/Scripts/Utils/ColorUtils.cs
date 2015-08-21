@@ -24,6 +24,14 @@ public class ColorUtils
         return outColor;
     }
 
+    public static Color IntensifyColorChannels(Color color, bool rChannel, bool gChannel, bool bChannel, float rt, float gt, float bt)
+    {
+        return new Color(rChannel ? Mathf.Lerp(color.r, 1, rt) : color.r,
+                         gChannel ? Mathf.Lerp(color.g, 1, gt) : color.g,
+                         bChannel ? Mathf.Lerp(color.b, 1, bt) : color.b,
+                         color.a);
+    }
+
     /**
      * Returns the color from the rainbow of colors (red-orange-yellow-yellow-green-cyan-blue-pink-purple-red)
      * **/

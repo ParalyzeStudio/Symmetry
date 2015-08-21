@@ -322,4 +322,3 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             m_parentRenderer.m_meshVerticesDirty = true;
     }
 }
-

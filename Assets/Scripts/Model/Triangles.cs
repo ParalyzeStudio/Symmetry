@@ -455,6 +455,8 @@ public class BackgroundTriangle : BaseTriangle
     private float m_flipAnimationDuration;
     private float m_flipAnimationDelay;
 
+    public const float EDGE_COLOR_INTENSIFY_FACTOR = 20.0f;
+
     /**
      * Build an equilateral triangle with the given orientation passed through the angle variable
      * The triangle can have an inner contour, in this case set the contourThickness to a strictly positive value
@@ -529,7 +531,14 @@ public class BackgroundTriangle : BaseTriangle
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
             float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+
+            edgeColor = ColorUtils.IntensifyColorChannels(edgeColor, 
+                                                          true, 
+                                                          true, 
+                                                          true, 
+                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 
+                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 
+                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
@@ -548,7 +557,14 @@ public class BackgroundTriangle : BaseTriangle
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
             float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+
+            edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r,
+                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g,
+                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
@@ -567,7 +583,14 @@ public class BackgroundTriangle : BaseTriangle
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
             float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
-            edgeColor = ColorUtils.LightenColor(edgeColor, dist * 2.5f);
+
+            edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r,
+                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g,
+                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
