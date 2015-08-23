@@ -2,13 +2,11 @@
 
 public class GUIButton : MonoBehaviour
 {
+    public GameObject m_skinObject;
     protected UVQuad m_skin;
 
     public Vector2 m_size { get; set; }
-
-    //In case button has to change textures between its on/off states
-    public Material m_skinOnMaterial;
-    public Material m_skinOffMaterial;
+    private Vector2 m_touchArea;
 
     //Color that will tint the skin texture
     public Color m_skinTintColor { get; set; }
@@ -54,33 +52,26 @@ public class GUIButton : MonoBehaviour
 
     public GUIButtonID m_ID;
 
-    public virtual void Init(Material skinMaterial, Color tintColor)
+    /**
+     * Init this button mesh with optional material
+     * **/
+    public virtual void Init(Material skinMaterial = null)
     {
-        BaseQuad[] childrenQuads = this.GetComponentsInChildren<BaseQuad>();
-        m_skin = (childrenQuads.Length > 0) ? (UVQuad) childrenQuads[0] : null;
+        m_skin = m_skinObject.GetComponent<UVQuad>();
+        m_skin.Init(skinMaterial);
 
-        if (m_skin != null)
-        {
-            m_skin.Init(skinMaterial);
-
-            TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
-            skinAnimator.SetPosition(new Vector3(0,0,-2));
-            skinAnimator.SetColor(tintColor);
-        }
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        skinAnimator.SetPosition(new Vector3(0, 0, -2));
+        skinAnimator.SetColor(Color.white); //default white tint color
     }
 
-    public static GUIButton FindInObjectChildrenForID(GameObject parentObject, GUIButtonID id)
+    /**
+     * Set a specific color to tint the button skin
+     * **/
+    public void SetTintColor(Color color)
     {
-        GUIButton[] childButtons = parentObject.GetComponentsInChildren<GUIButton>();
-        for (int iButtonIdx = 0; iButtonIdx != childButtons.Length; iButtonIdx++)
-        {
-            if (childButtons[iButtonIdx].m_ID == id)
-            {
-                return childButtons[iButtonIdx];
-            }
-        }
-
-        return null;
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        skinAnimator.SetColor(color);
     }
 
     /**
@@ -89,17 +80,17 @@ public class GUIButton : MonoBehaviour
     public virtual void SetSize(Vector2 size)
     {
         m_size = size;
+        m_touchArea = size;
 
         m_skin.GetComponent<TexturedQuadAnimator>().SetScale(GeometryUtils.BuildVector3FromVector2(size, 1));
     }
 
     /**
-     * Tint the skin
+     * Specify a rectangle that can be different from m_size and that serves as a touch collider
      * **/
-    public void SetSkinTintColor(Color skinTintColor)
+    public void SetTouchArea(Vector2 touchArea)
     {
-        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
-        skinAnimator.SetColor(skinTintColor);
+        m_touchArea = touchArea;
     }
 
     /**
@@ -107,10 +98,10 @@ public class GUIButton : MonoBehaviour
      * **/
     public bool ContainsPoint(Vector2 point)
     {
-        float minX = this.transform.position.x - 0.5f * m_size.x;
-        float maxX = this.transform.position.x + 0.5f * m_size.x;
-        float minY = this.transform.position.y - 0.5f * m_size.y;
-        float maxY = this.transform.position.y + 0.5f * m_size.y;
+        float minX = this.transform.position.x - 0.5f * m_touchArea.x;
+        float maxX = this.transform.position.x + 0.5f * m_touchArea.x;
+        float minY = this.transform.position.y - 0.5f * m_touchArea.y;
+        float maxY = this.transform.position.y + 0.5f * m_touchArea.y;
 
         return (point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY);
     }
@@ -120,11 +111,9 @@ public class GUIButton : MonoBehaviour
      * **/
     public void SetSkinMaterial(Material material)
     {
-        if (m_skin != null)
-        {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = material;
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
-        }
+        MeshRenderer skinRenderer = m_skinObject.GetComponent<MeshRenderer>();
+        skinRenderer.sharedMaterial = material;
+        skinRenderer.sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Clamp;
     }
 
     /**

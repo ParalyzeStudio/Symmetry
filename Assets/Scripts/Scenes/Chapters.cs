@@ -24,6 +24,9 @@ public class Chapters : GUIScene
     public GameObject m_progressBarFillGameObject;
     public Material m_progressBarMaterial;
 
+    //Selection arrows
+    public GameObject m_chapterSelectionArrowPfb;
+
     //Show central item with delay
     private bool m_showingCentralItem;
     private float m_showingCentralItemDelay;
@@ -42,7 +45,7 @@ public class Chapters : GUIScene
         ShowChapterSlot(fDelay);
 
         //Show chapter selection arrows
-        ShowSelectionArrows(true, fDelay);
+        ShowSelectionArrows(fDelay);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)
@@ -71,46 +74,44 @@ public class Chapters : GUIScene
     /**
      * Show chapter selection arrows
      * **/
-    public void ShowSelectionArrows(bool bAnimated, float fDelay = 0.0f)
+    public void ShowSelectionArrows(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         //Left selection arrow
-        GameObject leftArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
-                                                                          new Vector2(128.0f, 128.0f));
-
+        GameObject leftArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
         leftArrowObject.name = "LeftSelectionArrow";
-
         leftArrowObject.transform.parent = this.gameObject.transform;
-         
+
         float backgroundTrianglesColumnWidth = screenSize.x / BackgroundTrianglesRenderer.NUM_COLUMNS;
         float leftArrowPositionX = 3.5f * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
         leftArrowPositionX -= 0.5f * screenSize.x;
-        leftArrowObject.transform.localPosition = new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE);
+        leftArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
+
+        ChapterSelectionArrowButton arrowButton = leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        arrowButton.Init(null);
 
         //Right selection arrow
-        GameObject rightArrowObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT,
-                                                                           new Vector2(128.0f, 128.0f));
-
+        GameObject rightArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
         rightArrowObject.name = "RightSelectionArrow";
-
         rightArrowObject.transform.parent = this.gameObject.transform;
 
-        float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
+        float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth;
         rightArrowPositionX -= 0.5f * screenSize.x;
-        rightArrowObject.transform.localPosition = new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE);
+        rightArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
 
-        //flip the right arrow horizontally
+        arrowButton = rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        arrowButton.Init(null);
+
         rightArrowObject.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward);
 
         //Fade in arrows
         GameObjectAnimator leftArrowAnimator = leftArrowObject.GetComponent<GameObjectAnimator>();
-        GameObjectAnimator rightArrowAnimator = rightArrowObject.GetComponent<GameObjectAnimator>();
-
         leftArrowAnimator.SetOpacity(0);
-        rightArrowAnimator.SetOpacity(0);
         leftArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
+        GameObjectAnimator rightArrowAnimator = rightArrowObject.GetComponent<GameObjectAnimator>();
+        rightArrowAnimator.SetOpacity(0);
         rightArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
     }
 

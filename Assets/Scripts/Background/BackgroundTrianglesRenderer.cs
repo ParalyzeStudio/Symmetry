@@ -140,7 +140,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
 
         Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(18, 75, 89, 255));
         //Color gradientEndColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(98, 127, 134, 255));
-        Color gradientEndColor = Color.white;
+        Color gradientEndColor = Color.black;
 
         if (m_mainMenuGradient == null)
             m_mainMenuGradient = new Gradient();

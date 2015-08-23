@@ -47,7 +47,8 @@ public class ActionButton : GUIButton
         m_ID = m_childIDs[0];
         Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
 
-        base.Init(defaultSkinMaterial, tintColor);
+        base.Init(defaultSkinMaterial);
+        SetTintColor(tintColor);
 
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         buttonAnimator.SetPosition(new Vector3(-100.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
