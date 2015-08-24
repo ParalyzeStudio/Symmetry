@@ -11,6 +11,7 @@ public class Chapters : GUIScene
     public GameObject m_textMeshPfb;
     public GameObject m_circleMeshPfb;
     public Material m_positionColorMaterial;
+    public GameObject m_texQuadPfb;
 
     public int m_displayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
 
@@ -23,6 +24,7 @@ public class Chapters : GUIScene
     public GameObject m_progressBarBgGameObject;
     public GameObject m_progressBarFillGameObject;
     public Material m_progressBarMaterial;
+    public Material m_glowContourMaterial;
 
     //Selection arrows
     public GameObject m_chapterSelectionArrowPfb;
@@ -178,6 +180,20 @@ public class Chapters : GUIScene
         hexaMeshAnimator.SetOuterRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength, true);
         hexaMeshAnimator.SetColor(slotBackgroundBlendColor);
         hexaMeshAnimator.SetPosition(Vector3.zero);
+
+        //Add a contour to the hexagon
+        GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
+        contourObject.name = "SlotContour";
+        contourObject.transform.parent = m_chapterSlotObject.transform;
+
+        contourObject.GetComponent<UVQuad>().Init(m_glowContourMaterial);
+
+        TexturedQuadAnimator contourAnimator = contourObject.GetComponent<TexturedQuadAnimator>();
+        float contourTextureScale = 8 * GetBackgroundRenderer().m_triangleEdgeLength / 490.0f; //hexagon is 8 * triangleEdgeLength size, and the contour texture is 496x496 with 8 pixels blur (512x512)
+        contourAnimator.SetScale(new Vector3(contourTextureScale * 512, contourTextureScale * 512, 1));
+        contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
+
+        //TODO Add another contour a little bigger than the other one and with scale/opacity animation      
     }
 
     /**

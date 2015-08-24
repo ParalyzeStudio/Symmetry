@@ -6,13 +6,15 @@ public class Levels : GUIScene
     public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.5f;
 
     //Shared prefabs
+    public GameObject m_texQuadPfb;
     public GameObject m_textMeshPfb;
     public GameObject m_circleMeshPfb;
     public Material m_positionColorMaterial;
     private Material m_slotBackgroundMaterial;
 
     //Level slots
-    public GameObject[] m_levelSlots;
+    public GameObject[] m_levelSlots { get; set; }
+    public Material m_glowContourMaterial;
 
     //LevelSlot data
     //public LevelSlot[] m_levelSlots { get; set; }
@@ -250,6 +252,18 @@ public class Levels : GUIScene
         slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
         slotBgAnimator.SetColor(slotColor);
 
+        //Add a contour to the hexagon
+        GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
+        contourObject.name = "SlotContour";
+        contourObject.transform.parent = slot.transform;
+
+        contourObject.GetComponent<UVQuad>().Init(m_glowContourMaterial);
+
+        TexturedQuadAnimator contourAnimator = contourObject.GetComponent<TexturedQuadAnimator>();
+        float contourTextureScale = 2 * GetBackgroundRenderer().m_triangleEdgeLength / 168.0f; //hexagon is 2 * triangleEdgeLength size, and the contour texture is 168x168 with 44 pixels blur/padding (256x256)
+        contourAnimator.SetScale(new Vector3(contourTextureScale * 256, contourTextureScale * 256, 1));
+        contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
+
         //number
         GameObject levelNumberObject = (GameObject)Instantiate(m_textMeshPfb);
         levelNumberObject.name = "SlotNumber";
@@ -263,14 +277,24 @@ public class Levels : GUIScene
         numberAnimator.SetColor(Color.white);
 
         //make some adjustements on number x-position
+        AdjustNumberPosition(iLevelNumber, numberAnimator);
+
+        
+
+        return slot;
+    }
+
+    /**
+     * Slightly offset number positions so they appeared to be centered
+     * **/
+    private void AdjustNumberPosition(int iLevelNumber, TextMeshAnimator numberAnimator)
+    {
         if (iLevelNumber == 11)
             numberAnimator.SetPosition(new Vector3(-3.0f, 0, -1));
         else if (iLevelNumber >= 10)
             numberAnimator.SetPosition(new Vector3(-5.0f, 0, -1));
         else
             numberAnimator.SetPosition(new Vector3(0, 0, -1));
-
-        return slot;
     }
 
     ///**
