@@ -236,21 +236,25 @@ public class Levels : GUIScene
         slot.transform.parent = this.transform;
         GameObjectAnimator slotAnimator = slot.AddComponent<GameObjectAnimator>();
 
-        //Background
-        Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
+        //Add a background only if level is completed        
+        int iAbsoluteLevelNumber = GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
+        if (GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+        {
+            Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
 
-        GameObject slotBackground = (GameObject)Instantiate(m_circleMeshPfb);
-        slotBackground.name = "SlotBackground";
-        slotBackground.transform.parent = slot.transform;
+            GameObject slotBackground = (GameObject)Instantiate(m_circleMeshPfb);
+            slotBackground.name = "SlotBackground";
+            slotBackground.transform.parent = slot.transform;
 
-        CircleMesh slotBgHexaMesh = slotBackground.GetComponent<CircleMesh>();
-        slotBgHexaMesh.Init(m_slotBackgroundMaterial);
+            CircleMesh slotBgHexaMesh = slotBackground.GetComponent<CircleMesh>();
+            slotBgHexaMesh.Init(m_slotBackgroundMaterial);
 
-        CircleMeshAnimator slotBgAnimator = slotBackground.GetComponent<CircleMeshAnimator>();
-        slotBgAnimator.SetNumSegments(6, false);
-        slotBgAnimator.SetInnerRadius(0, false);
-        slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
-        slotBgAnimator.SetColor(slotColor);
+            CircleMeshAnimator slotBgAnimator = slotBackground.GetComponent<CircleMeshAnimator>();
+            slotBgAnimator.SetNumSegments(6, false);
+            slotBgAnimator.SetInnerRadius(0, false);
+            slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
+            slotBgAnimator.SetColor(slotColor);
+        }
 
         //Add a contour to the hexagon
         GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
@@ -277,9 +281,7 @@ public class Levels : GUIScene
         numberAnimator.SetColor(Color.white);
 
         //make some adjustements on number x-position
-        AdjustNumberPosition(iLevelNumber, numberAnimator);
-
-        
+        AdjustNumberPosition(iLevelNumber, numberAnimator);        
 
         return slot;
     }

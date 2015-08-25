@@ -261,4 +261,12 @@ public class LevelManager : MonoBehaviour
     {
         return m_chapters[iChapterNumber - 1];
     }
+
+    /**
+     * Returns the absolute level number for relative level number inside current chapter
+     * **/
+    public int GetAbsoluteLevelNumberForCurrentChapterAndLevel(int iChapterRelativeLevelNumber)
+    {
+        return m_currentChapter.m_number * LEVELS_PER_CHAPTER + iChapterRelativeLevelNumber;
+    }
 }

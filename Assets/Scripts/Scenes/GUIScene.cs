@@ -12,6 +12,7 @@ public class GUIScene : MonoBehaviour
     protected BackgroundTrianglesRenderer m_backgroundRenderer;
     protected LevelManager m_levelManager;
     protected SceneManager m_sceneManager;
+    protected PersistentDataManager m_persistentDataManager;
 
     public virtual void Init()
     {
@@ -80,6 +81,14 @@ public class GUIScene : MonoBehaviour
             m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
 
         return m_sceneManager;
+    }
+
+    public PersistentDataManager GetPersistentDataManager()
+    {
+        if (m_persistentDataManager == null)
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+
+        return m_persistentDataManager;
     }
 
     public virtual void Update()
