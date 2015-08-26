@@ -58,8 +58,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             trianglePositionX -= 0.5f * screenSize.x;
 
             Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
-            Color triangleColor = ColorUtils.GetRandomNearColor(m_parentRenderer.m_mainMenuGradient.GetColorAtPosition(trianglePosition), 0.02f);
-            BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, triangleColor, triangleContourThickness);
+            BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, Color.black, triangleContourThickness);
             triangle.m_indexInColumn = j;
             triangle.m_parentColumn = this;
             this.Add(triangle);
@@ -71,7 +70,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             int verticesArrayIndex = numVerticesPerTriangle * triangleGlobalIndex;
             int trianglesArrayIndex = numIndicesPerTriangle * triangleGlobalIndex;
 
-            AddTriangleToMesh(triangle, verticesArrayIndex, trianglesArrayIndex, triangleColor);
+            AddTriangleToMesh(triangle, verticesArrayIndex, trianglesArrayIndex, Color.black);
             
             //Set relations between neighbor triangles
             //Start with edge3 (horizontal neigbor)
@@ -157,13 +156,18 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
      * Specify a local variance for each triangle to generate a color that is near the color expected from the gradient
      * **/
     public void ApplyGradient(Gradient gradient,
-                                    float localTriangleVariance = 0.0f,
-                                    bool bAnimated = false,
-                                    float fTriangleAnimationDuration = 1.0f,
-                                    float fAnimationDelay = 0.0f,
-                                    float fTriangleAnimationInterval = 0.0f,
-                                    bool bSetRelativeDelayOnEachTriangle = false)
+                              float localTriangleVariance = 0.0f,
+                              bool bAnimated = false,
+                              BackgroundTrianglesRenderer.GradientAnimationPattern animationPattern = BackgroundTrianglesRenderer.GradientAnimationPattern.VERTICAL_STRIPES,
+                              float fTriangleAnimationDuration = 1.0f,
+                              float fAnimationDelay = 0.0f,
+                              float fTriangleAnimationInterval = 0.0f,
+                              bool bSetRandomRelativeDelayOnEachTriangle = false)
     {
+        float halfScreenSquaredDiagonal = 0.5f * ScreenUtils.GetDiagonalSquareLength();
+        float halfScreenDiagonal = Mathf.Sqrt(halfScreenSquaredDiagonal);
+        float numberOfTrianglesInDiagonal = halfScreenDiagonal / m_parentRenderer.m_triangleHeight; //number of triangles that can fit inside the circle that covers the whole screen
+
         for (int iTriangleIdx = 0; iTriangleIdx != this.Count; iTriangleIdx++)
         {
             BackgroundTriangle triangle = this[iTriangleIdx];
@@ -174,17 +178,29 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             if (bAnimated)
             {
                 Color animationEndColor = ColorUtils.GetRandomNearColor(triangle.m_originalColor, localTriangleVariance);
-                float fRelativeDelay = (bSetRelativeDelayOnEachTriangle) ? Random.value * 0.5f * fTriangleAnimationDuration : 0;
-                float fTriangleDelay = fAnimationDelay + iTriangleIdx * fTriangleAnimationInterval + fRelativeDelay;
+
+                float fTriangleDelay = 0;
+                if (animationPattern == BackgroundTrianglesRenderer.GradientAnimationPattern.VERTICAL_STRIPES)
+                    fTriangleDelay = fAnimationDelay + iTriangleIdx * fTriangleAnimationInterval;
+                else if (animationPattern == BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE)
+                {
+                    fTriangleDelay = fAnimationDelay;
+                    //square distance to screen center
+                    float squareDistanceToScreenCenter = (triangle.GetCenter() + new Vector2(0, m_parentRenderer.m_verticalOffset)).sqrMagnitude;
+                    fTriangleDelay += squareDistanceToScreenCenter / halfScreenSquaredDiagonal;
+                    fTriangleDelay = Mathf.Round(fTriangleDelay * numberOfTrianglesInDiagonal);
+                    fTriangleDelay *= fTriangleAnimationInterval;
+                }
+                
                 triangle.StartColorAnimation(animationEndColor, fTriangleAnimationDuration, fTriangleDelay);
             }
             else
             {
                 triangle.GenerateColorFromOriginalColor(localTriangleVariance);
-                triangle.SetInnerTriangleColor(triangle.m_color);
-                SetVerticalTopNeighbor(triangle);
-                SetHorizontalLeftNeighbor(triangle);
             }
+
+            SetVerticalTopNeighbor(triangle);
+            SetHorizontalLeftNeighbor(triangle);
         }
     }
 
@@ -298,16 +314,18 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                 }
                 Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
                 
-                Color triangleColor = m_parentRenderer.m_mainMenuGradient.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
+                Color triangleColor = m_parentRenderer.m_gradient.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
                 BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY),
                                                                      triangleEdgeLength,
                                                                      triangleAngle,
                                                                      triangleColor,
                                                                      m_parentRenderer.m_triangleContourThickness);
-                triangle.GenerateColorFromOriginalColor(0.02f);
 
                 triangle.m_indexInColumn = this.Count;
                 triangle.m_parentColumn = this;
+
+                triangle.GenerateColorFromOriginalColor(0.02f);
+
                 this.Add(triangle);
                 int triangleGlobalIndex = m_index * m_parentRenderer.m_numTrianglesPerColumn + triangle.m_indexInColumn;
 

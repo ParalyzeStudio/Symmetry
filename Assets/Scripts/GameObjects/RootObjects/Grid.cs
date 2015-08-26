@@ -20,7 +20,7 @@ public class Grid : MonoBehaviour
     public void Build()
     {   
         //Get the number of min lines and min columns we want for this level
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
         Level currentLevel = levelManager.m_currentLevel;
         int minNumLines = currentLevel.m_gridMinNumLines;
         int minNumColumns = currentLevel.m_gridMinNumColumns;

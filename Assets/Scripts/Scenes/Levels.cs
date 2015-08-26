@@ -22,18 +22,11 @@ public class Levels : GUIScene
     /**
      * Shows this scene
      * **/
-    public override void Show(bool bAnimated, float fDelay = 0.0f)
+    public override void Show()
     {
-        base.Show(bAnimated, fDelay);
+        base.Show();
 
-        ShowLevelsSlots(fDelay);
-
-        //GameObjectAnimator levelsAnimator = this.GetComponent<GameObjectAnimator>();
-        //levelsAnimator.SetOpacity(1);
-
-        //ShowTitle(fDelay);
-        //ShowChapterInfo(fDelay);
-        
+        ShowLevelsSlots();        
     }
 
     /**
@@ -44,7 +37,7 @@ public class Levels : GUIScene
         base.Dismiss(fDuration, fDelay);
     }
 
-    ///**
+    //**
     //* Shows title
     //**/
     //public void ShowTitle(float fDelay = 0.0f)
@@ -67,7 +60,7 @@ public class Levels : GUIScene
     //public void ShowChapterInfo(float fDelay = 0.0f)
     //{
     //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
     //    GameObject chapterInfoObject = (GameObject)Instantiate(m_chapterInfoPfb);
     //    chapterInfoObject.transform.parent = this.gameObject.transform;
@@ -88,7 +81,7 @@ public class Levels : GUIScene
     // * **/
     //public void ShowLevelsSlots(float fDelay)
     //{
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
     //    m_levelSlots = new GameObject[Chapter.LEVELS_COUNT];
 
     //    float verticalDistanceBetweenLevelSlots = m_levelsGridHeight / 4.2f;
@@ -215,18 +208,17 @@ public class Levels : GUIScene
         {
             GameObject levelSlotObject = m_levelSlots[i];
 
-            //slotAnimator = m_levelSlots[i].GetComponent<GameObjectAnimator>();
-            //slotAnimator.SetOpacity(1);
-            //slotAnimator.FadeTo(1.0f, animationDuration, fDelay);
-
             CircleMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<CircleMeshAnimator>();
             TextMeshAnimator levelSlotNumberAnimator = levelSlotObject.GetComponentInChildren<TextMeshAnimator>();
 
-            levelSlotBackgroundAnimator.SetOpacity(0);
-            levelSlotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, animationDuration, 0.0f);
+            if (levelSlotBackgroundAnimator != null) //we have a background to animate (i.e level is done)
+            {
+                levelSlotBackgroundAnimator.SetOpacity(0);
+                levelSlotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, animationDuration, fDelay);
+            }
 
             levelSlotNumberAnimator.SetOpacity(0);
-            levelSlotNumberAnimator.FadeTo(1.0f, animationDuration, 0.0f);
+            levelSlotNumberAnimator.FadeTo(1.0f, animationDuration, fDelay);
         }
     }
 
@@ -367,7 +359,7 @@ public class Levels : GUIScene
     //    }
 
     //    //Set the blend color and the correct number for every slot
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
     //    Chapter parentChapter = levelManager.m_currentChapter;
     //    Color blendColor = parentChapter.GetThemeColors()[2];
     //    GameObject levelsNumbersHolder = new GameObject("LevelsNumbersHolder");

@@ -139,7 +139,7 @@ public class ActionButton : GUIButton
      * -Fade in the skin
      * -translate the whole button from left to right
      * **/
-    public void Show()
+    public void Show(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -154,7 +154,7 @@ public class ActionButton : GUIButton
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         float buttonPositionY = buttonAnimator.GetPosition().y;
         Vector3 buttonToPosition = new Vector3(100.0f - 0.5f * screenSize.x, buttonPositionY, ACTION_BUTTON_Z_VALUE);
-        buttonAnimator.TranslateTo(buttonToPosition, 0.5f, 0.0f, ValueAnimator.InterpolationType.SINUSOIDAL);
+        buttonAnimator.TranslateTo(buttonToPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
         //Show the name label
         ShowButtonName();

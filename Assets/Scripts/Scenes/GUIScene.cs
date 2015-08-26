@@ -22,9 +22,14 @@ public class GUIScene : MonoBehaviour
     /**
      * Shows this scene
      * **/
-    public virtual void Show(bool bAnimated, float fDelay = 0.0f)
-    {
+    //public virtual void Show(bool bAnimated, float fDelay = 0.0f)
+    //{
         
+    //}
+
+    public virtual void Show()
+    {
+
     }
 
     /**
@@ -46,7 +51,6 @@ public class GUIScene : MonoBehaviour
     {
         Destroy(this.gameObject);
     }
-
 
     /**
      * Getters for global instances
@@ -70,7 +74,7 @@ public class GUIScene : MonoBehaviour
     public LevelManager GetLevelManager()
     {
         if (m_levelManager == null)
-            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         return m_levelManager;
     }
@@ -78,7 +82,7 @@ public class GUIScene : MonoBehaviour
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
 
         return m_sceneManager;
     }
@@ -86,7 +90,7 @@ public class GUIScene : MonoBehaviour
     public PersistentDataManager GetPersistentDataManager()
     {
         if (m_persistentDataManager == null)
-            m_persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
 
         return m_persistentDataManager;
     }

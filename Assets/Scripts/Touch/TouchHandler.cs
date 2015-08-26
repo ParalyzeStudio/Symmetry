@@ -197,7 +197,7 @@ public class TouchHandler : MonoBehaviour
     public TouchManager GetTouchManager()
     {
         if (m_touchManager == null)
-            m_touchManager = GameObject.FindGameObjectWithTag("TouchManager").GetComponent<TouchManager>();
+            m_touchManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<TouchManager>();
 
         return m_touchManager;
     }
@@ -220,7 +220,7 @@ public class TouchHandler : MonoBehaviour
     public LevelManager GetLevelManager()
     {
         if (m_levelManager == null)
-            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         return m_levelManager;
     }
@@ -228,7 +228,7 @@ public class TouchHandler : MonoBehaviour
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
 
         return m_sceneManager;
     }

@@ -28,36 +28,45 @@ public class MainMenu : GUIScene
     /**
      * Shows MainMenu with or without animation
      * **/
-    public override void Show(bool bAnimated, float fDelay = 0.0f)
+    public override void Show()
     {
-        base.Show(bAnimated, fDelay);
+        Debug.Log("Show");
+        base.Show();
 
-        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
-        backgroundRenderer.RenderForMainMenu(false, fDelay);
-        //backgroundRenderer.RenderForChapter(bAnimated, fDelay);
+        //GetBackgroundRenderer().RenderForMainMenu(false, fDelay);
+        //GetBackgroundRenderer().RenderForChapter(bAnimated, fDelay);
 
-        GameObjectAnimator menuAnimator = this.GetComponent<GameObjectAnimator>();
-        menuAnimator.SetOpacity(1);
-        ShowTitle(bAnimated, fDelay + 2.0f);
+        ApplyGradientOnBackground();
+        ShowTitle(true, 2.0f);
         ShowPlayButton();
         //ShowPlayBanner(bAnimated, fDelay + 3.5f);
         //ShowSideButtons(bAnimated, fDelay + 5.0f);
-
-        if (!bAnimated)
-        {
-            menuAnimator.SetOpacity(0);
-            menuAnimator.FadeTo(1, 0.5f, 1.0f);
-        }
     }
 
-    public void ShowTitle(bool bAnimated, float fDelay)
+    private void ApplyGradientOnBackground()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(18, 75, 89, 255));
+        Color gradientEndColor = Color.black;
+
+        Gradient mainMenuGradient = new Gradient();
+        mainMenuGradient.CreateLinear(new Vector2(0, 0.5f * screenSize.y),
+                                        new Vector2(0, -0.5f * screenSize.y),
+                                        gradientStartColor,
+                                        gradientEndColor);
+
+        GetBackgroundRenderer().ApplyGradient(mainMenuGradient, 0.02f);
+    }
+
+    private void ShowTitle(bool bAnimated = true, float fDelay = 0.0f)
     {
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         backgroundRenderer.RenderMainMenuTitle(bAnimated, fDelay);
     }
 
-    public void ShowPlayButton()
+    private void ShowPlayButton()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -108,7 +117,7 @@ public class MainMenu : GUIScene
         m_generatingFadingHexagons = false;
     }
 
-    public void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)
+    private void LaunchAnimatedHexagonOnPlayButton(float hexagonStartInnerRadius, float hexagonEndInnerRadius, float thickness, Color color, float fDuration)
     {
         m_hexagonAnimationDuration = fDuration;
         m_hexagonAnimationElapsedTime = 0;

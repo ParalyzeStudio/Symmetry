@@ -47,7 +47,7 @@ public class ShapeRenderer : MonoBehaviour
         Grid grid = null;
         if (bUpdateVertices)
         {
-            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
             grid = gameScene.m_grid;
             vertexCount = 3 * m_shape.m_gridTriangles.Count;
             if (renderFaces == RenderFaces.DOUBLE_SIDED) //we draw front and back faces

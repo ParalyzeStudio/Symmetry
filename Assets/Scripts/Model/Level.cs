@@ -31,7 +31,7 @@ public class Level
 
     public bool IsDone()
     {
-        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
         return persistentDataManager.IsLevelDone((m_parentChapter.m_number - 1) * Chapter.LEVELS_COUNT + m_chapterRelativeNumber);
     }
 }

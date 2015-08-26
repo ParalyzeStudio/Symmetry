@@ -503,7 +503,7 @@ public class ValueAnimator : MonoBehaviour
     public LevelManager GetLevelManager()
     {
         if (m_levelManager == null)
-            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         return m_levelManager;
     }
@@ -511,7 +511,7 @@ public class ValueAnimator : MonoBehaviour
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
 
         return m_sceneManager;
     }

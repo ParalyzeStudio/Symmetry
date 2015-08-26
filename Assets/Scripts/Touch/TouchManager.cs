@@ -144,7 +144,7 @@ public class TouchManager : MonoBehaviour
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
         return m_sceneManager;
     }
 

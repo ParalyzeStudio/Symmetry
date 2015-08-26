@@ -520,6 +520,36 @@ public class BackgroundTriangle : BaseTriangle
         m_color = color;
     }
 
+    /**
+     * Set the color of this triangle and update neighbors edges colors
+     * **/
+    public void SetColor(Color color)
+    {
+        m_color = color;
+        SetInnerTriangleColor(color);
+
+        if (m_edge1Neighbor != null)
+        {
+            //recalculate the color of the edge separating the two neighbors
+            this.SetEdge1Neighbor(m_edge1Neighbor);
+            m_edge1Neighbor.SetEdge2Neighbor(this);
+        }
+        if (m_edge2Neighbor != null)
+        {
+            //recalculate the color of the edge separating the two neighbors
+            this.SetEdge2Neighbor(m_edge2Neighbor);
+            m_edge2Neighbor.SetEdge1Neighbor(this);
+        }
+        if (m_edge3Neighbor != null)
+        {
+            //recalculate the color of the edge separating the two neighbors
+            this.SetEdge3Neighbor(m_edge3Neighbor);
+            m_edge3Neighbor.SetEdge3Neighbor(this);
+        }
+
+        m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
+    }
+
     public void SetEdge1Neighbor(BackgroundTriangle neighbor)
     {
         m_edge1Neighbor = neighbor;
@@ -631,20 +661,17 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 3] = color;
     }
 
-    public void SetInnerTriangleColor(Color color)
+    private void SetInnerTriangleColor(Color color)
     {
+        if (m_parentColumn == null)
+            Debug.Log("STOP");
+
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
 
         int innerTriangleFirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn) + 12;
         parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex] = color;
         parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex + 1] = color;
         parentRenderer.m_meshColors[innerTriangleFirstVerticesArrayIndex + 2] = color;
-    }
-
-    public void UpdateTriangleMainColor(Color color)
-    {
-        SetInnerTriangleColor(color);
-
     }
 
     /**
@@ -670,7 +697,7 @@ public class BackgroundTriangle : BaseTriangle
      * **/
     public void GenerateColorFromOriginalColor(float delta)
     {
-        m_color = ColorUtils.GetRandomNearColor(m_originalColor, delta);
+        SetColor(ColorUtils.GetRandomNearColor(m_originalColor, delta));
     }
 
     /**
@@ -702,12 +729,12 @@ public class BackgroundTriangle : BaseTriangle
             if (m_colorAnimationElapsedTime >= m_colorAnimationDuration + m_colorAnimationDelay)
             {
                 m_colorAnimating = false;
-                m_color = m_animationEndColor;
+                SetColor(m_animationEndColor);
             }
             else
             {
                 float timeRatio = (m_colorAnimationElapsedTime - m_colorAnimationDelay) / m_colorAnimationDuration;
-                m_color = Color.Lerp(m_animationStartColor, m_animationEndColor, timeRatio);
+                SetColor(Color.Lerp(m_animationStartColor, m_animationEndColor, timeRatio));
             }
         }       
     }

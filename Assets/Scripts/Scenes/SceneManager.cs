@@ -95,7 +95,10 @@ public class SceneManager : MonoBehaviour
 
         m_displayedContent = contentToDisplay;
         m_currentScene.Init();
-        m_currentScene.Show(bAnimated, fDelay);
+        //m_currentScene.Show(bAnimated, fDelay);
+
+        CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_currentScene.Show), fDelay);
     }
 
     /**

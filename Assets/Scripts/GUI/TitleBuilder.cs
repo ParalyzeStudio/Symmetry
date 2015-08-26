@@ -55,7 +55,7 @@ public class TitleBuilder : MonoBehaviour
             return;
         }
 
-        MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        MainMenu mainMenu = (MainMenu)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
         float gapBetweenLetters = 40.0f;
         int lettersCount = m_letters.Length;

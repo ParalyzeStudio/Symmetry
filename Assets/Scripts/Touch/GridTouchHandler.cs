@@ -90,7 +90,6 @@ public class GridTouchHandler : TouchHandler
         if (!m_selected)
             return;
 
-        //GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
         if (currentAxis != null)

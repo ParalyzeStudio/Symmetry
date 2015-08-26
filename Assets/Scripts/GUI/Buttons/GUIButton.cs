@@ -178,18 +178,18 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_MUSIC_BUTTON)
         {
-            SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+            SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
             soundManager.ToggleMusic();
 
-            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_musicActive);
         }
         else if (m_ID == GUIButtonID.ID_SOUND_BUTTON)
         {
-            SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+            SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
             soundManager.ToggleSound();
 
-            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
@@ -203,7 +203,7 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f);
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
@@ -212,7 +212,7 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f);
 
             //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
@@ -220,7 +220,7 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
             Chapters chapters = (Chapters) sceneManager.m_currentScene;
 
             if (chapters.DecrementChapterIndex())
@@ -232,7 +232,7 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
             Chapters chapters = (Chapters)sceneManager.m_currentScene;
 
             if (chapters.IncrementChapterIndex())

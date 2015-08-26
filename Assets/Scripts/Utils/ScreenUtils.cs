@@ -14,4 +14,16 @@ public class ScreenUtils
 
         return new Vector2(fScreenWidthInUnits, fScreenHeightInUnits);
     }
+
+    public static float GetDiagonalLength()
+    {
+        return Mathf.Sqrt(GetDiagonalSquareLength());
+    }
+
+    public static float GetDiagonalSquareLength()
+    {
+        Vector2 screenSize = GetScreenSize();
+
+        return screenSize.x * screenSize.x + screenSize.y * screenSize.y;
+    }
 }

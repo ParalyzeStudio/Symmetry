@@ -13,7 +13,7 @@ public class Outlines : MonoBehaviour
 
     public void Build()
     {
-        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("LevelManager");
+        GameObject levelManagerObject = GameObject.FindGameObjectWithTag("GameController");
         LevelManager levelManager = levelManagerObject.GetComponent<LevelManager>();
 
         List<DottedOutline> outlines = levelManager.m_currentLevel.m_outlines;

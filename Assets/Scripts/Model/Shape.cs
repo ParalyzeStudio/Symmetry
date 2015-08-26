@@ -101,7 +101,7 @@ public class Shape : Triangulable
      * **/
     public Shape Fusion()
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
 
         //Find the first shape that overlaps this shape

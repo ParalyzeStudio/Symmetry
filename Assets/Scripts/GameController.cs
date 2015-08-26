@@ -38,6 +38,18 @@ public class GameController : MonoBehaviour
         m_backgroundRenderer = null;
     }
 
+    //private void PerformTestCallFunc()
+    //{
+    //    Debug.Log("PerformTestCallFunc");
+    //    CallFuncHandler callFuncHandler = this.GetComponent<CallFuncHandler>();
+    //    callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(TestCallFunc), 5.0f);
+    //}
+
+    //private void TestCallFunc()
+    //{
+    //    Debug.Log("CallFunc");
+    //}
+
     protected void Start()
     {
         //Set up background fill color
@@ -71,6 +83,8 @@ public class GameController : MonoBehaviour
         //TouchHandler.s_touchDeactivated = false;
 
         m_finishingLevelVictory = false;
+
+        //PerformTestCallFunc();
     }
 
     public void ShowMainMenu()
@@ -303,7 +317,7 @@ public class GameController : MonoBehaviour
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>();
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
 
         return m_sceneManager;
     }
@@ -319,7 +333,7 @@ public class GameController : MonoBehaviour
     public LevelManager GetLevelManager()
     {
         if (m_levelManager == null)
-            m_levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         return m_levelManager;
     }
@@ -327,7 +341,7 @@ public class GameController : MonoBehaviour
     public PersistentDataManager GetPersistentManager()
     {
         if (m_persistentDataManager == null)
-            m_persistentDataManager = GameObject.FindGameObjectWithTag("PersistentDataManager").GetComponent<PersistentDataManager>();
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
 
         return m_persistentDataManager;
     }

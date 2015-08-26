@@ -147,7 +147,7 @@ public class Segment : MonoBehaviour
      * **/
     public void TransformPointsFromGridCoordinatesToWorldCoordinates(bool bTransformPointA = true, bool bTransformPointB = true)
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
         if (bTransformPointA)
             m_pointA = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
@@ -239,7 +239,7 @@ public class Segment : MonoBehaviour
         {
             //if (m_isGridSegment)
             //{
-            //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+            //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
             //    float gridWorldRatio = gameScene.m_grid.GetGridWorldRatio();
             //    fLength /= gridWorldRatio;
@@ -285,7 +285,7 @@ public class Segment : MonoBehaviour
 
     //    if (m_isGridSegment)
     //    {
-    //        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+    //        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
     //        float gridWorldRatio = gameScene.m_grid.GetGridWorldRatio();
     //        m_length /= gridWorldRatio;

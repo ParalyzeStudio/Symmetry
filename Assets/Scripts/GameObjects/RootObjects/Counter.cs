@@ -25,7 +25,7 @@ public class Counter : MonoBehaviour
         Material clonedSkinOffMaterial = (Material)Instantiate(m_positionColorMaterial);
         Material clonedOverlayMaterial = (Material)Instantiate(m_positionColorMaterial);
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         float elementSpacing = 115.0f;
         int maxActions = levelManager.m_currentLevel.m_maxActions;

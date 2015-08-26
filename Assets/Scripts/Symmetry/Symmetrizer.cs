@@ -21,7 +21,7 @@ public class Symmetrizer : MonoBehaviour
 
     public void SymmetrizeByAxis()
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
         //Find axis ribbon 4 vertices
         AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
@@ -120,7 +120,7 @@ public class Symmetrizer : MonoBehaviour
         Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
 
         ////First get all triangles
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         List<List<ShapeTriangle>> allShapeTriangles = new List<List<ShapeTriangle>>(); //the vector containing all triangles in the scene per shape
         allShapeTriangles.Capacity = gameScene.m_shapes.m_shapesObjects.Count;
 
@@ -261,7 +261,7 @@ public class Symmetrizer : MonoBehaviour
         List<Vector2> intersections = new List<Vector2>();
         intersections.Capacity = 2;
 
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         Vector2 gridTopLeft = new Vector2(1, gameScene.m_grid.m_numLines);
         Vector2 gridTopRight = new Vector2(gameScene.m_grid.m_numColumns, gameScene.m_grid.m_numLines);
         Vector2 gridBottomLeft = new Vector2(1, 1);

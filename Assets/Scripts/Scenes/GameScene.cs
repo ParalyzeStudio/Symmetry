@@ -56,23 +56,23 @@ public class GameScene : GUIScene
         m_isShown = false;
     }
 
-    public override void Show(bool bAnimated, float fDelay = 0.0f)
+    public override void Show()
     {
-        base.Show(bAnimated, fDelay);
+        base.Show();
         GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         sceneAnimator.SetOpacity(1.0f);
 
         //Display the grid
-        ShowGrid(fDelay);
+        ShowGrid();
         
         //Display interface buttons (pause, retry and hints)
-        ShowInterfaceButtons(fDelay);
+        ShowInterfaceButtons();
 
         //Display action counter
-        ShowCounter(fDelay);
+        ShowCounter();
 
         //Show outlines (if applicable)
-        ShowOutlines(fDelay);
+        ShowOutlines();
 
         //Show available symmetry axes
         BuildConstrainedDirections();
@@ -81,7 +81,7 @@ public class GameScene : GUIScene
         //Show action buttons
         ShowActionButtons();
 
-        ShowInitialShapes(fDelay);
+        ShowInitialShapes();
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
         m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
 
@@ -107,7 +107,7 @@ public class GameScene : GUIScene
      * We build the grid of anchors that is displayed on the screen and that will help the player positionning shapes and axis...
      * Two anchors are separated from each other of a distance of m_gridSpacing that can be set in the editor
      * **/
-    private void ShowGrid(float fDelay)
+    private void ShowGrid(float fDelay = 0.0f)
     {
         m_grid = this.gameObject.GetComponentInChildren<Grid>();
         m_grid.gameObject.transform.parent = this.gameObject.transform;
@@ -137,7 +137,7 @@ public class GameScene : GUIScene
     /**
      * Pause, retry and hints buttons
      * **/
-    private void ShowInterfaceButtons(float fDelay)
+    private void ShowInterfaceButtons(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
@@ -196,7 +196,7 @@ public class GameScene : GUIScene
     /**
      * Counters to show remaining actions for the player
      * **/
-    private void ShowCounter(float fDelay)
+    private void ShowCounter(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -215,7 +215,7 @@ public class GameScene : GUIScene
     /**
      * Here we build the dotted outlines (contour and holes) of the shape the player has to reproduce
      * **/
-    private void ShowOutlines(float fDelay)
+    private void ShowOutlines(float fDelay = 0.0f)
     {
         m_outlines = this.gameObject.GetComponentInChildren<Outlines>();
         m_outlines.transform.parent = this.gameObject.transform;
@@ -230,7 +230,7 @@ public class GameScene : GUIScene
     /**
      * Draw small icons to show the constraints on axes that the player can draw
      * **/
-    private void ShowAxisConstraintsIcons(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
+    private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -244,16 +244,6 @@ public class GameScene : GUIScene
         iconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
 
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
-
-        ///** TMP **/
-        //axisConstraints = new List<string>();
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL);
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_VERTICAL);
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_STRAIGHT);
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT);
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT);
-        //axisConstraints.Add(CONSTRAINT_SYMMETRY_AXES_DIAGONALS);
-        ///** TMP **/
 
         float horizontalDistanceBetweenIcons = 65.0f;
         Vector2 iconSize = new Vector2(64, 64);
@@ -281,7 +271,7 @@ public class GameScene : GUIScene
      * -Second button is for modifying the behavior of color symmetrization (addition or soustraction)
      * -Third button is for picking a color that will apply to the symmetry done by the user by filtering shapes that are not of that specific color
      * **/
-    private void ShowActionButtons()
+    private void ShowActionButtons(float fDelay = 0.0f)
     {
         Vector2 actionButtonSkinSize = new Vector2(128,128);
 
@@ -328,9 +318,9 @@ public class GameScene : GUIScene
 
         m_bottomActionButton = buttonObject.GetComponent<ActionButton>();
 
-        m_topActionButton.Show();
-        m_middleActionButton.Show();
-        m_bottomActionButton.Show();
+        m_topActionButton.Show(fDelay);
+        m_middleActionButton.Show(fDelay);
+        m_bottomActionButton.Show(fDelay);
     }
 
     /**
@@ -349,7 +339,7 @@ public class GameScene : GUIScene
     /**
      * We set the shapes the player initally starts with
      * **/
-    private void ShowInitialShapes(float fDelay)
+    private void ShowInitialShapes(float fDelay = 0.0f)
     {
         m_shapes = this.gameObject.GetComponentInChildren<Shapes>();
         m_shapes.gameObject.transform.parent = this.gameObject.transform;

@@ -35,19 +35,38 @@ public class Chapters : GUIScene
     private float m_showingCentralItemElapsedTime;
 
     /**
-     * Shows Chapters screen with or without animation
+     * Show Chapters screen with or without animation
      * **/
-    public override void Show(bool bAnimated, float fDelay = 0.0f)
+    public override void Show()
     {
-        base.Show(bAnimated, fDelay);
-        GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
-        chaptersAnimator.SetOpacity(1);
+        base.Show();
+
+        //GameObjectAnimator chaptersAnimator = this.GetComponent<GameObjectAnimator>();
+        //chaptersAnimator.SetOpacity(1);
+
+        ApplyGradientOnBackground();
 
         //Show chapter slot
-        ShowChapterSlot(fDelay);
+        ShowChapterSlot();
 
         //Show chapter selection arrows
-        ShowSelectionArrows(fDelay);
+        ShowSelectionArrows();
+    }
+
+    private void ApplyGradientOnBackground(float fDelay = 0.0f)
+    {
+        Gradient radialGradient = new Gradient();
+        Color innerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
+        Color outerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+        radialGradient.CreateRadial(Vector2.zero, 960, innerColor, outerColor);
+        GetBackgroundRenderer().ApplyGradient(radialGradient,
+                                              0.02f,
+                                              true,
+                                              BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
+                                              0.4f,
+                                              fDelay,
+                                              0.05f,
+                                              false);
     }
 
     public override void Dismiss(float fDuration, float fDelay = 0.0f)

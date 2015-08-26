@@ -208,7 +208,7 @@ public class Triangulable
     * **/
     public bool ContainsWorldPoint(Vector2 worldPoint)
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("Scenes").GetComponent<SceneManager>().m_currentScene;
+        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         Vector2 gridPoint = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(worldPoint);
 
         return ContainsGridPoint(gridPoint);

@@ -65,7 +65,7 @@ public class Chapter
      * **/
     public bool IsLocked()
     {
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("LevelManager").GetComponent<LevelManager>();
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
         if (m_number > 1)
         {
             Chapter previousChapter = levelManager.GetChapterForNumber(this.m_number - 1);

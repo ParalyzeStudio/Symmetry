@@ -190,12 +190,12 @@ public class GUIManager : MonoBehaviour
 
     //            if (childButton.m_ID == GUIButton.GUIButtonID.ID_SOUND_BUTTON)
     //            {
-    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
     //                childButton.Init(soundManager.m_soundActive ? childButton.m_skinOnMaterial : childButton.m_skinOffMaterial);
     //            }
     //            else if (childButton.m_ID == GUIButton.GUIButtonID.ID_MUSIC_BUTTON)
     //            {
-    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
     //                childButton.Init(soundManager.m_musicActive ? childButton.m_skinOnMaterial : childButton.m_skinOffMaterial);
     //            }
     //        }
@@ -231,12 +231,12 @@ public class GUIManager : MonoBehaviour
 
     //            if (interfaceButton.m_ID == GUIButton.GUIButtonID.ID_SOUND_BUTTON)
     //            {
-    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
     //                interfaceButton.Init(soundManager.m_soundActive ? interfaceButton.m_skinOnMaterial : interfaceButton.m_skinOffMaterial);
     //            }
     //            else if (interfaceButton.m_ID == GUIButton.GUIButtonID.ID_MUSIC_BUTTON)
     //            {
-    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("SoundManager").GetComponent<SoundManager>();
+    //                SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
     //                interfaceButton.Init(soundManager.m_musicActive ? interfaceButton.m_skinOnMaterial : interfaceButton.m_skinOffMaterial);
     //            }
     //            else
