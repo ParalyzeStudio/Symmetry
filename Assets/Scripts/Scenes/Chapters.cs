@@ -59,13 +59,14 @@ public class Chapters : GUIScene
         Color innerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
         Color outerColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
         radialGradient.CreateRadial(Vector2.zero, 960, innerColor, outerColor);
+        //GetBackgroundRenderer().ApplyGradient(radialGradient, 0.02f, false);
         GetBackgroundRenderer().ApplyGradient(radialGradient,
                                               0.02f,
                                               true,
                                               BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
-                                              0.4f,
+                                              0.8f,
                                               fDelay,
-                                              0.05f,
+                                              0.02f,
                                               false);
     }
 

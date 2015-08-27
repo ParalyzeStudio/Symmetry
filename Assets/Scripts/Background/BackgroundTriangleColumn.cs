@@ -158,7 +158,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
     public void ApplyGradient(Gradient gradient,
                               float localTriangleVariance = 0.0f,
                               bool bAnimated = false,
-                              BackgroundTrianglesRenderer.GradientAnimationPattern animationPattern = BackgroundTrianglesRenderer.GradientAnimationPattern.VERTICAL_STRIPES,
+                              BackgroundTrianglesRenderer.GradientAnimationPattern animationPattern = BackgroundTrianglesRenderer.GradientAnimationPattern.NONE,
                               float fTriangleAnimationDuration = 1.0f,
                               float fAnimationDelay = 0.0f,
                               float fTriangleAnimationInterval = 0.0f,
@@ -172,8 +172,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
         {
             BackgroundTriangle triangle = this[iTriangleIdx];
 
-            Vector2 triangleGlobalPosition = triangle.GetCenter() - new Vector2(0, m_parentRenderer.m_verticalOffset);
-            triangle.m_originalColor = gradient.GetColorAtPosition(triangleGlobalPosition);
+            triangle.m_originalColor = gradient.GetColorAtPosition(triangle.GetCenter());
 
             if (bAnimated)
             {
@@ -186,7 +185,7 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                 {
                     fTriangleDelay = fAnimationDelay;
                     //square distance to screen center
-                    float squareDistanceToScreenCenter = (triangle.GetCenter() + new Vector2(0, m_parentRenderer.m_verticalOffset)).sqrMagnitude;
+                    float squareDistanceToScreenCenter = triangle.GetCenter().sqrMagnitude;
                     fTriangleDelay += squareDistanceToScreenCenter / halfScreenSquaredDiagonal;
                     fTriangleDelay = Mathf.Round(fTriangleDelay * numberOfTrianglesInDiagonal);
                     fTriangleDelay *= fTriangleAnimationInterval;

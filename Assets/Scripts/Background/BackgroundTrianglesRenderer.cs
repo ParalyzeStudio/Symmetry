@@ -46,7 +46,8 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     //List available patterns to render an animated gradient
     public enum GradientAnimationPattern
     {
-        VERTICAL_STRIPES = 1, //verticale stripes falling down from the top of the screen
+        NONE = 0,
+        VERTICAL_STRIPES, //verticale stripes falling down from the top of the screen
         EXPANDING_CIRCLE //a circle centered in the middle of the screen expanding
     };
     
@@ -497,7 +498,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public void ApplyGradient(Gradient gradient,
                               float localTriangleVariance = 0.0f,
                               bool bAnimated = false,
-                              GradientAnimationPattern animationPattern = GradientAnimationPattern.VERTICAL_STRIPES,
+                              GradientAnimationPattern animationPattern = GradientAnimationPattern.NONE,
                               float fTriangleAnimationDuration = 1.0f,
                               float fAnimationDelay = 0.0f,
                               float fTriangleAnimationInterval = 0.0f,
@@ -545,18 +546,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         {
             m_triangleColumns[i].Offset(dy);
         }
-    }
-     
-    /**
-     * Launch the offsetting animation to move from main menu to chapters or vice versa
-     * **/
-    public void SwitchBetweenMainMenuBackgroundAndChapterBackground(bool bFromMainMenu, float fDuration, float fDelay = 0.0f)
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-        BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
-
-        float toOffset = bFromMainMenu ? 0.5f * screenSize.y : 0; //transition gradient is 1 screen unit length 
-        animator.TranslateTo(new Vector3(0, toOffset, 0), 1.0f, fDuration, fDelay);
     }
 
     /**

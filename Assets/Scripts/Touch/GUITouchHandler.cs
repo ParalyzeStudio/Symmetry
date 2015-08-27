@@ -77,13 +77,11 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickPlay()
     {
-        BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
-        //bgRenderer.m_transitionGradientLength = ScreenUtils.GetScreenSize().y;
-        //bgRenderer.GenerateChapterGradient();
-        //bgRenderer.GenerateTransitionGradients();
-        bgRenderer.SwitchBetweenMainMenuBackgroundAndChapterBackground(true, 4.0f);
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        BackgroundTriangleAnimator animator = GetBackgroundRenderer().GetComponent<BackgroundTriangleAnimator>();
+        animator.TranslateTo(new Vector3(0, 0.5f * screenSize.y, 0), 1.0f, 2.0f);
 
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 4.0f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 2.0f);
     }
 
     /**

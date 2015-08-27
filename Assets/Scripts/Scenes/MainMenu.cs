@@ -30,7 +30,6 @@ public class MainMenu : GUIScene
      * **/
     public override void Show()
     {
-        Debug.Log("Show");
         base.Show();
 
         //GetBackgroundRenderer().RenderForMainMenu(false, fDelay);
@@ -56,7 +55,11 @@ public class MainMenu : GUIScene
                                         gradientStartColor,
                                         gradientEndColor);
 
-        GetBackgroundRenderer().ApplyGradient(mainMenuGradient, 0.02f);
+        GetBackgroundRenderer().ApplyGradient(mainMenuGradient, 
+                                              0.02f,
+                                              true,
+                                              BackgroundTrianglesRenderer.GradientAnimationPattern.NONE,
+                                              0.5f);
     }
 
     private void ShowTitle(bool bAnimated = true, float fDelay = 0.0f)

@@ -532,13 +532,13 @@ public class BackgroundTriangle : BaseTriangle
         {
             //recalculate the color of the edge separating the two neighbors
             this.SetEdge1Neighbor(m_edge1Neighbor);
-            m_edge1Neighbor.SetEdge2Neighbor(this);
+            m_edge1Neighbor.SetEdge1Neighbor(this);
         }
         if (m_edge2Neighbor != null)
         {
             //recalculate the color of the edge separating the two neighbors
             this.SetEdge2Neighbor(m_edge2Neighbor);
-            m_edge2Neighbor.SetEdge1Neighbor(this);
+            m_edge2Neighbor.SetEdge2Neighbor(this);
         }
         if (m_edge3Neighbor != null)
         {
@@ -566,9 +566,9 @@ public class BackgroundTriangle : BaseTriangle
                                                           true, 
                                                           true, 
                                                           true, 
-                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 
-                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 
-                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
+                                                          Mathf.Clamp(rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 0, 1), 
+                                                          Mathf.Clamp(gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 0, 1),
+                                                          Mathf.Clamp(bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b, 0, 1));
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
@@ -663,9 +663,6 @@ public class BackgroundTriangle : BaseTriangle
 
     private void SetInnerTriangleColor(Color color)
     {
-        if (m_parentColumn == null)
-            Debug.Log("STOP");
-
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
 
         int innerTriangleFirstVerticesArrayIndex = parentRenderer.GetTriangleFirstVerticesArrayIndex(m_parentColumn.m_index, this.m_indexInColumn) + 12;
