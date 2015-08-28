@@ -6,7 +6,7 @@ public class GUIButton : MonoBehaviour
     protected UVQuad m_skin;
 
     public Vector2 m_size { get; set; }
-    private Vector2 m_touchArea;
+    public Vector2 m_touchArea { get; set; }
 
     //Color that will tint the skin texture
     public Color m_skinTintColor { get; set; }
@@ -21,6 +21,8 @@ public class GUIButton : MonoBehaviour
     public ButtonState m_state { get; set; }
 
     private GUIManager m_guiManager;
+    private SceneManager m_sceneManager;
+    private CallFuncHandler m_callFuncHandler;
 
     public enum GUIButtonID
     {
@@ -212,34 +214,30 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            SceneManager sceneManager = GetSceneManager();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 0.0f, 1.0f);
 
             //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             //guiManager.DismissPauseWindow();
         }
-        else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS)
+        else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS ||
+                 m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            SceneManager sceneManager = GetSceneManager();
             Chapters chapters = (Chapters) sceneManager.m_currentScene;
 
-            if (chapters.DecrementChapterIndex())
+            if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS && chapters.DecrementChapterIndex() ||
+                m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT && chapters.IncrementChapterIndex())
             {
-                chapters.DismissChapterSlot(false, true, 0.5f, 0.0f);
+                //dismiss old chapter slot information
+                chapters.DismissChapterSlot(false, false, false);
+                //update background gradient and chapter slot backgorund color
                 chapters.UpdateBackgroundGradient();
-                chapters.ShowChapterSlot(1.0f); //build a new container for diplaying chapter info
-            }
-        }
-        else if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT)
-        {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
-            Chapters chapters = (Chapters)sceneManager.m_currentScene;
-
-            if (chapters.IncrementChapterIndex())
-            {
-                chapters.DismissChapterSlot(false, true, 0.5f, 0.0f);
-                chapters.UpdateBackgroundGradient();
-                chapters.ShowChapterSlot(1.0f); //build a new container for diplaying chapter info
+                chapters.UpdateChapterSlotBackgroundColor();
+                //update chapter slot information when opacity is 0
+                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.UpdateChapterSlotInformation), 0.5f);
+                //wait a bit and then display the new information
+                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.ShowChapterSlotInformation), 0.8f);
             }
         }
     }
@@ -250,5 +248,21 @@ public class GUIButton : MonoBehaviour
             m_guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
 
         return m_guiManager;
+    }
+
+    protected SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+
+        return m_sceneManager;
+    }
+
+    protected CallFuncHandler GetCallFuncHandler()
+    {
+        if (m_callFuncHandler == null)
+            m_callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+
+        return m_callFuncHandler;
     }
 }
