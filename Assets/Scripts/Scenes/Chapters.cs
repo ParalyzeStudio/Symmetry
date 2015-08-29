@@ -18,6 +18,7 @@ public class Chapters : GUIScene
     //Chapter slot
     private GameObject m_chapterSlotObject;
     private GameObject m_chapterSlotBackground;
+    private GameObject m_chapterSlotContour;
     //Info data
     private GameObject m_chapterSlotInfoContainer;
     private GameObject m_chapterSlotTitleObject;
@@ -36,6 +37,8 @@ public class Chapters : GUIScene
 
     //Selection arrows
     public GameObject m_chapterSelectionArrowPfb;
+    private GameObject m_leftArrowObject;
+    private GameObject m_rightArrowObject;
 
     /**
      * Show Chapters screen with or without animation
@@ -45,7 +48,7 @@ public class Chapters : GUIScene
         base.Show();
 
         //Set the correct background gradient
-        UpdateBackgroundGradient();
+        UpdateBackgroundGradient(0.12f);
 
         //Show chapter slot
         ShowChapterSlot();
@@ -56,45 +59,14 @@ public class Chapters : GUIScene
 
     private void ApplyGradientOnBackground(Gradient gradient, float fDelay = 0.0f)
     {
-        //GetBackgroundRenderer().ApplyGradient(gradient,
-        //                                      0.02f,
-        //                                      true,
-        //                                      BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
-        //                                      0.8f,
-        //                                      fDelay,
-        //                                      0.02f,
-        //                                      false);
         GetBackgroundRenderer().ApplyGradient(gradient,
                                               0.02f,
                                               true,
                                               BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
-                                              1.0f,
+                                              0.6f,
                                               fDelay,
-                                              0.0f,
+                                              0.08f,
                                               false);
-    }
-
-    public override void Dismiss(float fDuration, float fDelay = 0.0f)
-    {
-        base.Dismiss(fDuration, fDelay);
-    }
-
-    public override void OnSceneDismissed()
-    {
-        base.OnSceneDismissed();
-    }
-
-    /**
-     * Callback used when the player has clicked on a chapter and wants to display levels
-     * **/
-    public void OnClickChapterSlot()
-    {
-        DismissChapterSlot();
-
-        int iChapterNumber = m_displayedChapterIndex + 1;
-
-        GetLevelManager().SetCurrentChapterByNumber(iChapterNumber);
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.0f, 0.7f);
     }
 
     /**
@@ -106,47 +78,64 @@ public class Chapters : GUIScene
         BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         //Left selection arrow
-        GameObject leftArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
-        leftArrowObject.name = "LeftSelectionArrow";
-        leftArrowObject.transform.parent = this.gameObject.transform;
+        m_leftArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
+        m_leftArrowObject.name = "LeftSelectionArrow";
+        m_leftArrowObject.transform.parent = this.gameObject.transform;
 
-        ChapterSelectionArrowButton leftArrowButton = leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        ChapterSelectionArrowButton leftArrowButton = m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
         leftArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS;
         leftArrowButton.m_touchArea = new Vector2(256, 256);
 
         float backgroundTrianglesColumnWidth = screenSize.x / BackgroundTrianglesRenderer.NUM_COLUMNS;
         float leftArrowPositionX = 3.5f * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
         leftArrowPositionX -= 0.5f * screenSize.x;
-        leftArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
+        m_leftArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
 
-        ChapterSelectionArrowButton arrowButton = leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        ChapterSelectionArrowButton arrowButton = m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
         arrowButton.Init(null);
 
         //Right selection arrow
-        GameObject rightArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
-        rightArrowObject.name = "RightSelectionArrow";
-        rightArrowObject.transform.parent = this.gameObject.transform;
+        m_rightArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
+        m_rightArrowObject.name = "RightSelectionArrow";
+        m_rightArrowObject.transform.parent = this.gameObject.transform;
 
-        ChapterSelectionArrowButton rightArrowButton = rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        ChapterSelectionArrowButton rightArrowButton = m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
         rightArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT;
         rightArrowButton.m_touchArea = new Vector2(256, 256);
 
         float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth;
         rightArrowPositionX -= 0.5f * screenSize.x;
-        rightArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
+        m_rightArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
 
-        arrowButton = rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
+        arrowButton = m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
         arrowButton.Init(null);
 
-        rightArrowObject.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward);
+        m_rightArrowObject.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward);
 
         //Fade in arrows
-        GameObjectAnimator leftArrowAnimator = leftArrowObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator leftArrowAnimator = m_leftArrowObject.GetComponent<GameObjectAnimator>();
         leftArrowAnimator.SetOpacity(0);
         leftArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
-        GameObjectAnimator rightArrowAnimator = rightArrowObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator rightArrowAnimator = m_rightArrowObject.GetComponent<GameObjectAnimator>();
         rightArrowAnimator.SetOpacity(0);
         rightArrowAnimator.FadeTo(1.0f, 0.5f, fDelay);
+    }
+
+    protected override void DismissSelf()
+    {
+        DismissChapterSlot();
+        DismissSelectionArrows();    
+    }
+
+    /**
+     * Fade out selection arrows
+     * **/
+    private void DismissSelectionArrows(bool bDestroyOnFinish = true)
+    {
+        GameObjectAnimator leftArrowAnimator = m_leftArrowObject.GetComponent<GameObjectAnimator>();
+        leftArrowAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        GameObjectAnimator rightArrowAnimator = m_rightArrowObject.GetComponent<GameObjectAnimator>();
+        rightArrowAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -200,16 +189,31 @@ public class Chapters : GUIScene
         hexaMeshAnimator.SetPosition(Vector3.zero);
 
         //Add a contour to the hexagon
-        GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
-        contourObject.name = "SlotContour";
-        contourObject.transform.parent = m_chapterSlotObject.transform;
+        m_chapterSlotContour = (GameObject)Instantiate(m_texQuadPfb);
+        m_chapterSlotContour.name = "SlotContour";
+        m_chapterSlotContour.transform.parent = m_chapterSlotObject.transform;
 
-        contourObject.GetComponent<UVQuad>().Init(m_glowContourMaterial);
+        m_chapterSlotContour.GetComponent<UVQuad>().Init(m_glowContourMaterial);
 
-        TexturedQuadAnimator contourAnimator = contourObject.GetComponent<TexturedQuadAnimator>();
+        TexturedQuadAnimator contourAnimator = m_chapterSlotContour.GetComponent<TexturedQuadAnimator>();
         float contourTextureScale = 8 * GetBackgroundRenderer().m_triangleEdgeLength / 490.0f; //hexagon is 8 * triangleEdgeLength size, and the contour texture is 496x496 with 8 pixels blur (512x512)
         contourAnimator.SetScale(new Vector3(contourTextureScale * 512, contourTextureScale * 512, 1));
         contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
+
+        GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
+        contourHexaObject.name = "ContourHexagon";
+        contourHexaObject.transform.parent = m_chapterSlotContour.transform;
+
+        CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
+        contourMesh.Init(Instantiate(m_positionColorMaterial));
+
+        float contourMeshThickness = 4.0f;
+        CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
+        contourMeshAnimator.SetNumSegments(6, false);
+        contourMeshAnimator.SetInnerRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength, false);
+        contourMeshAnimator.SetOuterRadius(4 * GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
+        contourMeshAnimator.SetColor(Color.white);
+        contourMeshAnimator.SetPosition(Vector3.zero);
 
         //TODO Add another contour a little bigger than the other one and with scale/opacity animation      
     }
@@ -355,14 +359,10 @@ public class Chapters : GUIScene
     {
         if (bDismissBackground)
         {
-            GameObjectAnimator slotAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
-            slotAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyBackgroundOnFinish);
+            DismissChapterSlotBackground(bDestroyBackgroundOnFinish);
         }
-        else
-        {
-            GameObjectAnimator slotInfoAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
-            slotInfoAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyChapterInfoOnFinish);
-        }
+        
+        DismissChapterSlotInformation(bDestroyChapterInfoOnFinish);
     }
 
     /**
@@ -374,6 +374,11 @@ public class Chapters : GUIScene
 
         slotBackgroundAnimator.SetOpacity(0);
         slotBackgroundAnimator.FadeTo(CHAPTER_SLOT_BACKGROUND_OPACITY, 0.5f);
+
+        TexturedQuadAnimator slotContourAnimator = m_chapterSlotContour.GetComponent<TexturedQuadAnimator>();
+
+        slotContourAnimator.SetOpacity(0);
+        slotContourAnimator.FadeTo(1.0f, 0.5f);
     }
 
     /**
@@ -393,9 +398,10 @@ public class Chapters : GUIScene
     private void DismissChapterSlotBackground(bool bDestroyOnFinish)
     {
         CircleMeshAnimator slotBackgroundAnimator = m_chapterSlotBackground.GetComponent<CircleMeshAnimator>();
-
-        slotBackgroundAnimator.SetOpacity(0);
         slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+
+        TexturedQuadAnimator slotContourAnimator = m_chapterSlotContour.GetComponent<TexturedQuadAnimator>();
+        slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -404,8 +410,6 @@ public class Chapters : GUIScene
     private void DismissChapterSlotInformation(bool bDestroyOnFinish)
     {
         GameObjectAnimator slotInfoContainerAnimator = m_chapterSlotInfoContainer.GetComponent<GameObjectAnimator>();
-
-        slotInfoContainerAnimator.SetOpacity(0);
         slotInfoContainerAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
@@ -468,7 +472,7 @@ public class Chapters : GUIScene
     /**
      * Update the background gradient for its color to match with the currently displayed chapter
      * **/
-    public void UpdateBackgroundGradient()
+    public void UpdateBackgroundGradient(float fDelay = 0.0f)
     {
         Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
 
@@ -478,7 +482,7 @@ public class Chapters : GUIScene
                               displayedChapter.GetThemeColors()[0],
                               displayedChapter.GetThemeColors()[1]);
 
-        ApplyGradientOnBackground(gradient);
+        ApplyGradientOnBackground(gradient, fDelay);
     }
 
     /**
@@ -515,5 +519,16 @@ public class Chapters : GUIScene
         }
 
         return false;
+    }       
+
+    /**
+     * Callback used when the player has clicked on a chapter and wants to display levels
+     * **/
+    public void OnClickChapterSlot()
+    {
+        int iChapterNumber = m_displayedChapterIndex + 1;
+
+        GetLevelManager().SetCurrentChapterByNumber(iChapterNumber);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);
     }
 }

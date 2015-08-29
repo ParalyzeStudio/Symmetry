@@ -2,22 +2,13 @@
 
 public class GUIScene : MonoBehaviour
 {
-    private bool m_dismissSceneRunning;
-    private float m_dismissSceneElapsedTime;
-    private float m_dismissSceneDelay;
-    private float m_dismissSceneDuration;
-
     //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
     protected GUIManager m_guiManager;
     protected BackgroundTrianglesRenderer m_backgroundRenderer;
     protected LevelManager m_levelManager;
     protected SceneManager m_sceneManager;
     protected PersistentDataManager m_persistentDataManager;
-
-    public virtual void Init()
-    {
-        m_dismissSceneRunning = false;
-    }
+    protected CallFuncHandler m_callFuncHandler;
 
     /**
      * Shows this scene
@@ -35,21 +26,23 @@ public class GUIScene : MonoBehaviour
     /**
      * Dismisses this scene
      * **/
-    public virtual void Dismiss(float fDuration, float fDelay = 0.0f)
+    public void Dismiss(float fDuration, float fDelay = 0.0f)
     {
-        m_dismissSceneRunning = true;
-        m_dismissSceneElapsedTime = 0;
-        m_dismissSceneDuration = fDuration;
-        m_dismissSceneDelay = fDelay;
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnSceneDismissed), fDuration + fDelay);
 
+        DismissSelf();
+    }
+
+    protected virtual void DismissSelf()
+    {
         //fade out the scene
-        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        sceneAnimator.FadeTo(0, fDuration, fDelay);
+        SceneAnimator sceneAnimator = this.gameObject.GetComponent<SceneAnimator>();
+        sceneAnimator.FadeTo(0, 1.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, false);
     }
 
     public virtual void OnSceneDismissed()
     {
-        Destroy(this.gameObject);
+        Destroy(this.gameObject); //Destroy the scene object
     }
 
     /**
@@ -95,16 +88,12 @@ public class GUIScene : MonoBehaviour
         return m_persistentDataManager;
     }
 
-    public virtual void Update()
+    public CallFuncHandler GetCallFuncHandler()
     {
-        float dt = Time.deltaTime;
+        if (m_callFuncHandler == null)
+            m_callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
 
-        if (m_dismissSceneRunning)
-        {
-            m_dismissSceneElapsedTime += dt;
-            if (m_dismissSceneElapsedTime > m_dismissSceneDuration + m_dismissSceneDelay)
-                OnSceneDismissed();
-        }
+        return m_callFuncHandler;
     }
 }
 

@@ -37,14 +37,12 @@ public class SceneManager : MonoBehaviour
      * **/
     public void SwitchDisplayedContent(DisplayContent contentToDisplay, 
                                        bool bAnimated = true, 
-                                       float fHideDuration = 0.5f, 
-                                       float fHideDelay = 0.0f, 
-                                       float fShowDelay = 0.0f)
+                                       float fHideDuration = 0.5f)
     {
         m_contentToDisplay = contentToDisplay;
 
-        HideContent(m_displayedContent, bAnimated, fHideDuration, fHideDelay);
-        ShowContent(m_contentToDisplay, bAnimated, fHideDuration + fHideDelay + fShowDelay); //show next content 1 second after hiding the previous one
+        HideContent(m_displayedContent, bAnimated, fHideDuration);
+        ShowContent(m_contentToDisplay, bAnimated, fHideDuration); //show next content 1 second after hiding the previous one
     }
 
     /**
@@ -52,6 +50,8 @@ public class SceneManager : MonoBehaviour
      * **/
     public void ShowContent(DisplayContent contentToDisplay, bool bAnimated = true, float fDelay = 0.0f)
     {
+        m_displayedContent = contentToDisplay;
+
         if (contentToDisplay == DisplayContent.MENU)
         {
             //build the content
@@ -93,11 +93,7 @@ public class SceneManager : MonoBehaviour
             m_currentScene = clonedGameScene.GetComponent<GameScene>();
         }
 
-        m_displayedContent = contentToDisplay;
-        m_currentScene.Init();
-        //m_currentScene.Show(bAnimated, fDelay);
-
-        CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+        CallFuncHandler callFuncHandler = this.gameObject.GetComponent<CallFuncHandler>();
         callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_currentScene.Show), fDelay);
     }
 

@@ -47,7 +47,7 @@ public class MainMenu : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         Color gradientStartColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(18, 75, 89, 255));
-        Color gradientEndColor = Color.black;
+        Color gradientEndColor = Color.gray;
 
         Gradient mainMenuGradient = new Gradient();
         mainMenuGradient.CreateLinear(new Vector2(0, 0.5f * screenSize.y),
@@ -385,10 +385,8 @@ public class MainMenu : GUIScene
     //    creditsButtonAnimator.TranslateTo(creditsButtonFinalPosition, 0.5f, 0, ValueAnimator.InterpolationType.SINUSOIDAL);
     //}
 
-    public override void Update()
+    public void Update()
     {
-        base.Update();
-
         if (m_generatingFadingHexagons)
         {
             float dt = Time.deltaTime;

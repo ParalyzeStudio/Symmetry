@@ -7,7 +7,7 @@ public class SceneAnimator : GameObjectAnimator
         LevelIntro levelIntro = this.GetComponent<LevelIntro>();
         if (levelIntro != null) //this scene is the level intro scene
         {
-            GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 0.7f);
+            GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f);
         }
     }
 }

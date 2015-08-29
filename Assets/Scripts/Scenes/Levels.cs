@@ -25,96 +25,9 @@ public class Levels : GUIScene
     public override void Show()
     {
         base.Show();
-
+        
         ShowLevelsSlots();        
     }
-
-    /**
-     * Dismisses this scene
-     * **/
-    public override void Dismiss(float fDuration, float fDelay = 0.0f)
-    {
-        base.Dismiss(fDuration, fDelay);
-    }
-
-    //**
-    //* Shows title
-    //**/
-    //public void ShowTitle(float fDelay = 0.0f)
-    //{
-    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-    //    GameObject titleObject = (GameObject)Instantiate(m_levelsTitlePfb);
-    //    titleObject.transform.parent = this.gameObject.transform;
-    //    titleObject.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, -20);
-    //    //TextMesh titleTextMesh = titleObject.GetComponent<TextMesh>();
-    //    GameObjectAnimator titleAnimator = titleObject.GetComponent<GameObjectAnimator>();
-
-    //    titleAnimator.SetOpacity(0);
-    //    titleAnimator.FadeTo(1, 0.5f, fDelay);
-    //}
-
-    ///**
-    //* Shows information about the selected chapter
-    //**/
-    //public void ShowChapterInfo(float fDelay = 0.0f)
-    //{
-    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
-
-    //    GameObject chapterInfoObject = (GameObject)Instantiate(m_chapterInfoPfb);
-    //    chapterInfoObject.transform.parent = this.gameObject.transform;
-    //    chapterInfoObject.transform.localPosition = new Vector3(0, -0.5f * screenSize.y + 108.0f, -20);
-
-    //    TextMesh[] childTextMeshes = chapterInfoObject.GetComponentsInChildren<TextMesh>();
-
-    //    TextMesh chapterNumberTextMesh = childTextMeshes[0];
-    //    chapterNumberTextMesh.text = levelManager.m_currentChapter.m_number.ToString();
-
-    //    GameObjectAnimator chapterInfoAnimator = chapterInfoObject.GetComponent<GameObjectAnimator>();
-    //    chapterInfoAnimator.SetOpacity(0);
-    //    chapterInfoAnimator.FadeTo(1, 0.5f, fDelay);
-    //}
-
-    ///**
-    // * Shows levels slots
-    // * **/
-    //public void ShowLevelsSlots(float fDelay)
-    //{
-    //    LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
-    //    m_levelSlots = new GameObject[Chapter.LEVELS_COUNT];
-
-    //    float verticalDistanceBetweenLevelSlots = m_levelsGridHeight / 4.2f;
-    //    float horizontalDistanceBetweenLevelSlots = 340.0f / 240.0f * verticalDistanceBetweenLevelSlots;
-    //    for (int iLevelSlotIdx = 0; iLevelSlotIdx != LevelManager.LEVELS_PER_CHAPTER; iLevelSlotIdx++)
-    //    {
-    //        GameObject clonedLevelSlot = (GameObject)Instantiate(m_levelSlotPfb);
-    //        m_levelSlots[iLevelSlotIdx] = clonedLevelSlot;
-    //        clonedLevelSlot.transform.parent = m_levelsHolder.transform;
-
-    //        int column = iLevelSlotIdx % 4 + 1;
-    //        int line = 4 - iLevelSlotIdx / 4;
-
-    //        Vector3 levelSlotPosition = new Vector3((column - 2.5f) * horizontalDistanceBetweenLevelSlots,
-    //                                                (line - 2.5f) * verticalDistanceBetweenLevelSlots,
-    //                                                0);
-
-    //        clonedLevelSlot.transform.localPosition = levelSlotPosition;
-
-    //        ColorNumberSlot levelSlot = clonedLevelSlot.GetComponent<ColorNumberSlot>();
-    //        levelSlot.Init();
-    //        levelSlot.SetNumber(iLevelSlotIdx + 1);
-
-    //        Color slotBaseColor = levelManager.GetChapterGroupBaseColor(levelManager.GetCurrentChapterGroup());
-    //        Color slotColor = ColorUtils.DarkenColor(slotBaseColor, 0.18f * (column - 1));
-    //        SlotAnimator slotAnimator = levelSlot.GetComponent<SlotAnimator>();
-    //        slotAnimator.SetColor(slotColor);
-    //    }
-
-    //    GameObjectAnimator levelsHolderAnimator = m_levelsHolder.GetComponent<GameObjectAnimator>();
-    //    levelsHolderAnimator.SetOpacity(0);
-    //    levelsHolderAnimator.FadeTo(1, 0.5f, fDelay);
-    //}
 
     /**
      * Build the slots for every level in that chapter
@@ -259,6 +172,21 @@ public class Levels : GUIScene
         float contourTextureScale = 2 * GetBackgroundRenderer().m_triangleEdgeLength / 168.0f; //hexagon is 2 * triangleEdgeLength size, and the contour texture is 168x168 with 44 pixels blur/padding (256x256)
         contourAnimator.SetScale(new Vector3(contourTextureScale * 256, contourTextureScale * 256, 1));
         contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
+
+        GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
+        contourHexaObject.name = "ContourHexagon";
+        contourHexaObject.transform.parent = contourObject.transform;
+
+        CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
+        contourMesh.Init(Instantiate(m_positionColorMaterial));
+
+        float contourMeshThickness = 4.0f;
+        CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
+        contourMeshAnimator.SetNumSegments(6, false);
+        contourMeshAnimator.SetInnerRadius(GetBackgroundRenderer().m_triangleEdgeLength, false);
+        contourMeshAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
+        contourMeshAnimator.SetColor(Color.white);
+        contourMeshAnimator.SetPosition(Vector3.zero);
 
         //number
         GameObject levelNumberObject = (GameObject)Instantiate(m_textMeshPfb);

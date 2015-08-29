@@ -14,11 +14,6 @@ public class LevelIntro : GUIScene
         sceneAnimator.FadeTo(0, 0.7f, 5.0f);
     }
 
-    public override void Dismiss(float fDuration, float fDelay = 0.0f)
-    {
-        base.Dismiss(fDuration, fDelay);
-    }
-
     public void ShowChapterAndLevel()
     {
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();

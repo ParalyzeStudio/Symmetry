@@ -79,9 +79,16 @@ public class GUITouchHandler : TouchHandler
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTriangleAnimator animator = GetBackgroundRenderer().GetComponent<BackgroundTriangleAnimator>();
-        animator.TranslateTo(new Vector3(0, 0.5f * screenSize.y, 0), 1.0f, 2.0f);
+        
+        //Translate of a even number of triangles
+        int numTrianglesPerColumn = GetBackgroundRenderer().m_numTrianglesPerColumn;
+        int translationLengthInTriangleUnits = Mathf.RoundToInt(0.6f * numTrianglesPerColumn);
+        if (translationLengthInTriangleUnits % 2 == 1) //make it even
+            translationLengthInTriangleUnits += 1;
+        float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
+        animator.TranslateTo(new Vector3(0, translationLengthInTriangleUnits * triangleEdgeLength, 0), 0.1f, 5.0f);
 
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 0.0f, 2.0f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 5.0f);
     }
 
     /**
@@ -92,7 +99,7 @@ public class GUITouchHandler : TouchHandler
         //GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
         //sceneAnimator.FadeTo(0, 0.7f);
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f, 1.4f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 1.4f);
     }
 
     /**

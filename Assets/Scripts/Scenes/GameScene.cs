@@ -50,9 +50,8 @@ public class GameScene : GUIScene
     //is the current scene displayed entirely
     public bool m_isShown { get; set; }
 
-    public override void Init()
+    public void Init()
     {
-        base.Init();
         m_isShown = false;
     }
 
@@ -96,11 +95,6 @@ public class GameScene : GUIScene
                                 500);
 
         m_isShown = true;
-    }
-
-    public override void Dismiss(float fDuration, float fDelay = 0.0f)
-    {
-        base.Dismiss(fDuration, fDelay);
     }
 
     /**
