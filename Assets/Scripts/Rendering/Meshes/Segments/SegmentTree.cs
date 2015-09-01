@@ -31,43 +31,37 @@ public class SegmentTreeNode
 public class SegmentTree : MonoBehaviour
 {
     public List<SegmentTreeNode> m_nodes { get; set; }
+    private GameObject m_parentHolder;
+    private GameObject m_segmentObjectPfb;
+    private float m_segmentThickness;
+    private Material m_segmentMaterial;
+    private Color m_tintColor;
+
  
     public void Awake()
     {
         m_nodes = new List<SegmentTreeNode>();
     }
 
-    public void BuildSegments(bool bAnimated, GameObject parentHolder, GameObject segmentObjectPfb, float segmentThickness, Material segmentMaterial, Color tintColor)
+    public void Init(GameObject parentHolder, GameObject segmentObjectPfb, float segmentThickness, Material segmentMaterial, Color tintColor)
+    {
+        m_parentHolder = parentHolder;
+        m_segmentObjectPfb = segmentObjectPfb;
+        m_segmentThickness = segmentThickness;
+        m_segmentMaterial = segmentMaterial;
+        m_tintColor = tintColor;
+    }
+
+    public void BuildSegments(bool bAnimated)
     {
         if (bAnimated)
         {
-            float segmentGrowSpeed = 10.0f;
-
             //Find the animation start node (there is only one)
             for (int i = 0; i != m_nodes.Count; i++)
             {
                 if (m_nodes[i].m_animationStartNode)
                 {
-                    GameObject segmentObject = (GameObject)Instantiate(segmentObjectPfb);
-                    segmentObject.transform.parent = parentHolder.transform;
-
-                    for (int iChildIdx = 0; iChildIdx != m_nodes[i].m_children.Count; iChildIdx++)
-                    {
-                        SegmentTreeNode childNode = m_nodes[i].m_children[iChildIdx];
-
-                        TexturedSegment segment = segmentObject.GetComponent<TexturedSegment>();
-                        segment.Build(GeometryUtils.BuildVector3FromVector2(m_nodes[i].m_position, 0),
-                                      GeometryUtils.BuildVector3FromVector2(m_nodes[i].m_position, 0),
-                                      segmentThickness,
-                                      segmentMaterial,
-                                      tintColor,
-                                      false,
-                                      TextureWrapMode.Clamp);
-
-                        float distanceToCover = (childNode.m_position - m_nodes[i].m_position).magnitude;
-                        TexturedSegmentAnimator segmentAnimator = segmentObject.GetComponent<TexturedSegmentAnimator>();
-                        segmentAnimator.TranslatePointBTo(childNode.m_position, distanceToCover / segmentGrowSpeed);
-                    }
+                    BuildSegmentsForNode(m_nodes[i], true);
                     break;
                 }
             }
@@ -76,25 +70,55 @@ public class SegmentTree : MonoBehaviour
         {
             for (int i = 0; i != m_nodes.Count; i++)
             {
-                SegmentTreeNode node = m_nodes[i];
-
-                for (int j = 0; j != node.m_children.Count; j++)
-                {
-                    SegmentTreeNode child = node.m_children[j];
-
-                    GameObject segmentObject = (GameObject)Instantiate(segmentObjectPfb);
-                    segmentObject.transform.parent = parentHolder.transform;
-
-                    TexturedSegment segment = segmentObject.GetComponent<TexturedSegment>();
-                    segment.Build(GeometryUtils.BuildVector3FromVector2(node.m_position, 0),
-                                  GeometryUtils.BuildVector3FromVector2(child.m_position, 0),
-                                  segmentThickness,
-                                  segmentMaterial,
-                                  tintColor,
-                                  false,
-                                  TextureWrapMode.Clamp);
-                }
+                BuildSegmentsForNode(m_nodes[i], false);
             }
+        }
+    }
+
+
+    /**
+     * Build all segments starting from a single node to all its children
+     * **/
+    public void BuildSegmentsForNode(SegmentTreeNode node,
+                                     bool bAnimated)
+    {
+        float segmentGrowSpeed = 500.0f;       
+
+        for (int iChildIdx = 0; iChildIdx != node.m_children.Count; iChildIdx++)
+        {
+            SegmentTreeNode childNode = node.m_children[iChildIdx];
+
+            GameObject segmentObject = (GameObject)Instantiate(m_segmentObjectPfb);
+            segmentObject.transform.parent = m_parentHolder.transform;
+            TexturedSegment segment = segmentObject.GetComponent<TexturedSegment>();
+
+            if (bAnimated)
+            {                
+                segment.Build(GeometryUtils.BuildVector3FromVector2(node.m_position, 0),
+                              GeometryUtils.BuildVector3FromVector2(node.m_position, 0),
+                              m_segmentThickness,
+                              m_segmentMaterial,
+                              m_tintColor,
+                              false,
+                              TextureWrapMode.Clamp);
+
+                float distanceToCover = (childNode.m_position - node.m_position).magnitude;
+                TexturedSegmentAnimator segmentAnimator = segmentObject.GetComponent<TexturedSegmentAnimator>();
+                segmentAnimator.TranslatePointBTo(childNode.m_position, distanceToCover / segmentGrowSpeed);
+            }
+            else
+            {
+                segment.Build(GeometryUtils.BuildVector3FromVector2(node.m_position, 0),
+                              GeometryUtils.BuildVector3FromVector2(childNode.m_position, 0),
+                              m_segmentThickness,
+                              m_segmentMaterial,
+                              m_tintColor,
+                              false,
+                              TextureWrapMode.Clamp);
+            }
+
+            segment.m_parentTree = this;
+            segment.m_endTreeNode = childNode;
         }
     }
 }

@@ -17,6 +17,10 @@ public class Segment : MonoBehaviour
 
     public const int DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE = 16;
 
+    //parent segment tree if this segment is part of a group and child node
+    public SegmentTree m_parentTree { get; set; }
+    public SegmentTreeNode m_endTreeNode { get; set; }
+
     //mesh arrays
     protected Mesh m_segmentMesh;
     protected Vector3[] m_meshVertices;

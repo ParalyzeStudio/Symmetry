@@ -135,7 +135,12 @@ public class SegmentAnimator : ValueAnimator
 
     public virtual void OnFinishTranslatingPointB()
     {
-        
+        Segment segment = this.GetComponent<Segment>();
+        SegmentTreeNode endNode = segment.m_endTreeNode;
+        if (endNode != null)
+        {
+            segment.m_parentTree.BuildSegmentsForNode(endNode, true);
+        }
     }
 
     protected virtual void UpdatePointBPosition(float dt)

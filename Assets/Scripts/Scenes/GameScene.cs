@@ -162,6 +162,7 @@ public class GameScene : GUIScene
 
         //Build buttons contours
         SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
+        contourSegmentTree.Init(m_interfaceButtonsHolder, m_texRoundedSegment, 16.0f, m_interfaceButtonContourMaterial, Color.white);
 
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
@@ -203,7 +204,7 @@ public class GameScene : GUIScene
         contourSegmentTree.m_nodes.Add(node10);
         contourSegmentTree.m_nodes.Add(node11);
 
-        contourSegmentTree.BuildSegments(true, m_interfaceButtonsHolder, m_texRoundedSegment, 16.0f, m_interfaceButtonContourMaterial, Color.white);
+        contourSegmentTree.BuildSegments(true);
 
 
         //Vector2 screenSize = ScreenUtils.GetScreenSize();
