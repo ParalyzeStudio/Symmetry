@@ -12,6 +12,8 @@ public class Chapters : GUIScene
     public GameObject m_circleMeshPfb;
     public Material m_positionColorMaterial;
     public GameObject m_texQuadPfb;
+    public GameObject m_dbgTexSegmentPfb;
+    public Material m_dbgTexSegmentMaterial;
 
     public int m_displayedChapterIndex { get; set; } //the index of the currently displayed chapter. Chapter 1 is index 0, chapter 2 is index 1 and so on...
 
@@ -55,6 +57,19 @@ public class Chapters : GUIScene
 
         //Show chapter selection arrows
         ShowSelectionArrows();
+
+        //Debug draw a textured segment
+        GameObject dbgTexSegmentObject = (GameObject)Instantiate(m_dbgTexSegmentPfb);
+        dbgTexSegmentObject.transform.parent = this.transform;
+        dbgTexSegmentObject.name = "DebugTexSegment";
+
+        TexturedSegment dbgTexSegment = dbgTexSegmentObject.GetComponent<TexturedSegment>();
+        Vector3 pointA = new Vector3(0, 350, -10);
+        Vector3 pointB = new Vector3(400, 350, -10);
+        float thickness = 16.0f;
+        dbgTexSegment.Build(pointA, pointB, thickness, m_dbgTexSegmentMaterial, Color.white, false, TextureWrapMode.Clamp);
+
+        TexturedSegmentAnimator dbgTexSegmentAnimator = dbgTexSegmentObject.GetComponent<TexturedSegmentAnimator>();
     }
 
     private void ApplyGradientOnBackground(Gradient gradient, float fDelay = 0.0f)

@@ -39,7 +39,7 @@ public class SegmentAnimator : ValueAnimator
     public virtual void SetPointAPosition(Vector3 position)
     {
         m_pointAPosition = position;
-        TitleLetterSegment segment = this.gameObject.GetComponent<TitleLetterSegment>();
+        Segment segment = this.gameObject.GetComponent<Segment>();
         segment.SetPointA(position);
         OnPointAPositionChanged();
     }
@@ -117,7 +117,7 @@ public class SegmentAnimator : ValueAnimator
     public virtual void SetPointBPosition(Vector3 position)
     {
         m_pointBPosition = position;
-        TitleLetterSegment segment = this.gameObject.GetComponent<TitleLetterSegment>();
+        Segment segment = this.gameObject.GetComponent<Segment>();
         segment.SetPointB(position);
         OnPointBPositionChanged();
     }

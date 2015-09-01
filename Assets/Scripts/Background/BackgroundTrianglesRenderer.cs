@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class BackgroundTrianglesRenderer : MonoBehaviour
 {
     public const float BACKGROUND_TRIANGLES_Z_VALUE = -5.0f;
-    public const int NUM_COLUMNS = 30;
+    public const int NUM_COLUMNS = 26;
 
     public List<BackgroundTriangleColumn> m_triangleColumns { get; set; }
     public int m_numTrianglesPerColumn { get; set; }

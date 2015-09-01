@@ -5,8 +5,8 @@
  * **/
 public class Segment : MonoBehaviour
 {
-    protected Vector2 m_pointA; //first point of the segment
-    protected Vector2 m_pointB; //second point of the segment
+    protected Vector3 m_pointA; //first point of the segment
+    protected Vector3 m_pointB; //second point of the segment
     protected float m_thickness; //segment thickness
     protected int m_numSegmentsPerHalfCircle; //number of segments used to draw each half circle on rounded endpoints. Set to 0 to have a rectangle segment
     protected Material m_material; //the material used to render this segment
@@ -36,8 +36,8 @@ public class Segment : MonoBehaviour
 
         //Calculate the distance between pointA and pointB to determine their mesh coordinates
         m_length = (m_pointB - m_pointA).magnitude;
-        Vector3 localPointA = new Vector3(-0.5f * m_length, 0, 0);
-        Vector3 localPointB = new Vector3(0.5f * m_length, 0, 0);
+        Vector3 localPointA = new Vector3(-0.5f * m_length, 0, segmentPosition.z);
+        Vector3 localPointB = new Vector3(0.5f * m_length, 0, segmentPosition.z);
 
         //Then find the angle between pointA and pointB and apply rotation to the segment object
         m_angle = Mathf.Atan2(m_pointB.y - m_pointA.y, m_pointB.x - m_pointA.x);
@@ -155,13 +155,13 @@ public class Segment : MonoBehaviour
             m_pointB = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public virtual void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, numSegmentsPerHalfCircle);
         RenderInternal(); //builds the mesh
     }
 
-    public void InitBasicVariables(Vector2 pointA, Vector2 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public void InitBasicVariables(Vector3 pointA, Vector3 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         m_pointA = pointA;
         m_pointB = pointB;

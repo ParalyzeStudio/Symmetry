@@ -6,7 +6,7 @@ public class TexturedSegment : Segment
     protected Vector2[] m_meshUVs;
     protected bool m_meshUVsDirty;
 
-    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool bGridPoints, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
+    public void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color tintColor, bool bGridPoints, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
     {
         InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, 0);
 
@@ -14,12 +14,19 @@ public class TexturedSegment : Segment
             throw new Exception("Material has no texture set on it");
 
         RenderInternal();
-
-        UpdateUVs();
         SetTextureWrapMode(texWrapMode);
 
         TexturedSegmentAnimator segmentAnimator = this.GetComponent<TexturedSegmentAnimator>();
         segmentAnimator.SetColor(tintColor);
+    }
+
+    protected virtual void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
+    {
+        base.RenderInternal(bUpdateVertices, bUpdateIndices);
+
+        if (bUpdateUVs)
+            UpdateUVs();
+
     }
 
     protected virtual void UpdateUVs()

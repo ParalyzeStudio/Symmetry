@@ -10,7 +10,7 @@ public class SimplifiedRoundedSegment : TexturedSegment
     /**
      * Renders the segment with rounded endpoints
      * **/
-    protected void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
+    protected override void RenderInternal(bool bUpdateVertices = true, bool bUpdateIndices = true, bool bUpdateUVs = true)
     {
         //First set the position of the segment and define mesh coordinates for pointA and pointB
         Vector3 segmentPosition = 0.5f * (m_pointA + m_pointB);

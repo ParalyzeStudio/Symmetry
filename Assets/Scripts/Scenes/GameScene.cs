@@ -15,6 +15,7 @@ public class GameScene : GUIScene
     //shared prefabs
     public GameObject m_radialGradientPfb;
     public GameObject m_texQuadPfb;
+    public GameObject m_texRoundedSegment;
 
     public Grid m_grid { get; set; }
     public Counter m_counter { get; set; }
@@ -24,6 +25,9 @@ public class GameScene : GUIScene
 
     //holders
     public GameObject m_interfaceButtonsHolder { get; set; }
+
+    //interface buttons
+    public Material m_interfaceButtonContourMaterial;
 
     //Action buttons
     private ActionButton m_topActionButton;
@@ -78,21 +82,38 @@ public class GameScene : GUIScene
         ShowAxisConstraintsIcons();
 
         //Show action buttons
-        ShowActionButtons();
+        //ShowActionButtons();
 
         ShowInitialShapes();
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
         m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
 
-        GameObject radialGradientBackground = Instantiate(m_radialGradientPfb);
-        radialGradientBackground.transform.parent = this.transform;
-        radialGradientBackground.transform.localPosition = new Vector3(0,0,-5.1f);
-        radialGradientBackground.transform.localScale = GeometryUtils.BuildVector3FromVector2(ScreenUtils.GetScreenSize(), 1);
+        //Gradient
+        Chapter displayedChapter = GetLevelManager().m_currentChapter;
 
-        GradientQuad gradientQuad = radialGradientBackground.GetComponent<GradientQuad>();
-        gradientQuad.InitRadial(ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255)),
-                                ColorUtils.GetColorFromRGBAVector4(new Vector4(64,12,26,255)),
-                                500);
+        Gradient gradient = new Gradient();
+        gradient.CreateRadial(Vector2.zero,
+                              960,
+                              displayedChapter.GetThemeColors()[0],
+                              displayedChapter.GetThemeColors()[1]);
+
+        GetBackgroundRenderer().ApplyGradient(gradient,
+                                              0.02f,
+                                              true,
+                                              BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
+                                              0.5f,
+                                              0.0f,
+                                              0.0f,
+                                              false);
+        //GameObject radialGradientBackground = Instantiate(m_radialGradientPfb);
+        //radialGradientBackground.transform.parent = this.transform;
+        //radialGradientBackground.transform.localPosition = new Vector3(0,0,-5.1f);
+        //radialGradientBackground.transform.localScale = GeometryUtils.BuildVector3FromVector2(ScreenUtils.GetScreenSize(), 1);
+
+        //GradientQuad gradientQuad = radialGradientBackground.GetComponent<GradientQuad>();
+        //gradientQuad.InitRadial(ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255)),
+        //                        ColorUtils.GetColorFromRGBAVector4(new Vector4(64,12,26,255)),
+        //                        500);
 
         m_isShown = true;
     }
@@ -134,49 +155,100 @@ public class GameScene : GUIScene
     private void ShowInterfaceButtons(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
 
         m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
         m_interfaceButtonsHolder.transform.parent = this.gameObject.transform;
+        m_interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0, -10);
 
-        //define some variables to help us positioning buttons correctly
-        float distanceToTopBorder = 30.0f;
-        float distanceToRightBorder = 30.0f;
-        float distanceBetweenButtons = 30.0f;
+        //Build buttons contours
+        SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
 
-        GameObjectAnimator holderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
-        holderAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - 0.5f * interfaceButtonSize.y - distanceToTopBorder, INTERFACE_BUTTONS_Z_VALUE));
+        float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
+        float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
 
-        //menu button
-        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
-        pauseButtonObject.name = "PauseButton";
-        pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+        SegmentTreeNode node1 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y));
+        SegmentTreeNode node2 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+        SegmentTreeNode node3 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+        SegmentTreeNode node4 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+        SegmentTreeNode node5 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y));
+        SegmentTreeNode node6 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+        SegmentTreeNode node7 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+        SegmentTreeNode node8 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y));
+        SegmentTreeNode node9 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+        SegmentTreeNode node10 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+        SegmentTreeNode node11 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y));
 
-        GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
-        float pauseButtonPositionX = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
-        pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, 0, 0));
+        node1.SetAnimationStartNode(true);
 
-        //retry button
-        GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
-        retryButtonObject.name = "RetryButton";
-        retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+        node1.AddChild(node2);
+        node2.AddChild(node3);
+        node3.AddChild(node4);
+        node4.AddChild(node5);
+        node4.AddChild(node6);
+        node6.AddChild(node7);
+        node7.AddChild(node8);
+        node7.AddChild(node9);
+        node9.AddChild(node10);
+        node10.AddChild(node11);
 
-        GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
-        float retryBtnPositionX = pauseButtonPositionX - distanceBetweenButtons - interfaceButtonSize.x;
-        retryButtonAnimator.SetPosition(new Vector3(retryBtnPositionX, 0, 0));
+        contourSegmentTree.m_nodes.Add(node1);
+        contourSegmentTree.m_nodes.Add(node2);
+        contourSegmentTree.m_nodes.Add(node3);
+        contourSegmentTree.m_nodes.Add(node4);
+        contourSegmentTree.m_nodes.Add(node5);
+        contourSegmentTree.m_nodes.Add(node6);
+        contourSegmentTree.m_nodes.Add(node7);
+        contourSegmentTree.m_nodes.Add(node8);
+        contourSegmentTree.m_nodes.Add(node9);
+        contourSegmentTree.m_nodes.Add(node10);
+        contourSegmentTree.m_nodes.Add(node11);
 
-        //hints button
-        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
-        hintsButtonObject.name = "HintsButton";
-        hintsButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+        contourSegmentTree.BuildSegments(true, m_interfaceButtonsHolder, m_texRoundedSegment, 16.0f, m_interfaceButtonContourMaterial, Color.white);
 
-        GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
-        float hintsBtnPositionX = retryBtnPositionX - distanceBetweenButtons - interfaceButtonSize.x;
-        hintsButtonAnimator.SetPosition(new Vector3(hintsBtnPositionX, 0, 0));
 
-        holderAnimator.SetOpacity(1);
+        //Vector2 screenSize = ScreenUtils.GetScreenSize();
+        //Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
+
+        //m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
+        //m_interfaceButtonsHolder.transform.parent = this.gameObject.transform;
+
+        ////define some variables to help us positioning buttons correctly
+        //float distanceToTopBorder = 30.0f;
+        //float distanceToRightBorder = 30.0f;
+        //float distanceBetweenButtons = 30.0f;
+
+        //GameObjectAnimator holderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
+        //holderAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - 0.5f * interfaceButtonSize.y - distanceToTopBorder, INTERFACE_BUTTONS_Z_VALUE));
+
+        ////menu button
+        //GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
+        //pauseButtonObject.name = "PauseButton";
+        //pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+        //GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
+        //float pauseButtonPositionX = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
+        //pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, 0, 0));
+
+        ////retry button
+        //GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
+        //retryButtonObject.name = "RetryButton";
+        //retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+        //GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
+        //float retryBtnPositionX = pauseButtonPositionX - distanceBetweenButtons - interfaceButtonSize.x;
+        //retryButtonAnimator.SetPosition(new Vector3(retryBtnPositionX, 0, 0));
+
+        ////hints button
+        //GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
+        //hintsButtonObject.name = "HintsButton";
+        //hintsButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+        //GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
+        //float hintsBtnPositionX = retryBtnPositionX - distanceBetweenButtons - interfaceButtonSize.x;
+        //hintsButtonAnimator.SetPosition(new Vector3(hintsBtnPositionX, 0, 0));
+
+        //holderAnimator.SetOpacity(1);
     }
-
 
     /**
      * Fades out interface buttons holder
