@@ -8,6 +8,9 @@ public class ChapterSelectionArrowButton : GUIButton
     public GameObject m_arrowObject; //the small arrow that indicates the direction left or right
     private UVQuad m_arrow;
     private TexturedQuadAnimator m_arrowAnimator;
+    public bool m_activeState { get; set; } //the state of the button (active/inactive)
+    public Material m_chapterSelectionArrowTriangleMaterial;
+    public Material m_chapterSelectionArrowHexagonMaterial;
 
     //variables to handle arrow translation animation
     private bool m_arrowTranslating;
@@ -21,10 +24,10 @@ public class ChapterSelectionArrowButton : GUIButton
 
     public override void Init(Material skinMaterial = null)
     {
-        base.Init(skinMaterial);
+        base.Init(Instantiate(m_chapterSelectionArrowHexagonMaterial));
 
         m_arrow = m_arrowObject.GetComponent<UVQuad>();
-        m_arrow.Init(null); //material is already specified inside prefab, just build the mesh here
+        m_arrow.Init(Instantiate(m_chapterSelectionArrowTriangleMaterial)); //material is already specified inside prefab, just build the mesh here
 
         m_arrowAnimator = m_arrow.GetComponent<TexturedQuadAnimator>();
         m_arrowAnimator.SetColor(Color.white); //default white tint color
@@ -44,7 +47,7 @@ public class ChapterSelectionArrowButton : GUIButton
 
         m_arrowAnimator.SetPosition(m_arrowTranslationPointB);
 
-        StartArrowTranslationAnimation();
+        SetState(false);
     }
 
     public void StartArrowTranslationAnimation()
@@ -52,6 +55,28 @@ public class ChapterSelectionArrowButton : GUIButton
         m_arrowTranslating = true;
         m_arrowTranslationDuration = 1.0f;
         m_arrowTranslationElapsedTime = 0;
+    }
+
+    /**
+     * Switch between active/inactive mode by setting a new state to the button
+     * true = active
+     * false = inactive
+     * **/
+    public void SetState(bool bNewState)
+    {
+        GameObjectAnimator arrowAnimator = this.GetComponent<GameObjectAnimator>();
+
+        if (bNewState)
+        {
+            StartArrowTranslationAnimation();
+            arrowAnimator.SetOpacity(0);
+            arrowAnimator.FadeTo(1.0f, 0.5f);
+        }
+        else
+        {
+            m_arrowTranslating = false;
+            arrowAnimator.SetOpacity(0);
+        }
     }
 
     public void Update()

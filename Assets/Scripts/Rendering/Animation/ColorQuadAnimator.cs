@@ -15,6 +15,6 @@ public class ColorQuadAnimator : GameObjectAnimator
         base.SetColor(color);
 
         ColorQuad colorQuad = this.GetComponent<ColorQuad>();
-        colorQuad.SetColor(color);
+        colorQuad.SetColor(m_color);
     }
 }

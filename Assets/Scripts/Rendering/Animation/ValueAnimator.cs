@@ -11,6 +11,12 @@ public class ValueAnimator : MonoBehaviour
         CUSTOM = 3 //use this for custom interpolation, but we have to redefine the UpdatePosition method with the appropriate interpolation function
     }
 
+    public enum ColorMode
+    {
+        RGB = 1,
+        TSB = 2
+    }
+
     //Variables to handle fading
     protected bool m_fading;
     public float m_opacity;
@@ -66,9 +72,21 @@ public class ValueAnimator : MonoBehaviour
     protected float m_colorChangingElapsedTime;
     protected InterpolationType m_colorChangingInterpolationType;
 
+    ////Variables to handle tint, saturation and brightness
+    //protected bool m_TSBchanging;
+    //public Vector3 m_TSB;
+    //protected Vector3 m_fromTSB;
+    //protected Vector3 m_toTSB;
+    //protected float m_TSBChangingDuration;
+    //protected float m_TSBChangingDelay;
+    //protected float m_TSBChangingElapsedTime;
+    //protected InterpolationType m_TSBChangingInterpolationType;
+
     //Store previous values to change them dynamically in inspector
     protected float m_prevOpacity;
     protected Color m_prevColor;
+    protected ColorMode m_prevColorMode;
+    //protected Vector3 m_prevTSB;
 
     //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
     protected GUIManager m_guiManager;
@@ -147,6 +165,35 @@ public class ValueAnimator : MonoBehaviour
         m_colorChangingInterpolationType = interpolType;
     }
 
+    //public void TSBChangeTo(Vector3 toTSB, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    m_TSBchanging = true;
+    //    m_fromTSB = m_TSB;
+    //    m_toTSB = toTSB;
+    //    m_TSBChangingDuration = duration;
+    //    m_TSBChangingDelay = delay;
+    //    m_TSBChangingElapsedTime = 0;
+    //    m_TSBChangingInterpolationType = interpolType;
+    //}
+
+    //public void TintChangeTo(float toTint, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    Vector3 toTSB = new Vector3(toTint, m_TSB.y, m_TSB.z);
+    //    TSBChangeTo(toTSB, duration, delay, interpolType);
+    //}
+
+    //public void SaturationChangeTo(float toSaturation, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    Vector3 toTSB = new Vector3(m_TSB.x, toSaturation, m_TSB.z);
+    //    TSBChangeTo(toTSB, duration, delay, interpolType);
+    //}
+
+    //public void BrightnessChangeTo(float toBrightness, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
+    //{
+    //    Vector3 toTSB = new Vector3(m_TSB.x, m_TSB.y, toBrightness);
+    //    TSBChangeTo(toTSB, duration, delay, interpolType);
+    //}
+
     public void RotateToAroundAxis(float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
         m_rotationAxis = axis;
@@ -155,7 +202,7 @@ public class ValueAnimator : MonoBehaviour
 
     public virtual void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
-        MathUtils.Clamp(ref fOpacity, 0, 1);
+        fOpacity = Mathf.Clamp(fOpacity, 0, 1);
 
         m_opacity = fOpacity;
         m_prevOpacity = fOpacity;
@@ -209,18 +256,53 @@ public class ValueAnimator : MonoBehaviour
     {
         m_color = color;
         m_prevColor = color;
+        m_opacity = color.a;
+        m_prevOpacity = color.a;
 
         //clamp color channels values between 0 and 1
-        MathUtils.Clamp(ref m_color.r, 0, 1);
-        MathUtils.Clamp(ref m_color.g, 0, 1);
-        MathUtils.Clamp(ref m_color.b, 0, 1);
-        MathUtils.Clamp(ref m_color.a, 0, 1);
-
-        m_opacity = m_color.a;
-        m_prevOpacity = m_color.a;
+        //m_color.r = Mathf.Clamp(m_color.r, 0, 1);
+        //m_color.g = Mathf.Clamp(m_color.g, 0, 1);
+        //m_color.b = Mathf.Clamp(m_color.b, 0, 1);
+        //m_color.a = Mathf.Clamp(m_color.a, 0, 1);
 
         OnColorChanged();
     }
+
+    /**
+     * Set the color channels 
+     * **/
+    public virtual void SetColorChannels(Vector3 channels, ColorMode colorMode = ColorMode.RGB)
+    {
+        if (colorMode == ColorMode.RGB)
+            SetColor(new Color(channels.x, channels.y, channels.z, m_color.a));
+        else if (colorMode == ColorMode.TSB)
+            SetColor(ColorUtils.GetRGBAColorFromTSB(new Vector3(channels.x, channels.y, channels.z), m_color.a));
+    }
+
+    //public virtual void SetTSB(Vector3 tsb)
+    //{
+    //    m_TSB = tsb;
+    //    m_prevTSB = m_TSB;
+    //    OnTSBChanged();
+    //}
+
+    //public virtual void SetTint(float tint)
+    //{
+    //    m_TSB.x = tint;
+    //    OnTSBChanged();
+    //}
+
+    //public virtual void SetSaturation(float saturation)
+    //{
+    //    m_TSB.y = saturation;
+    //    OnTSBChanged();
+    //}
+
+    //public virtual void SetBrightness(float brightness)
+    //{
+    //    m_TSB.z = brightness;
+    //    OnTSBChanged();
+    //}
 
     public virtual void IncOpacity(float deltaOpacity)
     {
@@ -252,6 +334,30 @@ public class ValueAnimator : MonoBehaviour
         SetColor(color);
     }
 
+    //public virtual void IncTSB(Vector3 deltaTSB)
+    //{
+    //    Vector3 tsb = m_TSB + deltaTSB;
+    //    SetTSB(tsb);
+    //}
+
+    //public virtual void IncTint(float deltaTint)
+    //{
+    //    float tint = m_TSB.x + deltaTint;
+    //    SetTint(tint);
+    //}
+
+    //public virtual void IncSaturation(float deltaSaturation)
+    //{
+    //    float saturation = m_TSB.y + deltaSaturation;
+    //    SetSaturation(saturation);
+    //}
+
+    //public virtual void IncBrightness(float deltaBrightness)
+    //{
+    //    float brightness = m_TSB.z + deltaBrightness;
+    //    SetBrightness(brightness);
+    //}
+
     public virtual void OnOpacityChanged()
     {
         
@@ -276,6 +382,11 @@ public class ValueAnimator : MonoBehaviour
     {
 
     }
+
+    //public virtual void OnTSBChanged()
+    //{
+
+    //}
 
     public virtual void OnFinishFading()
     {
@@ -303,6 +414,20 @@ public class ValueAnimator : MonoBehaviour
     {
 
     }
+
+    /**
+     * Return the color (RGB channels + opacity) of this animator
+     * **/
+    //public Color GetFullColor()
+    //{
+    //    Color color = Color.black;
+    //    if (m_colorMode == ColorMode.RGB)
+    //        color = new Color(m_color.x, m_color.y, m_color.z, m_opacity);
+    //    else if (m_colorMode == ColorMode.TSB)
+    //        color = ColorUtils.GetRGBAColorFromTSB(m_color, m_opacity);
+
+    //    return color;
+    //}
 
     protected virtual void UpdateOpacity(float dt)
     {
@@ -437,7 +562,7 @@ public class ValueAnimator : MonoBehaviour
                 if (inDelay) //we were in delay previously
                     dt = m_colorChangingElapsedTime - m_colorChangingDelay;
                 float effectiveElapsedTime = m_colorChangingElapsedTime - m_colorChangingDelay;
-                Vector4 deltaColor = Vector4.zero;
+                Vector4 deltaColor = Vector3.zero;
                 Vector4 colorVariation = m_toColor - m_fromColor;
                 if (m_colorChangingInterpolationType == InterpolationType.LINEAR)
                     deltaColor = dt / m_colorChangingDuration * colorVariation;
@@ -472,6 +597,13 @@ public class ValueAnimator : MonoBehaviour
             SetColor(m_color);
             return;
         }
+
+        //if (m_prevTSB != m_TSB)
+        //{
+        //    Debug.Log("Change TSB");
+        //    SetTSB(m_TSB);
+        //    return;
+        //}
 
         //update values that have to be modified through time
         UpdateOpacity(dt);

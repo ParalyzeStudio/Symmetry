@@ -41,9 +41,7 @@ public class TextMeshAnimator : GameObjectAnimator
         base.SetOpacity(fOpacity, bPassOnChildren);
             
         TextMesh textMesh = this.gameObject.GetComponent<TextMesh>();
-
-        Color newTextColor = new Color(textMesh.color.r, textMesh.color.g, textMesh.color.b, fOpacity);
-        textMesh.color = newTextColor;
+        textMesh.color = m_color;
     }
 
     public override void SetColor(Color color)
@@ -51,7 +49,7 @@ public class TextMeshAnimator : GameObjectAnimator
         base.SetColor(color);
 
         TextMesh textMesh = this.gameObject.GetComponent<TextMesh>();
-        textMesh.color = color;
+        textMesh.color = m_color;
     }
 
     protected override void Update()

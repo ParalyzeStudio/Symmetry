@@ -76,9 +76,9 @@ public class ColorUtils
         float nearColorGreen = originalColor.g + randomValue;
         float nearColorBlue = originalColor.b + randomValue;
 
-        MathUtils.Clamp(ref nearColorRed, 0, 1);
-        MathUtils.Clamp(ref nearColorGreen, 0, 1);
-        MathUtils.Clamp(ref nearColorBlue, 0, 1);
+        nearColorRed = Mathf.Clamp(nearColorRed, 0, 1);
+        nearColorGreen = Mathf.Clamp(nearColorGreen, 0, 1);
+        nearColorBlue = Mathf.Clamp(nearColorBlue, 0, 1);
 
         return new Color(nearColorRed, nearColorGreen, nearColorBlue, originalColor.a);
     }
@@ -93,6 +93,41 @@ public class ColorUtils
         float b = Random.value;
 
         return new Color(r, g, b, opacity);
+    }
+
+    public static Color GetRGBAColorFromTSB(Vector3 tsb, float a)
+    {
+        float tint = tsb.x;
+        float saturation = tsb.y;
+        float brightness = tsb.z;
+        float C = saturation * brightness;
+
+        tint = tint % 360.0f;
+        if (tint < 0)
+            tint = 360 - Mathf.Abs(tint);
+        tint /= 60.0f;
+        float X = C * (1 - Mathf.Abs(tint % 2.0f - 1));
+
+        Color outColor;
+        if (0 <= tint && tint < 1)
+            outColor = new Color(C, X, 0, a);
+        else if (1 <= tint && tint < 2)
+            outColor = new Color(X, C, 0, a);
+        else if (2 <= tint && tint < 3)
+            outColor = new Color(0, C, X, a);
+        else if (3 <= tint && tint < 4)
+            outColor = new Color(0, X, C, a);
+        else if (4 <= tint && tint < 5)
+            outColor = new Color(X, 0, C, a);
+        else if (5 <= tint && tint < 6)
+            outColor = new Color(C, 0, X, a);
+        else
+            outColor = new Color(0, 0, 0, a);
+
+        float m = brightness - C;
+        outColor += new Color(m, m, m, 0);
+
+        return outColor;
     }
 }
 

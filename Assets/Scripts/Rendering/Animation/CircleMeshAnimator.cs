@@ -39,6 +39,7 @@ public class CircleMeshAnimator : GameObjectAnimator
     public void SetInnerRadius(float radius, bool bRenderCircle = true)
     {
         m_innerRadius = radius;
+        m_prevInnerRadius = radius;
         if (bRenderCircle)
             RenderCircle();
     }
@@ -52,6 +53,7 @@ public class CircleMeshAnimator : GameObjectAnimator
     public void SetOuterRadius(float radius, bool bRenderCircle = true)
     {
         m_outerRadius = radius;
+        m_prevOuterRadius = radius;
         if (bRenderCircle)
             RenderCircle();
     }
@@ -82,7 +84,7 @@ public class CircleMeshAnimator : GameObjectAnimator
         base.SetColor(color);
 
         CircleMesh circleMesh = this.GetComponent<CircleMesh>();
-        circleMesh.SetColor(color);
+        circleMesh.SetColor(m_color);
     }
 
     public void RenderCircle()
@@ -212,13 +214,11 @@ public class CircleMeshAnimator : GameObjectAnimator
 
         if (m_prevInnerRadius != m_innerRadius)
         {
-            m_prevInnerRadius = m_innerRadius;
             SetInnerRadius(m_innerRadius);
         }
 
         if (m_prevOuterRadius != m_outerRadius)
         {
-            m_prevOuterRadius = m_outerRadius;
             SetOuterRadius(m_outerRadius);
         }
     }

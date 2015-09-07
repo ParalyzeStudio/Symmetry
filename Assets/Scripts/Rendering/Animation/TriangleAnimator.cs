@@ -15,6 +15,6 @@ public class TriangleAnimator : GameObjectAnimator
         base.SetColor(color);
 
         TriangleMesh triangleMesh = this.GetComponent<TriangleMesh>();
-        triangleMesh.SetColor(color);
+        triangleMesh.SetColor(m_color);
     }
 }

@@ -2,13 +2,17 @@
 
 public class MainMenu : GUIScene
 {
-    public const float TITLE_Z_VALUE = -200.0f;
+    public const float TITLE_Z_VALUE = -20.0f;
     public const float GUI_BUTTONS_Z_VALUE = -10.0f;
 
     //shared prefabs
     public GameObject m_textMeshPfb;
     public Material m_transpPositionColorMaterial;
     public GameObject m_circleMeshPfb;
+    public GameObject m_texRoundedSegmentPfb;
+    
+    //title
+    public Material m_titleContourMaterial;
 
     //buttons
     public GameObject m_playButton { get; set; }
@@ -64,9 +68,190 @@ public class MainMenu : GUIScene
 
     private void ShowTitle(bool bAnimated = true, float fDelay = 0.0f)
     {
-        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
+        GameObject titleObject = new GameObject("Title");
+        titleObject.transform.parent = this.transform;
 
-        backgroundRenderer.RenderMainMenuTitle(bAnimated, fDelay);
+        GameObjectAnimator titleAnimator = titleObject.AddComponent<GameObjectAnimator>();
+        titleAnimator.SetPosition(new Vector3(0, 0, TITLE_Z_VALUE));
+
+        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
+        float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
+        float yOffset = 3;
+
+        //LETTER F
+        GameObject letterFContourObject = new GameObject("LetterFContour");
+        letterFContourObject.transform.parent = titleObject.transform;
+
+        GameObjectAnimator letterFAnimator = letterFContourObject.AddComponent<GameObjectAnimator>();
+        letterFAnimator.SetPosition(Vector3.zero);
+
+        SegmentTree contourSegmentTree = letterFContourObject.AddComponent<SegmentTree>();
+
+        contourSegmentTree.Init(letterFContourObject, m_texRoundedSegmentPfb, 16.0f, m_titleContourMaterial, Color.white);
+
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-9 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-9 * triangleHeight, 0.5f * screenSize.y - (yOffset + 3) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-8 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-8 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-7 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.0f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-8 * triangleHeight, 0.5f * screenSize.y - (yOffset + 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-7 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-7 * triangleHeight, 0.5f * screenSize.y - (yOffset - 1) * triangleEdgeLength)));
+
+        contourSegmentTree.m_nodes[0].SetAnimationStartNode(true);
+
+        //set the node n+1 as children of the node n
+        for (int i = 0; i != contourSegmentTree.m_nodes.Count; i++)
+        {
+            if (i == contourSegmentTree.m_nodes.Count - 1)
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[0]);
+            else
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[i + 1]);
+        }
+
+        contourSegmentTree.BuildSegments(true);
+
+        //LETTER L
+        GameObject letterLContourObject = new GameObject("LetterLContour");
+        letterLContourObject.transform.parent = titleObject.transform;
+
+        GameObjectAnimator letterLAnimator = letterLContourObject.AddComponent<GameObjectAnimator>();
+        letterLAnimator.SetPosition(Vector3.zero);
+
+        contourSegmentTree = letterLContourObject.AddComponent<SegmentTree>();
+
+        contourSegmentTree.Init(letterLContourObject, m_texRoundedSegmentPfb, 16.0f, m_titleContourMaterial, Color.white);
+
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-6 * triangleHeight, 0.5f * screenSize.y - (yOffset - 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-6 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-5 * triangleHeight, 0.5f * screenSize.y - (yOffset + 3) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-4 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-5 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-5 * triangleHeight, 0.5f * screenSize.y - (yOffset - 1) * triangleEdgeLength)));
+
+        contourSegmentTree.m_nodes[0].SetAnimationStartNode(true);
+
+        //set the node n+1 as children of the node n
+        for (int i = 0; i != contourSegmentTree.m_nodes.Count; i++)
+        {
+            if (i == contourSegmentTree.m_nodes.Count - 1)
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[0]);
+            else
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[i + 1]);
+        }
+
+        contourSegmentTree.BuildSegments(true);
+
+        //LETTER E
+        GameObject letterEContourObject = new GameObject("LetterEContour");
+        letterEContourObject.transform.parent = titleObject.transform;
+
+        GameObjectAnimator letterEAnimator = letterEContourObject.AddComponent<GameObjectAnimator>();
+        letterEAnimator.SetPosition(Vector3.zero);
+
+        contourSegmentTree = letterLContourObject.AddComponent<SegmentTree>();
+
+        contourSegmentTree.Init(letterEContourObject, m_texRoundedSegmentPfb, 16.0f, m_titleContourMaterial, Color.white);
+
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-3 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-3 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 3) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-2 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-2 * triangleHeight, 0.5f * screenSize.y - (yOffset + 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-1 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-1 * triangleHeight, 0.5f * screenSize.y - (yOffset - 1) * triangleEdgeLength)));
+
+        contourSegmentTree.m_nodes[0].SetAnimationStartNode(true);
+
+        //set the node n+1 as children of the node n
+        for (int i = 0; i != contourSegmentTree.m_nodes.Count; i++)
+        {
+            if (i == contourSegmentTree.m_nodes.Count - 1)
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[0]);
+            else
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[i + 1]);
+        }
+
+        contourSegmentTree.BuildSegments(true);
+
+        //LETTER E (flipped horizontally)
+        GameObject letterFlippedEContourObject = new GameObject("LetterFlippedEContour");
+        letterFlippedEContourObject.transform.parent = titleObject.transform;
+
+        GameObjectAnimator letterFlippedEAnimator = letterFlippedEContourObject.AddComponent<GameObjectAnimator>();
+        letterFlippedEAnimator.SetPosition(Vector3.zero);
+
+        contourSegmentTree = letterFlippedEContourObject.AddComponent<SegmentTree>();
+
+        contourSegmentTree.Init(letterFlippedEContourObject, m_texRoundedSegmentPfb, 16.0f, m_titleContourMaterial, Color.white);
+
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(1 * triangleHeight, 0.5f * screenSize.y - (yOffset - 1) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(1 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(2 * triangleHeight, 0.5f * screenSize.y - (yOffset + 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(2 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(1 * triangleHeight, 0.5f * screenSize.y - (yOffset + 3) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(3 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(3 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+
+        contourSegmentTree.m_nodes[0].SetAnimationStartNode(true);
+
+        //set the node n+1 as children of the node n
+        for (int i = 0; i != contourSegmentTree.m_nodes.Count; i++)
+        {
+            if (i == contourSegmentTree.m_nodes.Count - 1)
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[0]);
+            else
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[i + 1]);
+        }
+
+        contourSegmentTree.BuildSegments(true);
+
+        //LETTER C
+        GameObject letterCContourObject = new GameObject("LetterCContour");
+        letterCContourObject.transform.parent = titleObject.transform;
+
+        GameObjectAnimator letterCAnimator = letterCContourObject.AddComponent<GameObjectAnimator>();
+        letterCAnimator.SetPosition(Vector3.zero);
+
+        contourSegmentTree = letterCContourObject.AddComponent<SegmentTree>();
+
+        contourSegmentTree.Init(letterCContourObject, m_texRoundedSegmentPfb, 16.0f, m_titleContourMaterial, Color.white);
+
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(5 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(5 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(7 * triangleHeight, 0.5f * screenSize.y - (yOffset + 3) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(9 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(8 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(7 * triangleHeight, 0.5f * screenSize.y - (yOffset + 2) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(6 * triangleHeight, 0.5f * screenSize.y - (yOffset + 1.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(6 * triangleHeight, 0.5f * screenSize.y - (yOffset + 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(7 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(8 * triangleHeight, 0.5f * screenSize.y - (yOffset + 0.5f) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(9 * triangleHeight, 0.5f * screenSize.y - (yOffset) * triangleEdgeLength)));
+        contourSegmentTree.m_nodes.Add(new SegmentTreeNode(new Vector2(7 * triangleHeight, 0.5f * screenSize.y - (yOffset - 1) * triangleEdgeLength)));
+
+        contourSegmentTree.m_nodes[0].SetAnimationStartNode(true);
+
+        //set the node n+1 as children of the node n
+        for (int i = 0; i != contourSegmentTree.m_nodes.Count; i++)
+        {
+            if (i == contourSegmentTree.m_nodes.Count - 1)
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[0]);
+            else
+                contourSegmentTree.m_nodes[i].AddChild(contourSegmentTree.m_nodes[i + 1]);
+        }
+
+        contourSegmentTree.BuildSegments(true);
+
+        //fill inner triangles with different color
+        //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(GetBackgroundRenderer().RenderMainMenuTitle), fDelay);
     }
 
     private void ShowPlayButton()

@@ -16,7 +16,7 @@ public class ShapeAnimator : GameObjectAnimator
         base.SetColor(color);
 
         ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.SetColor(color);
+        shapeRenderer.SetColor(m_color);
     }
 
     public override Vector3 GetGameObjectSize()

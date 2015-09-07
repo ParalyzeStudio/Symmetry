@@ -22,7 +22,15 @@ public class TexturedQuadAnimator : GameObjectAnimator
         base.SetColor(color);
 
         UVQuad texturedQuad = this.GetComponent<UVQuad>();
-        texturedQuad.SetTintColor(color);
+        texturedQuad.SetTintColor(m_color);
     }
+
+    //public override void SetTSB(Vector3 tsb)
+    //{
+    //    base.SetTSB(tsb);
+
+    //    UVQuad texturedQuad = this.GetComponent<UVQuad>();
+    //    texturedQuad.SetTSB(tsb);
+    //}
 }
 

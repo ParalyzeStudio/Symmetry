@@ -1,7 +1,7 @@
 ﻿Shader "Custom/Unlit/Transparent/PositionTexTintColor" {
 Properties {
 	_MainTex ("Texture", 2D) = "white" {}
-	_Color ("Tint", Color) = (1,1,1,1)
+	_TintColor ("Tint", Color) = (1,1,1,1)
 }
 
 SubShader {
@@ -31,20 +31,21 @@ SubShader {
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			fixed4 _Color;
+			float4 _TintColor;
 			
 			v2f vert (appdata_t IN)
 			{
 				v2f OUT;
 				OUT.vertex = mul(UNITY_MATRIX_MVP, IN.vertex);
 				OUT.texcoord = TRANSFORM_TEX(IN.texcoord, _MainTex);
-				OUT.color = IN.color * _Color;
+				OUT.color = _TintColor;
 				return OUT;
 			}
 			
-			fixed4 frag (v2f IN) : SV_Target
+			float4 frag (v2f IN) : SV_Target
 			{
-				fixed4 color = tex2D(_MainTex, IN.texcoord) * IN.color;
+				float4 color = tex2D(_MainTex, IN.texcoord) * IN.color;
+				color = clamp(color, 0, 1);
 				return color;
 			}
 		ENDCG

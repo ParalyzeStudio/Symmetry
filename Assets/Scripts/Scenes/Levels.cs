@@ -3,18 +3,20 @@
 public class Levels : GUIScene
 {
     public const float LEVELS_SLOTS_Z_VALUE = -10.0f;
-    public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.5f;
 
     //Shared prefabs
-    public GameObject m_texQuadPfb;
-    public GameObject m_textMeshPfb;
+    //public GameObject m_texQuadPfb;
+    //public GameObject m_textMeshPfb;
     public GameObject m_circleMeshPfb;
-    public Material m_positionColorMaterial;
-    private Material m_slotBackgroundMaterial;
+    public Material m_positionColorMaterial;    
 
     //Level slots
-    public GameObject[] m_levelSlots { get; set; }
+    public GameObject m_levelSlotPfb;
+    public Material m_slotBackgroundMaterial { get; set; }
+    public LevelSlot[] m_levelSlots { get; set; }
     public Material m_glowContourMaterial;
+    public Material m_slotGlowContourMaterial { get; set; }
+    public Material m_slotSharpContourMaterial { get; set; }
 
     //LevelSlot data
     //public LevelSlot[] m_levelSlots { get; set; }
@@ -26,7 +28,7 @@ public class Levels : GUIScene
     {
         base.Show();
         
-        ShowLevelsSlots();        
+        ShowLevelsSlots(0.5f);        
     }
 
     /**
@@ -35,11 +37,13 @@ public class Levels : GUIScene
     public void ShowLevelsSlots(float fDelay = 0.0f)
     {
         int iLevelCount = 15;
-        m_levelSlots = new GameObject[iLevelCount];
+        m_levelSlots = new LevelSlot[iLevelCount];
         m_slotBackgroundMaterial = Instantiate(m_positionColorMaterial);
+        m_slotGlowContourMaterial = Instantiate(m_glowContourMaterial);
+        m_slotSharpContourMaterial = Instantiate(m_positionColorMaterial);
 
         //build center slot
-        GameObject slot = BuildLevelSlotForNumber(8);
+        LevelSlot slot = BuildLevelSlotForNumber(8);
         float line2PositionY = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(0, BackgroundTrianglesRenderer.NUM_COLUMNS / 2, 180).GetCenter().y;
         Vector3 slotPosition = new Vector3(0, line2PositionY, LEVELS_SLOTS_Z_VALUE);
 
@@ -116,108 +120,126 @@ public class Levels : GUIScene
         }
 
         //animate slots
-        float animationDuration = 0.5f;
         for (int i = 0; i != m_levelSlots.Length; i++)
         {
-            GameObject levelSlotObject = m_levelSlots[i];
-
-            CircleMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<CircleMeshAnimator>();
-            TextMeshAnimator levelSlotNumberAnimator = levelSlotObject.GetComponentInChildren<TextMeshAnimator>();
-
-            if (levelSlotBackgroundAnimator != null) //we have a background to animate (i.e level is done)
-            {
-                levelSlotBackgroundAnimator.SetOpacity(0);
-                levelSlotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, animationDuration, fDelay);
-            }
-
-            levelSlotNumberAnimator.SetOpacity(0);
-            levelSlotNumberAnimator.FadeTo(1.0f, animationDuration, fDelay);
+            m_levelSlots[i].Show();
         }
+
+        //animate slots
+        //float animationDuration = 5.0f;
+        //for (int i = 0; i != m_levelSlots.Length; i++)
+        //{
+        //    LevelSlot levelSlotObject = m_levelSlots[i];
+
+        //    CircleMeshAnimator levelSlotBackgroundAnimator = levelSlotObject.GetComponentInChildren<CircleMeshAnimator>();
+        //    TextMeshAnimator levelSlotNumberAnimator = levelSlotObject.GetComponentInChildren<TextMeshAnimator>();
+
+        //    if (levelSlotBackgroundAnimator != null) //we have a background to animate (i.e level is done)
+        //    {
+        //        levelSlotBackgroundAnimator.SetOpacity(0);
+        //        levelSlotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, animationDuration, fDelay);
+        //    }
+
+        //    levelSlotNumberAnimator.SetOpacity(0);
+        //    levelSlotNumberAnimator.FadeTo(animationDuration, animationDuration, fDelay);
+        //}
     }
 
-    public GameObject BuildLevelSlotForNumber(int iLevelNumber)
+    public LevelSlot BuildLevelSlotForNumber(int iLevelNumber)
     {
-        GameObject slot = new GameObject("Slot" + iLevelNumber);
-        slot.transform.parent = this.transform;
-        GameObjectAnimator slotAnimator = slot.AddComponent<GameObjectAnimator>();
+        GameObject levelSlotObject = (GameObject)Instantiate(m_levelSlotPfb);
+        levelSlotObject.transform.parent = this.transform;
 
-        //Add a background only if level is completed        
-        int iAbsoluteLevelNumber = GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
-        if (GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
-        {
-            Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
+        LevelSlot levelSlot = levelSlotObject.GetComponent<LevelSlot>();
+        levelSlot.Init(this, iLevelNumber);
 
-            GameObject slotBackground = (GameObject)Instantiate(m_circleMeshPfb);
-            slotBackground.name = "SlotBackground";
-            slotBackground.transform.parent = slot.transform;
-
-            CircleMesh slotBgHexaMesh = slotBackground.GetComponent<CircleMesh>();
-            slotBgHexaMesh.Init(m_slotBackgroundMaterial);
-
-            CircleMeshAnimator slotBgAnimator = slotBackground.GetComponent<CircleMeshAnimator>();
-            slotBgAnimator.SetNumSegments(6, false);
-            slotBgAnimator.SetInnerRadius(0, false);
-            slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
-            slotBgAnimator.SetColor(slotColor);
-        }
-
-        //Add a contour to the hexagon
-        GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
-        contourObject.name = "SlotContour";
-        contourObject.transform.parent = slot.transform;
-
-        contourObject.GetComponent<UVQuad>().Init(m_glowContourMaterial);
-
-        TexturedQuadAnimator contourAnimator = contourObject.GetComponent<TexturedQuadAnimator>();
-        float contourTextureScale = 2 * GetBackgroundRenderer().m_triangleEdgeLength / 168.0f; //hexagon is 2 * triangleEdgeLength size, and the contour texture is 168x168 with 44 pixels blur/padding (256x256)
-        contourAnimator.SetScale(new Vector3(contourTextureScale * 256, contourTextureScale * 256, 1));
-        contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
-
-        GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
-        contourHexaObject.name = "ContourHexagon";
-        contourHexaObject.transform.parent = contourObject.transform;
-
-        CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
-        contourMesh.Init(Instantiate(m_positionColorMaterial));
-
-        float contourMeshThickness = 4.0f;
-        CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
-        contourMeshAnimator.SetNumSegments(6, false);
-        contourMeshAnimator.SetInnerRadius(GetBackgroundRenderer().m_triangleEdgeLength, false);
-        contourMeshAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
-        contourMeshAnimator.SetColor(Color.white);
-        contourMeshAnimator.SetPosition(Vector3.zero);
-
-        //number
-        GameObject levelNumberObject = (GameObject)Instantiate(m_textMeshPfb);
-        levelNumberObject.name = "SlotNumber";
-        levelNumberObject.transform.parent = slot.transform;
-
-        TextMesh numberTextMesh = levelNumberObject.GetComponent<TextMesh>();
-        numberTextMesh.text = iLevelNumber.ToString();
-
-        TextMeshAnimator numberAnimator = levelNumberObject.GetComponent<TextMeshAnimator>();
-        numberAnimator.SetFontHeight(0.8f * GetBackgroundRenderer().m_triangleEdgeLength);
-        numberAnimator.SetColor(Color.white);
-
-        //make some adjustements on number x-position
-        AdjustNumberPosition(iLevelNumber, numberAnimator);        
-
-        return slot;
+        return levelSlot;
     }
+
+    //public GameObject BuildLevelSlotForNumber(int iLevelNumber)
+    //{
+    //    GameObject slot = new GameObject("Slot" + iLevelNumber);
+    //    slot.transform.parent = this.transform;
+    //    GameObjectAnimator slotAnimator = slot.AddComponent<GameObjectAnimator>();
+
+    //    //Add a background only if level is completed        
+    //    int iAbsoluteLevelNumber = GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
+    //    //if (GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+    //        if (true)
+    //    {
+    //        Color slotColor = GetLevelManager().m_currentChapter.GetThemeColors()[2];
+
+    //        GameObject slotBackground = (GameObject)Instantiate(m_circleMeshPfb);
+    //        slotBackground.name = "SlotBackground";
+    //        slotBackground.transform.parent = slot.transform;
+
+    //        CircleMesh slotBgHexaMesh = slotBackground.GetComponent<CircleMesh>();
+    //        slotBgHexaMesh.Init(m_slotBackgroundMaterial);
+
+    //        CircleMeshAnimator slotBgAnimator = slotBackground.GetComponent<CircleMeshAnimator>();
+    //        slotBgAnimator.SetNumSegments(6, false);
+    //        slotBgAnimator.SetInnerRadius(0, false);
+    //        slotBgAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength, true);
+    //        slotBgAnimator.SetColor(slotColor);
+    //    }
+
+    //    //Add a contour to the hexagon
+    //    GameObject contourObject = (GameObject)Instantiate(m_texQuadPfb);
+    //    contourObject.name = "SlotContour";
+    //    contourObject.transform.parent = slot.transform;
+
+    //    contourObject.GetComponent<UVQuad>().Init(m_glowContourMaterial);
+
+    //    TexturedQuadAnimator contourAnimator = contourObject.GetComponent<TexturedQuadAnimator>();
+    //    float contourTextureScale = 2 * GetBackgroundRenderer().m_triangleEdgeLength / 168.0f; //hexagon is 2 * triangleEdgeLength size, and the contour texture is 168x168 with 44 pixels blur/padding (256x256)
+    //    contourAnimator.SetScale(new Vector3(contourTextureScale * 256, contourTextureScale * 256, 1));
+    //    contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
+
+    //    GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
+    //    contourHexaObject.name = "ContourHexagon";
+    //    contourHexaObject.transform.parent = contourObject.transform;
+
+    //    CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
+    //    contourMesh.Init(Instantiate(m_positionColorMaterial));
+
+    //    float contourMeshThickness = 4.0f;
+    //    CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
+    //    contourMeshAnimator.SetNumSegments(6, false);
+    //    contourMeshAnimator.SetInnerRadius(GetBackgroundRenderer().m_triangleEdgeLength, false);
+    //    contourMeshAnimator.SetOuterRadius(GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
+    //    contourMeshAnimator.SetColor(Color.white);
+    //    contourMeshAnimator.SetPosition(Vector3.zero);
+
+    //    //number
+    //    GameObject levelNumberObject = (GameObject)Instantiate(m_textMeshPfb);
+    //    levelNumberObject.name = "SlotNumber";
+    //    levelNumberObject.transform.parent = slot.transform;
+
+    //    TextMesh numberTextMesh = levelNumberObject.GetComponent<TextMesh>();
+    //    numberTextMesh.text = iLevelNumber.ToString();
+
+    //    TextMeshAnimator numberAnimator = levelNumberObject.GetComponent<TextMeshAnimator>();
+    //    numberAnimator.SetFontHeight(0.8f * GetBackgroundRenderer().m_triangleEdgeLength);
+    //    numberAnimator.SetColor(Color.white);
+
+    //    //make some adjustements on number x-position
+    //    AdjustNumberPosition(iLevelNumber, numberAnimator);        
+
+    //    return slot;
+    //}
 
     /**
      * Slightly offset number positions so they appeared to be centered
      * **/
-    private void AdjustNumberPosition(int iLevelNumber, TextMeshAnimator numberAnimator)
-    {
-        if (iLevelNumber == 11)
-            numberAnimator.SetPosition(new Vector3(-3.0f, 0, -1));
-        else if (iLevelNumber >= 10)
-            numberAnimator.SetPosition(new Vector3(-5.0f, 0, -1));
-        else
-            numberAnimator.SetPosition(new Vector3(0, 0, -1));
-    }
+    //private void AdjustNumberPosition(int iLevelNumber, TextMeshAnimator numberAnimator)
+    //{
+    //    if (iLevelNumber == 11)
+    //        numberAnimator.SetPosition(new Vector3(-3.0f, 0, -1));
+    //    else if (iLevelNumber >= 10)
+    //        numberAnimator.SetPosition(new Vector3(-5.0f, 0, -1));
+    //    else
+    //        numberAnimator.SetPosition(new Vector3(0, 0, -1));
+    //}
 
     ///**
     // * Show clickable level slots

@@ -137,9 +137,10 @@ public class SegmentAnimator : ValueAnimator
     {
         Segment segment = this.GetComponent<Segment>();
         SegmentTreeNode endNode = segment.m_endTreeNode;
-        if (endNode != null)
+        if (endNode != null && endNode.m_active)
         {
             segment.m_parentTree.BuildSegmentsForNode(endNode, true);
+            endNode.m_active = false; //deactivate this node as it already started emitting its children segments
         }
     }
 

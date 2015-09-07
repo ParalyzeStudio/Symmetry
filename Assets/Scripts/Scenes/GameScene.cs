@@ -15,7 +15,7 @@ public class GameScene : GUIScene
     //shared prefabs
     public GameObject m_radialGradientPfb;
     public GameObject m_texQuadPfb;
-    public GameObject m_texRoundedSegment;
+    public GameObject m_texRoundedSegmentPfb;
 
     public Grid m_grid { get; set; }
     public Counter m_counter { get; set; }
@@ -27,7 +27,8 @@ public class GameScene : GUIScene
     public GameObject m_interfaceButtonsHolder { get; set; }
 
     //interface buttons
-    public Material m_interfaceButtonContourMaterial;
+    public Material m_glowRectangleMaterial;
+    public Material m_glowSegmentMaterial;
 
     //Action buttons
     private ActionButton m_topActionButton;
@@ -82,7 +83,7 @@ public class GameScene : GUIScene
         ShowAxisConstraintsIcons();
 
         //Show action buttons
-        //ShowActionButtons();
+        ShowActionButtons();
 
         ShowInitialShapes();
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
@@ -161,8 +162,11 @@ public class GameScene : GUIScene
         m_interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0, -10);
 
         //Build buttons contours
+        GameObject buttonsContour = new GameObject("ButtonsContour");
+        buttonsContour.transform.parent = m_interfaceButtonsHolder.transform;
+
         SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
-        contourSegmentTree.Init(m_interfaceButtonsHolder, m_texRoundedSegment, 16.0f, m_interfaceButtonContourMaterial, Color.white);
+        contourSegmentTree.Init(m_interfaceButtonsHolder, m_texRoundedSegmentPfb, 16.0f, Instantiate(m_glowSegmentMaterial), Color.white);
 
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
@@ -206,6 +210,55 @@ public class GameScene : GUIScene
 
         contourSegmentTree.BuildSegments(true);
 
+        //Add glowing rectangles above each button skin
+        Vector2 glowRectSize = new Vector2(1.733f * triangleHeight, 0.867f * triangleHeight);
+        for (int i = 0; i != 3; i++)
+        {
+            GameObject glowRectObject = (GameObject)Instantiate(m_texQuadPfb);
+            glowRectObject.name = "GlowRectangle" + (i + 1);
+            glowRectObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+            glowRectObject.GetComponent<UVQuad>().Init(m_glowRectangleMaterial);
+
+            TexturedQuadAnimator glowRectAnimator = glowRectObject.GetComponent<TexturedQuadAnimator>();
+            float rectPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - (2 * i + 1)) * triangleHeight;
+            float rectPositionY = 0.5f * screenSize.y - 0.4f * triangleEdgeLength;
+            glowRectAnimator.SetPosition(new Vector3(rectPositionX, rectPositionY, 0));
+            glowRectAnimator.SetScale(glowRectSize);
+        }
+
+        //Add button skins
+        Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
+
+        //pause
+        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
+        pauseButtonObject.name = "PauseButton";
+        pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;        
+
+        GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
+        float pauseButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight;
+        float pauseButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+        pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, pauseButtonPositionY, 0));
+
+        //retry
+        GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
+        retryButtonObject.name = "RetryButton";
+        retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+        GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
+        float retryButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight - 4.0f; //offset a bit the texture, otherwise it gives a weird impression
+        float retryButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+        retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
+
+        //retry
+        GameObject hintsuttonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
+        hintsuttonObject.name = "HintsButton";
+        hintsuttonObject.transform.parent = m_interfaceButtonsHolder.transform;
+
+        GameObjectAnimator hintsButtonAnimator = hintsuttonObject.GetComponent<GameObjectAnimator>();
+        float hintsButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight;
+        float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+        hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
 
         //Vector2 screenSize = ScreenUtils.GetScreenSize();
         //Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);

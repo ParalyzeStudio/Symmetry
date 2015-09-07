@@ -15,6 +15,14 @@ public class TexturedSegmentAnimator : SegmentAnimator
         base.SetColor(color);
 
         TexturedSegment texturedSegment = this.GetComponent<TexturedSegment>();
-        texturedSegment.SetTintColor(color);
+        texturedSegment.SetTintColor(m_color);
     }
+
+    //public override void SetTSB(Vector3 tsb)
+    //{
+    //    base.SetTSB(tsb);
+
+    //    TexturedSegment texturedSegment = this.GetComponent<TexturedSegment>();
+    //    texturedSegment.SetTSB(tsb);
+    //}
 }

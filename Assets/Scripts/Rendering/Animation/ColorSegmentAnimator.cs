@@ -15,7 +15,7 @@ public class ColorSegmentAnimator : GameObjectAnimator
         base.SetColor(color);
 
         ColorSegment colorSegment = this.GetComponent<ColorSegment>();
-        colorSegment.SetColor(color);
+        colorSegment.SetColor(m_color);
     }
 }
 

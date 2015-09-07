@@ -71,8 +71,54 @@ public class UVQuad : BaseQuad
         Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
         if (material != null)
         {
-            material.SetColor("_Color", color);
+            material.SetColor("_TintColor", color);
         }
     }
+
+    ///**
+    // * Set the tint, saturation, brightness of this textured quad all at once
+    // * **/
+    //public void SetTSB(Vector3 tsb)
+    //{
+    //    SetTint(tsb.x);
+    //    SetSaturation(tsb.y);
+    //    SetBrightness(tsb.z);
+    //}
+
+    ///**
+    // * Set the tint of this this textured quad
+    // * **/
+    //public void SetTint(float tint)
+    //{
+    //    Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+    //    if (material != null)
+    //    {
+    //        material.SetFloat("_Tint", tint);
+    //    }
+    //}
+
+    ///**
+    // * Set the saturation of this this textured quad
+    // * **/
+    //public void SetSaturation(float saturation)
+    //{
+    //    Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+    //    if (material != null)
+    //    {
+    //        material.SetFloat("_Saturation", saturation);
+    //    }
+    //}
+
+    ///**
+    // * Set the brightness of this this textured quad
+    // * **/
+    //public void SetBrightness(float brightness)
+    //{
+    //    Material material = this.gameObject.GetComponent<MeshRenderer>().sharedMaterial;
+    //    if (material != null)
+    //    {
+    //        material.SetFloat("_Brightness", brightness);
+    //    }
+    //}
 }
 

@@ -5,13 +5,15 @@ public class SegmentTreeNode
 {
     public Vector2 m_position { get; set; }
     public List<SegmentTreeNode> m_children { get; set; }
-    public bool m_animationStartNode;
+    public bool m_animationStartNode { get; set; }
+    public bool m_active { get; set; }
 
     public SegmentTreeNode(Vector2 position)
     {
         m_position = position;
         m_children = new List<SegmentTreeNode>();
         m_animationStartNode = false;
+        m_active = true;
     }
 
     public void AddChild(SegmentTreeNode child)
@@ -105,6 +107,8 @@ public class SegmentTree : MonoBehaviour
                 float distanceToCover = (childNode.m_position - node.m_position).magnitude;
                 TexturedSegmentAnimator segmentAnimator = segmentObject.GetComponent<TexturedSegmentAnimator>();
                 segmentAnimator.TranslatePointBTo(childNode.m_position, distanceToCover / segmentGrowSpeed);
+
+                node.m_active = false;
             }
             else
             {

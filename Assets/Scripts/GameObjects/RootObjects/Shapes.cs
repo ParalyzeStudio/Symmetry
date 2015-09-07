@@ -43,7 +43,7 @@ public class Shapes : MonoBehaviour
         shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED);
 
         ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
-        shapeAnimator.SetColor(shapeData.m_color);
+        shapeAnimator.SetColor(shapeAnimator.m_color);
 
         if (bSubstitutionShape)
             AddSubstitutionShapeObject(clonedShapeObject);

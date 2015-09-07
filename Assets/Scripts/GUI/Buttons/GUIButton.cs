@@ -229,15 +229,15 @@ public class GUIButton : MonoBehaviour
             if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS && chapters.DecrementChapterIndex() ||
                 m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT && chapters.IncrementChapterIndex())
             {
-                //dismiss old chapter slot information
-                chapters.DismissChapterSlot(false, false, false);
-                //update background gradient and chapter slot backgorund color
-                chapters.UpdateBackgroundGradient();
-                chapters.UpdateChapterSlotBackgroundColor();
-                //update chapter slot information when opacity is 0
-                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.UpdateChapterSlotInformation), 0.5f);
-                //wait a bit and then display the new information
-                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.ShowChapterSlotInformation), 0.8f);
+                ////dismiss old chapter slot information
+                //chapters.DismissChapterSlot(false, false, false);
+                ////update background gradient and chapter slot backgorund color
+                //chapters.UpdateBackgroundGradient();
+                //chapters.UpdateChapterSlotBackgroundColor();
+                ////update chapter slot information when opacity is 0
+                //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.UpdateChapterSlotInformation), 0.5f);
+                ////wait a bit and then display the new information
+                //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.ShowChapterSlotInformation), 0.8f);
             }
         }
     }

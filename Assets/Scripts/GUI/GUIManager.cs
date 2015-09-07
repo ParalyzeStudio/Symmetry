@@ -12,6 +12,8 @@ public class GUIManager : MonoBehaviour
     public Material m_transpPositionColorMaterial;
     public GameObject m_textMeshPfb;
     public GameObject m_circleMeshPfb;
+    public Material m_glow1Material;
+    public GameObject m_texRoundedSegmentPfb;
 
     //buttons prefabs
     public GameObject m_GUIButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
@@ -282,7 +284,7 @@ public class GUIManager : MonoBehaviour
         BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
 
         Vector2 sideButtonSize = new Vector2(1.7f * bgRenderer.m_triangleHeight, 1.7f * bgRenderer.m_triangleHeight);
-
+              
         //Credits button
         GameObject creditsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_CREDITS_BUTTON,
                                                               sideButtonSize);
@@ -324,6 +326,30 @@ public class GUIManager : MonoBehaviour
             creditsButtonAnimator.SetPosition(creditsButtonFinalPosition);
             optionsButtonAnimator.SetPosition(optionsButtonFinalPosition);
         }
+
+        //Contour
+        GameObject contourObject = new GameObject("SideButtonsContour");
+        contourObject.transform.parent = this.transform;
+
+        GameObjectAnimator contourAnimator = contourObject.AddComponent<GameObjectAnimator>();
+        contourAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE));
+
+        SegmentTree contourTree = contourObject.AddComponent<SegmentTree>();
+        Color tintColor = ColorUtils.GetRGBAColorFromTSB(new Vector3(0, 0, 0.5f), 1);
+        contourTree.Init(contourObject, m_texRoundedSegmentPfb, 16.0f, Instantiate(m_glow1Material), tintColor);
+
+        contourTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-0.5f * screenSize.x, creditsButtonYPosition - 1.5f * bgRenderer.m_triangleEdgeLength)));
+        contourTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-0.5f * screenSize.x + 2 * bgRenderer.m_triangleHeight, creditsButtonYPosition - 0.5f * bgRenderer.m_triangleEdgeLength)));
+        contourTree.m_nodes.Add(new SegmentTreeNode(new Vector2(-0.5f * screenSize.x + 2 * bgRenderer.m_triangleHeight, creditsButtonYPosition + 3.5f * bgRenderer.m_triangleEdgeLength)));
+
+        for (int i = 0; i != contourTree.m_nodes.Count - 1; i++)
+        {
+            contourTree.m_nodes[i].AddChild(contourTree.m_nodes[i + 1]);
+        }
+
+        contourTree.m_nodes[0].SetAnimationStartNode(true);
+
+        contourTree.BuildSegments(true);
     }
 
     /**

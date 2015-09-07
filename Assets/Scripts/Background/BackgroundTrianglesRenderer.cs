@@ -274,31 +274,23 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     /**
      * Launches the main menu title rendering processing that will draw it after a certain delay
      * **/
-    public void RenderMainMenuTitle(bool bAnimated, float fDelay)
+    public void RenderMainMenuTitle()
     {
-        if (bAnimated)
-        {
-            m_renderingMainMenuTitle = true;
-            m_renderingMainMenuTitleElapsedTime = 0;
-            m_renderingMainMenuTitleDelay = fDelay;
-        }
-        else
-            DrawMainMenuTitle(false);
+        
     }
 
     /**
      * Modify the color of all triangles forming the title FLEEC
      * **/
     public void DrawMainMenuTitle(bool bAnimated)
-    {
-        return;
+    {       
 
         //List all triangles inside the title
         List<BackgroundTriangle> titleTriangles = new List<BackgroundTriangle>();
         titleTriangles.Capacity = 52; //52 triangles in the title (9+8+10+10+15)
 
-        int titleOffsetX = 2;
-        int titleOffsetY = 4;
+        int titleOffsetX = 1;
+        int titleOffsetY = 3;
 
         //Add 9 triangles for letter F
         int iReferenceColumnIndex = 4 + titleOffsetX;
