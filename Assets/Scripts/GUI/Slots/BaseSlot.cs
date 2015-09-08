@@ -11,13 +11,13 @@ public class BaseSlot : MonoBehaviour
         m_parentScene = parentScene;
     }
 
-
     /**
      * Show the whole slot
      * **/
     public virtual void Show()
     {
         ShowSlotBackground();
+        ShowSlotContour();
         ShowSlotInformation();
     }
 
@@ -27,6 +27,7 @@ public class BaseSlot : MonoBehaviour
     public virtual void Dismiss()
     {
         DismissSlotBackground(true);
+        DismissSlotContour(true);
         DismissSlotInformation(true);
     }
 
@@ -36,6 +37,14 @@ public class BaseSlot : MonoBehaviour
     protected virtual void ShowSlotBackground()
     {
         
+    }
+
+    /**
+    * Show the slot hexagon contour 
+    * **/
+    protected virtual void ShowSlotContour()
+    {
+
     }
 
     /**
@@ -50,6 +59,14 @@ public class BaseSlot : MonoBehaviour
      * Fade out background with eventually destroying the object at zero opacity
      * **/
     protected virtual void DismissSlotBackground(bool bDestroyOnFinish)
+    {
+
+    }
+
+    /**
+     * Fade out contour with eventually destroying the object at zero opacity
+     * **/
+    protected virtual void DismissSlotContour(bool bDestroyOnFinish)
     {
 
     }

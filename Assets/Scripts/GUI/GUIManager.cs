@@ -95,7 +95,6 @@ public class GUIManager : MonoBehaviour
         Material buttonSkinMaterial = (forcedSkinMaterial == null) ? GetClonedSkinMaterialForID(iID)  : forcedSkinMaterial;
         GUIButton button = buttonObject.GetComponent<GUIButton>();
         button.Init(buttonSkinMaterial);
-        button.SetTintColor(Color.white);
         button.m_ID = iID;
 
         //Set the size of the button skin
@@ -116,7 +115,7 @@ public class GUIManager : MonoBehaviour
 
         //Set the relevant skin material for the specified button ID
         ActionButton button = buttonObject.GetComponent<ActionButton>();
-        button.Init(Color.white, location, childIDs);
+        button.Init(location, childIDs);
 
         //Set the size of the button skin
         button.SetSize(size);

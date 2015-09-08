@@ -58,11 +58,11 @@ public class ChapterSlot : BaseSlot
         CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
         contourMesh.Init(Instantiate(m_positionColorMaterial));
 
-        float contourMeshThickness = 8.0f;
+        float contourThickness = 8.0f;
         CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
         contourMeshAnimator.SetNumSegments(6, false);
-        contourMeshAnimator.SetInnerRadius(4 * m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
-        contourMeshAnimator.SetOuterRadius(4 * m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
+        contourMeshAnimator.SetInnerRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
+        contourMeshAnimator.SetOuterRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourThickness, true);
         contourMeshAnimator.SetColor(Color.white);
         contourMeshAnimator.SetPosition(Vector3.zero);
 
@@ -201,25 +201,22 @@ public class ChapterSlot : BaseSlot
     //    DismissSlotInformation(bDestroyChapterInfoOnFinish);
     //}
 
-    /**
-     * Show the chapter slot hexagon background 
-     * **/
     protected override void ShowSlotBackground()
     {
         CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
 
         slotBackgroundAnimator.SetOpacity(0);
         slotBackgroundAnimator.FadeTo(CHAPTER_SLOT_BACKGROUND_OPACITY, 0.5f);
+    }
 
+    protected override void ShowSlotContour()
+    {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
 
         slotContourAnimator.SetOpacity(0);
         slotContourAnimator.FadeTo(1.0f, 0.5f);
     }
 
-    /**
-     * Show the chapter slot hexagon background 
-     * **/
     protected override void ShowSlotInformation()
     {
         GameObjectAnimator slotInfoContainerAnimator = m_infoContainer.GetComponent<GameObjectAnimator>();
@@ -236,6 +233,12 @@ public class ChapterSlot : BaseSlot
         CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
         slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
 
+        TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
+        slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+    }
+
+    protected override void DismissSlotContour(bool bDestroyOnFinish)
+    {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
         slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }

@@ -72,21 +72,14 @@ public class ValueAnimator : MonoBehaviour
     protected float m_colorChangingElapsedTime;
     protected InterpolationType m_colorChangingInterpolationType;
 
-    ////Variables to handle tint, saturation and brightness
-    //protected bool m_TSBchanging;
-    //public Vector3 m_TSB;
-    //protected Vector3 m_fromTSB;
-    //protected Vector3 m_toTSB;
-    //protected float m_TSBChangingDuration;
-    //protected float m_TSBChangingDelay;
-    //protected float m_TSBChangingElapsedTime;
-    //protected InterpolationType m_TSBChangingInterpolationType;
+    //DEBUG Variables to handle tint, saturation and brightness
+    public Vector3 m_TSB;
+    private Vector3 m_prevTSB;
 
     //Store previous values to change them dynamically in inspector
     protected float m_prevOpacity;
     protected Color m_prevColor;
     protected ColorMode m_prevColorMode;
-    //protected Vector3 m_prevTSB;
 
     //Global instances to prevent calls to FindGameObjectWithTag and GetComponent<>
     protected GUIManager m_guiManager;
@@ -164,35 +157,6 @@ public class ValueAnimator : MonoBehaviour
         m_colorChangingElapsedTime = 0;
         m_colorChangingInterpolationType = interpolType;
     }
-
-    //public void TSBChangeTo(Vector3 toTSB, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
-    //{
-    //    m_TSBchanging = true;
-    //    m_fromTSB = m_TSB;
-    //    m_toTSB = toTSB;
-    //    m_TSBChangingDuration = duration;
-    //    m_TSBChangingDelay = delay;
-    //    m_TSBChangingElapsedTime = 0;
-    //    m_TSBChangingInterpolationType = interpolType;
-    //}
-
-    //public void TintChangeTo(float toTint, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
-    //{
-    //    Vector3 toTSB = new Vector3(toTint, m_TSB.y, m_TSB.z);
-    //    TSBChangeTo(toTSB, duration, delay, interpolType);
-    //}
-
-    //public void SaturationChangeTo(float toSaturation, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
-    //{
-    //    Vector3 toTSB = new Vector3(m_TSB.x, toSaturation, m_TSB.z);
-    //    TSBChangeTo(toTSB, duration, delay, interpolType);
-    //}
-
-    //public void BrightnessChangeTo(float toBrightness, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
-    //{
-    //    Vector3 toTSB = new Vector3(m_TSB.x, m_TSB.y, toBrightness);
-    //    TSBChangeTo(toTSB, duration, delay, interpolType);
-    //}
 
     public void RotateToAroundAxis(float toAngle, Vector3 axis, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR)
     {
@@ -279,30 +243,12 @@ public class ValueAnimator : MonoBehaviour
             SetColor(ColorUtils.GetRGBAColorFromTSB(new Vector3(channels.x, channels.y, channels.z), m_color.a));
     }
 
-    //public virtual void SetTSB(Vector3 tsb)
-    //{
-    //    m_TSB = tsb;
-    //    m_prevTSB = m_TSB;
-    //    OnTSBChanged();
-    //}
-
-    //public virtual void SetTint(float tint)
-    //{
-    //    m_TSB.x = tint;
-    //    OnTSBChanged();
-    //}
-
-    //public virtual void SetSaturation(float saturation)
-    //{
-    //    m_TSB.y = saturation;
-    //    OnTSBChanged();
-    //}
-
-    //public virtual void SetBrightness(float brightness)
-    //{
-    //    m_TSB.z = brightness;
-    //    OnTSBChanged();
-    //}
+    public virtual void SetTSB(Vector3 tsb)
+    {
+        m_TSB = tsb;        
+        m_prevTSB = m_TSB;
+        SetColorChannels(tsb, ColorMode.TSB);
+    }
 
     public virtual void IncOpacity(float deltaOpacity)
     {
@@ -334,30 +280,6 @@ public class ValueAnimator : MonoBehaviour
         SetColor(color);
     }
 
-    //public virtual void IncTSB(Vector3 deltaTSB)
-    //{
-    //    Vector3 tsb = m_TSB + deltaTSB;
-    //    SetTSB(tsb);
-    //}
-
-    //public virtual void IncTint(float deltaTint)
-    //{
-    //    float tint = m_TSB.x + deltaTint;
-    //    SetTint(tint);
-    //}
-
-    //public virtual void IncSaturation(float deltaSaturation)
-    //{
-    //    float saturation = m_TSB.y + deltaSaturation;
-    //    SetSaturation(saturation);
-    //}
-
-    //public virtual void IncBrightness(float deltaBrightness)
-    //{
-    //    float brightness = m_TSB.z + deltaBrightness;
-    //    SetBrightness(brightness);
-    //}
-
     public virtual void OnOpacityChanged()
     {
         
@@ -382,11 +304,6 @@ public class ValueAnimator : MonoBehaviour
     {
 
     }
-
-    //public virtual void OnTSBChanged()
-    //{
-
-    //}
 
     public virtual void OnFinishFading()
     {
@@ -598,12 +515,11 @@ public class ValueAnimator : MonoBehaviour
             return;
         }
 
-        //if (m_prevTSB != m_TSB)
-        //{
-        //    Debug.Log("Change TSB");
-        //    SetTSB(m_TSB);
-        //    return;
-        //}
+        if (m_prevTSB != m_TSB)
+        {
+            SetTSB(m_TSB);
+            return;
+        }
 
         //update values that have to be modified through time
         UpdateOpacity(dt);

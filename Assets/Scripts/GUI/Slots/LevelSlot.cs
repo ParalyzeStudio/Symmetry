@@ -17,19 +17,25 @@ public class LevelSlot : BaseSlot
         m_levelNumber = iLevelNumber;
 
         //Add a background only if level is completed        
-        //int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
-        //if (GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+        int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
+        if (m_parentScene.GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+        {
+            Color slotColor = m_parentScene.GetLevelManager().m_currentChapter.GetThemeColors()[2];
 
-        Color slotColor = m_parentScene.GetLevelManager().m_currentChapter.GetThemeColors()[2];
-        
-        CircleMesh slotBgHexaMesh = m_background.GetComponent<CircleMesh>();
-        slotBgHexaMesh.Init(((Levels)m_parentScene).m_slotBackgroundMaterial);
+            CircleMesh slotBgHexaMesh = m_background.GetComponent<CircleMesh>();
+            slotBgHexaMesh.Init(((Levels)m_parentScene).m_slotBackgroundMaterial);
 
-        CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
-        slotBgAnimator.SetNumSegments(6, false);
-        slotBgAnimator.SetInnerRadius(0, false);
-        slotBgAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, true);
-        slotBgAnimator.SetColor(slotColor);
+            CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
+            slotBgAnimator.SetNumSegments(6, false);
+            slotBgAnimator.SetInnerRadius(0, false);
+            slotBgAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, true);
+            slotBgAnimator.SetColor(slotColor);
+        }
+        else
+        {
+            Destroy(m_background);
+            m_background = null;
+        }
 
         //Init contour mesh
         //First start with the textured blurry contour
@@ -48,13 +54,16 @@ public class LevelSlot : BaseSlot
         CircleMesh sharpContour = contourHexaObject.GetComponent<CircleMesh>();
         sharpContour.Init(((Levels)m_parentScene).m_slotSharpContourMaterial);
 
-        float contourMeshThickness = 8.0f;
+        float contourThickness = 4.0f;
         CircleMeshAnimator sharpContourAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
         sharpContourAnimator.SetNumSegments(6, false);
         sharpContourAnimator.SetInnerRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
-        sharpContourAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourMeshThickness, true);
+        sharpContourAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourThickness, true);
         sharpContourAnimator.SetColor(Color.white);
         sharpContourAnimator.SetPosition(Vector3.zero);
+
+        //Set correct level number
+        m_levelNumberText.GetComponent<TextMesh>().text = m_levelNumber.ToString();
 
         //Set color on texts
         TextMeshAnimator numberAnimator = m_levelNumberText.GetComponent<TextMeshAnimator>();
@@ -67,6 +76,12 @@ public class LevelSlot : BaseSlot
     public override void Show()
     {
         base.Show();
+
+        GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
+        slotAnimator.SetScale(new Vector3(0, 0, 1));
+        float randomDelay = Random.value;
+        randomDelay *= 0.5f;
+        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.5f, randomDelay);
     }
 
     public override void Dismiss()
@@ -76,11 +91,17 @@ public class LevelSlot : BaseSlot
 
     protected override void ShowSlotBackground()
     {
-        CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
+        if (m_background != null)
+        {
+            CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
 
-        slotBackgroundAnimator.SetOpacity(0);
-        slotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, 0.5f);
+            slotBackgroundAnimator.SetOpacity(0);
+            slotBackgroundAnimator.FadeTo(LEVEL_SLOT_BACKGROUND_OPACITY, 0.5f);
+        }
+    }
 
+    protected override void ShowSlotContour()
+    {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
 
         slotContourAnimator.SetOpacity(0);
@@ -99,7 +120,10 @@ public class LevelSlot : BaseSlot
     {
         CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
         slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+    }
 
+    protected override void DismissSlotContour(bool bDestroyOnFinish)
+    {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
         slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }

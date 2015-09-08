@@ -38,7 +38,6 @@ public class SegmentTree : MonoBehaviour
     private float m_segmentThickness;
     private Material m_segmentMaterial;
     private Color m_tintColor;
-
  
     public void Awake()
     {

@@ -132,6 +132,8 @@ public class CircleMesh : MonoBehaviour
             numVertices = m_numSegments * 2;
 
         Color[] colors = new Color[numVertices];
+        if (mesh == null)
+            Debug.Log("mesh NULL:" + this.name);
         for (int i = 0; i != mesh.vertexCount; i++)
         {
             colors[i] = color;

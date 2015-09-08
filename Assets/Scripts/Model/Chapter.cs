@@ -7,6 +7,9 @@ public class Chapter
     public Level[] m_levels { get; set; }
     public int m_number;
 
+    private Color[] m_themeColors;
+    private Vector3[] m_themeTintValues;
+
     public Chapter()
     {
         m_levels = new Level[LEVELS_COUNT];
@@ -26,38 +29,78 @@ public class Chapter
      * **/
     public Color[] GetThemeColors()
     {
-        Color[] themeColors = new Color[4];
+        if (m_themeColors == null)
+        {
+            m_themeColors = new Color[4];
+
+            if (m_number == 1)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 47, 125, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            }
+            else if (m_number == 2)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(174, 26, 24, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 9, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            }
+            else if (m_number == 3)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(176, 109, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 34, 9, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            }
+            else if (m_number == 4)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            }
+        }
+
+        return m_themeColors;
+    }
+
+    /**
+     * -0: tint color of the action buttons
+     * -1: color of the interface buttons contour
+     * -2: tint color of the interface buttons
+     * **/
+    public Vector3[] GetThemeTintValues()
+    {
+        m_themeTintValues = new Vector3[3];
 
         if (m_number == 1)
         {
-            themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
-            themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
-            themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 47, 125, 255));
-            themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
         }
         else if (m_number == 2)
         {
-            themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(174, 26, 24, 255));
-            themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 9, 10, 255));
-            themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
-            themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
         }
         else if (m_number == 3)
         {
-            themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(176, 109, 29, 255));
-            themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 34, 9, 255));
-            themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
-            themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
         }
         else if (m_number == 4)
         {
-            themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
-            themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
-            themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
-            themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
         }
 
-        return themeColors;
+        return m_themeTintValues;
     }
 
     /**

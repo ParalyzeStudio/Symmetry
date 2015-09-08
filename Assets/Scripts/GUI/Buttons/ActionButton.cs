@@ -36,7 +36,7 @@ public class ActionButton : GUIButton
     public GUIButton.GUIButtonID[] m_childIDs { get; set; }
     public int m_currentChildIdIndex { get; set; }
 
-    public void Init(Color tintColor, Location location, GUIButton.GUIButtonID[] childIDs)
+    public void Init(Location location, GUIButton.GUIButtonID[] childIDs)
     {
         m_location = location;
         m_childIDs = childIDs;
@@ -48,13 +48,12 @@ public class ActionButton : GUIButton
         Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
 
         base.Init(defaultSkinMaterial);
-        SetTintColor(tintColor);
+        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        skinAnimator.SetPosition(new Vector3(-18, 0, -2));
+        skinAnimator.SetColor(Color.white);
 
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         buttonAnimator.SetPosition(new Vector3(-128.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
-
-        //Material plainWhiteMaterial = GetGUIManager().m_plainWhiteMaterial;
-
 
         //Build the background
         GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
@@ -64,23 +63,12 @@ public class ActionButton : GUIButton
         m_background = buttonBackgroundObject.GetComponent<UVQuad>();
         m_background.Init(m_actionButtonFrameMaterial);
 
+        LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+
         TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
         backgroundAnimator.SetScale(new Vector2(256, 256));
-        backgroundAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 23, 76, 255)));
+        backgroundAnimator.SetColorChannels(levelManager.m_currentChapter.GetThemeTintValues()[0], ValueAnimator.ColorMode.TSB);
         backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
-
-        //Build the shadow
-        //GameObject buttonShadowObject = Instantiate(m_texQuadPfb);
-        //buttonShadowObject.name = "Shadow";
-        //buttonShadowObject.transform.parent = this.transform;
-
-        //m_shadow = buttonShadowObject.GetComponent<UVQuad>();
-        //m_shadow.Init(m_actionButtonShadowMaterial);
-
-        //TexturedQuadAnimator shadowAnimator = m_shadow.GetComponent<TexturedQuadAnimator>();
-        //shadowAnimator.SetScale(new Vector2(256, 256));
-        //shadowAnimator.SetPosition(new Vector3(0, -8, 0));
-        //shadowAnimator.SetColor(Color.white);
     }
 
     /**
