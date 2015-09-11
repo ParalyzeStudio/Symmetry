@@ -1,7 +1,25 @@
 ﻿using UnityEngine;
+using ClipperLib;
+using System;
+
+//public struct IntVector2
+//{
+//    public long x;
+//    public long y;
+
+//    public IntVector2(long X, long Y) { x = X; y = Y; }
+
+//    public static bool operator !=(IntVector2 a, IntVector2 b) { return a.x != b.x || a.y != b.y; }
+//    public static bool operator ==(IntVector2 a, IntVector2 b) { return a.x == b.x && a.y == b.y; }
+//    public static IntVector2 operator -(IntVector2 a) { return new IntVector2(-a.x, -a.y); }
+//    public static IntVector2 operator -(IntVector2 a, IntVector2 b) { return new IntVector2(a.x - b.x, a.y - b.y); }
+//    public static IntVector2 operator +(IntVector2 a, IntVector2 b) { return new IntVector2(a.x + b.x, a.y + b.y); }
+//}
 
 public class GeometryUtils
 {
+    public const double CONVERSION_FLOAT_PRECISION = 1.0E7;
+
     static public Vector3 BuildVector3FromVector2(Vector2 vector, float zValue)
     {
         return new Vector3(vector.x, vector.y, zValue);
@@ -12,13 +30,23 @@ public class GeometryUtils
         return new Vector2(vector.x, vector.y);
     }
 
+    public static IntPoint ConvertVector2ToIntPoint(Vector2 point)
+    {
+        return new IntPoint((Int64)Mathf.RoundToInt((float)(point.x * CONVERSION_FLOAT_PRECISION)), (Int64)Mathf.RoundToInt((float)(point.y * CONVERSION_FLOAT_PRECISION)));
+    }
+
+    public static Vector2 ConvertIntPointToVector2(IntPoint point)
+    {
+        return new Vector2(point.X / (float)CONVERSION_FLOAT_PRECISION, point.Y / (float)CONVERSION_FLOAT_PRECISION);
+    }
+
     /**
      * Simply tells if a segment intersects a line define by 2 points without giving the coordinates of the intersection point
      * **/
     static public bool SegmentIntersectsLine(Vector2 segmentPoint1, Vector2 segmentPoint2, Vector2 linePoint1, Vector2 linePoint2)
     {
-        float det1 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint1, false);
-        float det2 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint2, false);
+        float det1 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint1);
+        float det2 = MathUtils.Determinant(linePoint1, linePoint2, segmentPoint2);
 
         if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
             return false;
@@ -29,6 +57,108 @@ public class GeometryUtils
     /**
      * Find the intersection of a segment and a line if it exists
      * **/
+    static public void SegmentLineIntersection(IntPoint segmentPoint1, IntPoint segmentPoint2, IntPoint linePoint, Vector2 lineDirection, out IntPoint intersection, out bool intersects)
+    {
+        //normalize the line direction if not
+        lineDirection.Normalize();
+
+        //order points by ascending x for the segment only
+        if (segmentPoint1.X > segmentPoint2.X)
+        {
+            IntPoint tmpPoint = segmentPoint2;
+            segmentPoint2 = segmentPoint1;
+            segmentPoint1 = tmpPoint;
+        }
+        else if (segmentPoint1.X == segmentPoint2.X) // if x-coordinate is the same for both points, order them by ascending y
+        {
+            if (segmentPoint1.Y > segmentPoint2.Y)
+            {
+                IntPoint tmpPoint = segmentPoint2;
+                segmentPoint2 = segmentPoint1;
+                segmentPoint1 = tmpPoint;
+            }
+        }
+
+        //Both lines equation
+        float x, y;
+        if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //y = a1x + b1 && y = a2x + b2
+        {
+            float a1 = lineDirection.y / lineDirection.x;
+            float b1 = linePoint.Y - a1 * linePoint.X;
+            float a2 = (segmentPoint2.Y - segmentPoint1.Y) / (segmentPoint2.X - segmentPoint1.X);
+            float b2 = segmentPoint1.Y - a2 * segmentPoint1.X;
+
+            if (a1 == a2) //parallel lines
+            {
+                intersects = false;
+                intersection = new IntPoint(0, 0);
+                return;
+            }
+            else
+            {
+                x = (b2 - b1) / (a1 - a2);
+                y = a1 * x + b1;
+            }
+        }
+        else if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //y = a1x + b1 && x = a2
+        {
+            float a1 = lineDirection.y / lineDirection.x;
+            float b1 = linePoint.Y - a1 * linePoint.X;
+            float a2 = segmentPoint1.X;
+
+            x = a2;
+            y = a1 * a2 + b1;
+        }
+        else if (MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //x = a1 && y = a2x + b2
+        {
+            float a1 = linePoint.X;
+            float a2 = (segmentPoint2.Y - segmentPoint1.Y) / (segmentPoint2.X - segmentPoint1.X);
+            float b2 = segmentPoint1.Y - a2 * segmentPoint1.X;
+
+            x = a1;
+            y = a2 * a1 + b2;
+        }
+        else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
+        {
+            intersects = false;
+            intersection = new IntPoint(0, 0);
+            return;
+        }
+
+
+        //Check if ((x, y) point is contained in the segment
+        if (MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.Y))
+        {
+            if (MathUtils.isValueInInterval(y, segmentPoint1.Y, segmentPoint2.Y))
+            {
+                intersects = true;
+                intersection = new IntPoint(x, y);
+                return;
+            }
+            else
+            {
+                intersects = false;
+                intersection = new IntPoint(0, 0);
+                return;
+            }
+        }
+        else
+        {
+            if (MathUtils.isValueInInterval(x, segmentPoint1.X, segmentPoint2.X))
+            {
+                intersects = true;
+                intersection = new IntPoint(x, y);
+                return;
+            }
+            else
+            {
+                intersects = false;
+                intersection = new IntPoint(0, 0);
+                return;
+            }
+        }
+    }
+
     static public void SegmentLineIntersection(Vector2 segmentPoint1, Vector2 segmentPoint2, Vector2 linePoint, Vector2 lineDirection, out Vector2 intersection, out bool intersects)
     {
         //normalize the line direction if not
@@ -134,20 +264,53 @@ public class GeometryUtils
     /**
      * Simply tells if two segments intersect without giving the coordinates of the intersection point
      * **/
-    static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    static public bool TwoSegmentsIntersect(IntPoint segment1Point1, IntPoint segment1Point2, IntPoint segment2Point1, IntPoint segment2Point2)
     {
-        float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1, false);
-        float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2, false);
-        
+        long det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
+        long det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
+
         if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
         {
             //two segments are collinear and on the same line OR one point of the second segment is contained into the first segment but not the other point
-            return false;       
+            return false;
         }
         else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
         {
-            float det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1, false);
-            float det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2, false);
+            long det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1);
+            long det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2);
+
+            if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else /** (det1 * det2) > 0 **/
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Simply tells if two segments intersect without giving the coordinates of the intersection point
+     * **/
+    static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    {
+        float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
+        float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
+
+        if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+        {
+            //two segments are collinear and on the same line OR one point of the second segment is contained into the first segment but not the other point
+            return false;
+        }
+        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
+        {
+            float det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1);
+            float det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2);
 
             if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
             {
@@ -264,7 +427,7 @@ public class GeometryUtils
         if (MathUtils.AreVec2PointsEqual(point, segmentPointA) || MathUtils.AreVec2PointsEqual(point, segmentPointB))
             return bIncludeEndpoints;
 
-        float det = MathUtils.Determinant(segmentPointA, segmentPointB, point, false);
+        float det = MathUtils.Determinant(segmentPointA, segmentPointB, point);
         if (!MathUtils.AreFloatsEqual(det, 0)) //points are not aligned, thus point can never be on the segment AB
             return false;
 
@@ -305,9 +468,9 @@ public class GeometryUtils
             MathUtils.AreVec2PointsEqual(testPoint, pointC))
             return true;
 
-        float det1 = MathUtils.Determinant(pointA, pointB, testPoint, false);
-        float det2 = MathUtils.Determinant(pointB, pointC, testPoint, false);
-        float det3 = MathUtils.Determinant(pointC, pointA, testPoint, false);
+        float det1 = MathUtils.Determinant(pointA, pointB, testPoint);
+        float det2 = MathUtils.Determinant(pointB, pointC, testPoint);
+        float det3 = MathUtils.Determinant(pointC, pointA, testPoint);
 
         return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }
@@ -341,7 +504,7 @@ public class GeometryUtils
 
         Vector2 segment1Direction = segment1Point2 - segment1Point1;
         Vector2 segment2Direction = segment2Point2 - segment2Point1;
-        bool bCollinearVectors = Mathf.Abs(MathUtils.Determinant(segment1Direction, segment2Direction, true)) < MathUtils.DEFAULT_EPSILON;
+        bool bCollinearVectors = Mathf.Abs(MathUtils.Determinant(segment1Direction, segment2Direction)) < MathUtils.DEFAULT_EPSILON;
 
         if (bCollinearVectors)
         {

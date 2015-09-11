@@ -27,7 +27,7 @@ public class ColorSegment : Segment
         }
     }
 
-    public virtual void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color color, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public virtual void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color color, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         m_color = color;
         base.InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, numSegmentsPerHalfCircle);

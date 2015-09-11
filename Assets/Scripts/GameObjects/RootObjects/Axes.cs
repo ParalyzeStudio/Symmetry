@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using ClipperLib;
 
 public class Axes : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class Axes : MonoBehaviour
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
-        axisRenderer.BuildElements(gridStartPosition, true);
+        axisRenderer.BuildElements(gridStartPosition);
 
         AddAxis(newAxis);
         return newAxis;

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using ClipperLib;
 
 public class GridTouchHandler : TouchHandler 
 {
@@ -42,10 +43,7 @@ public class GridTouchHandler : TouchHandler
         Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
         float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
 
-        //if (distanceToAnchor < m_axisCreationMinDistance)
-        //{
-            gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
-        //}
+        gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)

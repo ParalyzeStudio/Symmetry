@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using ClipperLib;
 
 public class TriangleEdge
 {
@@ -60,7 +61,7 @@ public class GridTriangle : BaseTriangle
 {
     public GridTriangle() : base()
     {
-        
+               
     }
 
     public GridTriangle(GridTriangle other) : base(other)
@@ -165,7 +166,7 @@ public class GridTriangle : BaseTriangle
      * **/
     public float GetArea()
     {
-        return 0.5f * Mathf.Abs(MathUtils.Determinant(m_points[0], m_points[1], m_points[2], false));
+        return 0.5f * Mathf.Abs(MathUtils.Determinant(m_points[0], m_points[1], m_points[2]));
     }
 
     /**
@@ -216,7 +217,7 @@ public class ShapeTriangle : GridTriangle
 
     public ShapeTriangle(Shape parentShape = null) : base()
     {
-        m_parentShape = parentShape;
+        m_parentShape = parentShape;       
     }
 
     public ShapeTriangle(Shape parentShape, Color color) : base()

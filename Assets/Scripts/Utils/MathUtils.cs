@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using ClipperLib;
 
 public class MathUtils
 {
@@ -37,34 +38,39 @@ public class MathUtils
     /**
      * Calculates the determinant of 3 points
      * **/
-    static public float Determinant(Vector2 u, Vector2 v, Vector2 w, bool normalize)
+    static public long Determinant(IntPoint u, IntPoint v, IntPoint w)
     {
-        Vector2 vec1 = u - w;
-        Vector2 vec2 = v - w;
+        IntPoint vec1 = new IntPoint(u.X - w.X, u.Y - w.Y);
+        IntPoint vec2 = new IntPoint(v.X - w.X, v.Y - w.Y);
 
-        return Determinant(vec1, vec2, normalize);
-
-        //if (normalize)
-        //{
-        //    Vector2 vec1 = u - w;
-        //    Vector2 vec2 = v - w;
-        //    float determinant = u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
-        //    return determinant / (vec1.magnitude * vec2.magnitude);
-        //}
-        //else
-        //    return u.x * v.y + v.x * w.y + w.x * u.y - u.x * w.y - v.x * u.y - w.x * v.y;
+        return Determinant(vec1, vec2);
     }
 
     /**
      * Calculates the determinant of 2 vectors
      * **/
-    static public float Determinant(Vector2 u, Vector2 v, bool normalize)
+    static public long Determinant(IntPoint u, IntPoint v)
     {
-        float determinant = u.x * v.y - u.y * v.x;
-        if (normalize)
-            determinant /= (u.magnitude * v.magnitude);
+        return u.X * v.Y - u.Y * v.X;
+    }
 
-        return determinant;
+    /**
+     * Calculates the determinant of 3 points
+     * **/
+    static public float Determinant(Vector2 u, Vector2 v, Vector2 w)
+    {
+        Vector2 vec1 = u - w;
+        Vector2 vec2 = v - w;
+
+        return Determinant(vec1, vec2);
+    }
+
+    /**
+     * Calculates the determinant of 2 vectors
+     * **/
+    static public float Determinant(Vector2 u, Vector2 v)
+    {
+        return u.x * v.y - u.y * v.x;
     }
 
     /**

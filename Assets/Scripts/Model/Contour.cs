@@ -138,7 +138,7 @@ public class Contour : List<Vector2>
             else
                 point3 = this[i + 2];
 
-            float determinant = MathUtils.Determinant(point1, point2, point3, false);
+            float determinant = MathUtils.Determinant(point1, point2, point3);
             if (Mathf.Abs(determinant) < MathUtils.DEFAULT_EPSILON)
             {
                 this.Remove(point2);

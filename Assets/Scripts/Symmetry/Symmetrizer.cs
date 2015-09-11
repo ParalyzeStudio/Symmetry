@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using ClipperLib;
 
 public class Symmetrizer : MonoBehaviour 
 {
@@ -197,7 +198,7 @@ public class Symmetrizer : MonoBehaviour
                         splitTriangle.m_color = triangle.m_color;
 
                         Vector2 triangleBarycentre = splitTriangle.GetCenter();
-                        float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
+                        float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre);
 
                         //the triangle barycentre is on the side of the line we want
                         if (barycentreDet > 0 && bLeftSide
@@ -216,7 +217,7 @@ public class Symmetrizer : MonoBehaviour
                 else
                 {
                     Vector2 triangleBarycentre = triangle.GetCenter();
-                    float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre, false);
+                    float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre);
 
                     //the triangle barycentre is on the side of the line we want
                     if (barycentreDet > 0 && bLeftSide

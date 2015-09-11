@@ -4,26 +4,14 @@ using System.Collections.Generic;
 using ClipperLib;
 
 public class ClippingBooleanOperations
-{
-    public const double CONVERSION_FLOAT_PRECISION = 1.0E7;
-
-    public static IntPoint ConvertVector2ToIntPoint(Vector2 point)
-    {
-        return new IntPoint((Int64) Mathf.RoundToInt((float)(point.x * CONVERSION_FLOAT_PRECISION)), (Int64) Mathf.RoundToInt((float)(point.y * CONVERSION_FLOAT_PRECISION)));
-    }
-
-    public static Vector2 ConvertIntPointToVector2(IntPoint point)
-    {
-        return new Vector2(point.X / (float) CONVERSION_FLOAT_PRECISION, point.Y / (float) CONVERSION_FLOAT_PRECISION);
-    }
-
+{   
     public static List<IntPoint> CreatePathFromContour(Contour contour)
     {
         List<IntPoint> path = new List<IntPoint>();
         path.Capacity = contour.Count;
         for (int iContourPointIndex = 0; iContourPointIndex != contour.Count; iContourPointIndex++)
         {
-            IntPoint pathPoint = ConvertVector2ToIntPoint(contour[iContourPointIndex]);
+            IntPoint pathPoint = GeometryUtils.ConvertVector2ToIntPoint(contour[iContourPointIndex]);
             path.Add(pathPoint);
         }
 
@@ -39,7 +27,7 @@ public class ClippingBooleanOperations
             IntPoint pathPoint = path[iPathPointIndex];
             Vector2 contourPoint;
             if (bScalePoints)
-                contourPoint = ConvertIntPointToVector2(pathPoint);
+                contourPoint = GeometryUtils.ConvertIntPointToVector2(pathPoint);
             else
                 contourPoint = new Vector2(pathPoint.X, pathPoint.Y);
             contour.Add(contourPoint);
@@ -104,7 +92,7 @@ public class ClippingBooleanOperations
                 {
                     Contour splitContour = splitContours[iContourIdx];
                     splitContour.RemoveAlignedVertices();
-                    splitContour.ScalePoints(1 / (float)CONVERSION_FLOAT_PRECISION);
+                    splitContour.ScalePoints(1 / (float)GeometryUtils.CONVERSION_FLOAT_PRECISION);
                 }
 
                 if (splitContours.Count == 1) //only one shape add all holes to it

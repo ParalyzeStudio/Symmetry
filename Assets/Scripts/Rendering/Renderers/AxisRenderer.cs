@@ -46,27 +46,16 @@ public class AxisRenderer : MonoBehaviour
     /**
      * Build both endpoints and segment
      * **/
-    public void BuildElements(Vector2 startPosition, bool bGridPoints)
+    public void BuildElements(Vector2 startPosition)
     {
         GameScene gameScene = GetGameScene();
 
         //Set axis endpoints coordinates (both world and grid ones)
-        if (bGridPoints)
-        {
-            m_endpoint1GridPosition = startPosition;
-            m_endpoint2GridPosition = startPosition;
+        m_endpoint1GridPosition = startPosition;
+        m_endpoint2GridPosition = startPosition;
 
-            m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
-            m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
-        }
-        else
-        {
-            m_endpoint1Position = startPosition;
-            m_endpoint2Position = startPosition;
-
-            m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
-            m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(startPosition);
-        }
+        m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
+        m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
 
         //One material per axis
         Material axisMaterial = m_plainWhiteMaterial = Instantiate(m_plainWhiteMaterial);
@@ -103,7 +92,7 @@ public class AxisRenderer : MonoBehaviour
     }
 
     /**
-     * Renders the axis between 2 points. Set bGridPoints to true if points are in grid coordinates
+     * Renders the axis between 2 points using grid coordinates
      * **/
     public void Render(Vector2 pointA, Vector2 pointB, bool bGridPoints)
     {
@@ -121,7 +110,7 @@ public class AxisRenderer : MonoBehaviour
         {
             m_endpoint1Position = pointA;
             m_endpoint2Position = pointB;
-                       
+
             m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointA);
             m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointB);
         }

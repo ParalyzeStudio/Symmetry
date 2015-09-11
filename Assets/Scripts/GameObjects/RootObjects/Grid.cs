@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
+using ClipperLib;
 
 [ExecuteInEditMode]
 public class Grid : MonoBehaviour
@@ -119,25 +120,25 @@ public class Grid : MonoBehaviour
     /**
      * Calculates the world coordinates of a point knowing its grid coordinates (column, line) 
      * **/
-    public Vector2 GetPointWorldCoordinatesFromGridCoordinates(Vector2 gridCoordinates)
+    public Vector2 GetPointWorldCoordinatesFromGridCoordinates(Vector2 gridPoint)
     {
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
         {
-            anchorPositionX = ((gridCoordinates.x - m_numColumns / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionX = ((gridPoint.x - m_numColumns / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of columns
         {
-            anchorPositionX = ((gridCoordinates.x - 1 - m_numColumns / 2) * m_gridSpacing);
+            anchorPositionX = ((gridPoint.x - 1 - m_numColumns / 2) * m_gridSpacing);
         }
         float anchorPositionY;
         if (m_numLines % 2 == 0) //even number of lines
         {
-            anchorPositionY = ((gridCoordinates.y - m_numLines / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionY = ((gridPoint.y - m_numLines / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of lines
         {
-            anchorPositionY = ((gridCoordinates.y - 1 - m_numLines / 2) * m_gridSpacing);
+            anchorPositionY = ((gridPoint.y - 1 - m_numLines / 2) * m_gridSpacing);
         }
 
         Vector2 anchorLocalPosition = new Vector2(anchorPositionX, anchorPositionY);
@@ -183,44 +184,44 @@ public class Grid : MonoBehaviour
         return 1 / m_gridSpacing;
     }
 
-    public Vector2 TransformGridVectorToWorldVector(Vector2 gridVector)
-    {
-        return gridVector / GetGridWorldRatio();
-    }
+    //public Vector2 TransformGridVectorToWorldVector(Vector2 gridVector)
+    //{
+    //    return gridVector / GetGridWorldRatio();
+    //}
 
-    public Vector2 TransformWorldVectorToGridVector(Vector2 worldVector)
-    {
-        return worldVector * GetGridWorldRatio();
-    }
+    //public Vector2 TransformWorldVectorToGridVector(Vector2 worldVector)
+    //{
+    //    return worldVector * GetGridWorldRatio();
+    //}
 
     /**
      * Returns the anchor game object at grid position passed as parameter
      * **/
-    public GameObject GetAnchorAtGridPosition(Vector2 gridPosition)
-    {
-        int iColumnNumber = Mathf.RoundToInt(gridPosition.x);
-        int iLineNumber = Mathf.RoundToInt(gridPosition.y);
+    //public GameObject GetAnchorAtGridPosition(Vector2 gridPosition)
+    //{
+    //    int iColumnNumber = Mathf.RoundToInt(gridPosition.x);
+    //    int iLineNumber = Mathf.RoundToInt(gridPosition.y);
 
-        return m_anchors[(iLineNumber - 1) * m_numColumns + (iColumnNumber - 1)];
-    }
+    //    return m_anchors[(iLineNumber - 1) * m_numColumns + (iColumnNumber - 1)];
+    //}
 
     /**
      * Returns the grid coordinates of the anchor passed as parameter
      * **/
-    public Vector2 GetAnchorGridCoordinates(GameObject anchor)
-    {
-        int iAnchorIndex = -1;
-        for (int i = 0; i != m_anchors.Length; i++)
-        {
-            if (m_anchors[i] == anchor)
-            {
-                iAnchorIndex = i;
-                break;
-            }
-        }
+    //public Vector2 GetAnchorGridCoordinates(GameObject anchor)
+    //{
+    //    int iAnchorIndex = -1;
+    //    for (int i = 0; i != m_anchors.Length; i++)
+    //    {
+    //        if (m_anchors[i] == anchor)
+    //        {
+    //            iAnchorIndex = i;
+    //            break;
+    //        }
+    //    }
 
-        return GetAnchorGridCoordinatesForAnchorIndex(iAnchorIndex);
-    }
+    //    return GetAnchorGridCoordinatesForAnchorIndex(iAnchorIndex);
+    //}
 
     /**
      * Returns the grid coordinates of the anchor whose index is passed as parameter
@@ -228,7 +229,7 @@ public class Grid : MonoBehaviour
     public Vector2 GetAnchorGridCoordinatesForAnchorIndex(int iAnchorIndex)
     {
         if (iAnchorIndex < 0 || iAnchorIndex >= m_anchors.Length)
-            return Vector2.zero;
+            return new Vector2(0, 0);
 
         return new Vector2(iAnchorIndex % m_numColumns + 1, iAnchorIndex / m_numColumns + 1);
     }
@@ -265,7 +266,7 @@ public class Grid : MonoBehaviour
         if (iMinDistanceAnchorIndex >= 0)
             return GetPointGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
         else
-            return Vector2.zero;
+            return new Vector2(0, 0);
     }
 
     ///**
