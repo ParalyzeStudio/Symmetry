@@ -18,6 +18,7 @@ public class GameScene : GUIScene
     public GameObject m_texRoundedSegmentPfb;
 
     public Grid m_grid { get; set; }
+    public ShapeVoxelGrid m_voxelGrid { get; set; }
     public Counter m_counter { get; set; }
     public Outlines m_outlines { get; set; }
     public Shapes m_shapes { get; set; }
@@ -125,6 +126,7 @@ public class GameScene : GUIScene
      * **/
     private void ShowGrid(float fDelay = 0.0f)
     {
+        //Visible grid
         m_grid = this.gameObject.GetComponentInChildren<Grid>();
         m_grid.gameObject.transform.parent = this.gameObject.transform;
         m_grid.Build();
@@ -134,6 +136,10 @@ public class GameScene : GUIScene
         GameObjectAnimator gridAnimator = m_grid.gameObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 0.5f, fDelay);
+
+        //Voxel grid
+        m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
+        m_voxelGrid.Init(4);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();

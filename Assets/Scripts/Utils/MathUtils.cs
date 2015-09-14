@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using ClipperLib;
 
 public class MathUtils
 {
@@ -33,25 +32,6 @@ public class MathUtils
         }
 
         return (testValue >= (valueA - epsilon) && testValue <= (valueB + epsilon));
-    }
-
-    /**
-     * Calculates the determinant of 3 points
-     * **/
-    static public long Determinant(IntPoint u, IntPoint v, IntPoint w)
-    {
-        IntPoint vec1 = new IntPoint(u.X - w.X, u.Y - w.Y);
-        IntPoint vec2 = new IntPoint(v.X - w.X, v.Y - w.Y);
-
-        return Determinant(vec1, vec2);
-    }
-
-    /**
-     * Calculates the determinant of 2 vectors
-     * **/
-    static public long Determinant(IntPoint u, IntPoint v)
-    {
-        return u.X * v.Y - u.Y * v.X;
     }
 
     /**

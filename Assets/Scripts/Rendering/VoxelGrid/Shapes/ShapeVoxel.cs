@@ -2,18 +2,16 @@
 
 public class ShapeVoxel
 {
-    public enum ShapeVoxelState
-    {
-        EMPTY = 0,
-        FILLED
-    }
-
-    public ShapeVoxelState m_state;
+    private Shape m_overlappingShape;
     public Vector2 m_position;
 
     public ShapeVoxel(Vector2 position)
     {
         m_position = position;
-        m_state = ShapeVoxelState.EMPTY;
+    }
+
+    public void SetOverlappingShape(Shape shape)
+    {
+        m_overlappingShape = shape;
     }
 }

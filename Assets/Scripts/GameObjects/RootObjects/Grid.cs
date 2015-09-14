@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System;
-using ClipperLib;
 
 [ExecuteInEditMode]
 public class Grid : MonoBehaviour
@@ -19,7 +18,11 @@ public class Grid : MonoBehaviour
     //public GameObject m_gridConstraintAnchorPfb;
 
     public void Build()
-    {   
+    {
+        GameObject pointsHolder = new GameObject("Points");
+        pointsHolder.transform.parent = this.transform;
+        pointsHolder.transform.localPosition = Vector3.zero;
+
         //Get the number of min lines and min columns we want for this level
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
         Level currentLevel = levelManager.m_currentLevel;
@@ -37,7 +40,7 @@ public class Grid : MonoBehaviour
         float fScreenHeightInUnits = 2.0f * fCameraSize;
         float fScreenWidthInUnits = fScreenRatio * fScreenHeightInUnits;
 
-        //The grid occupies 85% of the screen height and 90% of the screen width
+        //The grid occupies at maximum 85% of the screen height and 90% of the screen width
         m_gridSize = new Vector2(0.9f * fScreenWidthInUnits, 0.78f * fScreenHeightInUnits);
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
@@ -54,6 +57,8 @@ public class Grid : MonoBehaviour
 
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
+
+        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
 
         //set the position for the grid
         Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
@@ -90,7 +95,7 @@ public class Grid : MonoBehaviour
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
-                clonedGridAnchor.transform.parent = this.transform;
+                clonedGridAnchor.transform.parent = pointsHolder.transform;
 
                 CircleMesh gridAnchorQuad = clonedGridAnchor.GetComponent<CircleMesh>();
                 gridAnchorQuad.Init(m_gridAnchorMaterial);

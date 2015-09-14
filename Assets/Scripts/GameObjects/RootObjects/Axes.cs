@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using ClipperLib;
 
 public class Axes : MonoBehaviour
 {

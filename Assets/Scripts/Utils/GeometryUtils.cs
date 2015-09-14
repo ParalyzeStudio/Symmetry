@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using ClipperLib;
 using System;
+using ClipperLib;
 
 //public struct IntVector2
 //{
@@ -258,39 +258,6 @@ public class GeometryUtils
                 intersection = Vector2.zero;
                 return;
             }
-        }
-    }
-
-    /**
-     * Simply tells if two segments intersect without giving the coordinates of the intersection point
-     * **/
-    static public bool TwoSegmentsIntersect(IntPoint segment1Point1, IntPoint segment1Point2, IntPoint segment2Point1, IntPoint segment2Point2)
-    {
-        long det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
-        long det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
-
-        if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
-        {
-            //two segments are collinear and on the same line OR one point of the second segment is contained into the first segment but not the other point
-            return false;
-        }
-        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
-        {
-            long det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1);
-            long det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2);
-
-            if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else /** (det1 * det2) > 0 **/
-        {
-            return false;
         }
     }
 
