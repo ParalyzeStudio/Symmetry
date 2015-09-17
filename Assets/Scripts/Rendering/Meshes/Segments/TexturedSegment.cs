@@ -6,9 +6,9 @@ public class TexturedSegment : Segment
     protected Vector2[] m_meshUVs;
     protected bool m_meshUVsDirty;
 
-    public void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color tintColor, bool bGridPoints, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
+    public void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color tintColor, TextureWrapMode texWrapMode = TextureWrapMode.Repeat)
     {
-        InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, 0);
+        InitBasicVariables(pointA, pointB, thickness, material, 0);
 
         if (GetComponent<MeshRenderer>().sharedMaterial.mainTexture == null)
             throw new Exception("Material has no texture set on it");

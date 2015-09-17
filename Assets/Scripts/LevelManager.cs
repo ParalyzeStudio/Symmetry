@@ -97,7 +97,7 @@ public class LevelManager : MonoBehaviour
         level.m_outlines.Capacity = dottedOutlinesNodeList.Count;
         foreach (XMLNode outlineNode in dottedOutlinesNodeList)
         {
-            DottedOutline outline = new DottedOutline();
+            DottedOutline outline = new DottedOutline(true);
 
             //Contour
             XMLNodeList contourPointsNodeList = outlineNode.GetNodeList("contour>0>point");
@@ -149,7 +149,7 @@ public class LevelManager : MonoBehaviour
             level.m_initialShapes.Capacity = shapesNodeList.Count;
             foreach (XMLNode shapeNode in shapesNodeList)
             {
-                Shape shape = new Shape();
+                Shape shape = new Shape(true);
                 //Get the color of the shape
                 string strShapeColor = shapeNode.GetValue("@color");
                 string[] strSplitColor = strShapeColor.Split(new char[] { ',' });

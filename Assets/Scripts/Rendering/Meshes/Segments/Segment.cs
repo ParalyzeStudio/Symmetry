@@ -146,34 +146,18 @@ public class Segment : MonoBehaviour
         }
     }
 
-    /**
-     * Transform points from 
-     * **/
-    public void TransformPointsFromGridCoordinatesToWorldCoordinates(bool bTransformPointA = true, bool bTransformPointB = true)
+    public virtual void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-
-        if (bTransformPointA)
-            m_pointA = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
-        if (bTransformPointB)
-            m_pointB = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
-    }
-
-    public virtual void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
-    {
-        InitBasicVariables(pointA, pointB, thickness, material, bGridPoints, numSegmentsPerHalfCircle);
+        InitBasicVariables(pointA, pointB, thickness, material, numSegmentsPerHalfCircle);
         RenderInternal(); //builds the mesh
     }
 
-    public void InitBasicVariables(Vector3 pointA, Vector3 pointB, float thickness, Material material, bool bGridPoints, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
+    public void InitBasicVariables(Vector3 pointA, Vector3 pointB, float thickness, Material material, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
         m_pointA = pointA;
         m_pointB = pointB;
         m_thickness = thickness;
         m_numSegmentsPerHalfCircle = numSegmentsPerHalfCircle;
-
-        if (bGridPoints) //this is a grid segment, this means the player is on the game scene
-            TransformPointsFromGridCoordinatesToWorldCoordinates();
 
         SegmentAnimator segmentAnimator = this.gameObject.GetComponent<SegmentAnimator>();
         if (segmentAnimator != null)
@@ -192,12 +176,9 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointA. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointA(Vector2 pointA, bool bGridPoint = false, bool bRenderSegment = true)
+    public virtual void SetPointA(Vector2 pointA, bool bRenderSegment = true)
     {
         m_pointA = pointA;
-
-        if (bGridPoint)
-            TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
 
         if (bRenderSegment)
             RenderInternal(true, false);
@@ -206,12 +187,9 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointB. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointB(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
+    public virtual void SetPointB(Vector2 pointB, bool bRenderSegment = true)
     {
         m_pointB = pointB;
-
-        if (bGridPoint)            
-            TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
 
         if (bRenderSegment)
             RenderInternal(true, false);

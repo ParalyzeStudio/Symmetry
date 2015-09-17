@@ -10,9 +10,9 @@ public class Shapes : MonoBehaviour
     public List<GameObject> m_shapesObjects { get; set; } //list of children shapes
     public List<PositionColorMaterial> m_materials { get; set; }
 
-    public GameObject m_mainOverlappingShapeObject; //the subject shape on which the clipping operations are performed on
-    public List<GameObject> m_substitutionShapeObjects; //the list of shapes that will replace the actual shapes that are overlapping
-    public List<GameObject> m_overlappingShapeObjects; //the list shape objects that are currently overlapping and needs to be masked
+    public GameObject m_mainOverlappingShapeObject { get; set; } //the subject shape on which the clipping operations are performed on
+    public List<GameObject> m_substitutionShapeObjects { get; set; } //the list of shapes that will replace the actual shapes that are overlapping
+    public List<GameObject> m_overlappingShapeObjects { get; set; } //the list shape objects that are currently overlapping and needs to be masked
 
     public Material m_transpColorMaterial;
 
@@ -35,12 +35,12 @@ public class Shapes : MonoBehaviour
         clonedShapeObject.transform.parent = this.gameObject.transform;
         clonedShapeObject.transform.localPosition = Vector3.zero;
 
-        MeshRenderer meshRenderer = clonedShapeObject.GetComponent<MeshRenderer>();
-        meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
+        //MeshRenderer meshRenderer = clonedShapeObject.GetComponent<MeshRenderer>();
+        //meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
 
-        ShapeRenderer shapeRenderer = clonedShapeObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.m_shape = shapeData;
-        shapeRenderer.Render(ShapeRenderer.RenderFaces.DOUBLE_SIDED);
+        ShapeMesh shapeMesh = clonedShapeObject.GetComponent<ShapeMesh>();
+        shapeMesh.Init(shapeData);
+        //shapeMesh.Render(ShapeMesh.RenderFaces.DOUBLE_SIDED);
 
         ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
         shapeAnimator.SetColor(shapeAnimator.m_color);
@@ -235,8 +235,8 @@ public class Shapes : MonoBehaviour
         {
             GameObject shapeObject = m_shapesObjects[iShapeIdx];
 
-            Shape translatedShape = m_mainOverlappingShapeObject.GetComponent<ShapeRenderer>().m_shape;
-            Shape shape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
+            Shape translatedShape = m_mainOverlappingShapeObject.GetComponent<ShapeMesh>().m_shapeData;
+            Shape shape = shapeObject.GetComponent<ShapeMesh>().m_shapeData;
 
             if (shapeObject == m_mainOverlappingShapeObject)
                 continue;

@@ -7,16 +7,16 @@ public class ShapeAnimator : GameObjectAnimator
     {
         base.SetOpacity(opacity, bPassOnChildren);
 
-        ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.SetColor(m_color);
+        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+        shapeMesh.SetColor(m_color);
     }
 
     public override void SetColor(Color color)
     {
         base.SetColor(color);
 
-        ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        shapeRenderer.SetColor(m_color);
+        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+        shapeMesh.SetColor(m_color);
     }
 
     //public override Vector3 GetGameObjectSize()
@@ -58,8 +58,8 @@ public class ShapeAnimator : GameObjectAnimator
     public override void OnFinishRotating()
     {
         //shapeRenderer.m_shape.Fusion();
-        ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
-        //Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
+        //ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+        //Shapes.PerformFusionOnShape(shapeMesh.m_shape);
         
         //MeshFilter meshFilter = this.gameObject.GetComponent<MeshFilter>();
         //shapeRenderer.Render(meshFilter.sharedMesh, ShapeRenderer.RenderFaces.DOUBLE_SIDED, true); //render again the shape

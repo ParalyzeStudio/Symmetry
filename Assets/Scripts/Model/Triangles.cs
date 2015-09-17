@@ -51,22 +51,6 @@ public class BaseTriangle
     {
         return GeometryUtils.IsInsideTriangle(point, m_points[0], m_points[1], m_points[2]);
     }
-}
-
-/**
- * Class that holds data for a triangle in grid coordinates (column, line)
- * **/
-public class GridTriangle : BaseTriangle
-{
-    public GridTriangle() : base()
-    {
-               
-    }
-
-    public GridTriangle(GridTriangle other) : base(other)
-    {
-        
-    }
 
     /**
     * Tells if one of the edges of this triangle intersects the contour passed as parameter
@@ -112,21 +96,13 @@ public class GridTriangle : BaseTriangle
     }
 
     /**
-     * Tells if this triangle contains a point
-     * **/
-    public bool ContainsGridPoint(Vector2 gridPoint)
-    {
-        return GeometryUtils.IsInsideTriangle(gridPoint, m_points[0], m_points[1], m_points[2]);
-    }
-
-    /**
      * Tells if this triangle contains the triangle passed as parameter
      * **/
-    public bool ContainsTriangle(GridTriangle triangle)
+    public bool ContainsTriangle(BaseTriangle triangle)
     {
-        return this.ContainsGridPoint(triangle.m_points[0]) &&
-               this.ContainsGridPoint(triangle.m_points[1]) &&
-               this.ContainsGridPoint(triangle.m_points[2]);
+        return this.ContainsPoint(triangle.m_points[0]) &&
+               this.ContainsPoint(triangle.m_points[1]) &&
+               this.ContainsPoint(triangle.m_points[2]);
     }
 
     /**
@@ -134,9 +110,9 @@ public class GridTriangle : BaseTriangle
      * **/
     public bool ContainsShape(Shape shape)
     {
-        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = shape.m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
             if (!this.ContainsTriangle(triangle)) //this triangle does not contains at least one of the shape triangles
                 return false;
         }
@@ -203,13 +179,12 @@ public class GridTriangle : BaseTriangle
 
         return intersections;
     }
-
 }
 
 /**
  * Triangle that belongs to a Shape
  * **/
-public class ShapeTriangle : GridTriangle
+public class ShapeTriangle : BaseTriangle
 {
     public Shape m_parentShape { get; set; }
     public Color m_color { get; set; }

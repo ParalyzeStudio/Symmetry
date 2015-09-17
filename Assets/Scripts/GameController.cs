@@ -38,18 +38,6 @@ public class GameController : MonoBehaviour
         m_backgroundRenderer = null;
     }
 
-    //private void PerformTestCallFunc()
-    //{
-    //    Debug.Log("PerformTestCallFunc");
-    //    CallFuncHandler callFuncHandler = this.GetComponent<CallFuncHandler>();
-    //    callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(TestCallFunc), 5.0f);
-    //}
-
-    //private void TestCallFunc()
-    //{
-    //    Debug.Log("CallFunc");
-    //}
-
     protected void Start()
     {
         //Set up background fill color
@@ -83,8 +71,6 @@ public class GameController : MonoBehaviour
         //TouchHandler.s_touchDeactivated = false;
 
         m_finishingLevelVictory = false;
-
-        //PerformTestCallFunc();
     }
 
     public void ShowMainMenu()
@@ -196,7 +182,7 @@ public class GameController : MonoBehaviour
         float shapesArea = 0;
         for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
         {
-            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
             bool shapeInsideOutline = false;
             for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
             {
@@ -207,7 +193,7 @@ public class GameController : MonoBehaviour
                 }
                 else //if not we check if this shape is inside an outline
                 {
-                    if (outline.ContainsGridPoint(shape.m_gridTriangles[0].GetCenter()))
+                    if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
                     {
                         shapeInsideOutline = true;
                         break;

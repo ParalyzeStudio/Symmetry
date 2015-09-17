@@ -11,14 +11,14 @@ public class ShapeTouchHandler : TouchHandler
         if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
         {
             //Get the triangles of this shape from the MeshFilter
-            return GetComponent<ShapeRenderer>().m_shape.ContainsWorldPoint(pointerLocation);
+            return GetComponent<ShapeMesh>().m_shapeData.ContainsPoint(pointerLocation);
         }
         return false;
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        this.GetComponent<ShapeRenderer>().m_shape.m_gridOffsetOnVertices = Vector2.zero;
+        this.GetComponent<ShapeMesh>().m_shapeData.m_gridOffsetOnVertices = Vector2.zero;
 
         base.OnPointerDown(pointerLocation);
 

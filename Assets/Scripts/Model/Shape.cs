@@ -1,28 +1,31 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Shape : Triangulable
+public class Shape : GridTriangulable
 {
     public Color m_color { get; set; }
     public Vector2 m_offsetOnVertices { get; set; }
     public Vector2 m_gridOffsetOnVertices { get; set; }
 
-    public Shape() : base()
+    public Shape(bool gridPointMode)
+        : base(gridPointMode)
     {
         m_offsetOnVertices = Vector2.zero;
         m_gridOffsetOnVertices = Vector2.zero;
     }
 
-    public Shape(Contour contour)
-        : base(contour)
+    public Shape(bool gridPointMode, Contour contour)
+        : base(gridPointMode, contour)
     {
-        
+        m_offsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = Vector2.zero;
     }
 
-    public Shape(Contour contour, List<Contour> holes)
-        : base(contour, holes)
+    public Shape(bool gridPointMode, Contour contour, List<Contour> holes)
+        : base(gridPointMode, contour, holes)
     {
-        
+        m_offsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = Vector2.zero;
     }
 
     public Shape(Shape other)
@@ -35,7 +38,7 @@ public class Shape : Triangulable
 
     public override void Triangulate()
     {
-        m_gridTriangles.Clear(); //clear any previous triangles from a previous triangulation
+        m_triangles.Clear(); //clear any previous triangles from a previous triangulation
 
         Vector2[] triangles = Triangulation.P2tTriangulate(this);
 
@@ -46,7 +49,7 @@ public class Shape : Triangulable
             shapeTriangle.m_points[1] = triangles[iVertexIndex + 1];
             shapeTriangle.m_points[2] = triangles[iVertexIndex + 2];
 
-            m_gridTriangles.Add(shapeTriangle);
+            m_triangles.Add(shapeTriangle);
             m_area += shapeTriangle.GetArea();
         }
     }
@@ -54,10 +57,10 @@ public class Shape : Triangulable
     public List<ShapeTriangle> GetShapeTriangles()
     {
         List<ShapeTriangle> shapeTriangles = new List<ShapeTriangle>();
-        shapeTriangles.Capacity = m_gridTriangles.Count;
-        for (int i = 0; i != m_gridTriangles.Count; i++)
+        shapeTriangles.Capacity = m_triangles.Count;
+        for (int i = 0; i != m_triangles.Count; i++)
         {
-            shapeTriangles.Add((ShapeTriangle) m_gridTriangles[i]);
+            shapeTriangles.Add((ShapeTriangle)m_triangles[i]);
         }
 
         return shapeTriangles;
@@ -65,11 +68,11 @@ public class Shape : Triangulable
 
     public void SetShapeTriangles(List<ShapeTriangle> shapeTriangles)
     {
-        m_gridTriangles.Clear();
-        m_gridTriangles.Capacity = shapeTriangles.Count;
+        m_triangles.Clear();
+        m_triangles.Capacity = shapeTriangles.Count;
         for (int i = 0; i != shapeTriangles.Count; i++)
         {
-            m_gridTriangles.Add(shapeTriangles[i]);
+            m_triangles.Add(shapeTriangles[i]);
         }
     }
 
@@ -77,10 +80,10 @@ public class Shape : Triangulable
      * Set the color of each child triangle from the color of the shape itself
      * **/
     public void PropagateColorToTriangles()
-    {       
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+    {
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            ShapeTriangle triangle = (ShapeTriangle)m_gridTriangles[iTriangleIndex];
+            ShapeTriangle triangle = (ShapeTriangle)m_triangles[iTriangleIndex];
             triangle.m_color = m_color;
         }
     }
@@ -90,8 +93,8 @@ public class Shape : Triangulable
      * **/
     public void ObtainColorFromTriangles()
     {
-        if (m_gridTriangles.Count > 0)
-            m_color = ((ShapeTriangle)m_gridTriangles[0]).m_color;
+        if (m_triangles.Count > 0)
+            m_color = ((ShapeTriangle)m_triangles[0]).m_color;
     }
 
     /**
@@ -112,7 +115,7 @@ public class Shape : Triangulable
 
         for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
         {
-            Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
 
             if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
                 continue;
@@ -154,9 +157,9 @@ public class Shape : Triangulable
 
     public bool IntersectsOutline(DottedOutline contour)
     {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             if (triangle.IntersectsContour(contour))
                 return true;
         }
@@ -170,9 +173,9 @@ public class Shape : Triangulable
      * **/
     public bool isIncludedInOneShapeTriangle(Shape shape)
     {
-        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = shape.m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
 
             if (triangle.ContainsShape(this)) //'this' shape is contained entirely inside one of the shape triangles
                 return true;
@@ -199,9 +202,9 @@ public class Shape : Triangulable
         }
 
         //Check if one of the triangle edges intersects triangle edges of the second shape
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
             {
                 Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex] + m_gridOffsetOnVertices;
@@ -228,9 +231,9 @@ public class Shape : Triangulable
      * **/
     private bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
     {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
             {
                 Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
@@ -249,9 +252,9 @@ public class Shape : Triangulable
      * **/
     private bool OverlapsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
     {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
             {
                 Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];

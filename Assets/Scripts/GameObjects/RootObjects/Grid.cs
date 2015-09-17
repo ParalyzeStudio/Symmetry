@@ -33,15 +33,10 @@ public class Grid : MonoBehaviour
         m_anchors = new GameObject[exactNumLines * exactNumColumns];
 
         //get the screen viewport dimensions
-        float fCameraSize = Camera.main.orthographicSize;
-        float fScreenWidth = (float)Screen.width;
-        float fScreenHeight = (float)Screen.height;
-        float fScreenRatio = fScreenWidth / fScreenHeight;
-        float fScreenHeightInUnits = 2.0f * fCameraSize;
-        float fScreenWidthInUnits = fScreenRatio * fScreenHeightInUnits;
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //The grid occupies at maximum 85% of the screen height and 90% of the screen width
-        m_gridSize = new Vector2(0.9f * fScreenWidthInUnits, 0.78f * fScreenHeightInUnits);
+        m_gridSize = new Vector2(0.9f * screenSize.x, 0.78f * screenSize.y);
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
             lineGridSpacing = m_gridSize.y / (float)(exactNumLines - 1);
@@ -59,10 +54,6 @@ public class Grid : MonoBehaviour
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
         m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
-
-        //set the position for the grid
-        Vector2 gridPosition = new Vector2(0, -0.5f * m_gridSize.y + 0.5f * fScreenHeightInUnits - 0.17f * fScreenHeightInUnits);
-        this.gameObject.transform.localPosition = gridPosition;
 
         //Build anchors
         m_gridAnchorMaterial = Instantiate(m_positionColorMaterial);

@@ -21,6 +21,8 @@ public class Symmetrizer : MonoBehaviour
 
     public void SymmetrizeByAxis()
     {
+        return;
+
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
 
         //Find axis ribbon 4 vertices
@@ -53,7 +55,7 @@ public class Symmetrizer : MonoBehaviour
 
                 if (reflectedTriangles != null)
                 {
-                    shapeData = new Shape();
+                    shapeData = new Shape(false);
                     shapeData.SetShapeTriangles(reflectedTriangles);
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
@@ -79,7 +81,7 @@ public class Symmetrizer : MonoBehaviour
 
                 if (reflectedTriangles != null)
                 {
-                    shapeData = new Shape();
+                    shapeData = new Shape(false);
                     shapeData.SetShapeTriangles(reflectedTriangles);
                     shapeData.CalculateContour();
                     shapeData.CalculateArea();
@@ -99,7 +101,7 @@ public class Symmetrizer : MonoBehaviour
 
         if (shapeData != null)
         {
-            ShapeRenderer shapeRenderer = this.gameObject.GetComponent<ShapeRenderer>();
+            ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
             Shapes.PerformFusionOnShape(shapeData);
 
             gameScene.m_counter.IncrementCounter();
@@ -126,7 +128,7 @@ public class Symmetrizer : MonoBehaviour
 
         for (int iShapeIndex = 0; iShapeIndex != gameScene.m_shapes.m_shapesObjects.Count; iShapeIndex++)
         {
-            Shape shape = gameScene.m_shapes.m_shapesObjects[iShapeIndex].GetComponent<ShapeRenderer>().m_shape;
+            Shape shape = gameScene.m_shapes.m_shapesObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
             allShapeTriangles.Add(shape.GetShapeTriangles());
         }
 

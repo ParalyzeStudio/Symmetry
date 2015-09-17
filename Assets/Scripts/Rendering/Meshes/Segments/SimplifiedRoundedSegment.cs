@@ -102,9 +102,9 @@ public class SimplifiedRoundedSegment : TexturedSegment
         }
     }
 
-    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor, bool isGridSegment)
+    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor)
     {
-        InitBasicVariables(pointA, pointB, thickness, material, isGridSegment);
+        InitBasicVariables(pointA, pointB, thickness, material);
 
         RenderInternal();
 
@@ -131,23 +131,17 @@ public class SimplifiedRoundedSegment : TexturedSegment
         mesh.uv = meshUVs;
     }
 
-    public override void SetPointA(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
+    public override void SetPointA(Vector2 pointB, bool bRenderSegment = true)
     {
         m_pointB = pointB;
-
-        if (bGridPoint)
-            TransformPointsFromGridCoordinatesToWorldCoordinates(true, false);
 
         if (bRenderSegment)
             RenderInternal(true, false, false);
     }
 
-    public override void SetPointB(Vector2 pointB, bool bGridPoint = false, bool bRenderSegment = true)
+    public override void SetPointB(Vector2 pointB, bool bRenderSegment = true)
     {
         m_pointB = pointB;
-
-        if (bGridPoint)
-            TransformPointsFromGridCoordinatesToWorldCoordinates(false, true);
 
         if (bRenderSegment)
             RenderInternal(true, false, false);

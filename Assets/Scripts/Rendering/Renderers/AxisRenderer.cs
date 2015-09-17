@@ -63,7 +63,7 @@ public class AxisRenderer : MonoBehaviour
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1GridPosition, m_endpoint2GridPosition, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.black);
+        m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.black);
         m_axisSegment.transform.parent = this.gameObject.transform;
 
         //endpoint 1
@@ -116,8 +116,8 @@ public class AxisRenderer : MonoBehaviour
         }
 
         //Set correct points coordinates for segment
-        m_axisSegment.SetPointA(m_endpoint1Position, false, false);
-        m_axisSegment.SetPointB(m_endpoint2Position, false, true);
+        m_axisSegment.SetPointA(m_endpoint1Position, false);
+        m_axisSegment.SetPointB(m_endpoint2Position, true);
         
         //Set correct position for both endpoints
         GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();

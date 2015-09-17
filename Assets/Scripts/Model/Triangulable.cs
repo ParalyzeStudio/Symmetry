@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 public class Triangulable
 {
-    public List<GridTriangle> m_gridTriangles { get; set; }
+    public List<BaseTriangle> m_triangles { get; set; }
     public Contour m_contour { get; set; } //the points surrounding the triangulable shape
     public List<Contour> m_holes { get; set; } //the holes inside the triangulable shape
     public float m_area { get;set; }
 
     public Triangulable()
     {
-        m_gridTriangles = new List<GridTriangle>();
+        m_triangles = new List<BaseTriangle>();
         m_contour = new Contour();
         m_holes = new List<Contour>();
     }
@@ -18,7 +18,7 @@ public class Triangulable
     public Triangulable(Contour contour)
     {
         m_contour = contour;
-        m_gridTriangles = new List<GridTriangle>();
+        m_triangles = new List<BaseTriangle>();
         m_holes = new List<Contour>();
     }
 
@@ -27,7 +27,7 @@ public class Triangulable
         m_contour = new Contour();
         m_contour.Capacity = contour.Length;
         m_contour.AddRange(contour);
-        m_gridTriangles = new List<GridTriangle>();
+        m_triangles = new List<BaseTriangle>();
         m_holes = new List<Contour>();
     }
 
@@ -35,17 +35,17 @@ public class Triangulable
     {
         m_contour = contour;
         m_holes = holes;
-        m_gridTriangles = new List<GridTriangle>();
+        m_triangles = new List<BaseTriangle>();
     }
 
     public Triangulable(Triangulable other)
     {
         //deep copy triangles
-        m_gridTriangles = new List<GridTriangle>();
-        m_gridTriangles.Capacity = other.m_gridTriangles.Count;
-        for (int i = 0; i != other.m_gridTriangles.Count; i++)
+        m_triangles = new List<BaseTriangle>();
+        m_triangles.Capacity = other.m_triangles.Count;
+        for (int i = 0; i != other.m_triangles.Count; i++)
         {
-            m_gridTriangles.Add(new GridTriangle(other.m_gridTriangles[i]));
+            m_triangles.Add(new BaseTriangle(other.m_triangles[i]));
         }
 
         //deep copy contour
@@ -74,14 +74,28 @@ public class Triangulable
 
         for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
         {
-            GridTriangle gridTriangle = new GridTriangle();
-            gridTriangle.m_points[0] = triangles[iVertexIndex];
-            gridTriangle.m_points[1] = triangles[iVertexIndex + 1];
-            gridTriangle.m_points[2] = triangles[iVertexIndex + 2];
+            BaseTriangle triangle = new BaseTriangle();
+            triangle.m_points[0] = triangles[iVertexIndex];
+            triangle.m_points[1] = triangles[iVertexIndex + 1];
+            triangle.m_points[2] = triangles[iVertexIndex + 2];
 
-            m_gridTriangles.Add(gridTriangle);
-            m_area += gridTriangle.GetArea();
+            m_triangles.Add(triangle);
+            m_area += triangle.GetArea();
         }
+    }
+
+    /**
+     * Does this object contains the parameter 'point'
+     * **/
+    public bool ContainsPoint(Vector2 point)
+    {
+        for (int i = 0; i != m_triangles.Count; i++)
+        {
+            if (m_triangles[i].ContainsPoint(point))
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -92,10 +106,10 @@ public class Triangulable
         m_contour.Clear(); //clear any previous contour
 
         //Retrieve all edges contained in this shape
-        TriangleEdge[] edges = new TriangleEdge[m_gridTriangles.Count * 3];
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        TriangleEdge[] edges = new TriangleEdge[m_triangles.Count * 3];
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             for (int iVertexIndex = 0; iVertexIndex != triangle.m_points.Length; iVertexIndex++)
             {
                 TriangleEdge edge = new TriangleEdge(triangle.m_points[iVertexIndex], (iVertexIndex < 2) ? triangle.m_points[iVertexIndex + 1] : triangle.m_points[0]);
@@ -182,36 +196,11 @@ public class Triangulable
     public void CalculateArea()
     {
         m_area = 0;
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
+        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            GridTriangle triangle = m_gridTriangles[iTriangleIndex];
+            BaseTriangle triangle = m_triangles[iTriangleIndex];
             m_area += triangle.GetArea();
         }
-    }
-
-    /**
-    * Does 'this' polygon contains the specified point in grid coordinates
-    * **/
-    public bool ContainsGridPoint(Vector2 gridPoint)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_gridTriangles.Count; iTriangleIndex++)
-        {
-            if (m_gridTriangles[iTriangleIndex].ContainsGridPoint(gridPoint))
-                return true;
-        }
-
-        return false;
-    }
-
-    /**
-    * Does 'this' polygon contains the specified point in world coordinates
-    * **/
-    public bool ContainsWorldPoint(Vector2 worldPoint)
-    {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        Vector2 gridPoint = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(worldPoint);
-
-        return ContainsGridPoint(gridPoint);
     }
 
     /**

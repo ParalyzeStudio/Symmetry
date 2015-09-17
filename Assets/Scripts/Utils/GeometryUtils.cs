@@ -32,7 +32,7 @@ public class GeometryUtils
 
     public static IntPoint ConvertVector2ToIntPoint(Vector2 point)
     {
-        return new IntPoint((Int64)Mathf.RoundToInt((float)(point.x * CONVERSION_FLOAT_PRECISION)), (Int64)Mathf.RoundToInt((float)(point.y * CONVERSION_FLOAT_PRECISION)));
+        return new IntPoint((long)(point.x * CONVERSION_FLOAT_PRECISION), (long)(point.y * CONVERSION_FLOAT_PRECISION));
     }
 
     public static Vector2 ConvertIntPointToVector2(IntPoint point)

@@ -100,7 +100,6 @@ public class SegmentTree : MonoBehaviour
                               m_segmentThickness,
                               m_segmentMaterial,
                               m_tintColor,
-                              false,
                               TextureWrapMode.Clamp);
 
                 float distanceToCover = (childNode.m_position - node.m_position).magnitude;
@@ -116,7 +115,6 @@ public class SegmentTree : MonoBehaviour
                               m_segmentThickness,
                               m_segmentMaterial,
                               m_tintColor,
-                              false,
                               TextureWrapMode.Clamp);
             }
 

@@ -86,7 +86,10 @@ public class GameScene : GUIScene
         //Show action buttons
         ShowActionButtons();
 
+        //Show starting shapes
         ShowInitialShapes();
+
+        //Build Axes holder
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
         m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
 
@@ -118,6 +121,13 @@ public class GameScene : GUIScene
         //                        500);
 
         m_isShown = true;
+
+
+        Vector2 testGridPoint = new Vector2(4, 5);
+        Vector2 testWorldPoint = m_grid.GetPointWorldCoordinatesFromGridCoordinates(testGridPoint);
+
+        Shape debugShape = m_shapes.GetComponentInChildren<ShapeMesh>().m_shapeData;
+        bool result = debugShape.ContainsPoint(testWorldPoint);
     }
 
     /**
@@ -126,20 +136,21 @@ public class GameScene : GUIScene
      * **/
     private void ShowGrid(float fDelay = 0.0f)
     {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
         //Visible grid
         m_grid = this.gameObject.GetComponentInChildren<Grid>();
         m_grid.gameObject.transform.parent = this.gameObject.transform;
         m_grid.Build();
-        Vector3 gridLocalPosition = m_grid.gameObject.transform.localPosition;
-        m_grid.gameObject.transform.localPosition = new Vector3(gridLocalPosition.x, gridLocalPosition.y, GRID_Z_VALUE);
 
         GameObjectAnimator gridAnimator = m_grid.gameObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 0.5f, fDelay);
+        gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
 
         //Voxel grid
         m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(4);
+        m_voxelGrid.Init(6);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
@@ -261,7 +272,7 @@ public class GameScene : GUIScene
         retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
         retryButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);  
 
-        //retry
+        //hints
         GameObject hintsuttonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
         hintsuttonObject.name = "HintsButton";
         hintsuttonObject.transform.parent = m_interfaceButtonsHolder.transform;
@@ -271,49 +282,6 @@ public class GameScene : GUIScene
         float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
         hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
         hintsButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-
-        //Vector2 screenSize = ScreenUtils.GetScreenSize();
-        //Vector2 interfaceButtonSize = new Vector2(110.0f, 110.0f);
-
-        //m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
-        //m_interfaceButtonsHolder.transform.parent = this.gameObject.transform;
-
-        ////define some variables to help us positioning buttons correctly
-        //float distanceToTopBorder = 30.0f;
-        //float distanceToRightBorder = 30.0f;
-        //float distanceBetweenButtons = 30.0f;
-
-        //GameObjectAnimator holderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
-        //holderAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - 0.5f * interfaceButtonSize.y - distanceToTopBorder, INTERFACE_BUTTONS_Z_VALUE));
-
-        ////menu button
-        //GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
-        //pauseButtonObject.name = "PauseButton";
-        //pauseButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
-
-        //GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
-        //float pauseButtonPositionX = 0.5f * screenSize.x - distanceToRightBorder - 0.5f * interfaceButtonSize.x;
-        //pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, 0, 0));
-
-        ////retry button
-        //GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
-        //retryButtonObject.name = "RetryButton";
-        //retryButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
-
-        //GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
-        //float retryBtnPositionX = pauseButtonPositionX - distanceBetweenButtons - interfaceButtonSize.x;
-        //retryButtonAnimator.SetPosition(new Vector3(retryBtnPositionX, 0, 0));
-
-        ////hints button
-        //GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
-        //hintsButtonObject.name = "HintsButton";
-        //hintsButtonObject.transform.parent = m_interfaceButtonsHolder.transform;
-
-        //GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
-        //float hintsBtnPositionX = retryBtnPositionX - distanceBetweenButtons - interfaceButtonSize.x;
-        //hintsButtonAnimator.SetPosition(new Vector3(hintsBtnPositionX, 0, 0));
-
-        //holderAnimator.SetOpacity(1);
     }
 
     /**
@@ -481,6 +449,7 @@ public class GameScene : GUIScene
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
+            shape.TogglePointMode();
 
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
@@ -493,9 +462,11 @@ public class GameScene : GUIScene
 
         m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
-        GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
-        shapesAnimator.SetOpacity(0);
-        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.5f, fDelay);
+        //GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
+        //shapesAnimator.SetOpacity(0);
+        //shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.5f, fDelay);
+
+        m_voxelGrid.Refresh();
 
         ////fusion initial shapes
         //GameObject shapeObject = m_shapes.m_shapesObj[0];

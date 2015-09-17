@@ -97,7 +97,7 @@ public class ClippingBooleanOperations
 
                 if (splitContours.Count == 1) //only one shape add all holes to it
                 {
-                    Shape shape = new Shape();
+                    Shape shape = new Shape(false);
                     shape.m_contour = splitContours[0];
 
                     //child of an outer is always a hole, no need to call IsHole on the child
@@ -118,7 +118,7 @@ public class ClippingBooleanOperations
 
                     if (contourArea > 0) //counter-clockwise orientation, it is a shape contour
                     {
-                        Shape shape = new Shape(splitContour);
+                        Shape shape = new Shape(false, splitContour);
 
                         //Color
                         Color shapeColor = Color.black;
@@ -148,7 +148,7 @@ public class ClippingBooleanOperations
                         for (int iResultingShapeIdx = 0; iResultingShapeIdx != resultingShapes.Count; iResultingShapeIdx++)
                         {
                             Shape resultingShape = resultingShapes[iResultingShapeIdx];
-                            if (resultingShape.ContainsGridPoint(holeBarycentre))
+                            if (resultingShape.ContainsPoint(holeBarycentre))
                             {
                                 resultingShape.m_holes.Add(holeContour);
                                 resultingShape.Triangulate(); //re-triangulate
