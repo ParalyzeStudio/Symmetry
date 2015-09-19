@@ -82,7 +82,7 @@ public class ClippingBooleanOperations
 
             PolyNode polynode = polytree.GetFirst();
             while (polynode != null)
-            {
+            {                
                 //contour
                 Contour polynodeContour = CreateContourFromPath(polynode.Contour, false);
                 List<Contour> splitContours = polynodeContour.Split();
@@ -91,6 +91,8 @@ public class ClippingBooleanOperations
                 for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
                 {
                     Contour splitContour = splitContours[iContourIdx];
+                    if (splitContour.Count < 3)
+                        Debug.Log("STOP");
                     splitContour.RemoveAlignedVertices();
                     splitContour.ScalePoints(1 / (float)GeometryUtils.CONVERSION_FLOAT_PRECISION);
                 }

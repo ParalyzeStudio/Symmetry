@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 
 public class ShapeVoxelGrid : MonoBehaviour
-{
-    public GameObject m_colorQuadPfb;
+{    
     public Material m_voxelMaterial;
+    public GameObject m_shapeVoxelPfb;
+    public GameObject m_shapeCellPfb;
 
     public float m_voxelSize { get; set; }
     private ShapeVoxel[] m_voxels;
 
     private GameObject m_voxelsHolder;
+    private GameObject m_cellsHolder;
     private int m_size;
     private int m_xVoxelsCount; //the number of voxels along the x-dimension of the grid
     private int m_yVoxelsCount; //the number of voxels along the y-dimension of the grid
@@ -22,6 +24,10 @@ public class ShapeVoxelGrid : MonoBehaviour
         m_voxelsHolder = new GameObject("Voxels");
         m_voxelsHolder.transform.parent = this.transform;
         m_voxelsHolder.transform.localPosition = Vector3.zero;
+
+        m_cellsHolder = new GameObject("Cells");
+        m_cellsHolder.transform.parent = this.transform;
+        m_cellsHolder.transform.localPosition = Vector3.zero;
 
         Grid parentGrid = this.GetComponent<Grid>();
         Vector2 gridSize = parentGrid.m_gridSize;
@@ -51,19 +57,20 @@ public class ShapeVoxelGrid : MonoBehaviour
         
         Vector3 voxelLocalPosition = new Vector3(x * m_voxelSize - 0.5f * gridSize.x, y * m_voxelSize - 0.5f * gridSize.y, 0);
         Vector3 voxelWorldPosition = voxelLocalPosition + this.gameObject.GetComponent<GameObjectAnimator>().GetPosition(); //add the position of the grid
-        ShapeVoxel voxel = new ShapeVoxel(voxelWorldPosition);
+        GameObject voxelObject = (GameObject) Instantiate(m_shapeVoxelPfb);
+        voxelObject.name = "Voxel";
+        voxelObject.transform.parent = m_voxelsHolder.transform;
 
-        GameObject debugQuad = Instantiate(m_colorQuadPfb) as GameObject;
-        debugQuad.transform.parent = m_voxelsHolder.transform;
-        GameObjectAnimator debugQuadAnimator = debugQuad.GetComponent<GameObjectAnimator>();
-        debugQuadAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(voxelLocalPosition, 0));
-        debugQuadAnimator.SetScale(Vector3.one * m_voxelSize * 0.1f);
+        ShapeVoxel voxel = voxelObject.GetComponent<ShapeVoxel>();
+        voxel.Init(voxelWorldPosition);
+        
+        voxelObject.GetComponent<ColorQuad>().Init(Instantiate(m_voxelMaterial));
 
-        debugQuad.GetComponent<ColorQuad>().Init(Instantiate(m_voxelMaterial));
+        ColorQuadAnimator voxelAnimator = voxelObject.GetComponent<ColorQuadAnimator>();
+        voxelAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(voxelLocalPosition, 0));
+        voxelAnimator.SetScale(Vector3.one * m_voxelSize * 0.1f);
+        voxelAnimator.SetColor(Color.blue);
 
-        debugQuad.GetComponent<ColorQuadAnimator>().SetColor(Color.red);
-
-        voxel.m_debugQuad = debugQuad;
         m_voxels[i] = voxel;
     }
 
@@ -95,8 +102,6 @@ public class ShapeVoxelGrid : MonoBehaviour
                 if (shape.ContainsPoint(voxel.m_position))
                 {
                     voxel.m_overlappingShapes.Add(shape);
-
-                    voxel.m_debugQuad.GetComponent<ColorQuadAnimator>().SetColor(Color.blue);
 
                     //Debug.Log("voxelPosition:" + voxelWorldPosition);
 
@@ -147,12 +152,17 @@ public class ShapeVoxelGrid : MonoBehaviour
                                c = m_voxels[i + m_xVoxelsCount],
                                d = m_voxels[i + m_xVoxelsCount + 1];
 
-                    ShapeCell cell = new ShapeCell(a, b, c, d);
+                    GameObject cellObject = Instantiate(m_shapeCellPfb);
+                    cellObject.name = "Cell";
+                    cellObject.transform.parent = this.transform;
+                    ShapeCell cell = cellObject.GetComponent<ShapeCell>();
+                    cell.Init(shapeMesh, a, b, c, d);
                     shapeMesh.m_cells.Add(cell);
                     shapeMesh.TriangulateVoxelCell(cell);
                 }
             }
 
+            shapeMesh.BuildUVs();
             shapeMesh.RefreshMesh();
         }
 

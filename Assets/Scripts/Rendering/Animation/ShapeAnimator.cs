@@ -3,21 +3,21 @@ using System.Collections.Generic;
 
 public class ShapeAnimator : GameObjectAnimator
 {
-    public override void SetOpacity(float opacity, bool bPassOnChildren = true)
-    {
-        base.SetOpacity(opacity, bPassOnChildren);
+    //public override void SetOpacity(float opacity, bool bPassOnChildren = true)
+    //{
+    //    base.SetOpacity(opacity, bPassOnChildren);
 
-        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
-        shapeMesh.SetColor(m_color);
-    }
+    //    ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+    //    shapeMesh.SetColor(m_color);
+    //}
 
-    public override void SetColor(Color color)
-    {
-        base.SetColor(color);
+    //public override void SetColor(Color color)
+    //{
+    //    base.SetColor(color);
 
-        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
-        shapeMesh.SetColor(m_color);
-    }
+    //    ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+    //    shapeMesh.SetColor(m_color);
+    //}
 
     //public override Vector3 GetGameObjectSize()
     //{

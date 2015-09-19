@@ -21,7 +21,10 @@ public class ShapeMesh : MonoBehaviour
 
     public List<ShapeCell> m_cells { get; set; }
 
-    public GameObject m_debugText;
+    public bool m_meshVerticesDirty { get; set; }
+    public bool m_meshIndicesDirty { get; set; }
+    public bool m_meshColorsDirty { get; set; }
+    public bool m_meshUVsDirty { get; set; }
 
     public void Init(Shape shapeData)
     {
@@ -37,6 +40,11 @@ public class ShapeMesh : MonoBehaviour
         m_colors = new List<Color>();
         m_UVs = new List<Vector2>();
 
+        m_meshVerticesDirty = false;
+        m_meshIndicesDirty = false;
+        m_meshColorsDirty = false;
+        m_meshUVsDirty = false;
+
         m_cells = new List<ShapeCell>();
     }
 
@@ -47,6 +55,32 @@ public class ShapeMesh : MonoBehaviour
     {
         m_vertices.Clear();
         m_indices.Clear();
+        m_colors.Clear();
+        m_UVs.Clear();
+    }
+
+    /**
+     * Show the shape
+     * **/
+    public void Show(bool bAnimated = false)
+    {
+        if (bAnimated)
+        {
+            for (int i = 0; i != m_cells.Count; i++)
+            {
+                ShowVoxelCell(m_cells[i]);
+            }
+        }
+        else
+        {
+
+        }
+    }
+
+    public void ShowVoxelCell(ShapeCell cell, bool bAnimated = false, float fDuration = 0.0f, float fDelay = 0.0f)
+    {
+        //First triangulate the cell
+        TriangulateVoxelCell(cell);
     }
 
     /**
@@ -89,6 +123,10 @@ public class ShapeMesh : MonoBehaviour
         cell.m_startIndex = m_vertices.Count;
         AddQuad(cell.m_voxelA.m_position, cell.m_voxelC.m_position, cell.m_voxelB.m_position, cell.m_voxelD.m_position);
         cell.m_endIndex = m_vertices.Count;
+
+        m_meshVerticesDirty = true;
+        m_meshIndicesDirty = true;
+        m_meshColorsDirty = true;
     }
 
     private void ClipCell(ShapeCell cell)
@@ -100,13 +138,6 @@ public class ShapeMesh : MonoBehaviour
         cellContour.Add(cell.m_voxelC.m_position);
         Shape cellShape = new Shape(false, cellContour);
         List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(this.m_shapeData, cellShape, ClipType.ctIntersection);
-
-        GameObject debugTextObject = (GameObject)Instantiate(m_debugText);
-        debugTextObject.GetComponent<TextMesh>().text = clipResult.Count.ToString();
-        debugTextObject.GetComponent<TextMeshAnimator>().SetPosition(cell.m_position);
-        debugTextObject.GetComponent<TextMeshAnimator>().SetColor(Color.white);
-        debugTextObject.GetComponent<TextMeshAnimator>().SetFontHeight(30);
-
 
         cell.m_startIndex = m_vertices.Count;
 
@@ -121,21 +152,39 @@ public class ShapeMesh : MonoBehaviour
             }
         }
         cell.m_endIndex = m_vertices.Count;
+
+        m_meshVerticesDirty = true;
+        m_meshIndicesDirty = true;
+        m_meshColorsDirty = true;
     }
 
     public void RefreshMesh()
     {
         m_mesh.Clear();
 
-        m_mesh.vertices = m_vertices.ToArray();
-        m_mesh.triangles = m_indices.ToArray();
-        m_mesh.colors = m_colors.ToArray();
-
-        BuildUVs();
-        m_mesh.uv = m_UVs.ToArray();
+        if (m_meshVerticesDirty)
+        {
+            m_mesh.vertices = m_vertices.ToArray();
+            m_meshVerticesDirty = false;
+        }
+        if (m_meshIndicesDirty)
+        {
+            m_mesh.triangles = m_indices.ToArray();
+            m_meshIndicesDirty = false;
+        }
+        if (m_meshColorsDirty)
+        {
+            m_mesh.colors = m_colors.ToArray();
+            m_meshColorsDirty = false;
+        }
+        if (m_meshUVsDirty)
+        {
+            m_mesh.uv = m_UVs.ToArray();
+            m_meshUVsDirty = false;
+        }
     }
 
-    private void BuildUVs()
+    public void BuildUVs()
     {
         GameScene gameScene = (GameScene) GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         Grid grid = gameScene.GetComponentInChildren<Grid>();
@@ -150,6 +199,8 @@ public class ShapeMesh : MonoBehaviour
 
             m_UVs.Add(uv);
         }
+
+        m_meshUVsDirty = true;
     }
 
     /**
@@ -201,6 +252,13 @@ public class ShapeMesh : MonoBehaviour
         m_maxIndex += 4;
     }
 
+    public void SetCellTintColor(ShapeCell cell, Color color)
+    {
+        for (int i = cell.m_startIndex; i != cell.m_endIndex; i++)
+        {
+            cell.SetColor(color);
+        }
+    }
 
     //-------------------------------------------------------------//
     //                        SEPARATION
@@ -317,44 +375,44 @@ public class ShapeMesh : MonoBehaviour
     //    }
     //}
 
-    /**
-     * Sets the color of this shape
-     * **/
-    public void SetColor(Color color)
-    {
-        m_shapeData.m_color = color;
-        m_shapeData.PropagateColorToTriangles();
+    ///**
+    // * Sets the color of this shape
+    // * **/
+    //public void SetColor(Color color)
+    //{
+    //    m_shapeData.m_color = color;
+    //    m_shapeData.PropagateColorToTriangles();
 
-        Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
+    //    Mesh mesh = this.GetComponent<MeshFilter>().sharedMesh;
 
-        Color[] meshColors = mesh.colors;
-        for (int i = 0; i != mesh.vertexCount; i++)
-        {
-            meshColors[i] = color;
-        }
+    //    Color[] meshColors = mesh.colors;
+    //    for (int i = 0; i != mesh.vertexCount; i++)
+    //    {
+    //        meshColors[i] = color;
+    //    }
 
-        mesh.colors = meshColors;
-    }
+    //    mesh.colors = meshColors;
+    //}
 
-    /**
-     * Shift all m_gridTriangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
-     * **/
-    public void ShiftShapeVertices(Vector2 shift)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_shapeData.m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = m_shapeData.m_triangles[iTriangleIndex];
-            Vector2[] trianglePoints = triangle.m_points;
-            for (int iPointIndex = 0; iPointIndex != 3; iPointIndex++)
-            {
-                trianglePoints[iPointIndex] += shift;
-            }
-        }
+    ///**
+    // * Shift all m_gridTriangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
+    // * **/
+    //public void ShiftShapeVertices(Vector2 shift)
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != m_shapeData.m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        BaseTriangle triangle = m_shapeData.m_triangles[iTriangleIndex];
+    //        Vector2[] trianglePoints = triangle.m_points;
+    //        for (int iPointIndex = 0; iPointIndex != 3; iPointIndex++)
+    //        {
+    //            trianglePoints[iPointIndex] += shift;
+    //        }
+    //    }
 
-        for (int iContourPointIdx = 0; iContourPointIdx != m_shapeData.m_contour.Count; iContourPointIdx++)
-        {
-            m_shapeData.m_contour[iContourPointIdx] += shift;
-        }
-    }
+    //    for (int iContourPointIdx = 0; iContourPointIdx != m_shapeData.m_contour.Count; iContourPointIdx++)
+    //    {
+    //        m_shapeData.m_contour[iContourPointIdx] += shift;
+    //    }
+    //}
 }
 

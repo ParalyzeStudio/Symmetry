@@ -103,7 +103,8 @@ public class Contour : List<Vector2>
                         splitContour.Add(contour[k]);
                     }
 
-                    splitContours.Add(splitContour);
+                    if (splitContour.Count > 2)
+                        splitContours.Add(splitContour);
 
                     //replace the contour with the sub contour
                     contour = contour.SubContour(i, farthestEqualVertexIndex - i);
@@ -113,7 +114,8 @@ public class Contour : List<Vector2>
             }
             if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
             {
-                splitContours.Add(contour);
+                if (contour.Count > 2)
+                    splitContours.Add(contour);
                 break;
             }
         }
@@ -156,6 +158,28 @@ public class Contour : List<Vector2>
         {
             this[i] *= scaleConstant;
         }
+    }
+
+    /**
+     * Returns the contour vertex with the minimal x-coordinate along the parameter 'axis'
+     * **/
+    public Vector2 GetLeftMostPointAlongAxis(Vector2 axisDirection)
+    {
+        Quaternion rotation = Quaternion.LookRotation(GeometryUtils.BuildVector3FromVector2(axisDirection, 0));
+
+        //create a rotated copy of the contour
+        Contour rotatedContour = new Contour();
+        rotatedContour.Capacity = this.Count;
+        int leftMostVertexIndex = 0; //the index of the last left most vertex found
+        float minX = float.MaxValue; //the current min x-coordinate found
+        for (int i = 0; i != this.Count; i++)
+        {
+            Vector2 rotatedVertex = rotation * this[i];
+            if (rotatedVertex.x < minX)
+                leftMostVertexIndex = i;
+        }
+
+        return this[leftMostVertexIndex];
     }
 }
 

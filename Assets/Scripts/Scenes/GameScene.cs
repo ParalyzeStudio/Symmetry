@@ -87,7 +87,9 @@ public class GameScene : GUIScene
         ShowActionButtons();
 
         //Show starting shapes
-        ShowInitialShapes();
+        CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 0.5f);
+        //ShowInitialShapes();
 
         //Build Axes holder
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
@@ -121,13 +123,6 @@ public class GameScene : GUIScene
         //                        500);
 
         m_isShown = true;
-
-
-        Vector2 testGridPoint = new Vector2(4, 5);
-        Vector2 testWorldPoint = m_grid.GetPointWorldCoordinatesFromGridCoordinates(testGridPoint);
-
-        Shape debugShape = m_shapes.GetComponentInChildren<ShapeMesh>().m_shapeData;
-        bool result = debugShape.ContainsPoint(testWorldPoint);
     }
 
     /**
@@ -150,7 +145,7 @@ public class GameScene : GUIScene
 
         //Voxel grid
         m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(6);
+        m_voxelGrid.Init(4);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
@@ -439,7 +434,7 @@ public class GameScene : GUIScene
     /**
      * We set the shapes the player initally starts with
      * **/
-    private void ShowInitialShapes(float fDelay = 0.0f)
+    private void ShowInitialShapes()
     {
         m_shapes = this.gameObject.GetComponentInChildren<Shapes>();
         m_shapes.gameObject.transform.parent = this.gameObject.transform;
