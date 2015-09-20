@@ -8,13 +8,35 @@ public class ShapeVoxelGrid : MonoBehaviour
     public GameObject m_shapeCellPfb;
 
     public float m_voxelSize { get; set; }
+
     private ShapeVoxel[] m_voxels;
+    public ShapeVoxel[] Voxels
+    {
+        get
+        {
+            return m_voxels;
+        }
+    }
 
     private GameObject m_voxelsHolder;
     private GameObject m_cellsHolder;
     private int m_size;
     private int m_xVoxelsCount; //the number of voxels along the x-dimension of the grid
+    public int XVoxelsCount
+    {
+        get
+        {
+            return m_xVoxelsCount;
+        }
+    }
     private int m_yVoxelsCount; //the number of voxels along the y-dimension of the grid
+    public int YVoxelsCount
+    {
+        get
+        {
+            return m_yVoxelsCount;
+        }
+    }
 
     /***
      * Init the voxel grid with a size and a density (number of voxels per grid unit)
@@ -72,126 +94,6 @@ public class ShapeVoxelGrid : MonoBehaviour
         voxelAnimator.SetColor(Color.blue);
 
         m_voxels[i] = voxel;
-    }
-
-    /**
-     * Refresh the mesh by drawing new polygons where current shapes are
-     * **/
-    public void Refresh()
-    {        
-        AssignShapesToVoxels();
-        TriangulateShapeMeshes();
-    }
-
-    /**
-     * Assign one single shape or none (set shape to null in this case) to every voxel in this grid
-     **/
-    public void AssignShapesToVoxels()
-    {
-        List<GameObject> shapesObjects = this.transform.parent.gameObject.GetComponentInChildren<Shapes>().m_shapesObjects;
-
-        for (int iVoxelIdx = 0; iVoxelIdx != m_voxels.Length; iVoxelIdx++)
-        {
-            ShapeVoxel voxel = m_voxels[iVoxelIdx];
-            voxel.ClearOverlappingShapes(); //clear any previous shape set on this voxel
-
-            for (int iShapeIdx = 0; iShapeIdx != shapesObjects.Count; iShapeIdx++)
-            {
-                Shape shape = shapesObjects[iShapeIdx].GetComponent<ShapeMesh>().m_shapeData;
-
-                if (shape.ContainsPoint(voxel.m_position))
-                {
-                    voxel.m_overlappingShapes.Add(shape);
-
-                    //Debug.Log("voxelPosition:" + voxelWorldPosition);
-
-                    break; //we break because only one shape can contain this voxel
-                }
-            }            
-        }        
-    }
-
-    /**
-     * Triangulate polygons that are being drawn
-     * **/
-    private void TriangulateShapeMeshes()
-    {
-        TriangulateCellRows();
-
-        //if (m_xNeighbor != null)
-        //{
-        //    m_dummyX.BecomeXDummyOf(m_xNeighbor.m_voxels[0], m_gridSize);
-        //}
-        //FillFirstRowCache();
-        //TriangulateCellRows();
-
-        //if (m_yNeighbor != null)
-        //{
-        //    TriangulateGapRow();
-        //}
-
-        //m_mesh.vertices = m_vertices.ToArray();
-        //m_mesh.triangles = m_triangles.ToArray();
-    }
-
-    private void TriangulateCellRows()
-    {
-        List<GameObject> shapesObjects = this.transform.parent.gameObject.GetComponentInChildren<Shapes>().m_shapesObjects;
-
-        for (int iShapeIdx = 0; iShapeIdx != shapesObjects.Count; iShapeIdx++)
-        {
-            ShapeMesh shapeMesh = shapesObjects[iShapeIdx].GetComponent<ShapeMesh>();
-            
-            for (int i = 0, y = 0; y != m_yVoxelsCount - 1; y++)
-            {
-                for (int x = 0; x < m_xVoxelsCount - 1; x++, i++)
-                {
-                    ShapeVoxel
-                               a = m_voxels[i],
-                               b = m_voxels[i + 1],
-                               c = m_voxels[i + m_xVoxelsCount],
-                               d = m_voxels[i + m_xVoxelsCount + 1];
-
-                    GameObject cellObject = Instantiate(m_shapeCellPfb);
-                    cellObject.name = "Cell";
-                    cellObject.transform.parent = this.transform;
-                    ShapeCell cell = cellObject.GetComponent<ShapeCell>();
-                    cell.Init(shapeMesh, a, b, c, d);
-                    shapeMesh.m_cells.Add(cell);
-                    shapeMesh.TriangulateVoxelCell(cell);
-                }
-            }
-
-            shapeMesh.BuildUVs();
-            shapeMesh.RefreshMesh();
-        }
-
-        //int cells = m_ - 1;
-        //for (int i = 0, y = 0; y < cells; y++, i++)
-        //{
-        //    SwapRowCaches();
-        //    CacheFirstCorner(m_voxels[i + m_resolution]);
-        //    CacheNextMiddleEdge(m_voxels[i], m_voxels[i + m_resolution]);
-
-        //    for (int x = 0; x < cells; x++, i++)
-        //    {
-        //        Voxel
-        //               a = m_voxels[i],
-        //               b = m_voxels[i + 1],
-        //               c = m_voxels[i + m_resolution],
-        //               d = m_voxels[i + m_resolution + 1];
-        //        int cacheIndex = x * 2;
-        //        CacheNextEdgeAndCorner(cacheIndex, c, d);
-        //        CacheNextMiddleEdge(b, d);
-        //        TriangulateCell(cacheIndex, a, b, c, d);
-        //    }
-
-        //    if (m_xNeighbor != null)
-        //    {
-        //        //Debug.Log("TriangulateGapCell i:" + i + " y:" + y);
-        //        TriangulateGapCell(i);
-        //    }
-        //}
     }
 }
 

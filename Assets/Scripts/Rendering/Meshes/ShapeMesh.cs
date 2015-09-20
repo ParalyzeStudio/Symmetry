@@ -18,6 +18,7 @@ public class ShapeMesh : MonoBehaviour
     private List<Vector2> m_UVs;
 
     public Material m_shapeTilesMaterial;
+    public GameObject m_shapeCellPfb;
 
     public List<ShapeCell> m_cells { get; set; }
 
@@ -25,6 +26,9 @@ public class ShapeMesh : MonoBehaviour
     public bool m_meshIndicesDirty { get; set; }
     public bool m_meshColorsDirty { get; set; }
     public bool m_meshUVsDirty { get; set; }
+
+    private Grid m_grid; //global instance of the game scene grid
+    private ShapeVoxelGrid m_voxelGrid; //global instance of the game scene voxel grid
 
     public void Init(Shape shapeData)
     {
@@ -62,24 +66,92 @@ public class ShapeMesh : MonoBehaviour
     /**
      * Show the shape
      * **/
-    public void Show(bool bAnimated = false)
+    public void Render(bool bAnimated = false)
     {
         if (bAnimated)
         {
-            for (int i = 0; i != m_cells.Count; i++)
-            {
-                ShowVoxelCell(m_cells[i]);
-            }
+            AssignVoxels();
+            BuildCells();
+            ShowCells();            
         }
         else
         {
+            //Simply add the shape triangles to the mesh
+            for (int i = 0; i != m_shapeData.m_triangles.Count; i++)
+            {
+                BaseTriangle shapeTriangle = m_shapeData.m_triangles[i];
+                AddTriangle(shapeTriangle.m_points[0], shapeTriangle.m_points[2], shapeTriangle.m_points[1]);
+            }
 
+            m_meshVerticesDirty = true;
+            m_meshIndicesDirty = true;
+            m_meshColorsDirty = true;
         }
     }
 
-    public void ShowVoxelCell(ShapeCell cell, bool bAnimated = false, float fDuration = 0.0f, float fDelay = 0.0f)
+    /**
+     * Assign this shape to every voxel contained in it
+     **/
+    private void AssignVoxels()
     {
-        //First triangulate the cell
+        ShapeVoxel[] voxels = GetVoxelGrid().Voxels;
+
+        for (int iVoxelIdx = 0; iVoxelIdx != voxels.Length; iVoxelIdx++)
+        {
+            ShapeVoxel voxel = voxels[iVoxelIdx];
+
+            if (m_shapeData.ContainsPoint(voxel.m_position))
+                voxel.AddOverlappingShape(m_shapeData);
+        }        
+    }
+
+    /**
+     * Build the cells on this shape mesh based on the assigned voxels
+     * **/
+    private void BuildCells()
+    {
+        ShapeVoxelGrid voxelGrid = GetVoxelGrid();
+
+        for (int i = 0, y = 0; y != voxelGrid.YVoxelsCount - 1; y++)
+        {
+            for (int x = 0; x < voxelGrid.XVoxelsCount - 1; x++, i++)
+            {
+                ShapeVoxel
+                           a = voxelGrid.Voxels[i],
+                           b = voxelGrid.Voxels[i + 1],
+                           c = voxelGrid.Voxels[i + voxelGrid.XVoxelsCount],
+                           d = voxelGrid.Voxels[i + voxelGrid.XVoxelsCount + 1];
+
+                //only build a cell if a one of the 4 voxels is contained in this shape
+                if (a.IsOverlappedByShape(this.m_shapeData) ||
+                    b.IsOverlappedByShape(this.m_shapeData) ||
+                    c.IsOverlappedByShape(this.m_shapeData) ||
+                    d.IsOverlappedByShape(this.m_shapeData))
+                {
+                    GameObject cellObject = Instantiate(m_shapeCellPfb);
+                    cellObject.name = "Cell";
+                    cellObject.transform.parent = this.transform;
+                    ShapeCell cell = cellObject.GetComponent<ShapeCell>();
+                    cell.Init(this, a, b, c, d);
+                    m_cells.Add(cell);
+                }
+            }
+        }
+    }
+
+    /**
+     * Show cells using a sweeping line
+     * **/
+    private void ShowCells()
+    {
+        //for (int i = 0; i != m_cells.Count; i++)
+        //{
+        //    ShowVoxelCell(m_cells[i]);
+        //}
+    }
+
+    public void ShowVoxelCell(ShapeCell cell)
+    {
         TriangulateVoxelCell(cell);
     }
 
@@ -123,10 +195,6 @@ public class ShapeMesh : MonoBehaviour
         cell.m_startIndex = m_vertices.Count;
         AddQuad(cell.m_voxelA.m_position, cell.m_voxelC.m_position, cell.m_voxelB.m_position, cell.m_voxelD.m_position);
         cell.m_endIndex = m_vertices.Count;
-
-        m_meshVerticesDirty = true;
-        m_meshIndicesDirty = true;
-        m_meshColorsDirty = true;
     }
 
     private void ClipCell(ShapeCell cell)
@@ -152,16 +220,141 @@ public class ShapeMesh : MonoBehaviour
             }
         }
         cell.m_endIndex = m_vertices.Count;
+    }
+
+    /**
+     * Return the texture UV coordinates associated with this mesh vertex
+     * **/
+    private Vector2 GetUVsForVertex(Vector3 vertex)
+    {
+        Grid grid = GetGrid();
+        ShapeVoxelGrid voxelGrid = GetVoxelGrid();
+        Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
+
+        Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
+        localVertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
+        Vector2 uv = localVertex / voxelGrid.m_voxelSize; //normalize coordinates of the vertex so it is in UV mode
+
+        return uv;
+    }
+
+    /**
+    * Add a triangle to this shape mesh
+    *   2
+     * / \
+    * 1---3
+    * **/
+    private void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
+    {
+        //add vertices
+        m_vertices.Add(point1);
+        m_vertices.Add(point2);
+        m_vertices.Add(point3);
+
+        //add indices and colors
+        for (int i = 0; i != 3; i++)
+        {
+            m_indices.Add(m_maxIndex + i + 1);
+            m_colors.Add(new Color(0, 1, 0, 0.3f));            
+        }
+
+        m_maxIndex += 3; //increment the max index
+
+        //add UVs
+        m_UVs.Add(GetUVsForVertex(point1));
+        m_UVs.Add(GetUVsForVertex(point2));
+        m_UVs.Add(GetUVsForVertex(point3));
 
         m_meshVerticesDirty = true;
         m_meshIndicesDirty = true;
         m_meshColorsDirty = true;
+        m_meshUVsDirty = true;
+    }
+    
+    /**
+     * Add a quad to this shape mesh
+     * 2--4
+     * |  |
+     * 1--3
+     * **/
+    private void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+    {
+        //add vertices
+        m_vertices.Add(point1);
+        m_vertices.Add(point2);
+        m_vertices.Add(point3);
+        m_vertices.Add(point4);
+
+        //add colors
+        for (int i = 0; i != 4; i++)
+        {
+            m_colors.Add(new Color(0, 1, 0, 0.3f));
+        }
+
+        //add indices
+        m_indices.Add(m_maxIndex + 1);
+        m_indices.Add(m_maxIndex + 2);
+        m_indices.Add(m_maxIndex + 3);
+        m_indices.Add(m_maxIndex + 3);
+        m_indices.Add(m_maxIndex + 2);
+        m_indices.Add(m_maxIndex + 4);
+
+        m_maxIndex += 4;
+
+        //add UVs
+        m_UVs.Add(GetUVsForVertex(point1));
+        m_UVs.Add(GetUVsForVertex(point2));
+        m_UVs.Add(GetUVsForVertex(point3));
+        m_UVs.Add(GetUVsForVertex(point4));
+
+        m_meshVerticesDirty = true;
+        m_meshIndicesDirty = true;
+        m_meshColorsDirty = true;
+        m_meshUVsDirty = true;
     }
 
-    public void RefreshMesh()
+    public void SetCellTintColor(ShapeCell cell, Color color)
     {
-        m_mesh.Clear();
+        for (int i = cell.m_startIndex; i != cell.m_endIndex; i++)
+        {
+            cell.SetColor(color);
+        }
+    }
 
+    private Grid GetGrid()
+    {
+        if (m_grid == null)
+        {
+            if (m_voxelGrid == null)
+            {
+                m_grid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<Grid>();
+                m_voxelGrid = m_grid.gameObject.GetComponent<ShapeVoxelGrid>();
+            }
+            else
+                m_grid = m_voxelGrid.gameObject.GetComponent<Grid>();
+        }
+
+        return m_grid;
+    }
+
+    private ShapeVoxelGrid GetVoxelGrid()
+    {
+        if (m_voxelGrid == null)
+        {
+            if (m_grid == null)
+            {
+                m_voxelGrid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<ShapeVoxelGrid>();
+                m_grid = m_voxelGrid.gameObject.GetComponent<Grid>();
+            }
+            else
+                m_voxelGrid = m_grid.gameObject.GetComponent<ShapeVoxelGrid>();
+        }
+
+        return m_voxelGrid;
+    }
+
+    public void Update()
+    {
         if (m_meshVerticesDirty)
         {
             m_mesh.vertices = m_vertices.ToArray();
@@ -181,82 +374,6 @@ public class ShapeMesh : MonoBehaviour
         {
             m_mesh.uv = m_UVs.ToArray();
             m_meshUVsDirty = false;
-        }
-    }
-
-    public void BuildUVs()
-    {
-        GameScene gameScene = (GameScene) GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        Grid grid = gameScene.GetComponentInChildren<Grid>();
-        ShapeVoxelGrid voxelGrid = gameScene.GetComponentInChildren<ShapeVoxelGrid>();
-        Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
-
-        for (int i = 0; i != m_vertices.Count; i++)
-        {
-            Vector3 localVertex = m_vertices[i] - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
-            localVertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
-            Vector2 uv = localVertex / voxelGrid.m_voxelSize; //normalize coordinates of the vertex so it is in UV mode
-
-            m_UVs.Add(uv);
-        }
-
-        m_meshUVsDirty = true;
-    }
-
-    /**
-    * Add a triangle to this shape mesh
-    *   2
-     * / \
-    * 1---3
-    * **/
-    private void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
-    {
-        m_vertices.Add(point1);
-        m_vertices.Add(point2);
-        m_vertices.Add(point3);
-
-        for (int i = 0; i != 3; i++)
-        {
-            m_indices.Add(m_maxIndex + i + 1);
-            m_colors.Add(new Color(0, 1, 0, 0.3f));
-        }
-
-        m_maxIndex += 3;
-    }
-    
-    /**
-     * Add a quad to this shape mesh
-     * 2--4
-     * |  |
-     * 1--3
-     * **/
-    private void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
-    {        
-        m_vertices.Add(point1);
-        m_vertices.Add(point2);
-        m_vertices.Add(point3);
-        m_vertices.Add(point4);
-
-        for (int i = 0; i != 4; i++)
-        {
-            m_colors.Add(new Color(0, 1, 0, 0.3f));
-        }
-
-        m_indices.Add(m_maxIndex + 1);
-        m_indices.Add(m_maxIndex + 2);
-        m_indices.Add(m_maxIndex + 3);
-        m_indices.Add(m_maxIndex + 3);
-        m_indices.Add(m_maxIndex + 2);
-        m_indices.Add(m_maxIndex + 4);
-
-        m_maxIndex += 4;
-    }
-
-    public void SetCellTintColor(ShapeCell cell, Color color)
-    {
-        for (int i = cell.m_startIndex; i != cell.m_endIndex; i++)
-        {
-            cell.SetColor(color);
         }
     }
 

@@ -87,9 +87,9 @@ public class GameScene : GUIScene
         ShowActionButtons();
 
         //Show starting shapes
-        CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
-        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 0.5f);
-        //ShowInitialShapes();
+        //CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+        //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 0.5f);
+        ShowInitialShapes();
 
         //Build Axes holder
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
@@ -461,7 +461,7 @@ public class GameScene : GUIScene
         //shapesAnimator.SetOpacity(0);
         //shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.5f, fDelay);
 
-        m_voxelGrid.Refresh();
+        //m_voxelGrid.Refresh();
 
         ////fusion initial shapes
         //GameObject shapeObject = m_shapes.m_shapesObj[0];
