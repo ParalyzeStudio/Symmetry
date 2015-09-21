@@ -165,18 +165,19 @@ public class Contour : List<Vector2>
      * **/
     public Vector2 GetLeftMostPointAlongAxis(Vector2 axisDirection)
     {
-        Quaternion rotation = Quaternion.LookRotation(GeometryUtils.BuildVector3FromVector2(axisDirection, 0));
+        Quaternion rotation = Quaternion.FromToRotation(GeometryUtils.BuildVector3FromVector2(axisDirection, 0), new Vector3(1,0,0));
 
         //create a rotated copy of the contour
-        Contour rotatedContour = new Contour();
-        rotatedContour.Capacity = this.Count;
         int leftMostVertexIndex = 0; //the index of the last left most vertex found
         float minX = float.MaxValue; //the current min x-coordinate found
         for (int i = 0; i != this.Count; i++)
         {
             Vector2 rotatedVertex = rotation * this[i];
             if (rotatedVertex.x < minX)
+            {
+                minX = rotatedVertex.x;
                 leftMostVertexIndex = i;
+            }
         }
 
         return this[leftMostVertexIndex];

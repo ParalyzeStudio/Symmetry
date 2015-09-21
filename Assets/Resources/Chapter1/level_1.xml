@@ -32,9 +32,9 @@
 			<contour>
 				<point column="3" line="4"/>
 				<point column="3" line="3"/>
-				<point column="5" line="3.5"/>
-				<point column="4.5" line="5"/>
-				<point column="4" line="5.5"/>
+				<point column="5" line="3"/>
+				<point column="5" line="5"/>
+				<point column="4" line="5"/>
 				<point column="4" line="4"/>
 			</contour>
 		</shape>

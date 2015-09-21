@@ -7,9 +7,21 @@ using ClipperLib;
  * Class that renders a mesh formed with grid triangles
  * **/
 public class ShapeMesh : MonoBehaviour
-{  
+{
+    public const float SWEEP_LINE_ANGLE = -45.0f;
+    public const float SWEEP_LINE_SPEED = 300.0f;
+    public const int SHAPE_TEXTURES_TILING = 6; //textures is 6x6 squares
+
     public Shape m_shapeData { get; set; } //the shape data we want to render
 
+    //Prefabs
+    public Material m_shapeTilesMaterial;
+    public GameObject m_shapeCellPfb;
+
+    //cells
+    public List<ShapeCell> m_cells { get; set; }
+
+    //mesh
     private Mesh m_mesh;
     private List<Vector3> m_vertices;
     private List<int> m_indices;
@@ -17,15 +29,19 @@ public class ShapeMesh : MonoBehaviour
     private List<Color> m_colors;
     private List<Vector2> m_UVs;
 
-    public Material m_shapeTilesMaterial;
-    public GameObject m_shapeCellPfb;
-
-    public List<ShapeCell> m_cells { get; set; }
-
     public bool m_meshVerticesDirty { get; set; }
     public bool m_meshIndicesDirty { get; set; }
     public bool m_meshColorsDirty { get; set; }
     public bool m_meshUVsDirty { get; set; }
+
+    //sweep line
+    private Vector2 m_sweepLineDirection;
+    private Vector2 m_sweepLinePoint;
+    private float m_sweepLineSpeed;
+    private bool m_sweeping;
+
+    //public GameObject m_sweepLinePfb;
+    //private GameObject m_debugSweepLineObject;
 
     private Grid m_grid; //global instance of the game scene grid
     private ShapeVoxelGrid m_voxelGrid; //global instance of the game scene voxel grid
@@ -140,14 +156,20 @@ public class ShapeMesh : MonoBehaviour
     }
 
     /**
-     * Show cells using a sweeping line
+     * Show cells using a sweep line
      * **/
     private void ShowCells()
     {
-        //for (int i = 0; i != m_cells.Count; i++)
-        //{
-        //    ShowVoxelCell(m_cells[i]);
-        //}
+        m_sweeping = true;
+        m_sweepLineSpeed = SWEEP_LINE_SPEED;
+
+        m_sweepLineDirection = Quaternion.AngleAxis(SWEEP_LINE_ANGLE, Vector3.forward) * new Vector3(1, 0, 0);
+        Vector2 sweepLineNormal = new Vector2(-m_sweepLineDirection.y, m_sweepLineDirection.x);
+        m_sweepLinePoint = this.m_shapeData.m_contour.GetLeftMostPointAlongAxis(sweepLineNormal);
+
+        //m_debugSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+        //m_debugSweepLineObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(m_sweepLinePoint, -50);
+        //m_debugSweepLineObject.transform.rotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), m_sweepLineDirection);
     }
 
     public void ShowVoxelCell(ShapeCell cell)
@@ -158,7 +180,7 @@ public class ShapeMesh : MonoBehaviour
     /**
      * Triangulate some voxel cell and add vertices to this mesh
      * **/
-    public void TriangulateVoxelCell(ShapeCell cell)
+    public bool TriangulateVoxelCell(ShapeCell cell)
     {
         int cellType = 0;
         if (cell.m_voxelA.IsOverlappedByShape(this.m_shapeData))
@@ -181,10 +203,15 @@ public class ShapeMesh : MonoBehaviour
         if (cellType > 0)
         {
             if (cellType == 15)
+            {
                 TriangulateFullQuadCell(cell);
+                return true;
+            }
             else
-                ClipCell(cell);
+                return ClipCell(cell);
         }
+
+        return false;
     }
 
     /**
@@ -194,10 +221,10 @@ public class ShapeMesh : MonoBehaviour
     {
         cell.m_startIndex = m_vertices.Count;
         AddQuad(cell.m_voxelA.m_position, cell.m_voxelC.m_position, cell.m_voxelB.m_position, cell.m_voxelD.m_position);
-        cell.m_endIndex = m_vertices.Count;
+        cell.m_endIndex = m_vertices.Count - 1;
     }
 
-    private void ClipCell(ShapeCell cell)
+    private bool ClipCell(ShapeCell cell)
     {
         Contour cellContour = new Contour(4);
         cellContour.Add(cell.m_voxelA.m_position);
@@ -206,6 +233,9 @@ public class ShapeMesh : MonoBehaviour
         cellContour.Add(cell.m_voxelC.m_position);
         Shape cellShape = new Shape(false, cellContour);
         List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(this.m_shapeData, cellShape, ClipType.ctIntersection);
+
+        if (clipResult.Count == 0) //no intersection
+            return false;
 
         cell.m_startIndex = m_vertices.Count;
 
@@ -219,8 +249,32 @@ public class ShapeMesh : MonoBehaviour
                 AddTriangle(triangle.m_points[0], triangle.m_points[2], triangle.m_points[1]);
             }
         }
-        cell.m_endIndex = m_vertices.Count;
+        cell.m_endIndex = m_vertices.Count - 1;
+
+        return true;
     }
+
+    public void SetCellTintOpacity(ShapeCell cell, float opacity)
+    {
+        for (int i = cell.m_startIndex; i != cell.m_endIndex + 1; i++)
+        {
+            Color oldColor = m_colors[i];
+            Color newColor = new Color(oldColor.r, oldColor.g, oldColor.b, opacity);
+            m_colors[i] = newColor;
+        }
+
+        m_meshColorsDirty = true;
+    }
+
+    public void SetCellTintColor(ShapeCell cell, Color color)
+    {
+        for (int i = cell.m_startIndex; i != cell.m_endIndex + 1; i++)
+        {
+            m_colors[i] = color;
+        }
+
+        m_meshColorsDirty = true;
+    }    
 
     /**
      * Return the texture UV coordinates associated with this mesh vertex
@@ -234,6 +288,7 @@ public class ShapeMesh : MonoBehaviour
         Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
         localVertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
         Vector2 uv = localVertex / voxelGrid.m_voxelSize; //normalize coordinates of the vertex so it is in UV mode
+        uv /= SHAPE_TEXTURES_TILING; //divide uvs by the number of tiles along each dimension inside the texture
 
         return uv;
     }
@@ -255,7 +310,7 @@ public class ShapeMesh : MonoBehaviour
         for (int i = 0; i != 3; i++)
         {
             m_indices.Add(m_maxIndex + i + 1);
-            m_colors.Add(new Color(0, 1, 0, 0.3f));            
+            m_colors.Add(new Color(0, 0, 0, 0)); //add empty color        
         }
 
         m_maxIndex += 3; //increment the max index
@@ -288,7 +343,7 @@ public class ShapeMesh : MonoBehaviour
         //add colors
         for (int i = 0; i != 4; i++)
         {
-            m_colors.Add(new Color(0, 1, 0, 0.3f));
+            m_colors.Add(new Color(0, 0, 0, 0)); //add empty color
         }
 
         //add indices
@@ -311,14 +366,6 @@ public class ShapeMesh : MonoBehaviour
         m_meshIndicesDirty = true;
         m_meshColorsDirty = true;
         m_meshUVsDirty = true;
-    }
-
-    public void SetCellTintColor(ShapeCell cell, Color color)
-    {
-        for (int i = cell.m_startIndex; i != cell.m_endIndex; i++)
-        {
-            cell.SetColor(color);
-        }
     }
 
     private Grid GetGrid()
@@ -355,6 +402,7 @@ public class ShapeMesh : MonoBehaviour
 
     public void Update()
     {
+        //refresh the mesh if needed
         if (m_meshVerticesDirty)
         {
             m_mesh.vertices = m_vertices.ToArray();
@@ -374,6 +422,44 @@ public class ShapeMesh : MonoBehaviour
         {
             m_mesh.uv = m_UVs.ToArray();
             m_meshUVsDirty = false;
+        }
+
+        //move sweep line
+        if (m_sweeping)
+        {
+            float dt = Time.deltaTime;
+
+            Vector2 sweepLineNormal = new Vector2(-m_sweepLineDirection.y, m_sweepLineDirection.x); //take the normal of the sweeping line by rotating its direction by +PI/2
+            m_sweepLinePoint += (dt * m_sweepLineSpeed * sweepLineNormal); //translate the line
+
+            //m_debugSweepLineObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(m_sweepLinePoint,  -50);
+
+            //Test if cells are on the left or on the right of this line
+            Vector2 sweepLinePoint2 = m_sweepLinePoint + 100.0f * m_sweepLineDirection;
+            bool allCellsSwept = true; //did the line swept all cells already
+            for (int iCellIdx = 0; iCellIdx != m_cells.Count; iCellIdx++)
+            {
+                ShapeCell cell = m_cells[iCellIdx];
+                float det = MathUtils.Determinant(m_sweepLinePoint, sweepLinePoint2, cell.m_position);
+
+                if (!cell.Showing && !cell.m_swept)
+                {
+                    allCellsSwept = false;
+                    if (det <= 0) //cell is on the left of the line
+                    {
+                        if (TriangulateVoxelCell(cell))
+                            cell.Show();
+                        else //remove empty cell
+                        {
+                            m_cells.Remove(cell);
+                            iCellIdx--;
+                        }
+                    }
+                }                
+            }
+
+            if (allCellsSwept)
+                m_sweeping = false;
         }
     }
 

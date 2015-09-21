@@ -40,7 +40,7 @@ public class Shapes : MonoBehaviour
 
         ShapeMesh shapeMesh = clonedShapeObject.GetComponent<ShapeMesh>();
         shapeMesh.Init(shapeData);
-        shapeMesh.Render();
+        shapeMesh.Render(true);
         //shapeMesh.Render(ShapeMesh.RenderFaces.DOUBLE_SIDED);
 
         ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();

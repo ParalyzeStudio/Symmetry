@@ -64,36 +64,6 @@ public class GameScene : GUIScene
     public override void Show()
     {
         base.Show();
-        GameObjectAnimator sceneAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        sceneAnimator.SetOpacity(1.0f);
-
-        //Display the grid
-        ShowGrid();
-        
-        //Display interface buttons (pause, retry and hints)
-        ShowInterfaceButtons();
-
-        //Display action counter
-        ShowCounter();
-
-        //Show outlines (if applicable)
-        ShowOutlines();
-
-        //Show available symmetry axes
-        BuildConstrainedDirections();
-        ShowAxisConstraintsIcons();
-
-        //Show action buttons
-        ShowActionButtons();
-
-        //Show starting shapes
-        //CallFuncHandler callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
-        //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 0.5f);
-        ShowInitialShapes();
-
-        //Build Axes holder
-        m_axes = this.gameObject.GetComponentInChildren<Axes>();
-        m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
 
         //Gradient
         Chapter displayedChapter = GetLevelManager().m_currentChapter;
@@ -121,8 +91,43 @@ public class GameScene : GUIScene
         //gradientQuad.InitRadial(ColorUtils.GetColorFromRGBAVector4(new Vector4(146,21,51,255)),
         //                        ColorUtils.GetColorFromRGBAVector4(new Vector4(64,12,26,255)),
         //                        500);
+        
+        //Show all elements
+        CallFuncHandler callFuncHandler = GetCallFuncHandler();
+        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
+        //ShowElements();
 
         m_isShown = true;
+    }
+
+    public void ShowElements()
+    {
+        //Display the grid
+        ShowGrid();
+
+        //Display interface buttons (pause, retry and hints)
+        ShowInterfaceButtons();
+
+        //Display action counter
+        ShowCounter();
+
+        //Show outlines (if applicable)
+        ShowOutlines();
+
+        //Show available symmetry axes
+        BuildConstrainedDirections();
+        ShowAxisConstraintsIcons();
+
+        //Show action buttons
+        ShowActionButtons();
+
+        //Show starting shapes
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
+        //ShowInitialShapes();
+
+        //Build Axes holder
+        m_axes = this.gameObject.GetComponentInChildren<Axes>();
+        m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
     }
 
     /**
@@ -145,7 +150,7 @@ public class GameScene : GUIScene
 
         //Voxel grid
         m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(4);
+        m_voxelGrid.Init(8);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
@@ -451,8 +456,8 @@ public class GameScene : GUIScene
 
             GameObject shapeObject = m_shapes.CreateShapeObjectFromData(shape);
 
-            ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
-            shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
+            //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
+            //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
 
         m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);

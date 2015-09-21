@@ -7,7 +7,7 @@ public class ShapeCellAnimator : GameObjectAnimator
         base.SetOpacity(opacity, bPassOnChildren);
 
         ShapeCell shapeCell = this.gameObject.GetComponent<ShapeCell>();
-        shapeCell.SetColor(m_color);
+        shapeCell.SetOpacity(opacity);
     }
 
     public override void SetColor(Color color)

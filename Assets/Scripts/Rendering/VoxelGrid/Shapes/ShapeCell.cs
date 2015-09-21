@@ -12,12 +12,18 @@ public class ShapeCell : MonoBehaviour
     public int m_startIndex { get; set; } //the start index of this cell inside the mesh vertices array
     public int m_endIndex { get; set; }
 
-    //Variables to handle cell animation
-    private bool m_showing;
-    private float m_showingElapsedTime;
-    private float m_showingDuration;
-
     private ShapeMesh m_parentMesh;
+
+    private bool m_showing;
+    public bool Showing
+    {
+        get
+        {
+            return m_showing;
+        }
+    }
+
+    public bool m_swept { get; set; }
 
     public void Init(ShapeMesh parentMesh, ShapeVoxel a, ShapeVoxel b, ShapeVoxel c, ShapeVoxel d)
     {
@@ -31,11 +37,26 @@ public class ShapeCell : MonoBehaviour
         m_position = 0.25f * (m_voxelA.m_position + m_voxelB.m_position + m_voxelC.m_position + m_voxelD.m_position);
     }
 
-    public void Show(bool bAnimated = true, float fDuration = 0.5f)
+    public void Show()
     {
-        m_showing = true;
+        m_swept = true;
+
+        ShapeCellAnimator cellAnimator = this.gameObject.GetComponent<ShapeCellAnimator>();
+        cellAnimator.SetColor(new Color(1, 1, 1, 0));
+        cellAnimator.FadeTo(1.0f, 0.02f);
     }
 
+    /**
+     * Set opacity on all vertices contained in this cell
+     * **/
+    public void SetOpacity(float opacity)
+    {
+        m_parentMesh.SetCellTintOpacity(this, opacity);     
+    }
+
+    /**
+     * Set color on all vertices contained in this cell
+     * **/
     public void SetColor(Color color)
     {
         m_parentMesh.SetCellTintColor(this, color);
