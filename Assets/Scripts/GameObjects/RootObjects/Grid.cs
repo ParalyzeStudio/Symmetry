@@ -17,6 +17,15 @@ public class Grid : MonoBehaviour
     public float m_gridSpacing { get; set; }
     //public GameObject m_gridConstraintAnchorPfb;
 
+    public enum GridEdge
+    {
+        NONE = 0,
+        LEFT,
+        BOTTOM,
+        RIGHT,
+        TOP
+    }
+
     public void Build()
     {
         GameObject pointsHolder = new GameObject("Points");
@@ -53,7 +62,7 @@ public class Grid : MonoBehaviour
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
-        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
+        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);       
 
         //Build anchors
         m_gridAnchorMaterial = Instantiate(m_positionColorMaterial);
@@ -263,6 +272,114 @@ public class Grid : MonoBehaviour
             return GetPointGridCoordinatesFromWorldCoordinates(m_anchors[iMinDistanceAnchorIndex].transform.position);
         else
             return new Vector2(0, 0);
+    }
+
+    public struct GridBoxPoint
+    {
+        public GridBoxPoint(Vector2 position, GridEdge edge) { m_position = position; m_edge = edge; }
+
+        public Vector2 m_position;
+        public GridEdge m_edge;
+    }
+
+    /**
+    * Find all intersections between a line and the box determined by grid boundaries
+    * linePoint has to be specified in grid coordinates
+    * **/
+    public GridBoxPoint[] FindLineGridBoxIntersections(Vector2 linePoint, Vector2 lineDirection)
+    {
+        GridBoxPoint[] intersections = new GridBoxPoint[2];
+        int intersectionIndex = 0;
+
+        //bool intersects;
+        //Vector2 intersection;
+        //Check intersection with left grid border
+        GridBoxPoint intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.LEFT, linePoint, lineDirection);
+        AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+
+        //Check intersection with top grid border
+        intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.TOP, linePoint, lineDirection);
+        AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+
+        //Check intersection with right grid border
+        if (intersectionIndex < 2)
+        {
+            intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.RIGHT, linePoint, lineDirection);
+            AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+        }
+
+        //Check intersection with bottom grid border
+        if (intersectionIndex < 2)
+        {
+            intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.BOTTOM, linePoint, lineDirection);
+            AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+        }
+
+        return intersections;
+    }
+
+    /**
+     * Check if a line intersects a grid edge
+     * **/
+    private GridBoxPoint CheckLineIntersectionOnGridEdge(GridEdge edge, Vector2 linePoint, Vector2 lineDirection)
+    {
+        //Set the grid coordinates of edge endpoints
+        Vector2 edgePointA, edgePointB;
+        if (edge == GridEdge.LEFT)
+        {
+            edgePointA = new Vector2(1, m_numLines);
+            edgePointB = new Vector2(1, 1);
+        }
+        else if (edge == GridEdge.BOTTOM)
+        {
+            edgePointA = new Vector2(1, 1);
+            edgePointB = new Vector2(m_numColumns, 1);
+        }
+        else if (edge == GridEdge.RIGHT)
+        {
+            edgePointA = new Vector2(m_numColumns, 1);
+            edgePointB = new Vector2(m_numColumns, m_numLines);
+        }
+        else //GridEdge.TOP
+        {
+            edgePointA = new Vector2(m_numColumns, m_numLines);
+            edgePointB = new Vector2(1, m_numLines);
+        }
+
+        Vector2 intersection;
+        bool intersects;
+        GeometryUtils.SegmentLineIntersection(edgePointA, edgePointB, linePoint, lineDirection, out intersection, out intersects);
+        if (intersects)
+        {
+            GridBoxPoint intersectionPoint = new GridBoxPoint(intersection, edge);
+            return intersectionPoint;
+        }
+
+        return new GridBoxPoint(Vector2.zero, GridEdge.NONE);
+    }
+
+    /**
+     * Add a point in the array of intersection grid box points
+     * **/
+    private void AddIntersectionGridBoxPointAtIndex(ref GridBoxPoint[] array, ref int index, GridBoxPoint point)
+    {
+        if (point.m_edge != GridEdge.NONE)
+        {
+            //Add the point if not already stored
+            if (index == 1)
+            {
+                if (!array[0].m_position.Equals(point.m_position)) //check if point is different from first one
+                {
+                    array[1] = point;
+                    index++;
+                }
+            }
+            else
+            {
+                array[0] = point;
+                index++;
+            }
+        }
     }
 
     ///**

@@ -39,8 +39,7 @@ public class GridTriangulable : Triangulable
             //modify contour points
             for (int i = 0; i != m_contour.Count; i++)
             {
-                Vector2 contourPoint = grid.GetPointGridCoordinatesFromWorldCoordinates(m_contour[i]);
-                m_contour[i] = contourPoint;
+                m_contour[i] = grid.GetPointGridCoordinatesFromWorldCoordinates(m_contour[i]);
             }
 
             //modify holes points
@@ -49,8 +48,17 @@ public class GridTriangulable : Triangulable
                 Contour hole = m_holes[i];
                 for (int j = 0; j != hole.Count; j++)
                 {
-                    Vector2 holePoint = grid.GetPointGridCoordinatesFromWorldCoordinates(hole[j]);
-                    hole[j] = holePoint;
+                    hole[j] = grid.GetPointGridCoordinatesFromWorldCoordinates(hole[j]);
+                }
+            }
+
+            //modify triangles
+            for (int i = 0; i != m_triangles.Count; i++)
+            {
+                BaseTriangle triangle = m_triangles[i];
+                for (int j = 0; j != 3; j++)
+                {
+                    triangle.m_points[j] = grid.GetPointGridCoordinatesFromWorldCoordinates(triangle.m_points[j]);
                 }
             }
         }
@@ -59,8 +67,7 @@ public class GridTriangulable : Triangulable
             //modify contour points
             for (int i = 0; i != m_contour.Count; i++)
             {
-                Vector2 contourPoint = grid.GetPointWorldCoordinatesFromGridCoordinates(m_contour[i]);
-                m_contour[i] = contourPoint;
+                m_contour[i] = grid.GetPointWorldCoordinatesFromGridCoordinates(m_contour[i]);
             }
 
             //modify holes points
@@ -69,8 +76,17 @@ public class GridTriangulable : Triangulable
                 Contour hole = m_holes[i];
                 for (int j = 0; j != hole.Count; j++)
                 {
-                    Vector2 holePoint = grid.GetPointWorldCoordinatesFromGridCoordinates(hole[j]);
-                    hole[j] = holePoint;
+                    hole[j] = grid.GetPointWorldCoordinatesFromGridCoordinates(hole[j]);
+                }
+            }
+
+            //modify triangles
+            for (int i = 0; i != m_triangles.Count; i++)
+            {
+                BaseTriangle triangle = m_triangles[i];
+                for (int j = 0; j != 3; j++)
+                {
+                    triangle.m_points[j] = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[j]);
                 }
             }
         }

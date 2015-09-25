@@ -6,7 +6,7 @@ using ClipperLib;
 /**
  * Class that renders a mesh formed with grid triangles
  * **/
-public class ShapeMesh : MonoBehaviour
+public class ShapeMesh : TexturedMesh
 {
     public const float SWEEP_LINE_ANGLE = -45.0f;
     public const float SWEEP_LINE_SPEED = 300.0f;
@@ -21,19 +21,6 @@ public class ShapeMesh : MonoBehaviour
     //cells
     public List<ShapeCell> m_cells { get; set; }
 
-    //mesh
-    private Mesh m_mesh;
-    private List<Vector3> m_vertices;
-    private List<int> m_indices;
-    private int m_maxIndex; //the max index set on this mesh
-    private List<Color> m_colors;
-    private List<Vector2> m_UVs;
-
-    public bool m_meshVerticesDirty { get; set; }
-    public bool m_meshIndicesDirty { get; set; }
-    public bool m_meshColorsDirty { get; set; }
-    public bool m_meshUVsDirty { get; set; }
-
     //sweep line
     private Vector2 m_sweepLineDirection;
     private Vector2 m_sweepLinePoint;
@@ -46,37 +33,20 @@ public class ShapeMesh : MonoBehaviour
     private Grid m_grid; //global instance of the game scene grid
     private ShapeVoxelGrid m_voxelGrid; //global instance of the game scene voxel grid
 
-    public void Init(Shape shapeData)
+    public override void Init()
     {
-        m_shapeData = shapeData;
-
-        m_mesh = new Mesh();
+        base.Init();
         m_mesh.name = "ShapeMesh";
-        GetComponent<MeshFilter>().sharedMesh = m_mesh;
-
-        m_vertices = new List<Vector3>();
-        m_indices = new List<int>();
-        m_maxIndex = -1;
-        m_colors = new List<Color>();
-        m_UVs = new List<Vector2>();
-
-        m_meshVerticesDirty = false;
-        m_meshIndicesDirty = false;
-        m_meshColorsDirty = false;
-        m_meshUVsDirty = false;
 
         m_cells = new List<ShapeCell>();
     }
 
     /**
-     * Clear the mesh
+     * Assign a shape to this mesh
      * **/
-    public void Clear()
+    public void SetShapeData(Shape shapeData)
     {
-        m_vertices.Clear();
-        m_indices.Clear();
-        m_colors.Clear();
-        m_UVs.Clear();
+        m_shapeData = shapeData;
     }
 
     /**
@@ -274,12 +244,12 @@ public class ShapeMesh : MonoBehaviour
         }
 
         m_meshColorsDirty = true;
-    }    
+    }
 
     /**
      * Return the texture UV coordinates associated with this mesh vertex
      * **/
-    private Vector2 GetUVsForVertex(Vector3 vertex)
+    protected override Vector2 GetUVsForVertex(Vector3 vertex)
     {
         Grid grid = GetGrid();
         ShapeVoxelGrid voxelGrid = GetVoxelGrid();
@@ -294,78 +264,16 @@ public class ShapeMesh : MonoBehaviour
     }
 
     /**
-    * Add a triangle to this shape mesh
-    *   2
-     * / \
-    * 1---3
-    * **/
-    private void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
-    {
-        //add vertices
-        m_vertices.Add(point1);
-        m_vertices.Add(point2);
-        m_vertices.Add(point3);
-
-        //add indices and colors
-        for (int i = 0; i != 3; i++)
-        {
-            m_indices.Add(m_maxIndex + i + 1);
-            m_colors.Add(new Color(0, 0, 0, 0)); //add empty color        
-        }
-
-        m_maxIndex += 3; //increment the max index
-
-        //add UVs
-        m_UVs.Add(GetUVsForVertex(point1));
-        m_UVs.Add(GetUVsForVertex(point2));
-        m_UVs.Add(GetUVsForVertex(point3));
-
-        m_meshVerticesDirty = true;
-        m_meshIndicesDirty = true;
-        m_meshColorsDirty = true;
-        m_meshUVsDirty = true;
-    }
-    
-    /**
-     * Add a quad to this shape mesh
-     * 2--4
-     * |  |
-     * 1--3
+     * Set the tint color of this shape
      * **/
-    private void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+    public void SetTintColor(Color color)
     {
-        //add vertices
-        m_vertices.Add(point1);
-        m_vertices.Add(point2);
-        m_vertices.Add(point3);
-        m_vertices.Add(point4);
-
-        //add colors
-        for (int i = 0; i != 4; i++)
+        for (int i = 0; i != m_colors.Count; i++)
         {
-            m_colors.Add(new Color(0, 0, 0, 0)); //add empty color
+            m_colors[i] = color;
         }
 
-        //add indices
-        m_indices.Add(m_maxIndex + 1);
-        m_indices.Add(m_maxIndex + 2);
-        m_indices.Add(m_maxIndex + 3);
-        m_indices.Add(m_maxIndex + 3);
-        m_indices.Add(m_maxIndex + 2);
-        m_indices.Add(m_maxIndex + 4);
-
-        m_maxIndex += 4;
-
-        //add UVs
-        m_UVs.Add(GetUVsForVertex(point1));
-        m_UVs.Add(GetUVsForVertex(point2));
-        m_UVs.Add(GetUVsForVertex(point3));
-        m_UVs.Add(GetUVsForVertex(point4));
-
-        m_meshVerticesDirty = true;
-        m_meshIndicesDirty = true;
         m_meshColorsDirty = true;
-        m_meshUVsDirty = true;
     }
 
     private Grid GetGrid()
@@ -400,29 +308,9 @@ public class ShapeMesh : MonoBehaviour
         return m_voxelGrid;
     }
 
-    public void Update()
+    public override void Update()
     {
-        //refresh the mesh if needed
-        if (m_meshVerticesDirty)
-        {
-            m_mesh.vertices = m_vertices.ToArray();
-            m_meshVerticesDirty = false;
-        }
-        if (m_meshIndicesDirty)
-        {
-            m_mesh.triangles = m_indices.ToArray();
-            m_meshIndicesDirty = false;
-        }
-        if (m_meshColorsDirty)
-        {
-            m_mesh.colors = m_colors.ToArray();
-            m_meshColorsDirty = false;
-        }
-        if (m_meshUVsDirty)
-        {
-            m_mesh.uv = m_UVs.ToArray();
-            m_meshUVsDirty = false;
-        }
+        base.Update();
 
         //move sweep line
         if (m_sweeping)

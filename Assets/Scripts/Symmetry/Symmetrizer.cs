@@ -19,94 +19,126 @@ public class Symmetrizer : MonoBehaviour
         m_symmetryType = SymmetryType.NONE;
     }
 
-    public void SymmetrizeByAxis()
+    /**
+     * Apply symmetry on all shapes located inside the axis ribbon
+     * **/
+    public void Symmetrize()
     {
-        return;
-
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-
         //Find axis ribbon 4 vertices
-        AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
-        Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
-        List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
-        List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
-        //ribbon vertices = bottom-left, bottom-right, top-left, top-right
-        Vector2[] ribbonVertices = new Vector2[4] {line1GridBoxIntersections[0], line1GridBoxIntersections[1], line2GridBoxIntersections[0], line2GridBoxIntersections[1]};
+        //AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
+        //Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
+        //List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
+        //List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
+        ////ribbon vertices = bottom-left, bottom-right, top-left, top-right
+        //Vector2[] ribbonVertices = new Vector2[4] { line1GridBoxIntersections[0], line1GridBoxIntersections[1], line2GridBoxIntersections[0], line2GridBoxIntersections[1] };
 
-        //Extract triangles
-        List<List<ShapeTriangle>> leftTriangles = null;
-        List<List<ShapeTriangle>> rightTriangles = null;
+        
+        ////Create ribbon shape
+        //AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
+        //Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
+        //Shape ribbonShape = new Shape(false);
+        //float ribbonWidth = 2 * ScreenUtils.GetDiagonalLength(); //ribbon wide enough
+        //Contour ribbonContour = new Contour(4);
+        //ribbonContour.Add(axisRenderer.m_endpoint1Position + axisRenderer.GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(axisRenderer.m_endpoint2Position + axisRenderer.GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(axisRenderer.m_endpoint2Position - axisRenderer.GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(axisRenderer.m_endpoint1Position - axisRenderer.GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonShape.m_contour = ribbonContour;
 
-        if (m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
-            ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles);
-        else if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
-            ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles, true , false);
+        ////Create grid shape
+        //Grid grid = ((GameScene) GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<Grid>();
+        //Shape gridShape = new Shape(false);
+        //gridShape.m_contour = grid.m_contour;
 
-        //Rebuild shapes from those lists of triangles
-        Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
-        Vector3 axisDirection = axisRenderer.GetAxisDirection();
-
-        Shape shapeData = null;
-        if (leftTriangles != null && leftTriangles.Count > 0)
-        {
-            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
-            {
-                List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, leftTriangles[iTrianglesVecIdx], true);
-
-                if (reflectedTriangles != null)
-                {
-                    shapeData = new Shape(false);
-                    shapeData.SetShapeTriangles(reflectedTriangles);
-                    shapeData.CalculateContour();
-                    shapeData.CalculateArea();
-                    shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
-                    GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-                    gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
-                    gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
-                    gameScene.m_shapes.FinalizeClippingOperations();
-                    //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-                    //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                    //shapeObjectAnimator.SetRotationAxis(axisDirection);
-                    //shapeObjectAnimator.SetRotationAngle(90);
-                    //shapeObjectAnimator.RotateTo(0, 5.0f);
-                }
-            }
-        }
-
-        if (rightTriangles != null && rightTriangles.Count > 0)
-        {
-            for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
-            {
-                List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, rightTriangles[iTrianglesVecIdx], false);
-
-                if (reflectedTriangles != null)
-                {
-                    shapeData = new Shape(false);
-                    shapeData.SetShapeTriangles(reflectedTriangles);
-                    shapeData.CalculateContour();
-                    shapeData.CalculateArea();
-                    shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
-                    GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-                    gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
-                    gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
-                    gameScene.m_shapes.FinalizeClippingOperations();
-                    //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-                    //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-                    //shapeObjectAnimator.SetRotationAxis(axisDirection);
-                    //shapeObjectAnimator.SetRotationAngle(-90);
-                    //shapeObjectAnimator.RotateTo(0, 5.0f);
-                }
-            }
-        }
-
-        if (shapeData != null)
-        {
-            ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
-            Shapes.PerformFusionOnShape(shapeData);
-
-            gameScene.m_counter.IncrementCounter();
-        }
+        //ClippingBooleanOperations.ShapesOperation(gridShape, ribbonShape, ClipperLib.ClipType.ctIntersection);
     }
+
+    //public void SymmetrizeByAxis()
+    //{
+    //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
+
+    //    //Find axis ribbon 4 vertices
+    //    AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
+    //    Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
+    //    List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
+    //    List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
+    //    //ribbon vertices = bottom-left, bottom-right, top-left, top-right
+    //    Vector2[] ribbonVertices = new Vector2[4] {line1GridBoxIntersections[0], line1GridBoxIntersections[1], line2GridBoxIntersections[0], line2GridBoxIntersections[1]};
+
+    //    //Extract triangles
+    //    List<List<ShapeTriangle>> leftTriangles = null;
+    //    List<List<ShapeTriangle>> rightTriangles = null;
+
+    //    if (m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+    //        ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles);
+    //    else if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+    //        ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles, true , false);
+
+    //    //Rebuild shapes from those lists of triangles
+    //    Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
+    //    Vector3 axisDirection = axisRenderer.GetAxisDirection();
+
+    //    Shape shapeData = null;
+    //    if (leftTriangles != null && leftTriangles.Count > 0)
+    //    {
+    //        for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
+    //        {
+    //            List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, leftTriangles[iTrianglesVecIdx], true);
+
+    //            if (reflectedTriangles != null)
+    //            {
+    //                shapeData = new Shape(false);
+    //                shapeData.SetShapeTriangles(reflectedTriangles);
+    //                shapeData.CalculateContour();
+    //                shapeData.CalculateArea();
+    //                shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
+    //                GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
+    //                gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
+    //                gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+    //                gameScene.m_shapes.FinalizeClippingOperations();
+    //                //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
+    //                //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+    //                //shapeObjectAnimator.SetRotationAxis(axisDirection);
+    //                //shapeObjectAnimator.SetRotationAngle(90);
+    //                //shapeObjectAnimator.RotateTo(0, 5.0f);
+    //            }
+    //        }
+    //    }
+
+    //    if (rightTriangles != null && rightTriangles.Count > 0)
+    //    {
+    //        for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
+    //        {
+    //            List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, rightTriangles[iTrianglesVecIdx], false);
+
+    //            if (reflectedTriangles != null)
+    //            {
+    //                shapeData = new Shape(false);
+    //                shapeData.SetShapeTriangles(reflectedTriangles);
+    //                shapeData.CalculateContour();
+    //                shapeData.CalculateArea();
+    //                shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
+    //                GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
+    //                gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
+    //                gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+    //                gameScene.m_shapes.FinalizeClippingOperations();
+    //                //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
+    //                //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
+    //                //shapeObjectAnimator.SetRotationAxis(axisDirection);
+    //                //shapeObjectAnimator.SetRotationAngle(-90);
+    //                //shapeObjectAnimator.RotateTo(0, 5.0f);
+    //            }
+    //        }
+    //    }
+
+    //    if (shapeData != null)
+    //    {
+    //        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
+    //        Shapes.PerformFusionOnShape(shapeData);
+
+    //        gameScene.m_counter.IncrementCounter();
+    //    }
+    //}
 
     public void SymmetrizeByPoint()
     {

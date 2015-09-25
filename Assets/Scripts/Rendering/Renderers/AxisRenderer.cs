@@ -23,16 +23,10 @@ public class AxisRenderer : MonoBehaviour
 
     private GameScene m_gameScene;
 
-    //public enum BuildStatus
-    //{
-    //    NOTHING, //nothing has been built yet
-    //    FIRST_ENDPOINT_SET, //player has set the first endpoint only
-    //    SECOND_ENDPOINT_SET, //player has set both endpoints
-    //    BUILDING_SEGMENT, //segment is being drawn
-    //    DONE_BUILDING //everything has been set properly
-    //};
-
-    //public BuildStatus m_buildStatus { get; set; } //is the axis built
+    //Ribbon
+    public GameObject m_ribbonPfb;
+    public Material m_ribbonMaterial;
+    private RibbonMesh m_ribbonMesh;
 
     public void Awake()
     {
@@ -62,13 +56,15 @@ public class AxisRenderer : MonoBehaviour
 
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
+        axisSegmentObject.transform.parent = this.transform;
+        axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
         m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.black);
-        m_axisSegment.transform.parent = this.gameObject.transform;
 
         //endpoint 1
         m_endpoint1 = (GameObject)Instantiate(m_circleMeshPfb);
         m_endpoint1.transform.parent = this.gameObject.transform;
+        m_endpoint1.name = "AxisEndpoint1";
         CircleMesh endpoint1Mesh = m_endpoint1.GetComponent<CircleMesh>();
         endpoint1Mesh.Init(axisMaterial);
         CircleMeshAnimator endpoint1Animator = m_endpoint1.GetComponent<CircleMeshAnimator>();
@@ -81,6 +77,7 @@ public class AxisRenderer : MonoBehaviour
         //endpoint 2
         m_endpoint2 = (GameObject)Instantiate(m_circleMeshPfb);
         m_endpoint2.transform.parent = this.gameObject.transform;
+        m_endpoint2.name = "AxisEndpoint2";
         CircleMesh endpoint2Mesh = m_endpoint2.GetComponent<CircleMesh>();
         endpoint2Mesh.Init(axisMaterial);
         CircleMeshAnimator endpoint2Animator = m_endpoint2.GetComponent<CircleMeshAnimator>();
@@ -89,6 +86,9 @@ public class AxisRenderer : MonoBehaviour
         endpoint2Animator.SetOuterRadius(8, true);
         endpoint2Animator.SetColor(Color.white);
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+
+        //ribbon
+        CreateRibbon();
     }
 
     /**
@@ -96,6 +96,10 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void Render(Vector2 pointA, Vector2 pointB, bool bGridPoints)
     {
+        //pointA = new Vector2(3, 7);
+        //pointB = new Vector2(4, 6);
+        //bGridPoints = true;
+
         GameScene gameScene = GetGameScene();
 
         if (bGridPoints)
@@ -105,6 +109,8 @@ public class AxisRenderer : MonoBehaviour
 
             m_endpoint1Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointA);
             m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointB);
+
+            //Debug.Log("endpoint1:" + m_endpoint1Position + " endpoint2:" + m_endpoint2Position);
         }
         else
         {
@@ -113,6 +119,8 @@ public class AxisRenderer : MonoBehaviour
 
             m_endpoint1GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointA);
             m_endpoint2GridPosition = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointB);
+
+            //Debug.Log("endpoint1:" + m_endpoint1Position + " endpoint2:" + m_endpoint2Position);
         }
 
         //Set correct points coordinates for segment
@@ -124,10 +132,34 @@ public class AxisRenderer : MonoBehaviour
         GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+
+        RenderRibbon();
     }
 
     /**
-     * Try to snap the second endpoint to a grid anchor if the distance to it is small enough ( <= m_snapDistance)
+     * Create the ribbon object with related mesh
+     * **/
+    private void CreateRibbon()
+    {
+        GameObject ribbonObject = (GameObject) Instantiate(m_ribbonPfb);
+        ribbonObject.transform.parent = this.transform;
+        ribbonObject.name = "Ribbon";
+
+        m_ribbonMesh = ribbonObject.GetComponent<RibbonMesh>();
+        m_ribbonMesh.Init();
+
+        //Set a simple material on the ribbon
+        MeshRenderer ribbonRenderer = ribbonObject.GetComponent<MeshRenderer>();
+        ribbonRenderer.material = Instantiate(m_ribbonMaterial);
+
+        //Set the color of the ribbon
+        RibbonAnimator ribbonAnimator = ribbonObject.GetComponent<RibbonAnimator>();
+        ribbonAnimator.SetColor(new Color(1, 1, 1, 0.5f));
+        ribbonAnimator.SetPosition(Vector3.zero);
+    }
+
+    /**
+     * Try to snap the second endpoint to a grid anchor if the distance to it is small enough
      * **/
     public bool TryToSnapAxisEndpointToClosestAnchor()
     {
@@ -139,9 +171,9 @@ public class AxisRenderer : MonoBehaviour
             GameObject snapAnchor = gridAnchors[anchorIndex];
 
             Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinatesForAnchorIndex(anchorIndex);
+            Vector2 snapAnchorWorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(snapAnchorGridPosition);
 
-            Vector2 snapAnchorPosition = snapAnchor.transform.position;
-            float fDistanceToAnchor = (m_endpoint2Position - snapAnchorPosition).magnitude;
+            float fDistanceToAnchor = (m_endpoint2Position - snapAnchorWorldPosition).magnitude;
 
             //do not snap on the current snapped anchor or on the anchor under the first axis endpoint
             if (snapAnchor != m_snappedAnchor && snapAnchorGridPosition != m_endpoint1GridPosition)
@@ -149,9 +181,10 @@ public class AxisRenderer : MonoBehaviour
                 if (fDistanceToAnchor <= m_snapDistance) //we can snap the anchor
                 {
                     m_snappedAnchor = snapAnchor;
-                    Render(m_endpoint1Position, snapAnchorPosition, false);
+                    //Render(m_endpoint1Position, snapAnchorPosition, false);
+                    Render(m_endpoint1GridPosition, snapAnchorGridPosition, true);
 
-                    gameScene.m_axes.LaunchSnapCircleAnimation(snapAnchorPosition);
+                    //gameScene.m_axes.LaunchSnapCircleAnimation(snapAnchorPosition);
 
                     return true;
                 }
@@ -210,7 +243,75 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void RenderRibbon()
     {
+        m_ribbonMesh.CalculateRibbonForAxis(this);
 
+
+
+        ////if (m_ribbonDebugSegmentsHolder != null)
+        ////    Destroy(m_ribbonDebugSegmentsHolder);
+
+        ////m_ribbonDebugSegmentsHolder = new GameObject("RibbonDebug");
+        ////m_ribbonDebugSegmentsHolder.transform.parent = this.transform;
+
+        //Vector2 axisNormal = GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
+        //Shape ribbonShape = new Shape(false);
+        //float ribbonWidth = 2 * ScreenUtils.GetDiagonalLength(); //ribbon wide enough
+        //Contour ribbonContour = new Contour(4);
+        //ribbonContour.Add(m_endpoint1Position + GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(m_endpoint2Position + GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(m_endpoint2Position - GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonContour.Add(m_endpoint1Position - GetAxisNormal() * 0.5f * ribbonWidth);
+        //ribbonShape.m_contour = ribbonContour;
+
+        ////Create grid shape
+        //Grid grid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<Grid>();
+        //Vector2 gridPosition = grid.transform.position;
+        //Shape gridShape = new Shape(false);
+        //Contour gridContour = new Contour(4);
+        //gridContour.Add(new Vector2(-0.5f * grid.m_gridSize.x, 0.5f * grid.m_gridSize.y) + gridPosition); //top left
+        //gridContour.Add(new Vector2(-0.5f * grid.m_gridSize.x, -0.5f * grid.m_gridSize.y) + gridPosition); //bottom left
+        //gridContour.Add(new Vector2(0.5f * grid.m_gridSize.x, -0.5f * grid.m_gridSize.y) + gridPosition); //bottom right
+        //gridContour.Add(new Vector2(0.5f * grid.m_gridSize.x, 0.5f * grid.m_gridSize.y) + gridPosition); //top right
+        //gridShape.m_contour = gridContour;
+
+        //List<Shape> resultShapes = ClippingBooleanOperations.ShapesOperation(gridShape, ribbonShape, ClipperLib.ClipType.ctIntersection);
+        //if (resultShapes.Count == 1)
+        //{
+        //    Shape clippedRibbonShape = resultShapes[0];
+        //    clippedRibbonShape.Triangulate();
+
+        //    //GameObject ribbonShapeObject = (GameObject)Instantiate(m_shapePfb);
+        //    //ribbonShapeObject.transform.parent = this.gameObject.transform;
+        //    //ribbonShapeObject.transform.localPosition = Vector3.zero;
+
+        //    //MeshRenderer meshRenderer = clonedShapeObject.GetComponent<MeshRenderer>();
+        //    //meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
+
+        //    //ShapeMesh shapeMesh = ribbonShapeObject.GetComponent<ShapeMesh>();
+        //    //shapeMesh.Init(clippedRibbonShape);
+        //    //shapeMesh.Render(false);
+
+        //    //ShapeAnimator shapeAnimator = ribbonShapeObject.GetComponent<ShapeAnimator>();
+        //    //shapeAnimator.SetColor(shapeAnimator.m_color);
+
+        //    //Contour clippedRibbonContour = clippedRibbonShape.m_contour;
+        //    //Material debugSegmentMaterial = Instantiate(m_debugSegmentMaterial);
+        //    //for (int i = 0; i != clippedRibbonContour.Count; i++)
+        //    //{
+        //    //    Vector2 firstVertex = clippedRibbonContour[i];
+        //    //    Vector2 secondVertex = (i == clippedRibbonContour.Count - 1) ? clippedRibbonContour[0] : clippedRibbonContour[i+1];
+
+        //    //    GameObject colorSegmentObject = (GameObject)Instantiate(m_colorSegmentPfb);
+        //    //    colorSegmentObject.transform.parent = m_ribbonDebugSegmentsHolder.transform;
+        //    //    ColorSegment colorSegment = colorSegmentObject.GetComponent<ColorSegment>();
+        //    //    colorSegment.Build(GeometryUtils.BuildVector3FromVector2(firstVertex, -50),
+        //    //                       GeometryUtils.BuildVector3FromVector2(secondVertex, -50),
+        //    //                       4.0f,
+        //    //                       debugSegmentMaterial,
+        //    //                       Color.red,
+        //    //                       0);
+        //    //}
+        //}
     }
 
     public Vector2 GetAxisCenterInWorldCoordinates()

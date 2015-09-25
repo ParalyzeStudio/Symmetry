@@ -39,7 +39,8 @@ public class Shapes : MonoBehaviour
         //meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
 
         ShapeMesh shapeMesh = clonedShapeObject.GetComponent<ShapeMesh>();
-        shapeMesh.Init(shapeData);
+        shapeMesh.Init();
+        shapeMesh.SetShapeData(shapeData);
         shapeMesh.Render(true);
         //shapeMesh.Render(ShapeMesh.RenderFaces.DOUBLE_SIDED);
 
