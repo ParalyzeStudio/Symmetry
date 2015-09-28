@@ -5,9 +5,13 @@ public class RibbonMesh : ColorMesh
 {
     private GridTriangulable m_ribbonData; //the points defining the contour of this ribbon
 
+    //Axis endpoints that define the ribbon
+    private Vector2 m_ribbonPointA;
+    private Vector2 m_ribbonPointB;
+
     //parts of the ribbon that are on the left and on the right of the axis
-    private GridTriangulable m_leftAxisRibbon;
-    private GridTriangulable m_rightAxisRibbon;
+    public Shape m_ribbonLeftSubShape { get; set; }
+    public Shape m_ribbonRightSubShape { get; set; }
 
     private Grid m_grid;
     private Color m_color; //the color set by the animator (read-only)
@@ -31,6 +35,9 @@ public class RibbonMesh : ColorMesh
      * **/
     public virtual void CalculateRibbonForAxis(AxisRenderer axis)
     {
+        m_ribbonPointA = axis.m_endpoint1Position;
+        m_ribbonPointB = axis.m_endpoint2Position;
+
         //clear the mesh
         ClearMesh();
         m_mesh.Clear();
@@ -38,74 +45,37 @@ public class RibbonMesh : ColorMesh
         //Calculate intersection points
         Grid grid = GetGrid();
         Vector2 axisNormal = axis.GetAxisNormal();
-        //Grid.GridBoxPoint[] intersectionPoints = new Grid.GridBoxPoint[4];
         Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint1GridPosition, axisNormal);
         Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint2GridPosition, axisNormal);
-        //intersectionPoints[0] = endpoint1LineIntersections[0];
-        //intersectionPoints[1] = endpoint1LineIntersections[1];
-        //intersectionPoints[2] = endpoint2LineIntersections[0];
-        //intersectionPoints[3] = endpoint2LineIntersections[1];      
 
         //extract edge points and sort them
         List<Grid.GridBoxPoint> leftEdgePoints = new List<Grid.GridBoxPoint>();
         List<Grid.GridBoxPoint> bottomEdgePoints = new List<Grid.GridBoxPoint>();
         List<Grid.GridBoxPoint> rightEdgePoints = new List<Grid.GridBoxPoint>();
         List<Grid.GridBoxPoint> topEdgePoints = new List<Grid.GridBoxPoint>();
-        int leftEdgePoints1Count = 0;
-        int bottomEdgePoints1Count = 0;
-        int rightEdgePoints1Count = 0;
-        int topEdgePoints1Count = 0;
 
         for (int i = 0; i != endpoint1LineIntersections.Length; i++)
         {
             if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.LEFT)
-            {
                 leftEdgePoints.Add(endpoint1LineIntersections[i]);
-                leftEdgePoints1Count++;
-            }
             else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.BOTTOM)
-            {
                 bottomEdgePoints.Add(endpoint1LineIntersections[i]);
-                bottomEdgePoints1Count++;
-            }
             else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.RIGHT)
-            {
                 rightEdgePoints.Add(endpoint1LineIntersections[i]);
-                rightEdgePoints1Count++;
-            }
             else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.TOP)
-            {
                 topEdgePoints.Add(endpoint1LineIntersections[i]);
-                topEdgePoints1Count++;
-            }
         }
 
-        int leftEdgePoints2Count = 0;
-        int bottomEdgePoints2Count = 0;
-        int rightEdgePoints2Count = 0;
-        int topEdgePoints2Count = 0;
         for (int i = 0; i != endpoint2LineIntersections.Length; i++)
         {
             if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.LEFT)
-            {
                 leftEdgePoints.Add(endpoint2LineIntersections[i]);
-                leftEdgePoints2Count++;
-            }
             else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.BOTTOM)
-            {
                 bottomEdgePoints.Add(endpoint2LineIntersections[i]);
-                bottomEdgePoints2Count++;
-            }
             else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.RIGHT)
-            {
                 rightEdgePoints.Add(endpoint2LineIntersections[i]);
-                rightEdgePoints2Count++;
-            }
             else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.TOP)
-            {
                 topEdgePoints.Add(endpoint2LineIntersections[i]);
-                topEdgePoints2Count++;
-            }
         }
         
         //reorder points so they follow the contour left->bottom->right->top
@@ -116,7 +86,10 @@ public class RibbonMesh : ColorMesh
 
         //Build the contour by adding grid vertices if 2 consecutive intersection points are on 2 adjacent grid edges
         Contour ribbonContour = new Contour(4); //at least 4 points
-        bool bAddGridCorners = (leftEdgePoints.Count == 1) && (bottomEdgePoints.Count == 1) && (rightEdgePoints.Count == 1) && (topEdgePoints.Count == 1);
+        Vector2 gridTopLeftCorner = new Vector2(1, grid.m_numLines);
+        Vector2 gridBottomLeftCorner = new Vector2(1, 1);
+        Vector2 gridBottomRightCorner = new Vector2(grid.m_numColumns, 1);
+        Vector2 gridTopRightCorner = new Vector2(grid.m_numColumns, grid.m_numLines);
         
         //add left edge points
         for (int i = 0; i != leftEdgePoints.Count; i++)
@@ -124,12 +97,8 @@ public class RibbonMesh : ColorMesh
             ribbonContour.Add(leftEdgePoints[i].m_position);
         }
         //add bottom left hand corner of the grid if necessary
-        if (bAddGridCorners &&
-            (leftEdgePoints1Count == 1 && bottomEdgePoints2Count == 1 ||
-            leftEdgePoints2Count == 1 && bottomEdgePoints1Count == 1))
-        {
-            ribbonContour.Add(new Vector2(1, 1));
-        }         
+        if (GeometryUtils.IsPointContainedInStrip(gridBottomLeftCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+            ribbonContour.Add(gridBottomLeftCorner);        
 
         //add bottom edge points
         for (int i = 0; i != bottomEdgePoints.Count; i++)
@@ -138,12 +107,8 @@ public class RibbonMesh : ColorMesh
         }
 
         //add bottom right hand corner of the grid if necessary
-        if (bAddGridCorners &&
-            (bottomEdgePoints1Count == 1 && rightEdgePoints2Count == 1 ||
-            bottomEdgePoints2Count == 1 && rightEdgePoints1Count == 1))
-        {
-            ribbonContour.Add(new Vector2(grid.m_numColumns, 1));
-        }
+        if (GeometryUtils.IsPointContainedInStrip(gridBottomRightCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+            ribbonContour.Add(gridBottomRightCorner);
 
         //add right edge points
         for (int i = 0; i != rightEdgePoints.Count; i++)
@@ -152,12 +117,8 @@ public class RibbonMesh : ColorMesh
         }
 
         //add top right hand corner of the grid if necessary
-        if (bAddGridCorners &&
-            (rightEdgePoints1Count == 1 && topEdgePoints2Count == 1 ||
-            rightEdgePoints2Count == 1 && topEdgePoints1Count == 1))
-        {
-            ribbonContour.Add(new Vector2(grid.m_numColumns, grid.m_numLines));
-        }
+        if (GeometryUtils.IsPointContainedInStrip(gridTopRightCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+            ribbonContour.Add(gridTopRightCorner);
 
         //add top edge points
         for (int i = 0; i != topEdgePoints.Count; i++)
@@ -166,12 +127,8 @@ public class RibbonMesh : ColorMesh
         }
 
         //add top left hand corner of the grid if necessary
-        if (bAddGridCorners &&
-            (topEdgePoints1Count == 1 && leftEdgePoints2Count == 1 ||
-            topEdgePoints2Count == 1 && leftEdgePoints1Count == 1))
-        {
-            ribbonContour.Add(new Vector2(1, grid.m_numLines));
-        }
+        if (GeometryUtils.IsPointContainedInStrip(gridTopLeftCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+            ribbonContour.Add(gridTopLeftCorner);
 
         //build the ribbon data object
         m_ribbonData = new GridTriangulable(true, ribbonContour);
@@ -217,6 +174,82 @@ public class RibbonMesh : ColorMesh
 
             length--;
         }
+    }
+
+    /**
+     * Extract sub contours on ribbon to create a left and a right shape that will be used to clip polygon shapes inside the grid
+     * **/
+    public void ExtractLeftAndRightSubShapes()
+    {
+        Contour ribbonContour = m_ribbonData.m_contour;
+        Contour leftSubContour = new Contour(); //the contour associated with the 'left' sub shape
+        Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
+
+        //Find the index of the next vertices to axis endpoints inside the ribbon contour
+        int indexOfNextVertexToAxisPointA = -1;
+        int indexOfNextVertexToAxisPointB = -1;
+
+        for (int i = 0; i != ribbonContour.Count; i++)
+        {
+            Vector2 ribbonVertex1 = ribbonContour[i];
+            Vector2 ribbonVertex2 = (i == ribbonContour.Count - 1) ? ribbonContour[0] : ribbonContour[i + 1];
+
+            if (indexOfNextVertexToAxisPointA < 0 && GeometryUtils.IsPointContainedInSegment(m_ribbonPointA, ribbonVertex1, ribbonVertex2))
+            {
+                indexOfNextVertexToAxisPointA = (i == ribbonContour.Count - 1) ? 0 : i + 1;
+            }
+
+            if (indexOfNextVertexToAxisPointB < 0 && GeometryUtils.IsPointContainedInSegment(m_ribbonPointB, ribbonVertex1, ribbonVertex2))
+            {
+                indexOfNextVertexToAxisPointB = (i == ribbonContour.Count - 1) ? 0 : i + 1;
+            }
+
+            if (indexOfNextVertexToAxisPointA >= 0 && indexOfNextVertexToAxisPointB >= 0)
+                break;
+        }
+
+        if (indexOfNextVertexToAxisPointA == -1 || indexOfNextVertexToAxisPointB == -1)
+        {
+            Debug.Log("STOP");
+            throw new System.Exception("will run out of memory");
+        }
+
+        //Create the two sub contours
+        rightSubContour.Add(m_ribbonPointA);
+        for (int i = indexOfNextVertexToAxisPointA; i != indexOfNextVertexToAxisPointB; i++)
+        {
+            if (i == ribbonContour.Count)
+            {
+                if (indexOfNextVertexToAxisPointB == 0) //we added all points between A and B, break the loop so we can add B
+                    break;
+                else //more points need to be added, reset to the beginning of the list
+                    i = 0;
+            }
+            rightSubContour.Add(ribbonContour[i]);
+        }
+        rightSubContour.Add(m_ribbonPointB);
+
+        leftSubContour.Add(m_ribbonPointB);
+        for (int i = indexOfNextVertexToAxisPointB; i != indexOfNextVertexToAxisPointA; i++)
+        {
+            if (i == ribbonContour.Count) //reset to the beginning of the list
+            {
+                if (indexOfNextVertexToAxisPointA == 0) //we added all points between A and B, break the loop so we can add B
+                    break;
+                else //more points need to be added, reset to the beginning of the list
+                    i = 0;
+            }
+            leftSubContour.Add(ribbonContour[i]);
+        }
+        leftSubContour.Add(m_ribbonPointA);
+
+        Debug.Log("sub-contours extracted");
+
+        //Finally create the sub shape objects
+        m_ribbonLeftSubShape = new Shape(false, leftSubContour);
+        m_ribbonRightSubShape = new Shape(false, rightSubContour);
+
+        Debug.Log("sub-shapes created");
     }
 
     /**

@@ -77,7 +77,6 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickPlay()
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
         BackgroundTriangleAnimator animator = GetBackgroundRenderer().GetComponent<BackgroundTriangleAnimator>();
         
         //Translate of a even number of triangles
@@ -143,8 +142,6 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnMainMenu(Vector2 clickLocation)
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
         MainMenu mainMenu = (MainMenu) GetSceneManager().m_currentScene;
 
         //transform the click location in screen rect coordinates

@@ -6,6 +6,13 @@ public class BaseMesh : MonoBehaviour
     //mesh
     protected Mesh m_mesh;
     protected List<Vector3> m_vertices;
+    public List<Vector3> Vertices
+    {
+        get
+        {
+            return m_vertices;
+        }
+    }
     protected List<int> m_indices;
     protected int m_maxIndex; //the max index set on this mesh
 

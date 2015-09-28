@@ -38,9 +38,7 @@ public class GridTouchHandler : TouchHandler
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
-        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);        
-        Vector2 closestAnchorWorldCoords = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(closestAnchorGridCoords);
-        float distanceToAnchor = (closestAnchorWorldCoords - pointerLocation).magnitude;
+        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
 
         gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
     }
@@ -64,7 +62,6 @@ public class GridTouchHandler : TouchHandler
         float projectionLength;
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
         pointerLocation = axisRenderer.m_endpoint1Position + constrainedDirection * projectionLength;
-
 
         if (axisRenderer.isAxisSnapped())
         {
@@ -95,14 +92,15 @@ public class GridTouchHandler : TouchHandler
 
             if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
             {
+
                 Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
-                symmetrizer.Symmetrize();
+                symmetrizer.SymmetrizeByAxis();
                 //symmetrizer.SymmetrizeByAxis();
             }
 
             //remove the axis from the axes list and destroy the object
-            //gameScene.m_axes.RemoveAxis(currentAxis);
-            //Destroy(currentAxis);
+            gameScene.m_axes.RemoveAxis(currentAxis);
+            Destroy(currentAxis);
         }
     }
 }

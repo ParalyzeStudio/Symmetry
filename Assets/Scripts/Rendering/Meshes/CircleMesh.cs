@@ -6,7 +6,6 @@
 public class CircleMesh : MonoBehaviour
 {
     private float m_innerRadius;
-    private float m_outerRadius;
     private int m_numSegments;
 
     public void Init(Material material = null)
@@ -29,7 +28,6 @@ public class CircleMesh : MonoBehaviour
             throw new System.Exception("circle must have at least 3 segments");
 
         m_innerRadius = innerRadius;
-        m_outerRadius = outerRadius;
         m_numSegments = numSegments;
 
         Mesh circleMesh = GetComponent<MeshFilter>().sharedMesh;

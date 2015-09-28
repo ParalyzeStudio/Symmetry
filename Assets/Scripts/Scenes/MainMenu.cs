@@ -23,8 +23,8 @@ public class MainMenu : GUIScene
     private GameObject m_playTextObject;
 
     //variables to handle the generation of fading hexagon on play button
-    private float m_hexagonAnimationStartInnerRadius;
-    private float m_hexagonAnimationEndInnerRadius;
+    //private float m_hexagonAnimationStartInnerRadius;
+    //private float m_hexagonAnimationEndInnerRadius;
     private bool m_generatingFadingHexagons;
     private float m_hexagonAnimationDuration;
     private float m_hexagonAnimationElapsedTime;
@@ -74,7 +74,6 @@ public class MainMenu : GUIScene
         GameObjectAnimator titleAnimator = titleObject.AddComponent<GameObjectAnimator>();
         titleAnimator.SetPosition(new Vector3(0, 0, TITLE_Z_VALUE));
 
-        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
@@ -309,8 +308,6 @@ public class MainMenu : GUIScene
     {
         m_hexagonAnimationDuration = fDuration;
         m_hexagonAnimationElapsedTime = 0;
-        m_hexagonAnimationStartInnerRadius = hexagonStartInnerRadius;
-        m_hexagonAnimationEndInnerRadius = hexagonEndInnerRadius;
 
         GameObject fadingHexagon = (GameObject)Instantiate(m_circleMeshPfb);
         fadingHexagon.name = "FadingHexagon";

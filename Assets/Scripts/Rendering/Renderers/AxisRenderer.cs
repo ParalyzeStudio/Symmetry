@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class AxisRenderer : MonoBehaviour
 {
+    public const float SWEEP_LINE_SPEED = 300.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
 
     //Shared prefabs
@@ -27,6 +28,70 @@ public class AxisRenderer : MonoBehaviour
     public GameObject m_ribbonPfb;
     public Material m_ribbonMaterial;
     private RibbonMesh m_ribbonMesh;
+    public RibbonMesh Ribbon
+    {
+        get
+        {
+            return m_ribbonMesh;
+        }
+    }
+
+    //Sweeping lines that reveal shapes. Axis and sweeping line are parallel so define this line with two points 
+    //that are the projections of both axis points A and B and a translation direction
+    public class SweepingLine
+    {
+        private Vector2 m_pointA; //the projection of the axis point A on this line
+        public Vector2 PointA
+        {
+            get
+            {
+                return m_pointA;
+            }
+        }
+        
+        private Vector2 m_pointB; //the projection of the axis point B on this line
+        public Vector2 PointB
+        {
+            get
+            {
+                return m_pointB;
+            }
+        }
+
+        private Vector2 m_translationDirection;
+        public Vector2 TranslationDirection
+        {
+            get
+            {
+                return m_translationDirection;
+            }
+        }
+
+        public SweepingLine(Vector2 pointA, Vector2 pointB, Vector2 translationDirection) 
+        { 
+            m_pointA = pointA; 
+            m_pointB = pointB;
+            m_translationDirection = translationDirection;
+        }
+
+        public void Translate(float dx) { m_pointA += dx * m_translationDirection; m_pointB += dx * m_translationDirection; }
+    }
+
+    public SweepingLine m_leftSweepingLine { get; set; } //line that will sweep the area on the 'left' of the axis or null if not applicable
+    public SweepingLine m_rightSweepingLine { get; set; } //line that will sweep the area on the 'right' of the axis or null if not applicable
+
+    public GameObject m_sweepLinePfb;
+    private GameObject m_debugLeftSweepLineObject;
+    private GameObject m_debugRightSweepLineObject;
+
+    ////Circle that grow and sweep an area
+    //public struct SweepingCircle
+    //{
+    //    public Vector2 m_center;
+    //    public float m_radius;
+    //}
+
+    //public SweepingLine m_sweepingCircle;
 
     public void Awake()
     {
@@ -35,6 +100,9 @@ public class AxisRenderer : MonoBehaviour
         m_endpoint1 = null;
         m_endpoint2 = null;
         m_snappedAnchor = null;
+
+        m_leftSweepingLine = null;
+        m_rightSweepingLine = null;
     }
 
     /**
@@ -96,8 +164,8 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void Render(Vector2 pointA, Vector2 pointB, bool bGridPoints)
     {
-        //pointA = new Vector2(3, 7);
-        //pointB = new Vector2(4, 6);
+        //pointA = new Vector2(5, 6);
+        //pointB = new Vector2(6, 5);
         //bGridPoints = true;
 
         GameScene gameScene = GetGameScene();
@@ -163,6 +231,9 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public bool TryToSnapAxisEndpointToClosestAnchor()
     {
+        if (m_snappedAnchor != null)
+            return false;
+
         GameScene gameScene = GetGameScene();
         GameObject[] gridAnchors = gameScene.m_grid.m_anchors;
 
@@ -200,6 +271,7 @@ public class AxisRenderer : MonoBehaviour
     public void TryToUnsnap(Vector2 pointerLocation)
     {
         Vector2 snappedAnchorPosition = m_snappedAnchor.transform.position;
+        Vector2 snappedAnchorPosition2 = m_snappedAnchor.GetComponent<GameObjectAnimator>().GetPosition();
         float fDistanceFromMouseToAnchor = (pointerLocation - snappedAnchorPosition).magnitude;
         if (fDistanceFromMouseToAnchor > m_snapDistance)
         {
@@ -244,74 +316,41 @@ public class AxisRenderer : MonoBehaviour
     public void RenderRibbon()
     {
         m_ribbonMesh.CalculateRibbonForAxis(this);
+    }
 
+    /**
+     * Callback used when a symmetry is performed on the grid
+     * **/
+    public void OnPerformSymmetry(Symmetrizer.SymmetryType symmetryType)
+    {
+        m_ribbonMesh.ExtractLeftAndRightSubShapes();
 
+        //Create and animate sweeping lines
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        {
+            Vector2 clockwiseAxisNormal = GetAxisNormal();
+            m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
+            m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, clockwiseAxisNormal);
 
-        ////if (m_ribbonDebugSegmentsHolder != null)
-        ////    Destroy(m_ribbonDebugSegmentsHolder);
+            //debug objects
+            Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
+            m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugLeftSweepLineObject.transform.localRotation = sweepLineRotation;
+            m_debugLeftSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
+            m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugRightSweepLineObject.transform.localRotation = sweepLineRotation;
+            m_debugRightSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
+        }
+        else if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+        {
+            m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, GetAxisNormal());
+            Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
+            m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugRightSweepLineObject.transform.localRotation = sweepLineRotation;
+            m_debugRightSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
 
-        ////m_ribbonDebugSegmentsHolder = new GameObject("RibbonDebug");
-        ////m_ribbonDebugSegmentsHolder.transform.parent = this.transform;
-
-        //Vector2 axisNormal = GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
-        //Shape ribbonShape = new Shape(false);
-        //float ribbonWidth = 2 * ScreenUtils.GetDiagonalLength(); //ribbon wide enough
-        //Contour ribbonContour = new Contour(4);
-        //ribbonContour.Add(m_endpoint1Position + GetAxisNormal() * 0.5f * ribbonWidth);
-        //ribbonContour.Add(m_endpoint2Position + GetAxisNormal() * 0.5f * ribbonWidth);
-        //ribbonContour.Add(m_endpoint2Position - GetAxisNormal() * 0.5f * ribbonWidth);
-        //ribbonContour.Add(m_endpoint1Position - GetAxisNormal() * 0.5f * ribbonWidth);
-        //ribbonShape.m_contour = ribbonContour;
-
-        ////Create grid shape
-        //Grid grid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<Grid>();
-        //Vector2 gridPosition = grid.transform.position;
-        //Shape gridShape = new Shape(false);
-        //Contour gridContour = new Contour(4);
-        //gridContour.Add(new Vector2(-0.5f * grid.m_gridSize.x, 0.5f * grid.m_gridSize.y) + gridPosition); //top left
-        //gridContour.Add(new Vector2(-0.5f * grid.m_gridSize.x, -0.5f * grid.m_gridSize.y) + gridPosition); //bottom left
-        //gridContour.Add(new Vector2(0.5f * grid.m_gridSize.x, -0.5f * grid.m_gridSize.y) + gridPosition); //bottom right
-        //gridContour.Add(new Vector2(0.5f * grid.m_gridSize.x, 0.5f * grid.m_gridSize.y) + gridPosition); //top right
-        //gridShape.m_contour = gridContour;
-
-        //List<Shape> resultShapes = ClippingBooleanOperations.ShapesOperation(gridShape, ribbonShape, ClipperLib.ClipType.ctIntersection);
-        //if (resultShapes.Count == 1)
-        //{
-        //    Shape clippedRibbonShape = resultShapes[0];
-        //    clippedRibbonShape.Triangulate();
-
-        //    //GameObject ribbonShapeObject = (GameObject)Instantiate(m_shapePfb);
-        //    //ribbonShapeObject.transform.parent = this.gameObject.transform;
-        //    //ribbonShapeObject.transform.localPosition = Vector3.zero;
-
-        //    //MeshRenderer meshRenderer = clonedShapeObject.GetComponent<MeshRenderer>();
-        //    //meshRenderer.sharedMaterial = GetMaterialForColor(shapeData.m_color).m_material;
-
-        //    //ShapeMesh shapeMesh = ribbonShapeObject.GetComponent<ShapeMesh>();
-        //    //shapeMesh.Init(clippedRibbonShape);
-        //    //shapeMesh.Render(false);
-
-        //    //ShapeAnimator shapeAnimator = ribbonShapeObject.GetComponent<ShapeAnimator>();
-        //    //shapeAnimator.SetColor(shapeAnimator.m_color);
-
-        //    //Contour clippedRibbonContour = clippedRibbonShape.m_contour;
-        //    //Material debugSegmentMaterial = Instantiate(m_debugSegmentMaterial);
-        //    //for (int i = 0; i != clippedRibbonContour.Count; i++)
-        //    //{
-        //    //    Vector2 firstVertex = clippedRibbonContour[i];
-        //    //    Vector2 secondVertex = (i == clippedRibbonContour.Count - 1) ? clippedRibbonContour[0] : clippedRibbonContour[i+1];
-
-        //    //    GameObject colorSegmentObject = (GameObject)Instantiate(m_colorSegmentPfb);
-        //    //    colorSegmentObject.transform.parent = m_ribbonDebugSegmentsHolder.transform;
-        //    //    ColorSegment colorSegment = colorSegmentObject.GetComponent<ColorSegment>();
-        //    //    colorSegment.Build(GeometryUtils.BuildVector3FromVector2(firstVertex, -50),
-        //    //                       GeometryUtils.BuildVector3FromVector2(secondVertex, -50),
-        //    //                       4.0f,
-        //    //                       debugSegmentMaterial,
-        //    //                       Color.red,
-        //    //                       0);
-        //    //}
-        //}
+            m_leftSweepingLine = null;
+        }
     }
 
     public Vector2 GetAxisCenterInWorldCoordinates()
@@ -348,5 +387,51 @@ public class AxisRenderer : MonoBehaviour
         }
 
         return m_gameScene;
+    }
+
+    public void Update()
+    {
+        float dt = Time.deltaTime;
+
+        if (m_leftSweepingLine != null)
+        {
+            m_leftSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
+
+            Vector2 sweepingLinePosition = 0.5f * (m_leftSweepingLine.PointA + m_leftSweepingLine.PointB);
+            float sqrDistanceFromAxis = (sweepingLinePosition - GetAxisCenterInWorldCoordinates()).sqrMagnitude;
+
+            if (sqrDistanceFromAxis < 1000000) //TMP delete sweeping line when far enough (out of screen)
+            {
+                //move the debug object
+                Vector2 debugLeftSweepLinePosition = 0.5f * (m_leftSweepingLine.PointA + m_leftSweepingLine.PointB);
+                m_debugLeftSweepLineObject.transform.localPosition = debugLeftSweepLinePosition;
+            }
+            else
+            {
+                m_leftSweepingLine = null;
+                Destroy(m_debugLeftSweepLineObject);
+                m_debugLeftSweepLineObject = null;
+            }
+        }
+        if (m_rightSweepingLine != null)
+        {
+            m_rightSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
+
+            Vector2 sweepingLinePosition = 0.5f * (m_rightSweepingLine.PointA + m_rightSweepingLine.PointB);
+            float sqrDistanceFromAxis = (sweepingLinePosition - GetAxisCenterInWorldCoordinates()).sqrMagnitude;
+
+            if (sqrDistanceFromAxis < 1000000) //TMP delete sweeping line when far enough (out of screen)
+            {
+                //move the debug object
+                Vector3 debugRightSweepLinePosition = 0.5f * (m_rightSweepingLine.PointA + m_rightSweepingLine.PointB);
+                m_debugRightSweepLineObject.transform.localPosition = debugRightSweepLinePosition;
+            }
+            else
+            {
+                m_rightSweepingLine = null;
+                Destroy(m_debugRightSweepLineObject);
+                m_debugRightSweepLineObject = null;
+            }
+        }
     }
 }

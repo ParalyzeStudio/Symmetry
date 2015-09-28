@@ -48,7 +48,6 @@ public class Segment : MonoBehaviour
         this.gameObject.transform.rotation = Quaternion.AngleAxis(m_angle * Mathf.Rad2Deg, Vector3.forward);
 
         //Build the actual mesh if it doesnt exist
-        MeshFilter meshFilter = GetComponent<MeshFilter>();
         InitSegmentMesh();        
 
         if (bUpdateVertices)

@@ -57,7 +57,6 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
             }
             trianglePositionX -= 0.5f * screenSize.x;
 
-            Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
             BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY), triangleEdgeLength, triangleAngle, Color.black, triangleContourThickness);
             triangle.m_indexInColumn = j;
             triangle.m_parentColumn = this;

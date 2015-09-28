@@ -99,7 +99,7 @@ public class Grid : MonoBehaviour
 
                 CircleMesh gridAnchorQuad = clonedGridAnchor.GetComponent<CircleMesh>();
                 gridAnchorQuad.Init(m_gridAnchorMaterial);
-                int iAnchorIndex = (iColumnNumber - 1) * exactNumLines + (iLineNumber - 1);
+                int iAnchorIndex = (iLineNumber - 1) * exactNumColumns + (iColumnNumber - 1);
 
                 CircleMeshAnimator anchorAnimator = clonedGridAnchor.GetComponent<CircleMeshAnimator>();
                 anchorAnimator.SetNumSegments(4, false);

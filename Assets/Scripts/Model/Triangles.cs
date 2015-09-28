@@ -402,8 +402,8 @@ public class BackgroundTriangle : BaseTriangle
 {
     public Color m_color { get; set; } //the color of the front face of this triangle (the 3 vertices share the same color)
     public Color m_originalColor { get; set; } //the color that this triangle face should have before being offset to m_frontColor
-    private Vector3 m_flipAxis; //the axis the triangle is rotating around
-    private float m_flipAngle; //the angle the triangle is rotated along its flip axis
+    //private Vector3 m_flipAxis; //the axis the triangle is rotating around
+    //private float m_flipAngle; //the angle the triangle is rotated along its flip axis
     public int m_indexInColumn { get; set; }
     public BackgroundTriangleColumn m_parentColumn { get; set; }
     public float m_edgeLength { get; set; }
@@ -424,11 +424,11 @@ public class BackgroundTriangle : BaseTriangle
     private float m_colorAnimationDelay;
 
     //Variables to handle flip animation of this triangle
-    private bool m_flipping;
-    private float m_flipToAngle;
-    private float m_flipAnimationElapsedTime;
-    private float m_flipAnimationDuration;
-    private float m_flipAnimationDelay;
+    //private bool m_flipping;
+    //private float m_flipToAngle;
+    //private float m_flipAnimationElapsedTime;
+    //private float m_flipAnimationDuration;
+    //private float m_flipAnimationDelay;
 
     public const float EDGE_COLOR_INTENSIFY_FACTOR = 20.0f;
 
@@ -534,7 +534,6 @@ public class BackgroundTriangle : BaseTriangle
             float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
             float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
 
             edgeColor = ColorUtils.IntensifyColorChannels(edgeColor, 
@@ -560,7 +559,6 @@ public class BackgroundTriangle : BaseTriangle
             float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
             float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
 
             edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
@@ -586,7 +584,6 @@ public class BackgroundTriangle : BaseTriangle
             float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
             float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
             float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            float dist = (rDist + gDist + bDist) / 3.0f;
             edgeColor = 0.5f * (neighbor.m_color + this.m_color);
 
             edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,

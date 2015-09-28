@@ -114,30 +114,29 @@ public class GameController : MonoBehaviour
 
     protected void Update()
     {
-        return;
-        if (m_sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
-        {
-            GameStatus gameStatus = GetGameStatus();
-            if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
-            {
-                EndLevel(gameStatus);
-                m_gameStatus = GameStatus.FINISHED;
-            }
-            else if (m_gameStatus == GameStatus.FINISHED)
-            {
-                if (m_finishingLevelVictory)
-                {
-                    float dt = Time.deltaTime;
-                    m_finishLevelVictoryElapsedTime += dt;
-                    if (m_finishLevelVictoryElapsedTime >= m_finishLevelVictoryDelay)
-                    {
-                        OnFinishEndingLevelVictory();
-                        Debug.Log("OnFinishEndingLevelVictory");
-                        m_finishingLevelVictory = false;
-                    }
-                }
-            }
-        }
+        //if (m_sceneManager.m_displayedContent == SceneManager.DisplayContent.GAME)
+        //{
+        //    GameStatus gameStatus = GetGameStatus();
+        //    if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
+        //    {
+        //        EndLevel(gameStatus);
+        //        m_gameStatus = GameStatus.FINISHED;
+        //    }
+        //    else if (m_gameStatus == GameStatus.FINISHED)
+        //    {
+        //        if (m_finishingLevelVictory)
+        //        {
+        //            float dt = Time.deltaTime;
+        //            m_finishLevelVictoryElapsedTime += dt;
+        //            if (m_finishLevelVictoryElapsedTime >= m_finishLevelVictoryDelay)
+        //            {
+        //                OnFinishEndingLevelVictory();
+        //                Debug.Log("OnFinishEndingLevelVictory");
+        //                m_finishingLevelVictory = false;
+        //            }
+        //        }
+        //    }
+        //}
     }    
 
     /**
@@ -171,59 +170,59 @@ public class GameController : MonoBehaviour
     {
         return false; //TODO remove this line
 
-        //First we check if one of the shapes intersects a contour
-        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+        ////First we check if one of the shapes intersects a contour
+        //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
 
-        if (!gameScene.m_isShown)
-            return false;
+        //if (!gameScene.m_isShown)
+        //    return false;
 
-        List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObjects;
-        List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
-        float shapesArea = 0;
-        for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
-        {
-            Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
-            bool shapeInsideOutline = false;
-            for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
-            {
-                DottedOutline outline = allContours[iOutlineIndex];
-                if (shape.IntersectsOutline(outline)) //we check if this shape intersects an outline
-                {
-                    return false;
-                }
-                else //if not we check if this shape is inside an outline
-                {
-                    if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
-                    {
-                        shapeInsideOutline = true;
-                        break;
-                    }
-                }
-            }
+        //List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObjects;
+        //List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
+        //float shapesArea = 0;
+        //for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
+        //{
+        //    Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
+        //    bool shapeInsideOutline = false;
+        //    for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
+        //    {
+        //        DottedOutline outline = allContours[iOutlineIndex];
+        //        if (shape.IntersectsOutline(outline)) //we check if this shape intersects an outline
+        //        {
+        //            return false;
+        //        }
+        //        else //if not we check if this shape is inside an outline
+        //        {
+        //            if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
+        //            {
+        //                shapeInsideOutline = true;
+        //                break;
+        //            }
+        //        }
+        //    }
 
-            if (!shapeInsideOutline)
-                return false;
+        //    if (!shapeInsideOutline)
+        //        return false;
 
-            shapesArea += shape.m_area;
-        }
+        //    shapesArea += shape.m_area;
+        //}
 
-        //Debug.Log("1: NO SHAPE/OUTLINE INTERSECTION");
+        ////Debug.Log("1: NO SHAPE/OUTLINE INTERSECTION");
 
-        //finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
-        float contoursArea = 0;
-        for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
-        {
-            DottedOutline contour = allContours[iContourIndex];
-            contoursArea += contour.m_area;
-        }
+        ////finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
+        //float contoursArea = 0;
+        //for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+        //{
+        //    DottedOutline contour = allContours[iContourIndex];
+        //    contoursArea += contour.m_area;
+        //}
 
-        //Debug.Log("contoursArea:" + contoursArea);
-        //Debug.Log("shapesArea:" + shapesArea);
+        ////Debug.Log("contoursArea:" + contoursArea);
+        ////Debug.Log("shapesArea:" + shapesArea);
 
-        //if (contoursArea == shapesArea)
-        //    Debug.Log("3: SAME AREA");
+        ////if (contoursArea == shapesArea)
+        ////    Debug.Log("3: SAME AREA");
 
-        return (contoursArea == shapesArea);
+        //return (contoursArea == shapesArea);
     }
 
     /**
@@ -233,15 +232,15 @@ public class GameController : MonoBehaviour
     {
         return false; //TODO remove this line
 
-        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+        //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
 
-        if (!gameScene.m_isShown)
-            return false;
+        //if (!gameScene.m_isShown)
+        //    return false;
 
-        bool bDefeat = gameScene.m_counter.isFull();
-        if (bDefeat)
-            Debug.Log("DEFEAT");
-        return gameScene.m_counter.isFull();
+        //bool bDefeat = gameScene.m_counter.isFull();
+        //if (bDefeat)
+        //    Debug.Log("DEFEAT");
+        //return gameScene.m_counter.isFull();
     }
 
     /**

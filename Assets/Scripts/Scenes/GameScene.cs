@@ -93,9 +93,41 @@ public class GameScene : GUIScene
         //                        500);
         
         //Show all elements
-        CallFuncHandler callFuncHandler = GetCallFuncHandler();
-        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
-        //ShowElements();
+        //CallFuncHandler callFuncHandler = GetCallFuncHandler();
+        //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
+        ShowElements();
+
+        /** TEST SYMMETRY **/
+        //Shape testShape = new Shape(true);
+        //Contour testContour = new Contour(4);
+        //testContour.Add(new Vector2(-4, 5));
+        //testContour.Add(new Vector2(-6, 3));
+        //testContour.Add(new Vector2(-4, 1));
+        //testContour.Add(new Vector2(-2, 3));
+
+        //List<Contour> testHoles = new List<Contour>(1);
+        //Contour testHole = new Contour(4);
+        //testHole.Add(new Vector2(-4.5f, 3.5f));
+        //testHole.Add(new Vector2(-4.5f, 2.5f));
+        //testHole.Add(new Vector2(-3.5f, 2.5f));
+        //testHole.Add(new Vector2(-3.5f, 3.5f));
+        //testHoles.Add(testHole);
+
+        //testShape = new Shape(true, testContour, testHoles);
+
+        //AxisRenderer testAxis = m_axes.BuildAxis(new Vector2(0, 1)).GetComponent<AxisRenderer>();
+        //testAxis.Render(new Vector2(0, 1), new Vector2(0, 5), true);
+        //Shape symmetricShape = testShape.CalculateSymmetricShape(testAxis);
+
+        //for (int i = 0; i != symmetricShape.m_contour.Count; i++)
+        //{
+        //    Debug.Log("contour point: " + symmetricShape.m_contour[i]);
+        //}
+
+        //for (int i = 0; i != symmetricShape.m_holes[0].Count; i++)
+        //{
+        //    Debug.Log("hole point: " + symmetricShape.m_holes[0][i]);
+        //}
 
         m_isShown = true;
     }
@@ -454,7 +486,7 @@ public class GameScene : GUIScene
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
 
-            GameObject shapeObject = m_shapes.CreateShapeObjectFromData(shape);
+            m_shapes.CreateShapeObjectFromData(shape);
 
             //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
             //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);

@@ -398,12 +398,21 @@ public class GeometryUtils
         if (!MathUtils.AreFloatsEqual(det, 0)) //points are not aligned, thus point can never be on the segment AB
             return false;
 
-        Vector2 u = point - segmentPointA; //AM vector
-        Vector2 v = segmentPointB - segmentPointA; //AB vector
+        //points are aligned, just test if points is inside the ribbon defined by A and B
+        return IsPointContainedInStrip(point, segmentPointA, segmentPointB, bIncludeEndpoints);
+    }
+
+    /**
+     * Test if a point is contained in a strip whose width is defined by segment AB
+     * **/
+    static public bool IsPointContainedInStrip(Vector2 point, Vector2 ribbonPointA, Vector2 ribbonPointB, bool bIncludeEndpoints = true)
+    {
+        Vector2 u = point - ribbonPointA; //AM vector
+        Vector2 v = ribbonPointB - ribbonPointA; //AB vector
 
         float dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
         if (dotProduct > 0)
-            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so fot product AM.AB should be majored by AB squared length
+            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
         else //AM and AB are of opposite sign
             return false;
     }

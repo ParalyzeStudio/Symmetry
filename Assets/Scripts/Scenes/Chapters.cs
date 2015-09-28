@@ -54,7 +54,6 @@ public class Chapters : GUIScene
     public void ShowSelectionArrows(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        BackgroundTrianglesRenderer backgroundRenderer = GetBackgroundRenderer();
 
         //Left selection arrow
         m_leftArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);

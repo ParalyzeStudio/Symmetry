@@ -77,6 +77,35 @@ public class Shape : GridTriangulable
     }
 
     /**
+     * Return a Shape object that is symmetric about the 'axis' parameter
+     * **/
+    public Shape CalculateSymmetricShape(AxisRenderer axis)
+    {
+        //Symmetrize contour
+        Contour symmetricContour = new Contour(m_contour.Count);
+    
+        for (int i = m_contour.Count - 1; i != -1; i--)
+        {
+            symmetricContour.Add(Symmetrizer.GetSymmetricPointAboutAxis(m_contour[i], axis));
+        }
+
+        //Symmetrize holes
+        List<Contour> symmetricHoles = new List<Contour>(m_holes.Count);
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            Contour hole = m_holes[i];
+            Contour symmetricHole = new Contour(hole.Count);
+            for (int j = hole.Count - 1; j != -1; j--)
+            {
+                symmetricHole.Add(Symmetrizer.GetSymmetricPointAboutAxis(hole[j], axis));
+            }
+            symmetricHoles.Add(symmetricHole);
+        }
+
+        return new Shape(m_gridPointMode, symmetricContour, symmetricHoles);
+    }
+
+    /**
      * Set the color of each child triangle from the color of the shape itself
      * **/
     public void PropagateColorToTriangles()

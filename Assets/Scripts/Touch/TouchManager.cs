@@ -130,6 +130,10 @@ public class TouchManager : MonoBehaviour
                     gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
 
                     //or the shapes
+                    if (gameScene == null)
+                        Debug.Log("TouchManager.cs GameScene NULL");
+                    if (gameScene.m_shapes == null)
+                        Debug.Log("TouchManager.cs GameScene.m_shapes NULL");
                     List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
                     for (int iShapeIdx = 0; iShapeIdx != shapeObjects.Count; iShapeIdx++)
                     {

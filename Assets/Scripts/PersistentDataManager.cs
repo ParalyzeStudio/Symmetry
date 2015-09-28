@@ -62,7 +62,7 @@ public class PersistentDataManager : MonoBehaviour
         {
             try
             {
-                FileStream fs = File.Open(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
+                File.Open(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
             }
             catch (FileNotFoundException)
             {

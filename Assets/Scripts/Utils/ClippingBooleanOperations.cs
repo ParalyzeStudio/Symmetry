@@ -46,12 +46,11 @@ public class ClippingBooleanOperations
         subjsPaths.Add(CreatePathFromContour(contourWithOffset));
 
         //subj holes
+        List<Contour> holesWithOffset = subjShape.GetHolesWithOffset();
         for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
         {
-            subjsPaths.Add(CreatePathFromContour(subjShape.m_holes[iHoleIdx]));
+            subjsPaths.Add(CreatePathFromContour(holesWithOffset[iHoleIdx]));
         }
-
-        List<Contour> holesWithOffset = subjShape.GetHolesWithOffset();
 
         //build clips paths
         List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();

@@ -30,9 +30,9 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     public bool m_meshColorsDirty { get; set; }
 
     //Variables to handle the delayed rendering of main title
-    private bool m_renderingMainMenuTitle;
-    private float m_renderingMainMenuTitleElapsedTime;
-    private float m_renderingMainMenuTitleDelay;
+    //private bool m_renderingMainMenuTitle;
+    //private float m_renderingMainMenuTitleElapsedTime;
+    //private float m_renderingMainMenuTitleDelay;
 
     //gradients
     public float m_verticalOffset { get; set; } //the offset generated when translating background across gradients
@@ -61,15 +61,15 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
     //private float m_offsettingMaxSpeed; //Limit the exponential to a maximum value
 
     //point lights
-    public const int MAX_LIGHTS = 5;
-    private GameObject[] m_pointLightsObjects;
-    public GameObject m_pointLightPfb;
+    //public const int MAX_LIGHTS = 5;
+    //private GameObject[] m_pointLightsObjects;
+    //public GameObject m_pointLightPfb;
 
     public void Awake()
     {
         m_meshBuilt = false;
         m_triangleColumns = new List<BackgroundTriangleColumn>();
-        m_pointLightsObjects = new GameObject[MAX_LIGHTS];
+        //m_pointLightsObjects = new GameObject[MAX_LIGHTS];
     }
 
     public void Init()
@@ -86,7 +86,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();
         animator.SetPosition(Vector3.zero);
 
-        m_renderingMainMenuTitle = false;
+        //m_renderingMainMenuTitle = false;
     }
 
     /**
@@ -548,8 +548,6 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
      * **/
     public BackgroundTriangle GetNearestTriangleToScreenYPosition(float yPosition = 0, int columnIndex = 0, float bTriangleAngle = -1)
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
         float minDistance = float.MaxValue;
         BackgroundTriangle nearestTriangle = null;
         for (int i = 0; i != m_triangleColumns[columnIndex].Count; i++)
@@ -678,15 +676,15 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         }        
 
         //render main menu title
-        if (m_renderingMainMenuTitle)
-        {
-            m_renderingMainMenuTitleElapsedTime += dt;
-            if (m_renderingMainMenuTitleElapsedTime >= m_renderingMainMenuTitleDelay)
-            {
-                m_renderingMainMenuTitle = false;
-                DrawMainMenuTitle(true);
-            }
-        }
+        //if (m_renderingMainMenuTitle)
+        //{
+        //    m_renderingMainMenuTitleElapsedTime += dt;
+        //    if (m_renderingMainMenuTitleElapsedTime >= m_renderingMainMenuTitleDelay)
+        //    {
+        //        m_renderingMainMenuTitle = false;
+        //        DrawMainMenuTitle(true);
+        //    }
+        //}
 
         //point lights
         //ProcessPointLights();

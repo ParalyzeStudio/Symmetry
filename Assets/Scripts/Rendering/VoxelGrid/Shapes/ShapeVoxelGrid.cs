@@ -52,7 +52,6 @@ public class ShapeVoxelGrid : MonoBehaviour
         m_cellsHolder.transform.localPosition = Vector3.zero;
 
         Grid parentGrid = this.GetComponent<Grid>();
-        Vector2 gridSize = parentGrid.m_gridSize;
 
         m_xVoxelsCount = (parentGrid.m_numColumns - 1) * (density - 1) + 1; 
         m_yVoxelsCount = (parentGrid.m_numLines - 1) * (density - 1) + 1;
@@ -85,13 +84,6 @@ public class ShapeVoxelGrid : MonoBehaviour
 
         ShapeVoxel voxel = voxelObject.GetComponent<ShapeVoxel>();
         voxel.Init(voxelWorldPosition);
-        
-        voxelObject.GetComponent<ColorQuad>().Init(Instantiate(m_voxelMaterial));
-
-        ColorQuadAnimator voxelAnimator = voxelObject.GetComponent<ColorQuadAnimator>();
-        voxelAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(voxelLocalPosition, 0));
-        voxelAnimator.SetScale(Vector3.one * m_voxelSize * 0.1f);
-        voxelAnimator.SetColor(Color.blue);
 
         m_voxels[i] = voxel;
     }
