@@ -177,13 +177,11 @@ public class RibbonMesh : ColorMesh
     }
 
     /**
-     * Extract sub contours on ribbon to create a left and a right shape that will be used to clip polygon shapes inside the grid
+     * Extract sub contours on ribbon to create a left and/or a right shape that will be used to clip polygon shapes inside the grid
      * **/
-    public void ExtractLeftAndRightSubShapes()
+    public void SplitByAxis(Symmetrizer.SymmetryType symmetryType)
     {
         Contour ribbonContour = m_ribbonData.m_contour;
-        Contour leftSubContour = new Contour(); //the contour associated with the 'left' sub shape
-        Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
 
         //Find the index of the next vertices to axis endpoints inside the ribbon contour
         int indexOfNextVertexToAxisPointA = -1;
@@ -210,11 +208,11 @@ public class RibbonMesh : ColorMesh
 
         if (indexOfNextVertexToAxisPointA == -1 || indexOfNextVertexToAxisPointB == -1)
         {
-            Debug.Log("STOP");
-            throw new System.Exception("will run out of memory");
+            throw new System.Exception("Could not place pointA or pointB inside ribbon");
         }
 
         //Create the two sub contours
+        Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
         rightSubContour.Add(m_ribbonPointA);
         for (int i = indexOfNextVertexToAxisPointA; i != indexOfNextVertexToAxisPointB; i++)
         {
@@ -229,27 +227,29 @@ public class RibbonMesh : ColorMesh
         }
         rightSubContour.Add(m_ribbonPointB);
 
-        leftSubContour.Add(m_ribbonPointB);
-        for (int i = indexOfNextVertexToAxisPointB; i != indexOfNextVertexToAxisPointA; i++)
-        {
-            if (i == ribbonContour.Count) //reset to the beginning of the list
-            {
-                if (indexOfNextVertexToAxisPointA == 0) //we added all points between A and B, break the loop so we can add B
-                    break;
-                else //more points need to be added, reset to the beginning of the list
-                    i = 0;
-            }
-            leftSubContour.Add(ribbonContour[i]);
-        }
-        leftSubContour.Add(m_ribbonPointA);
-
-        Debug.Log("sub-contours extracted");
-
-        //Finally create the sub shape objects
-        m_ribbonLeftSubShape = new Shape(false, leftSubContour);
         m_ribbonRightSubShape = new Shape(false, rightSubContour);
 
-        Debug.Log("sub-shapes created");
+        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        {
+            Contour leftSubContour = new Contour(); //the contour associated with the 'left' sub shape
+            leftSubContour.Add(m_ribbonPointB);
+            for (int i = indexOfNextVertexToAxisPointB; i != indexOfNextVertexToAxisPointA; i++)
+            {
+                if (i == ribbonContour.Count) //reset to the beginning of the list
+                {
+                    if (indexOfNextVertexToAxisPointA == 0) //we added all points between A and B, break the loop so we can add B
+                        break;
+                    else //more points need to be added, reset to the beginning of the list
+                        i = 0;
+                }
+                leftSubContour.Add(ribbonContour[i]);
+            }
+            leftSubContour.Add(m_ribbonPointA);
+
+            m_ribbonLeftSubShape = new Shape(false, leftSubContour);
+        }
+        else
+            m_ribbonLeftSubShape = null;
     }
 
     /**

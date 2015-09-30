@@ -6,6 +6,7 @@ public class Shape : GridTriangulable
     public Color m_color { get; set; }
     public Vector2 m_offsetOnVertices { get; set; }
     public Vector2 m_gridOffsetOnVertices { get; set; }
+    public ShapeMesh m_parentMesh { get; set; }
 
     public Shape(bool gridPointMode)
         : base(gridPointMode)
@@ -102,29 +103,31 @@ public class Shape : GridTriangulable
             symmetricHoles.Add(symmetricHole);
         }
 
-        return new Shape(m_gridPointMode, symmetricContour, symmetricHoles);
+        Shape symmetricShape = new Shape(m_gridPointMode, symmetricContour, symmetricHoles);
+        symmetricShape.m_color = this.m_color;
+        return symmetricShape;
     }
 
     /**
      * Set the color of each child triangle from the color of the shape itself
      * **/
-    public void PropagateColorToTriangles()
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
-        {
-            ShapeTriangle triangle = (ShapeTriangle)m_triangles[iTriangleIndex];
-            triangle.m_color = m_color;
-        }
-    }
+    //public void PropagateColorToTriangles()
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        ShapeTriangle triangle = (ShapeTriangle)m_triangles[iTriangleIndex];
+    //        triangle.m_color = m_color;
+    //    }
+    //}
 
     /**
      * Obtain the color of this shape from the triangles
      * **/
-    public void ObtainColorFromTriangles()
-    {
-        if (m_triangles.Count > 0)
-            m_color = ((ShapeTriangle)m_triangles[0]).m_color;
-    }
+    //public void ObtainColorFromTriangles()
+    //{
+    //    if (m_triangles.Count > 0)
+    //        m_color = ((ShapeTriangle)m_triangles[0]).m_color;
+    //}
 
     /**
      * Fusion this shape with every shape that overlaps it. 
@@ -134,7 +137,7 @@ public class Shape : GridTriangulable
     public Shape Fusion()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        List<GameObject> shapeObjects = gameScene.m_shapes.m_shapesObjects;
+        List<Shape> shapeObjects = gameScene.m_shapes.m_staticShapes;
 
         //Find the first shape that overlaps this shape
         Shape subjShape = null;
@@ -144,7 +147,7 @@ public class Shape : GridTriangulable
 
         for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
         {
-            Shape shapeData = shapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
+            Shape shapeData = shapeObjects[iShapeIndex];
 
             if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
                 continue;
@@ -152,12 +155,10 @@ public class Shape : GridTriangulable
             if (this == shapeData)
             {
                 subjShape = this;
-                subjShapeObject = shapeObjects[iShapeIndex];
             }
             else if (clipShape == null && this.OverlapsShape(shapeData)) //we have not found a clip shape yet
             {
-                clipShape = shapeData;
-                clipShapeObject = shapeObjects[iShapeIndex];                
+                clipShape = shapeData;              
             }
 
             if (clipShape != null && subjShape != null) //we have both subj and clip shape we can break the loop
@@ -171,12 +172,12 @@ public class Shape : GridTriangulable
         if (resultingShapes.Count > 1)
         {
             Shape resultingShape = resultingShapes[0];
-            gameScene.m_shapes.CreateShapeObjectFromData(resultingShape);
+            gameScene.m_shapes.CreateShapeObjectFromData(resultingShape, false);
 
             gameScene.m_shapes.DestroyShape(subjShapeObject);
             gameScene.m_shapes.DestroyShape(clipShapeObject);
-            gameScene.m_shapes.RemoveShapeObject(subjShapeObject);
-            gameScene.m_shapes.RemoveShapeObject(clipShapeObject);
+            gameScene.m_shapes.RemoveStaticShape(subjShape);
+            gameScene.m_shapes.RemoveStaticShape(clipShape);
 
             return resultingShape;
         }

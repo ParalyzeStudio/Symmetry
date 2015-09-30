@@ -20,6 +20,7 @@ public class ShapeMesh : TexturedMesh
     public GameObject m_shapeCellPfb;
 
     //cells
+    private bool m_renderedWithCells;
     //public List<ShapeCell> m_cells { get; set; }
     public ShapeCell[] m_cells { get; set; }
 
@@ -50,20 +51,23 @@ public class ShapeMesh : TexturedMesh
     public void SetShapeData(Shape shapeData)
     {
         m_shapeData = shapeData;
+        shapeData.m_parentMesh = this;
     }
 
     /**
-     * Show the shape
+     * Render the shape by either building the shape cell by cell and displaying it later with sweeping lines
+     * or triangulate the contour and add triangles to the mesh
      * **/
-    public void Render(bool bAnimated = false)
+    public void Render(bool bCellRendering = false)
     {
-        if (bAnimated)
+        m_renderedWithCells = bCellRendering;
+
+        if (bCellRendering) //render shape using cells
         {
             AssignVoxels();
             BuildCells();
-            ShowCells();            
         }
-        else
+        else //render shape with simple triangulation
         {
             //Simply add the shape triangles to the mesh
             for (int i = 0; i != m_shapeData.m_triangles.Count; i++)
@@ -154,28 +158,54 @@ public class ShapeMesh : TexturedMesh
     }
 
     /**
-     * Show cells using a sweep line
+     * Destroy all cells and clear the associated array
      * **/
-    private void ShowCells()
+    public void DestroyCells()
     {
-        //Start cell animation with one of them (for instance the one with the lower index), then propagate through neighboring cells
         for (int i = 0; i != m_cells.Length; i++)
         {
             if (m_cells[i] != null)
             {
-                if (m_cells[i].TriangulateAndShow())
-                    break;
-                else
-                    DestroyAndNullifyCellAtIndex(i);
+                Destroy(m_cells[i].gameObject);
+                m_cells[i] = null;
+            }
+        }
+    }
+
+    /**
+     * Sweep mesh cells and reveal them if they have just crossed the sweeping line and are now on the 'side' specified by the associated paramater
+     * **/
+    public void SweepCellsWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
+    {
+        bool allCellsSwept = true;
+        for (int i = 0; i != m_cells.Length; i++)
+        {
+            ShapeCell cell = m_cells[i];
+            if (cell == null || cell.Swept || cell.Showing)
+                continue;
+            else
+                allCellsSwept = false;
+
+            //Test the position of this cell about the axis
+            float det = MathUtils.Determinant(line.PointA, line.PointB, cell.m_position);
+            if ((bLeftSide && det >= 0) || (!bLeftSide && det <= 0))
+            {
+                cell.TriangulateAndShow();
             }
         }
 
-        //m_sweeping = true;
-        //m_sweepLineSpeed = SWEEP_LINE_SPEED;
+        if (allCellsSwept && m_renderedWithCells) //we just swept all cells, we can now render this whole mesh with simple triangles
+        {
+            OnMeshSwept();
+        }
+    }
 
-        //m_sweepLineDirection = Quaternion.AngleAxis(SWEEP_LINE_ANGLE, Vector3.forward) * new Vector3(1, 0, 0);
-        //Vector2 sweepLineNormal = new Vector2(-m_sweepLineDirection.y, m_sweepLineDirection.x);
-        //m_sweepLinePoint = this.m_shapeData.m_contour.GetLeftMostPointAlongAxis(sweepLineNormal);
+    /**
+     * Sweep mesh cells and reveal them if they have just crossed the sweeping circle
+     * **/
+    public void SweepCellsWithCircle()
+    {
+
     }
 
     /**
@@ -185,6 +215,16 @@ public class ShapeMesh : TexturedMesh
     {
         Destroy(m_cells[index]);
         m_cells[index] = null;
+    }
+
+    /**
+     * Callback called when all cells of this mesh have been swept
+     * **/
+    private void OnMeshSwept()
+    {
+        Debug.Log("OnMeshSwept");
+        DestroyCells();
+        Render(false);
     }
 
     //public void ShowVoxelCell(ShapeCell cell)

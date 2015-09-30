@@ -90,8 +90,6 @@ public class ClippingBooleanOperations
                 for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
                 {
                     Contour splitContour = splitContours[iContourIdx];
-                    if (splitContour.Count < 3)
-                        Debug.Log("STOP");
                     splitContour.RemoveAlignedVertices();
                     splitContour.ScalePoints(1 / (float)GeometryUtils.CONVERSION_FLOAT_PRECISION);
                 }
@@ -119,18 +117,7 @@ public class ClippingBooleanOperations
 
                     if (contourArea > 0) //counter-clockwise orientation, it is a shape contour
                     {
-                        Shape shape = new Shape(false, splitContour);
-
-                        //Color
-                        Color shapeColor = Color.black;
-                        if (clipOperation == ClipType.ctUnion || clipOperation == ClipType.ctDifference)
-                            shapeColor = subjShape.m_color;
-                        else if (clipOperation == ClipType.ctIntersection)
-                            shapeColor = 0.5f * (subjShape.m_color + clipShape.m_color);
-
-                        shapeColor.a = Shapes.SHAPES_OPACITY;
-                        shape.m_color = shapeColor;
-                        shape.PropagateColorToTriangles();
+                        Shape shape = new Shape(false, splitContour);                        
                         shape.Triangulate(); //tmp triangulation, we will retriangulate if necessary if holes are added
 
                         resultingShapes.Add(shape);

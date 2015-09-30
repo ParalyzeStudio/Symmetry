@@ -154,8 +154,8 @@ public class GameScene : GUIScene
         ShowActionButtons();
 
         //Show starting shapes
-        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
-        //ShowInitialShapes();
+        //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
+        ShowInitialShapes();
 
         //Build Axes holder
         m_axes = this.gameObject.GetComponentInChildren<Axes>();
@@ -486,7 +486,7 @@ public class GameScene : GUIScene
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
 
-            m_shapes.CreateShapeObjectFromData(shape);
+            m_shapes.CreateShapeObjectFromData(shape, false);
 
             //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
             //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);

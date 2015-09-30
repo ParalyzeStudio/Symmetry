@@ -26,33 +26,45 @@ public class Symmetrizer : MonoBehaviour
      * **/
     public void SymmetrizeByAxis()
     {
+        Shapes shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
         AxisRenderer axis = this.GetComponent<AxisRenderer>();
 
+        //Split the ribbon first
+        axis.SplitRibbon(m_symmetryType);
+
         //Get ribbon left and right clip shapes
-        //Shape ribbonLeftClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonLeftSubShape;
-        //Shape ribbonRightClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonRightSubShape;
+        Shape ribbonLeftClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonLeftSubShape;
+        Shape ribbonRightClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonRightSubShape;
 
         //Clip all shapes
-        //List<GameObject> allShapeObjects = GetGameScene().GetComponentInChildren<Shapes>().m_shapesObjects;
-       
+        List<Shape> staticShapes = GetGameScene().GetComponentInChildren<Shapes>().m_staticShapes;
 
-        //for (int i = 0; i != allShapeObjects.Count; i++)
-        //{
-        //    Shape shape = allShapeObjects[i].GetComponent<ShapeMesh>().m_shapeData;
+        for (int i = 0; i != staticShapes.Count; i++)
+        {
+            Shape shape = staticShapes[i];
 
-        //    List<Shape> lResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection);
-        //    List<Shape> rResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
+            if (ribbonLeftClipShape != null)
+            {
+                List<Shape> lResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection);
+                for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
+                {
+                    Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(axis);
+                    lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
+                    shapesHolder.ClipAgainstStaticShapes(lSymmetricShape);
+                }
+            }
 
-        //    for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
-        //    {
-        //        Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(axis);
-        //    }
-
-        //    for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
-        //    {
-        //        Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(axis);
-        //    }
-        //}
+            //if (ribbonRightClipShape != null)
+            //{
+            //    List<Shape> rResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
+            //    for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
+            //    {
+            //        Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(axis);
+            //        rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
+            //        shapesHolder.ClipAgainstStaticShapes(rSymmetricShape);
+            //    }
+            //}
+        }
 
         //Callback on the AxisRenderer
         axis.OnPerformSymmetry(m_symmetryType);
@@ -431,11 +443,11 @@ public class Symmetrizer : MonoBehaviour
             return point;
         else
         {
-            float distanceToAxis = GeometryUtils.DistanceToLine(point, axis.m_endpoint1GridPosition, axis.GetAxisDirection());
-            if (det > 0) // 'right'
-                return point - 2 * distanceToAxis * axisNormal;
-            else // 'left'
+            float distanceToAxis = GeometryUtils.DistanceToLine(point, bGridPoint ? axis.m_endpoint1GridPosition : axis.m_endpoint1Position, axis.GetAxisDirection());
+            if (det > 0) // 'left'
                 return point + 2 * distanceToAxis * axisNormal;
+            else // 'right'
+                return point - 2 * distanceToAxis * axisNormal;
         }
     }
 

@@ -23,6 +23,7 @@ public class AxisRenderer : MonoBehaviour
     public float m_snapDistance;
 
     private GameScene m_gameScene;
+    private Shapes m_shapesHolder;
 
     //Ribbon
     public GameObject m_ribbonPfb;
@@ -79,6 +80,8 @@ public class AxisRenderer : MonoBehaviour
 
     public SweepingLine m_leftSweepingLine { get; set; } //line that will sweep the area on the 'left' of the axis or null if not applicable
     public SweepingLine m_rightSweepingLine { get; set; } //line that will sweep the area on the 'right' of the axis or null if not applicable
+    private bool m_sweepingLeft;
+    private bool m_sweepingRight;
 
     public GameObject m_sweepLinePfb;
     private GameObject m_debugLeftSweepLineObject;
@@ -103,6 +106,8 @@ public class AxisRenderer : MonoBehaviour
 
         m_leftSweepingLine = null;
         m_rightSweepingLine = null;
+        m_sweepingLeft = false;
+        m_sweepingRight = false;
     }
 
     /**
@@ -319,25 +324,57 @@ public class AxisRenderer : MonoBehaviour
     }
 
     /**
+     * Sweep cells on all shapes
+     * **/
+    private void SweepShapeCells()
+    {
+        //List<GameObject> allShapeObjects = GetShapesHolder().m_shapesObjects;
+        //for (int i = 0; i != allShapeObjects.Count; i++)
+        //{
+        //    ShapeMesh shapeMesh = allShapeObjects[i].GetComponent<ShapeMesh>();
+        //    shapeMesh.SweepCellsWithLine(m_leftSweepingLine, bLeftSide);
+        //}
+    }
+
+    /**
+     * Split ribbon in two sub-shapes for each side of the axis
+     * **/
+    public void SplitRibbon(Symmetrizer.SymmetryType symmetryType)
+    {
+        m_ribbonMesh.SplitByAxis(symmetryType);
+    }
+
+    /**
+     * Launch sweeping lines from the current axis
+     * **/
+    public void LaunchSweepingLines()
+    {
+        if (m_leftSweepingLine != null)
+            m_sweepingLeft = true;
+        if (m_rightSweepingLine != null)
+            m_sweepingRight = true;
+    }
+
+    /**
      * Callback used when a symmetry is performed on the grid
      * **/
     public void OnPerformSymmetry(Symmetrizer.SymmetryType symmetryType)
-    {
-        m_ribbonMesh.ExtractLeftAndRightSubShapes();
-
+    {   
         //Create and animate sweeping lines
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
             Vector2 clockwiseAxisNormal = GetAxisNormal();
-            m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
+            //m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
             m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, clockwiseAxisNormal);
 
             //debug objects
             Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
-            m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            m_debugLeftSweepLineObject.transform.localRotation = sweepLineRotation;
-            m_debugLeftSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
+            //m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            //m_debugLeftSweepLineObject.transform.parent = this.transform;
+            //m_debugLeftSweepLineObject.transform.localRotation = sweepLineRotation;
+            //m_debugLeftSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
             m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugRightSweepLineObject.transform.parent = this.transform;
             m_debugRightSweepLineObject.transform.localRotation = sweepLineRotation;
             m_debugRightSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
         }
@@ -351,6 +388,9 @@ public class AxisRenderer : MonoBehaviour
 
             m_leftSweepingLine = null;
         }
+
+        Destroy(m_ribbonMesh.gameObject);
+        LaunchSweepingLines();
     }
 
     public Vector2 GetAxisCenterInWorldCoordinates()
@@ -389,11 +429,19 @@ public class AxisRenderer : MonoBehaviour
         return m_gameScene;
     }
 
+    private Shapes GetShapesHolder()
+    {
+        if (m_shapesHolder == null)
+            m_shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
+
+        return m_shapesHolder;
+    }
+
     public void Update()
     {
         float dt = Time.deltaTime;
 
-        if (m_leftSweepingLine != null)
+        if (m_sweepingLeft)
         {
             m_leftSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
 
@@ -405,15 +453,17 @@ public class AxisRenderer : MonoBehaviour
                 //move the debug object
                 Vector2 debugLeftSweepLinePosition = 0.5f * (m_leftSweepingLine.PointA + m_leftSweepingLine.PointB);
                 m_debugLeftSweepLineObject.transform.localPosition = debugLeftSweepLinePosition;
+                GetShapesHolder().SweepDynamicShapesWithLine(m_leftSweepingLine, false);
             }
             else
             {
                 m_leftSweepingLine = null;
+                m_sweepingLeft = false;
                 Destroy(m_debugLeftSweepLineObject);
                 m_debugLeftSweepLineObject = null;
             }
         }
-        if (m_rightSweepingLine != null)
+        if (m_sweepingRight)
         {
             m_rightSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
 
@@ -425,10 +475,12 @@ public class AxisRenderer : MonoBehaviour
                 //move the debug object
                 Vector3 debugRightSweepLinePosition = 0.5f * (m_rightSweepingLine.PointA + m_rightSweepingLine.PointB);
                 m_debugRightSweepLineObject.transform.localPosition = debugRightSweepLinePosition;
+                GetShapesHolder().SweepDynamicShapesWithLine(m_rightSweepingLine, true);
             }
             else
             {
                 m_rightSweepingLine = null;
+                m_sweepingRight = false;
                 Destroy(m_debugRightSweepLineObject);
                 m_debugRightSweepLineObject = null;
             }

@@ -5,7 +5,7 @@ public class ShapeAnimator : GameObjectAnimator
 {
     public override void SetOpacity(float opacity, bool bPassOnChildren = true)
     {
-        base.SetOpacity(opacity, bPassOnChildren);
+        base.SetOpacity(opacity, false); //only children a shape can have are cells, do not pass opacity to them because they are likely to not being built yet
 
         ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
         shapeMesh.SetTintColor(m_color);

@@ -26,7 +26,14 @@ public class ShapeCell : MonoBehaviour
         }
     }
 
-    public bool m_swept { get; set; }
+    private bool m_swept;
+    public bool Swept
+    {
+        get
+        {
+            return m_swept;
+        }
+    }
 
     //neighboring cells
     public ShapeCell m_topCell { get; set; }
@@ -55,7 +62,7 @@ public class ShapeCell : MonoBehaviour
     /**
      * Try to triangulate the cell and show it if cell is not empty
      * **/
-    public bool TriangulateAndShow()
+    public void TriangulateAndShow()
     {
         //Triangulate the cell first
         bool bEmptyCell = !Triangulate();
@@ -63,12 +70,10 @@ public class ShapeCell : MonoBehaviour
         if (!bEmptyCell)
         {
             Show();
-            return true;
         }
         else //triangulation led to an empty cell so remove it
         {
             m_parentMesh.DestroyAndNullifyCellAtIndex(m_index);
-            return false;
         }
     }
 
@@ -97,7 +102,7 @@ public class ShapeCell : MonoBehaviour
         //animate cell by fading in it
         ShapeCellAnimator cellAnimator = this.gameObject.GetComponent<ShapeCellAnimator>();
         cellAnimator.SetColor(new Color(1, 1, 1, 0));
-        cellAnimator.FadeTo(1.0f, 0.02f);
+        cellAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.02f);
     }
 
     /**

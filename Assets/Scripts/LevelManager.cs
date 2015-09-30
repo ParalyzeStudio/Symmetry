@@ -157,6 +157,7 @@ public class LevelManager : MonoBehaviour
                 shapeColor.r = float.Parse(strSplitColor[0]);
                 shapeColor.g = float.Parse(strSplitColor[1]);
                 shapeColor.b = float.Parse(strSplitColor[2]);
+                shapeColor.a = 1;
                 shape.m_color = shapeColor;
 
                 //Contour

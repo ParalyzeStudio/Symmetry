@@ -25,7 +25,7 @@ public class ShapeTouchHandler : TouchHandler
         GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
         gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
 
-        gameScene.m_shapes.InitClippingOperationsOnShapeObject(this.gameObject);
+        //gameScene.m_shapes.InitClippingOperationsOnShapeObject(this.gameObject);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
