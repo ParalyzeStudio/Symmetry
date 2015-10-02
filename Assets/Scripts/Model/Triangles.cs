@@ -184,215 +184,215 @@ public class BaseTriangle
 /**
  * Triangle that belongs to a Shape
  * **/
-public class ShapeTriangle : BaseTriangle
-{
-    public Shape m_parentShape { get; set; }
-    public Color m_color { get; set; }
+//public class ShapeTriangle : BaseTriangle
+//{
+//    public Shape m_parentShape { get; set; }
+//    public Color m_color { get; set; }
 
-    public ShapeTriangle(Shape parentShape = null) : base()
-    {
-        m_parentShape = parentShape;       
-    }
+//    public ShapeTriangle(Shape parentShape = null) : base()
+//    {
+//        m_parentShape = parentShape;       
+//    }
 
-    public ShapeTriangle(Shape parentShape, Color color) : base()
-    {
-        m_parentShape = parentShape;
-        m_color = color;
-    }
+//    public ShapeTriangle(Shape parentShape, Color color) : base()
+//    {
+//        m_parentShape = parentShape;
+//        m_color = color;
+//    }
 
-    /**
-     * Splits this triangle intersected by a line
-     * **/
-    public void Split(Vector2 linePoint1, Vector2 linePoint2, out ShapeTriangle[] splitTriangles, out int splitTrianglesCount)
-    {
-        splitTriangles = new ShapeTriangle[3];
-        splitTrianglesCount = 0;
+//    /**
+//     * Splits this triangle intersected by a line
+//     * **/
+//    public void Split(Vector2 linePoint1, Vector2 linePoint2, out ShapeTriangle[] splitTriangles, out int splitTrianglesCount)
+//    {
+//        splitTriangles = new ShapeTriangle[3];
+//        splitTrianglesCount = 0;
 
-        List<Vector2> intersections = FindIntersectionsWithLine(linePoint1, linePoint2);
+//        List<Vector2> intersections = FindIntersectionsWithLine(linePoint1, linePoint2);
 
-        if (intersections.Count != 2)
-            return;
+//        if (intersections.Count != 2)
+//            return;
 
-        int intersection1IsTriangleVertex = PointEqualsVertex(intersections[0]);
-        int intersection2IsTriangleVertex = PointEqualsVertex(intersections[1]);
-        if (intersection1IsTriangleVertex >= 0 || intersection2IsTriangleVertex >= 0) //one of the intersection is equal to a triangle vertex
-        {
-            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
-            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
-            splitTrianglesCount = 2;
+//        int intersection1IsTriangleVertex = PointEqualsVertex(intersections[0]);
+//        int intersection2IsTriangleVertex = PointEqualsVertex(intersections[1]);
+//        if (intersection1IsTriangleVertex >= 0 || intersection2IsTriangleVertex >= 0) //one of the intersection is equal to a triangle vertex
+//        {
+//            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
+//            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
+//            splitTrianglesCount = 2;
 
-            if (intersection1IsTriangleVertex >= 0)
-            {
-                if (intersection1IsTriangleVertex == 0)
-                {
-                    splitTriangles[0].m_points[0] = intersections[0];
-                    splitTriangles[0].m_points[1] = m_points[1];
-                    splitTriangles[0].m_points[2] = intersections[1];
+//            if (intersection1IsTriangleVertex >= 0)
+//            {
+//                if (intersection1IsTriangleVertex == 0)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[0];
+//                    splitTriangles[0].m_points[1] = m_points[1];
+//                    splitTriangles[0].m_points[2] = intersections[1];
 
-                    splitTriangles[1].m_points[0] = intersections[0];
-                    splitTriangles[1].m_points[1] = intersections[1];
-                    splitTriangles[1].m_points[2] = m_points[2];
-                }
-                else if (intersection1IsTriangleVertex == 1)
-                {
-                    splitTriangles[0].m_points[0] = intersections[0];
-                    splitTriangles[0].m_points[1] = m_points[2];
-                    splitTriangles[0].m_points[2] = intersections[1];
+//                    splitTriangles[1].m_points[0] = intersections[0];
+//                    splitTriangles[1].m_points[1] = intersections[1];
+//                    splitTriangles[1].m_points[2] = m_points[2];
+//                }
+//                else if (intersection1IsTriangleVertex == 1)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[0];
+//                    splitTriangles[0].m_points[1] = m_points[2];
+//                    splitTriangles[0].m_points[2] = intersections[1];
 
-                    splitTriangles[1].m_points[0] = m_points[0];
-                    splitTriangles[1].m_points[1] = intersections[0];
-                    splitTriangles[1].m_points[2] = intersections[1];
-                }
-                else if (intersection1IsTriangleVertex == 2)
-                {
-                    splitTriangles[0].m_points[0] = intersections[0];
-                    splitTriangles[0].m_points[1] = m_points[0];
-                    splitTriangles[0].m_points[2] = intersections[1];
+//                    splitTriangles[1].m_points[0] = m_points[0];
+//                    splitTriangles[1].m_points[1] = intersections[0];
+//                    splitTriangles[1].m_points[2] = intersections[1];
+//                }
+//                else if (intersection1IsTriangleVertex == 2)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[0];
+//                    splitTriangles[0].m_points[1] = m_points[0];
+//                    splitTriangles[0].m_points[2] = intersections[1];
 
-                    splitTriangles[1].m_points[0] = intersections[0];
-                    splitTriangles[1].m_points[1] = intersections[1];
-                    splitTriangles[1].m_points[2] = m_points[1];
-                }
-            }
-            else
-            {
-                if (intersection2IsTriangleVertex == 0)
-                {
-                    splitTriangles[0].m_points[0] = intersections[1];
-                    splitTriangles[0].m_points[1] = m_points[1];
-                    splitTriangles[0].m_points[2] = intersections[0];
+//                    splitTriangles[1].m_points[0] = intersections[0];
+//                    splitTriangles[1].m_points[1] = intersections[1];
+//                    splitTriangles[1].m_points[2] = m_points[1];
+//                }
+//            }
+//            else
+//            {
+//                if (intersection2IsTriangleVertex == 0)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[1];
+//                    splitTriangles[0].m_points[1] = m_points[1];
+//                    splitTriangles[0].m_points[2] = intersections[0];
 
-                    splitTriangles[1].m_points[0] = intersections[1];
-                    splitTriangles[1].m_points[1] = intersections[0];
-                    splitTriangles[1].m_points[2] = m_points[2];
-                }
-                else if (intersection2IsTriangleVertex == 1)
-                {
-                    splitTriangles[0].m_points[0] = intersections[1];
-                    splitTriangles[0].m_points[1] = m_points[2];
-                    splitTriangles[0].m_points[2] = intersections[0];
+//                    splitTriangles[1].m_points[0] = intersections[1];
+//                    splitTriangles[1].m_points[1] = intersections[0];
+//                    splitTriangles[1].m_points[2] = m_points[2];
+//                }
+//                else if (intersection2IsTriangleVertex == 1)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[1];
+//                    splitTriangles[0].m_points[1] = m_points[2];
+//                    splitTriangles[0].m_points[2] = intersections[0];
 
-                    splitTriangles[1].m_points[0] = m_points[0];
-                    splitTriangles[1].m_points[1] = intersections[1];
-                    splitTriangles[1].m_points[2] = intersections[0];
-                }
-                else if (intersection2IsTriangleVertex == 2)
-                {
-                    splitTriangles[0].m_points[0] = intersections[1];
-                    splitTriangles[0].m_points[1] = m_points[0];
-                    splitTriangles[0].m_points[2] = intersections[0];
+//                    splitTriangles[1].m_points[0] = m_points[0];
+//                    splitTriangles[1].m_points[1] = intersections[1];
+//                    splitTriangles[1].m_points[2] = intersections[0];
+//                }
+//                else if (intersection2IsTriangleVertex == 2)
+//                {
+//                    splitTriangles[0].m_points[0] = intersections[1];
+//                    splitTriangles[0].m_points[1] = m_points[0];
+//                    splitTriangles[0].m_points[2] = intersections[0];
 
-                    splitTriangles[1].m_points[0] = intersections[1];
-                    splitTriangles[1].m_points[1] = intersections[0];
-                    splitTriangles[1].m_points[2] = m_points[1];
-                }
-            }
-        }
-        else //intersections are strictly inside edges
-        {
-            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
-            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
-            splitTriangles[2] = new ShapeTriangle(this.m_parentShape);
-            splitTrianglesCount = 3;
+//                    splitTriangles[1].m_points[0] = intersections[1];
+//                    splitTriangles[1].m_points[1] = intersections[0];
+//                    splitTriangles[1].m_points[2] = m_points[1];
+//                }
+//            }
+//        }
+//        else //intersections are strictly inside edges
+//        {
+//            splitTriangles[0] = new ShapeTriangle(this.m_parentShape);
+//            splitTriangles[1] = new ShapeTriangle(this.m_parentShape);
+//            splitTriangles[2] = new ShapeTriangle(this.m_parentShape);
+//            splitTrianglesCount = 3;
 
-            //find edges on which intersection points are on
-            int[] intersectionEdgesNumber = new int[2];
+//            //find edges on which intersection points are on
+//            int[] intersectionEdgesNumber = new int[2];
 
-            bool isEdge1Intersected = false;
-            bool isEdge2Intersected = false;
-            //find where the first intersection is
-            isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[0], m_points[1]);
-            if (isEdge1Intersected)
-                intersectionEdgesNumber[0] = 1; //intersection is on the first edge of the triangle
-            else
-            {
-                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[1], m_points[2]);
-                if (isEdge2Intersected)
-                    intersectionEdgesNumber[0] = 2; //intersection is on the second edge of the triangle
-                else
-                    intersectionEdgesNumber[0] = 3; //intersection is on the third edge of the triangle
-            }
+//            bool isEdge1Intersected = false;
+//            bool isEdge2Intersected = false;
+//            //find where the first intersection is
+//            isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[0], m_points[1]);
+//            if (isEdge1Intersected)
+//                intersectionEdgesNumber[0] = 1; //intersection is on the first edge of the triangle
+//            else
+//            {
+//                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[0], m_points[1], m_points[2]);
+//                if (isEdge2Intersected)
+//                    intersectionEdgesNumber[0] = 2; //intersection is on the second edge of the triangle
+//                else
+//                    intersectionEdgesNumber[0] = 3; //intersection is on the third edge of the triangle
+//            }
 
-            //find where the second intersection is
-            if (!isEdge1Intersected)
-            {
-                isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[0], m_points[1]);
-                if (isEdge1Intersected)
-                    intersectionEdgesNumber[1] = 1; //intersection is on the first edge of the triangle
-                else
-                {
-                    if (isEdge2Intersected)
-                        intersectionEdgesNumber[1] = 3; //intersection is on the third edge of the triangle
-                    else
-                        intersectionEdgesNumber[1] = 2; //intersection is on the second edge of the triangle
-                }
-            }
-            else
-            {
-                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[1], m_points[2]);
-                if (isEdge2Intersected)
-                    intersectionEdgesNumber[1] = 2; //intersection is on the second edge of the triangle
-                else
-                    intersectionEdgesNumber[1] = 3; //intersection is on the third edge of the triangle
-            }
+//            //find where the second intersection is
+//            if (!isEdge1Intersected)
+//            {
+//                isEdge1Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[0], m_points[1]);
+//                if (isEdge1Intersected)
+//                    intersectionEdgesNumber[1] = 1; //intersection is on the first edge of the triangle
+//                else
+//                {
+//                    if (isEdge2Intersected)
+//                        intersectionEdgesNumber[1] = 3; //intersection is on the third edge of the triangle
+//                    else
+//                        intersectionEdgesNumber[1] = 2; //intersection is on the second edge of the triangle
+//                }
+//            }
+//            else
+//            {
+//                isEdge2Intersected = GeometryUtils.IsPointContainedInSegment(intersections[1], m_points[1], m_points[2]);
+//                if (isEdge2Intersected)
+//                    intersectionEdgesNumber[1] = 2; //intersection is on the second edge of the triangle
+//                else
+//                    intersectionEdgesNumber[1] = 3; //intersection is on the third edge of the triangle
+//            }
 
-            if (intersectionEdgesNumber[1] < intersectionEdgesNumber[0])
-            {
-                Vector2 tmpIntersection = intersections[0];
-                intersections[0] = intersections[1];
-                intersections[1] = tmpIntersection;
+//            if (intersectionEdgesNumber[1] < intersectionEdgesNumber[0])
+//            {
+//                Vector2 tmpIntersection = intersections[0];
+//                intersections[0] = intersections[1];
+//                intersections[1] = tmpIntersection;
 
-                int tmpEdgeNumber = intersectionEdgesNumber[0];
-                intersectionEdgesNumber[1] = intersectionEdgesNumber[0];
-                intersectionEdgesNumber[0] = tmpEdgeNumber;
-            }
+//                int tmpEdgeNumber = intersectionEdgesNumber[0];
+//                intersectionEdgesNumber[1] = intersectionEdgesNumber[0];
+//                intersectionEdgesNumber[0] = tmpEdgeNumber;
+//            }
 
             
-            if (intersectionEdgesNumber[0] == 1 && intersectionEdgesNumber[1] == 2)
-            {
-                splitTriangles[0].m_points[0] = intersections[0];
-                splitTriangles[0].m_points[1] = m_points[1];
-                splitTriangles[0].m_points[2] = intersections[1];
+//            if (intersectionEdgesNumber[0] == 1 && intersectionEdgesNumber[1] == 2)
+//            {
+//                splitTriangles[0].m_points[0] = intersections[0];
+//                splitTriangles[0].m_points[1] = m_points[1];
+//                splitTriangles[0].m_points[2] = intersections[1];
 
-                splitTriangles[1].m_points[0] = intersections[0];
-                splitTriangles[1].m_points[1] = intersections[1];
-                splitTriangles[1].m_points[2] = m_points[2];
+//                splitTriangles[1].m_points[0] = intersections[0];
+//                splitTriangles[1].m_points[1] = intersections[1];
+//                splitTriangles[1].m_points[2] = m_points[2];
 
-                splitTriangles[2].m_points[0] = intersections[0];
-                splitTriangles[2].m_points[1] = m_points[2];
-                splitTriangles[2].m_points[2] = m_points[0];
-            }
-            else if (intersectionEdgesNumber[0] == 1 && intersectionEdgesNumber[1] == 3)
-            {
-                splitTriangles[0].m_points[0] = m_points[0];
-                splitTriangles[0].m_points[1] = intersections[0];
-                splitTriangles[0].m_points[2] = intersections[1];
+//                splitTriangles[2].m_points[0] = intersections[0];
+//                splitTriangles[2].m_points[1] = m_points[2];
+//                splitTriangles[2].m_points[2] = m_points[0];
+//            }
+//            else if (intersectionEdgesNumber[0] == 1 && intersectionEdgesNumber[1] == 3)
+//            {
+//                splitTriangles[0].m_points[0] = m_points[0];
+//                splitTriangles[0].m_points[1] = intersections[0];
+//                splitTriangles[0].m_points[2] = intersections[1];
 
-                splitTriangles[1].m_points[0] = intersections[0];
-                splitTriangles[1].m_points[1] = m_points[1];
-                splitTriangles[1].m_points[2] = m_points[2];
+//                splitTriangles[1].m_points[0] = intersections[0];
+//                splitTriangles[1].m_points[1] = m_points[1];
+//                splitTriangles[1].m_points[2] = m_points[2];
 
-                splitTriangles[2].m_points[0] = intersections[0];
-                splitTriangles[2].m_points[1] = m_points[2];
-                splitTriangles[2].m_points[2] = intersections[1];
-            }
-            else if (intersectionEdgesNumber[0] == 2 && intersectionEdgesNumber[1] == 3)
-            {
-                splitTriangles[0].m_points[0] = m_points[0];
-                splitTriangles[0].m_points[1] = m_points[1];
-                splitTriangles[0].m_points[2] = intersections[0];
+//                splitTriangles[2].m_points[0] = intersections[0];
+//                splitTriangles[2].m_points[1] = m_points[2];
+//                splitTriangles[2].m_points[2] = intersections[1];
+//            }
+//            else if (intersectionEdgesNumber[0] == 2 && intersectionEdgesNumber[1] == 3)
+//            {
+//                splitTriangles[0].m_points[0] = m_points[0];
+//                splitTriangles[0].m_points[1] = m_points[1];
+//                splitTriangles[0].m_points[2] = intersections[0];
 
-                splitTriangles[1].m_points[0] = intersections[0];
-                splitTriangles[1].m_points[1] = intersections[1];
-                splitTriangles[1].m_points[2] = m_points[0];
+//                splitTriangles[1].m_points[0] = intersections[0];
+//                splitTriangles[1].m_points[1] = intersections[1];
+//                splitTriangles[1].m_points[2] = m_points[0];
 
-                splitTriangles[2].m_points[0] = intersections[0];
-                splitTriangles[2].m_points[1] = m_points[2];
-                splitTriangles[2].m_points[2] = intersections[1];
-            }
-        }
-    }
-}
+//                splitTriangles[2].m_points[0] = intersections[0];
+//                splitTriangles[2].m_points[1] = m_points[2];
+//                splitTriangles[2].m_points[2] = intersections[1];
+//            }
+//        }
+//    }
+//}
 
 /**
  * Triangle used for drawing fancy backgrounds

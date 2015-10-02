@@ -97,37 +97,50 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
         ShowElements();
 
-        /** TEST SYMMETRY **/
-        //Shape testShape = new Shape(true);
-        //Contour testContour = new Contour(4);
-        //testContour.Add(new Vector2(-4, 5));
-        //testContour.Add(new Vector2(-6, 3));
-        //testContour.Add(new Vector2(-4, 1));
-        //testContour.Add(new Vector2(-2, 3));
+        /**
+         * TEST OVERLAP TIME
+         * **/
+        Contour contourShape1 = new Contour(4);
+        contourShape1.Add(new Vector2(0, 0));
+        contourShape1.Add(new Vector2(1, 0));
+        contourShape1.Add(new Vector2(1, 1));
+        contourShape1.Add(new Vector2(0, 1));
 
-        //List<Contour> testHoles = new List<Contour>(1);
-        //Contour testHole = new Contour(4);
-        //testHole.Add(new Vector2(-4.5f, 3.5f));
-        //testHole.Add(new Vector2(-4.5f, 2.5f));
-        //testHole.Add(new Vector2(-3.5f, 2.5f));
-        //testHole.Add(new Vector2(-3.5f, 3.5f));
-        //testHoles.Add(testHole);
+        Shape shape1 = new Shape(true, contourShape1);
+        shape1.Triangulate();
 
-        //testShape = new Shape(true, testContour, testHoles);
+        Contour contourShape2 = new Contour(4);
+        contourShape2.Add(new Vector2(1, 1));
+        contourShape2.Add(new Vector2(1, 0));
+        contourShape2.Add(new Vector2(2, 0));
+        contourShape2.Add(new Vector2(2, 1));
 
-        //AxisRenderer testAxis = m_axes.BuildAxis(new Vector2(0, 1)).GetComponent<AxisRenderer>();
-        //testAxis.Render(new Vector2(0, 1), new Vector2(0, 5), true);
-        //Shape symmetricShape = testShape.CalculateSymmetricShape(testAxis);
+        Shape shape2 = new Shape(true, contourShape2);
+        shape2.Triangulate();
 
-        //for (int i = 0; i != symmetricShape.m_contour.Count; i++)
+        bool bOverlap = shape1.OverlapsShape(shape2);
+        Debug.Log("Overlaps:" + bOverlap);
+
+        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+        //sw.Start();
+        //for (int i = 0; i != 100000; i++)
         //{
-        //    Debug.Log("contour point: " + symmetricShape.m_contour[i]);
+        //    shape1.OverlapsShape(shape2);
         //}
+        //sw.Stop();
 
-        //for (int i = 0; i != symmetricShape.m_holes[0].Count; i++)
+        //Debug.Log("1>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
+
+        //sw = new System.Diagnostics.Stopwatch();
+        //sw.Start();
+        //for (int i = 0; i != 100000; i++)
         //{
-        //    Debug.Log("hole point: " + symmetricShape.m_holes[0][i]);
+        //    shape1.OverlapsShape(shape2);
+        //    ClippingBooleanOperations.ShapesOperation(shape1, shape2, ClipperLib.ClipType.ctIntersection);
         //}
+        //sw.Stop();
+        //Debug.Log("2>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
 
         m_isShown = true;
     }

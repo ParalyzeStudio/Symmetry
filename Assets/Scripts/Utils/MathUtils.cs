@@ -2,10 +2,11 @@
 
 public class MathUtils
 {
-    public const float DEFAULT_EPSILON = 0.0001f;
+    public const float DEFAULT_EPSILON = 0.1f;
 
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
+        float abs = Mathf.Abs(floatA - floatB);
         return Mathf.Abs(floatA - floatB) <= epsilon;
     }
 

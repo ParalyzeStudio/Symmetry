@@ -4,7 +4,7 @@ using System;
 
 public class Shapes : MonoBehaviour
 {
-    public const float SHAPES_OPACITY = 0.5f;
+    public const float SHAPES_OPACITY = 1.0f;
 
     public GameObject m_shapePfb; //prefab to instantiate a shape
     //public List<GameObject> m_staticShapeObjects { get; set; } //list of shapes currently set in the grid and triangulated
@@ -313,6 +313,8 @@ public class Shapes : MonoBehaviour
         {
             ShapeMesh shapeMesh = m_dynamicShapes[i].m_parentMesh;
             shapeMesh.SweepCellsWithLine(line, bLeftSide);
+            //if (!shapeMesh.m_renderedWithCells) //whole shape has been swept and transferred to static shapes
+            //    i--;
         }
     }
 
@@ -321,6 +323,8 @@ public class Shapes : MonoBehaviour
      * **/
     public void ClipAgainstStaticShapes(Shape subjShape)
     {
+        Debug.Log(">>>>>>>>>>>>>>ClipAgainstStaticShapes");
+
         List<Shape> clipShapes = new List<Shape>(4); //build a list with big enough capacity to store result of clipping on subjShape
         clipShapes.Add(subjShape);
 
@@ -379,6 +383,10 @@ public class Shapes : MonoBehaviour
                     //}
 
                     //TODO Calculate intersection shapes and add them to dynamic shape objects
+                }
+                else //no intersection, add the full clipShape to clippedDifferenceShapes
+                {
+                    clippedDifferenceShapes.Add(clipShape);
                 }
             }
 
@@ -463,5 +471,14 @@ public class Shapes : MonoBehaviour
                 return;
             }
         }
+    }
+
+    /**
+     * Remove a shape from dynamic shapes array and place it inside the static shapes array instead
+     * **/
+    public void MakeDynamicShapeStatic(Shape shape)
+    {
+        RemoveDynamicShape(shape);
+        AddStaticShape(shape);
     }
 }

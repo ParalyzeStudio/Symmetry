@@ -20,7 +20,7 @@ public class ShapeMesh : TexturedMesh
     public GameObject m_shapeCellPfb;
 
     //cells
-    private bool m_renderedWithCells;
+    public bool m_renderedWithCells { get; set; }
     //public List<ShapeCell> m_cells { get; set; }
     public ShapeCell[] m_cells { get; set; }
 
@@ -36,6 +36,8 @@ public class ShapeMesh : TexturedMesh
     private Grid m_grid; //global instance of the game scene grid
     private ShapeVoxelGrid m_voxelGrid; //global instance of the game scene voxel grid
     private CallFuncHandler m_callFuncHandler; //global instance of the CallFunc Handler
+    private Shapes m_shapesHolder; //global instance of the Shapes holder
+    private GameScene m_gameScene; //global instance of the Shapes holder
 
     public override void Init()
     {
@@ -61,11 +63,14 @@ public class ShapeMesh : TexturedMesh
     public void Render(bool bCellRendering = false)
     {
         m_renderedWithCells = bCellRendering;
+        ClearMesh();
+        m_mesh.Clear();
 
         if (bCellRendering) //render shape using cells
         {
             AssignVoxels();
             BuildCells();
+            //TODO clear the voxel grid after building cells
         }
         else //render shape with simple triangulation
         {
@@ -75,6 +80,8 @@ public class ShapeMesh : TexturedMesh
                 BaseTriangle shapeTriangle = m_shapeData.m_triangles[i];
                 AddTriangle(shapeTriangle.m_points[0], shapeTriangle.m_points[2], shapeTriangle.m_points[1]);
             }
+
+            SetTintColor(m_shapeData.m_color);
 
             m_meshVerticesDirty = true;
             m_meshIndicesDirty = true;
@@ -94,7 +101,9 @@ public class ShapeMesh : TexturedMesh
             ShapeVoxel voxel = voxels[iVoxelIdx];
 
             if (m_shapeData.ContainsPoint(voxel.m_position))
+            {
                 voxel.AddOverlappingShape(m_shapeData);
+            }
         }        
     }
 
@@ -109,15 +118,15 @@ public class ShapeMesh : TexturedMesh
         int YCellsCount = voxelGrid.YVoxelsCount - 1;
         m_cells = new ShapeCell[XCellsCount * YCellsCount];
 
-        for (int i = 0, y = 0; y != YCellsCount - 1; y++)
+        for (int i = 0, y = 0; y != YCellsCount; y++)
         {
-            for (int x = 0; x < XCellsCount - 1; x++, i++)
+            for (int x = 0; x != XCellsCount; x++, i++)
             {
                 ShapeVoxel
-                           a = voxelGrid.Voxels[i],
-                           b = voxelGrid.Voxels[i + 1],
-                           c = voxelGrid.Voxels[i + voxelGrid.XVoxelsCount],
-                           d = voxelGrid.Voxels[i + voxelGrid.XVoxelsCount + 1];
+                           a = voxelGrid.Voxels[y + i],
+                           b = voxelGrid.Voxels[y + i + 1],
+                           c = voxelGrid.Voxels[y + i + voxelGrid.XVoxelsCount],
+                           d = voxelGrid.Voxels[y + i + voxelGrid.XVoxelsCount + 1];
 
                 //only build a cell if one of the 4 voxels is contained in this shape               
                 if (a.IsOverlappedByShape(this.m_shapeData) ||
@@ -164,11 +173,7 @@ public class ShapeMesh : TexturedMesh
     {
         for (int i = 0; i != m_cells.Length; i++)
         {
-            if (m_cells[i] != null)
-            {
-                Destroy(m_cells[i].gameObject);
-                m_cells[i] = null;
-            }
+            DestroyAndNullifyCellAtIndex(i);
         }
     }
 
@@ -196,7 +201,7 @@ public class ShapeMesh : TexturedMesh
 
         if (allCellsSwept && m_renderedWithCells) //we just swept all cells, we can now render this whole mesh with simple triangles
         {
-            OnMeshSwept();
+            //OnMeshSwept();
         }
     }
 
@@ -213,8 +218,11 @@ public class ShapeMesh : TexturedMesh
      * **/
     public void DestroyAndNullifyCellAtIndex(int index)
     {
-        Destroy(m_cells[index]);
-        m_cells[index] = null;
+        if (m_cells[index] != null)
+        {
+            Destroy(m_cells[index].gameObject);
+            m_cells[index] = null;
+        }
     }
 
     /**
@@ -225,6 +233,7 @@ public class ShapeMesh : TexturedMesh
         Debug.Log("OnMeshSwept");
         DestroyCells();
         Render(false);
+        //GetShapesHolder().MakeDynamicShapeStatic(m_shapeData);
     }
 
     //public void ShowVoxelCell(ShapeCell cell)
@@ -323,7 +332,6 @@ public class ShapeMesh : TexturedMesh
         for (int i = 0; i != clipResult.Count; i++)
         {
             Shape resultShape = clipResult[i];
-            resultShape.Triangulate();
             for (int j = 0; j != resultShape.m_triangles.Count; j++)
             {
                 BaseTriangle triangle = resultShape.m_triangles[j];
@@ -346,7 +354,7 @@ public class ShapeMesh : TexturedMesh
     }
 
     public void SetCellTintColor(ShapeCell cell, Color color)
-    {
+    {        
         for (int i = cell.m_startIndex; i != cell.m_endIndex + 1; i++)
         {
             m_colors[i] = color;
@@ -385,13 +393,21 @@ public class ShapeMesh : TexturedMesh
         m_meshColorsDirty = true;
     }
 
+    private GameScene GetGameScene()
+    {
+        if (m_gameScene == null)
+            m_gameScene = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene);
+
+        return m_gameScene;
+    }
+
     private Grid GetGrid()
     {
         if (m_grid == null)
         {
             if (m_voxelGrid == null)
             {
-                m_grid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<Grid>();
+                m_grid = GetGameScene().GetComponentInChildren<Grid>();
                 m_voxelGrid = m_grid.gameObject.GetComponent<ShapeVoxelGrid>();
             }
             else
@@ -407,7 +423,7 @@ public class ShapeMesh : TexturedMesh
         {
             if (m_grid == null)
             {
-                m_voxelGrid = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene).GetComponentInChildren<ShapeVoxelGrid>();
+                m_voxelGrid = GetGameScene().GetComponentInChildren<ShapeVoxelGrid>();
                 m_grid = m_voxelGrid.gameObject.GetComponent<Grid>();
             }
             else
@@ -425,47 +441,12 @@ public class ShapeMesh : TexturedMesh
         return m_callFuncHandler;
     }
 
-    public override void Update()
+    private Shapes GetShapesHolder()
     {
-        base.Update();
+        if (m_shapesHolder == null)
+            m_shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
 
-        //move sweep line
-        //if (m_sweeping)
-        //{
-        //    float dt = Time.deltaTime;
-
-        //    Vector2 sweepLineNormal = new Vector2(-m_sweepLineDirection.y, m_sweepLineDirection.x); //take the normal of the sweeping line by rotating its direction by +PI/2
-        //    m_sweepLinePoint += (dt * m_sweepLineSpeed * sweepLineNormal); //translate the line
-
-        //    //m_debugSweepLineObject.transform.localPosition = GeometryUtils.BuildVector3FromVector2(m_sweepLinePoint,  -50);
-
-        //    //Test if cells are on the left or on the right of this line
-        //    Vector2 sweepLinePoint2 = m_sweepLinePoint + 100.0f * m_sweepLineDirection;
-        //    bool allCellsSwept = true; //did the line swept all cells already
-        //    for (int iCellIdx = 0; iCellIdx != m_cells.Count; iCellIdx++)
-        //    {
-        //        ShapeCell cell = m_cells[iCellIdx];
-        //        float det = MathUtils.Determinant(m_sweepLinePoint, sweepLinePoint2, cell.m_position);
-
-        //        if (!cell.Showing && !cell.m_swept)
-        //        {
-        //            allCellsSwept = false;
-        //            if (det <= 0) //cell is on the left of the line
-        //            {
-        //                if (TriangulateVoxelCell(cell))
-        //                    cell.Show();
-        //                else //remove empty cell
-        //                {
-        //                    m_cells.Remove(cell);
-        //                    iCellIdx--;
-        //                }
-        //            }
-        //        }                
-        //    }
-
-        //    if (allCellsSwept)
-        //        m_sweeping = false;
-        //}
+        return m_shapesHolder;
     }
 
     //-------------------------------------------------------------//
@@ -583,9 +564,9 @@ public class ShapeMesh : TexturedMesh
     //    }
     //}
 
-    ///**
-    // * Sets the color of this shape
-    // * **/
+    /**
+     * Sets the color of this shape
+     * **/
     //public void SetColor(Color color)
     //{
     //    m_shapeData.m_color = color;
@@ -602,9 +583,9 @@ public class ShapeMesh : TexturedMesh
     //    mesh.colors = meshColors;
     //}
 
-    ///**
-    // * Shift all m_gridTriangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
-    // * **/
+    /**
+     * Shift all m_gridTriangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
+     * **/
     //public void ShiftShapeVertices(Vector2 shift)
     //{
     //    for (int iTriangleIndex = 0; iTriangleIndex != m_shapeData.m_triangles.Count; iTriangleIndex++)
@@ -623,4 +604,3 @@ public class ShapeMesh : TexturedMesh
     //    }
     //}
 }
-

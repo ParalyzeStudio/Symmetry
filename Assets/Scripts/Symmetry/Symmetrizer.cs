@@ -49,6 +49,7 @@ public class Symmetrizer : MonoBehaviour
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
                     Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(axis);
+                    lSymmetricShape.Triangulate();
                     lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
                     shapesHolder.ClipAgainstStaticShapes(lSymmetricShape);
                 }
@@ -60,6 +61,7 @@ public class Symmetrizer : MonoBehaviour
             //    for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
             //    {
             //        Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(axis);
+            //        rSymmetricShape.Triangulate();
             //        rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
             //        shapesHolder.ClipAgainstStaticShapes(rSymmetricShape);
             //    }

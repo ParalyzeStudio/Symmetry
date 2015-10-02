@@ -37,7 +37,7 @@ public class ClippingBooleanOperations
     }
 
     public static List<Shape> ShapesOperation(Shape subjShape, Shape clipShape, ClipType clipOperation)
-    {
+    {   
         //build subjs paths
         List<List<IntPoint>> subjsPaths = new List<List<IntPoint>>();
 
@@ -148,6 +148,8 @@ public class ClippingBooleanOperations
                 polynode = polynode.GetNext();
             }
         }
+
+        //Debug.Log("ShapeOperation:" + clipOperation + "result:" + resultingShapes.Count);
 
         return resultingShapes;
     }

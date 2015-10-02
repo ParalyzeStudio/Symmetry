@@ -70,17 +70,32 @@ public class Triangulable
 
     public virtual void Triangulate()
     {
-        Vector2[] triangles = Triangulation.P2tTriangulate(this);
+        m_triangles.Clear();
 
-        for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
+        if (m_contour.Count == 3 && m_holes.Count == 0) //only one triangle
         {
             BaseTriangle triangle = new BaseTriangle();
-            triangle.m_points[0] = triangles[iVertexIndex];
-            triangle.m_points[1] = triangles[iVertexIndex + 1];
-            triangle.m_points[2] = triangles[iVertexIndex + 2];
+            triangle.m_points[0] = m_contour[0];
+            triangle.m_points[1] = m_contour[1];
+            triangle.m_points[2] = m_contour[2];
 
             m_triangles.Add(triangle);
-            m_area += triangle.GetArea();
+            m_area = triangle.GetArea();
+        }
+        else
+        {
+            Vector2[] triangles = Triangulation.P2tTriangulate(this);
+
+            for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
+            {
+                BaseTriangle triangle = new BaseTriangle();
+                triangle.m_points[0] = triangles[iVertexIndex];
+                triangle.m_points[1] = triangles[iVertexIndex + 1];
+                triangle.m_points[2] = triangles[iVertexIndex + 2];
+
+                m_triangles.Add(triangle);
+                m_area += triangle.GetArea();
+            }
         }
     }
 

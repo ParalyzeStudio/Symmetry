@@ -263,16 +263,22 @@ public class GeometryUtils
 
     /**
      * Simply tells if two segments intersect without giving the coordinates of the intersection point
+     * Intersection cannot be one of the 4 points given as parameters. If so, no intersection result is returned
      * **/
     static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
     {
         float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
         float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
 
-        if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+        if (MathUtils.AreFloatsEqual(det1, 0) && MathUtils.AreFloatsEqual(det2, 0))
         {
-            //two segments are collinear and on the same line OR one point of the second segment is contained into the first segment but not the other point
+            //two segments are collinear and on the same line
             return false;
+        }
+        else if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+        {
+            //one point of the second segment is contained into the first segment but not the other point
+            return true;
         }
         else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
         {

@@ -37,46 +37,6 @@ public class Shape : GridTriangulable
         m_gridOffsetOnVertices = other.m_gridOffsetOnVertices;
     }
 
-    public override void Triangulate()
-    {
-        m_triangles.Clear(); //clear any previous triangles from a previous triangulation
-
-        Vector2[] triangles = Triangulation.P2tTriangulate(this);
-
-        for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
-        {
-            ShapeTriangle shapeTriangle = new ShapeTriangle(this);
-            shapeTriangle.m_points[0] = triangles[iVertexIndex];
-            shapeTriangle.m_points[1] = triangles[iVertexIndex + 1];
-            shapeTriangle.m_points[2] = triangles[iVertexIndex + 2];
-
-            m_triangles.Add(shapeTriangle);
-            m_area += shapeTriangle.GetArea();
-        }
-    }
-
-    public List<ShapeTriangle> GetShapeTriangles()
-    {
-        List<ShapeTriangle> shapeTriangles = new List<ShapeTriangle>();
-        shapeTriangles.Capacity = m_triangles.Count;
-        for (int i = 0; i != m_triangles.Count; i++)
-        {
-            shapeTriangles.Add((ShapeTriangle)m_triangles[i]);
-        }
-
-        return shapeTriangles;
-    }
-
-    public void SetShapeTriangles(List<ShapeTriangle> shapeTriangles)
-    {
-        m_triangles.Clear();
-        m_triangles.Capacity = shapeTriangles.Count;
-        for (int i = 0; i != shapeTriangles.Count; i++)
-        {
-            m_triangles.Add(shapeTriangles[i]);
-        }
-    }
-
     /**
      * Return a Shape object that is symmetric about the 'axis' parameter
      * **/
@@ -220,6 +180,9 @@ public class Shape : GridTriangulable
      * **/
     public bool OverlapsShape(Shape shape)
     {
+        if (this.m_triangles.Count == 0 || shape.m_triangles.Count == 0)
+            throw new System.Exception("One (or both) of the shapes is not triangulated");
+
         if (shape == this)
         {
             return true;
@@ -278,7 +241,7 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * Does 'this' shape overlaps the edge passed as parameter
+     * Does 'this' shape overlaps (i.e both edges are collinear and share a portion of segment) the edge passed as parameter
      * **/
     private bool OverlapsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
     {

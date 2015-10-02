@@ -182,6 +182,23 @@ public class Contour : List<Vector2>
 
         return this[leftMostVertexIndex];
     }
+
+    /**
+     * Test if the contour has the 'point' parameter in it
+     * **/
+    public bool ContainsPoint(Vector2 point)
+    {
+        for (int i = 0; i != Count; i++)
+        {
+            Vector2 contourPoint1 = this[i];
+            Vector2 contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
+
+            if (GeometryUtils.IsPointContainedInSegment(point, contourPoint1, contourPoint2))
+                return true;
+        }
+
+        return false;
+    }
 }
 
 /**

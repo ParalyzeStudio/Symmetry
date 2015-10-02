@@ -78,6 +78,7 @@ public class ShapeVoxelGrid : MonoBehaviour
         
         Vector3 voxelLocalPosition = new Vector3(x * m_voxelSize - 0.5f * gridSize.x, y * m_voxelSize - 0.5f * gridSize.y, 0);
         Vector3 voxelWorldPosition = voxelLocalPosition + this.gameObject.GetComponent<GameObjectAnimator>().GetPosition(); //add the position of the grid
+        voxelWorldPosition.z = 0;
         GameObject voxelObject = (GameObject) Instantiate(m_shapeVoxelPfb);
         voxelObject.name = "Voxel";
         voxelObject.transform.parent = m_voxelsHolder.transform;

@@ -7,6 +7,11 @@ public class ShapeCell : MonoBehaviour
 
     public Vector3 m_position { get; set; }
 
+    /**
+     * C -- D
+     * |    |
+     * A -- B
+     * **/
     public ShapeVoxel m_voxelA { get; set; }
     public ShapeVoxel m_voxelB { get; set; }
     public ShapeVoxel m_voxelC { get; set; }
@@ -101,8 +106,7 @@ public class ShapeCell : MonoBehaviour
 
         //animate cell by fading in it
         ShapeCellAnimator cellAnimator = this.gameObject.GetComponent<ShapeCellAnimator>();
-        cellAnimator.SetColor(new Color(1, 1, 1, 0));
-        cellAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.02f);
+        cellAnimator.SetColor(m_parentMesh.m_shapeData.m_color);
     }
 
     /**
@@ -144,43 +148,123 @@ public class ShapeCell : MonoBehaviour
 
     private void TriangulateFullQuad()
     {
-        m_parentMesh.AddFullQuadCell(this);
+        //Debug.Log("TriangulateFullQuad");
 
-        //m_startIndex = m_parentMesh.Vertices.Count;
-        //m_parentMesh.AddQuad(m_voxelA.m_position, m_voxelC.m_position, m_voxelB.m_position, m_voxelD.m_position);
-        //m_endIndex = m_parentMesh.Vertices.Count - 1;
+        m_parentMesh.AddFullQuadCell(this);
     }
 
     private bool ClipWithParentMesh()
     {
+        Shape parentShape = m_parentMesh.m_shapeData;
+
+        if (MathUtils.AreVec2PointsEqual(m_position, new Vector2(25,79)))
+            Debug.Log(m_position);
+
+        if (!OverlapsShape(parentShape)) //no intersection, no need to waste resources clipping it
+            return false;
+
+        Debug.Log("ClipWithParentMesh:" + m_position);
+
         Contour cellContour = new Contour(4);
         cellContour.Add(m_voxelA.m_position);
         cellContour.Add(m_voxelB.m_position);
         cellContour.Add(m_voxelD.m_position);
         cellContour.Add(m_voxelC.m_position);
         Shape cellShape = new Shape(false, cellContour);
-        List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(this.m_parentMesh.m_shapeData, cellShape, ClipperLib.ClipType.ctIntersection);
+        List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(parentShape, cellShape, ClipperLib.ClipType.ctIntersection);
 
         if (clipResult.Count == 0) //no intersection
             return false;
 
         m_parentMesh.AddClippedCell(this, clipResult);
         return true;
-        //m_startIndex = m_parentMesh.Vertices.Count;
+    }
 
-        //for (int i = 0; i != clipResult.Count; i++)
-        //{
-        //    Shape resultShape = clipResult[i];
-        //    resultShape.Triangulate();
-        //    for (int j = 0; j != resultShape.m_triangles.Count; j++)
-        //    {
-        //        BaseTriangle triangle = resultShape.m_triangles[j];
-        //        m_parentMesh.AddTriangle(triangle.m_points[0], triangle.m_points[2], triangle.m_points[1]);
-        //    }
-        //}
-        //m_endIndex = m_parentMesh.Vertices.Count - 1;
+    /**
+     * Check if this cell has a non-null intersection with the given shape
+     * **/
+    private bool OverlapsShape(Shape shape)
+    {
+        Contour shapeContour = shape.m_contour;
 
-        //return true;
+        for (int i = 0; i != shapeContour.Count; i++)
+        {
+            Vector2 contourEdgePoint1 = shapeContour[i];
+            Vector2 contourEdgePoint2 = shapeContour[i == shape.m_contour.Count - 1 ? 0 : i + 1];
+
+            if (GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelA.m_position, m_voxelB.m_position) ||
+                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelB.m_position, m_voxelD.m_position) ||
+                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelD.m_position, m_voxelC.m_position) ||
+                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelC.m_position, m_voxelA.m_position))
+            {
+                if (!ShareOnlyEdgesOrPointsWithShape(shape)) //this is not an 'empty' intersection
+                    return true;
+            }
+        }
+
+        //Shape does not intersect with one of the 4 edges of the cell, the only remaining possibility is that the shape itself is contained inside the cell (very unlikely but have to test it anyway)
+        //Thus test if the barycentre of the shape is inside the cell. That means that all shape vertices are inside the cell because of no intersection with cell edges
+        if (ContainsPoint(shape.GetBarycentre()))
+            return true;
+
+        return false;
+    }
+
+    /**
+     * Use this method to eliminate case of intersections where two shapes are only touching at some edges or points but with no real intersection
+     * (i.e their intersection should be null despite the fact that OverlapsShape returns true)
+     * **/
+    public bool ShareOnlyEdgesOrPointsWithShape(Shape shape)
+    {
+        Contour shapeContour = shape.m_contour;
+        Contour cellContour = new Contour(4);
+        cellContour.Add(m_voxelA.m_position);
+        cellContour.Add(m_voxelB.m_position);
+        cellContour.Add(m_voxelD.m_position);
+        cellContour.Add(m_voxelC.m_position);
+
+        //locate shape contour vertices about cell contour
+        for (int i = 0; i != shapeContour.Count; i++)
+        {
+            Vector2 shapeContourVertex = shapeContour[i];
+            if (!this.ContainsPointOnContour(shapeContourVertex)) //the point is either inside or outside the shape contour, but not on it
+            {
+                if (this.ContainsPoint(shapeContourVertex)) //we have a shape contour vertex inside the cell contour, there is an intersection
+                    return false;
+            }
+        }
+
+        //locate cell contour vertices about shape contour
+        for (int i = 0; i != 4; i++)
+        {
+            Vector2 cellContourVertex = cellContour[i];
+            if (!shapeContour.ContainsPoint(cellContourVertex)) //the point is either inside or outside the cell contour, but not on it
+            {
+                if (shape.ContainsPoint(cellContourVertex)) //we have a cell contour vertex inside the shape contour, there is an intersection
+                    return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if this cell contains the parameter 'point'
+     * **/
+    private bool ContainsPoint(Vector2 point)
+    {
+        return (point.x >= m_voxelA.m_position.x && point.x <= m_voxelB.m_position.x) && (point.y >= m_voxelA.m_position.y && point.y <= m_voxelC.m_position.y);
+    }
+
+    /**
+     * Check if this cell contour contains the parameter 'point'
+     * **/
+    private bool ContainsPointOnContour(Vector2 point)
+    {
+        return ((point.x >= m_voxelA.m_position.x  && point.x <= m_voxelB.m_position.x && point.y == m_voxelA.m_position.y) ||
+                (point.x >= m_voxelA.m_position.x  && point.x <= m_voxelB.m_position.x && point.y == m_voxelC.m_position.y) ||
+                (point.y >= m_voxelA.m_position.y  && point.y <= m_voxelC.m_position.x && point.x == m_voxelA.m_position.x) ||
+                (point.y >= m_voxelA.m_position.y  && point.y <= m_voxelC.m_position.x && point.x == m_voxelB.m_position.x));
     }
 
     /**
