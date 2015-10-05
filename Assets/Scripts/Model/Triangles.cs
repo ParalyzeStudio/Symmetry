@@ -18,6 +18,9 @@ public class TriangleEdge
     }
 }
 
+/**
+ * Class that holds data to represent a triangle where points are in ccw order
+ * **/
 public class BaseTriangle
 {
     public Vector2[] m_points { get; set; }
@@ -35,6 +38,334 @@ public class BaseTriangle
         }
     }
 
+    public static void UnitTests()
+    {
+        //-----TEST 1-----// O points
+        BaseTriangle triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        BaseTriangle triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(2, 2);
+        triangle2.m_points[1] = new Vector2(4, 2);
+        triangle2.m_points[2] = new Vector2(3, 4);
+
+        bool bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bool bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (!bResult1 && !bResult2)
+            Debug.Log("TEST 1 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 1 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 2-----// 1 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0.5f, 1);
+        triangle2.m_points[1] = new Vector2(3, 0);
+        triangle2.m_points[2] = new Vector2(3, 3);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && !bResult2)
+            Debug.Log("TEST 2 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 2 FAILURE:" + bResult1 + "-" + bResult2);
+
+
+        //-----TEST 3-----//1 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 2);
+        triangle2.m_points[1] = new Vector2(3, 2);
+        triangle2.m_points[2] = new Vector2(2, 4);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && !bResult2)
+            Debug.Log("TEST 3 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 3 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 4-----//1 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 1);
+        triangle2.m_points[1] = new Vector2(3, 1);
+        triangle2.m_points[2] = new Vector2(2, 3);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 4 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 4 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 5-----//1 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(1, 0);
+        triangle2.m_points[1] = new Vector2(3, 3);
+        triangle2.m_points[2] = new Vector2(-2, 2);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 5 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 5 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 6-----//1 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(1, 0);
+        triangle1.m_points[2] = new Vector2(0, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 2);
+        triangle2.m_points[1] = new Vector2(2, 4);
+        triangle2.m_points[2] = new Vector2(-1, 4);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && !bResult2)
+            Debug.Log("TEST 6 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 6 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 7-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(1, 0);
+        triangle2.m_points[1] = new Vector2(3, 0);
+        triangle2.m_points[2] = new Vector2(4, 3);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 7 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 7 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 8-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 0);
+        triangle2.m_points[1] = new Vector2(2, -3);
+        triangle2.m_points[2] = new Vector2(2, 0);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && !bResult2)
+            Debug.Log("TEST 8 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 8 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 9-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 0);
+        triangle2.m_points[1] = new Vector2(2, 0);
+        triangle2.m_points[2] = new Vector2(0, -2);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && !bResult2)
+            Debug.Log("TEST 9 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 9 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 10-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(2, 0);
+        triangle2.m_points[1] = new Vector2(5, 2);
+        triangle2.m_points[2] = new Vector2(2, 2);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 10 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 10 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 11-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(2, 0);
+        triangle2.m_points[1] = new Vector2(3, 1);
+        triangle2.m_points[2] = new Vector2(0, 2);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 11 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 11 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 12-----//2 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(4, 0);
+        triangle1.m_points[2] = new Vector2(2, 2);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(1, 1);
+        triangle2.m_points[1] = new Vector2(2, 0);
+        triangle2.m_points[2] = new Vector2(3, 1);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 12 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 12 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 13-----//0 point
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(6, 0);
+        triangle1.m_points[2] = new Vector2(3, 4);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(2, 1);
+        triangle2.m_points[1] = new Vector2(3, 1);
+        triangle2.m_points[2] = new Vector2(3, 2);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 13 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 13 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 14-----//3 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(6, 0);
+        triangle1.m_points[2] = new Vector2(3, 3);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(3, 3);
+        triangle2.m_points[1] = new Vector2(1, 1);
+        triangle2.m_points[2] = new Vector2(4, 0);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 14 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 14 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 15-----//3 points
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(6, 0);
+        triangle1.m_points[2] = new Vector2(3, 3);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 0);
+        triangle2.m_points[1] = new Vector2(6, 0);
+        triangle2.m_points[2] = new Vector2(3, 3);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 15 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 15 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 16-----//
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 0);
+        triangle1.m_points[1] = new Vector2(3, 0);
+        triangle1.m_points[2] = new Vector2(-2, 3);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(-2, 1);
+        triangle2.m_points[1] = new Vector2(6, 0);
+        triangle2.m_points[2] = new Vector2(3, 3);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 16 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 16 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 17-----//
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(0, 0);
+        triangle2.m_points[1] = new Vector2(1, 0);
+        triangle2.m_points[2] = new Vector2(0, 1);
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(2, 0);
+        triangle1.m_points[1] = new Vector2(2, 2);
+        triangle1.m_points[2] = new Vector2(0, 0);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 17 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 17 FAILURE:" + bResult1 + "-" + bResult2);
+
+        //-----TEST 18-----//
+        triangle1 = new BaseTriangle();
+        triangle1.m_points[0] = new Vector2(0, 54);
+        triangle1.m_points[1] = new Vector2(150, 54);
+        triangle1.m_points[2] = new Vector2(0, 204);
+        triangle2 = new BaseTriangle();
+        triangle2.m_points[0] = new Vector2(300, 54);
+        triangle2.m_points[1] = new Vector2(300, 204);
+        triangle2.m_points[2] = new Vector2(0, 54);
+
+        bResult1 = triangle1.IntersectsTriangle(triangle2);
+        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+
+        if (bResult1 && bResult2)
+            Debug.Log("TEST 18 SUCCESS:" + bResult1 + "-" + bResult2);
+        else
+            Debug.Log("TEST 18 FAILURE:" + bResult1 + "-" + bResult2);
+    }
+
     public Vector2 GetCenter()
     {
         return (m_points[0] + m_points[1] + m_points[2]) / 3.0f;
@@ -50,6 +381,261 @@ public class BaseTriangle
     public bool ContainsPoint(Vector2 point)
     {
         return GeometryUtils.IsInsideTriangle(point, m_points[0], m_points[1], m_points[2]);
+    }
+
+    /**
+     * Return true if this triangle intersects the parameter 'triangle'
+     * This intersection can have a null area (triangles just share points or portions of edges for instance)
+     * To test if this intersection is effectively null, use the method IntersectTriangleWithNonNullIntersection()
+     * **/
+    public bool IntersectsTriangle(BaseTriangle triangle)
+    {
+        bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) || 
+                               IntersectsEdge(triangle.m_points[1], triangle.m_points[2]) ||
+                               IntersectsEdge(triangle.m_points[2], triangle.m_points[1]);
+
+        //Test if the triangle is contained inside the other
+        if (!bIntersectEdges)
+            return this.ContainsPoint(triangle.GetCenter());
+        else 
+            return true;
+    }
+
+    public bool IntersectsTriangleWithNonNullIntersection(BaseTriangle triangle)
+    {
+        if (!IntersectsTriangle(triangle)) //no intersection at all, return false
+            return false;
+
+        return IsIntersectionWithTriangleNull(triangle);
+    }
+
+    private bool IsIntersectionWithTriangleNull(BaseTriangle triangle)
+    {
+        int[] point1OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[0]);
+        int[] point2OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[1]);
+        int[] point3OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[2]);
+
+        int pointsOnContourCount = 0;
+        if (point1OnContourEdgeIndices != null) pointsOnContourCount++;
+        if (point2OnContourEdgeIndices != null) pointsOnContourCount++;
+        if (point3OnContourEdgeIndices != null) pointsOnContourCount++;            
+
+        if (pointsOnContourCount == 0) 
+        {
+            //if the second triangle does not contain any of the first triangle vertices on its contour then there is a non-null intersection
+            return (triangle.ContourContainsPoint(m_points[0]) == null &&
+                    triangle.ContourContainsPoint(m_points[1]) == null &&
+                    triangle.ContourContainsPoint(m_points[2]) == null);
+
+        }
+        else if (pointsOnContourCount == 3) //all points are on the contour of the other triangle so the first triangle is contained in the second triangle
+            return true;
+        else if (pointsOnContourCount == 2)
+        {
+            //test if points are equal to one of the triangle vertices
+            bool bOnVertex1 = false;
+            bool bOnVertex2 = false;
+            bool bOnVertex3 = false;
+            if (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 2)
+            {
+                if (point1OnContourEdgeIndices[0] == 2 && point1OnContourEdgeIndices[1] == 0)
+                    bOnVertex1 = true;
+                else if (point1OnContourEdgeIndices[0] == 0 && point1OnContourEdgeIndices[1] == 1)
+                    bOnVertex2 = true;
+                else if (point1OnContourEdgeIndices[0] == 1 && point1OnContourEdgeIndices[1] == 2)
+                    bOnVertex3 = true;
+            }
+            if (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 2)
+            {
+                if (point2OnContourEdgeIndices[0] == 2 && point2OnContourEdgeIndices[1] == 0)
+                    bOnVertex1 = true;
+                else if (point2OnContourEdgeIndices[0] == 0 && point2OnContourEdgeIndices[1] == 1)
+                    bOnVertex2 = true;
+                else if (point2OnContourEdgeIndices[0] == 1 && point2OnContourEdgeIndices[1] == 2)
+                    bOnVertex3 = true;
+            }
+            if (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 2)
+            {
+                if (point3OnContourEdgeIndices[0] == 2 && point3OnContourEdgeIndices[1] == 0)
+                    bOnVertex1 = true;
+                else if (point3OnContourEdgeIndices[0] == 0 && point3OnContourEdgeIndices[1] == 1)
+                    bOnVertex2 = true;
+                else if (point3OnContourEdgeIndices[0] == 1 && point3OnContourEdgeIndices[1] == 2)
+                    bOnVertex3 = true;
+            }
+            //bool bOnVertex1 = (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 2);
+            //bool bOnVertex2 = (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 2);
+            //bool bOnVertex3 = (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 2);
+
+            //Count points that are strictly on an edge
+            int bOnEdge1Count = 0;
+            int bOnEdge2Count = 0;
+            int bOnEdge3Count = 0;
+            if (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 1)
+            {
+                if (point1OnContourEdgeIndices[0] == 0)
+                    bOnEdge1Count++;
+                else if (point1OnContourEdgeIndices[0] == 1)
+                    bOnEdge2Count++;
+                else if (point1OnContourEdgeIndices[0] == 2)
+                    bOnEdge3Count++;
+            }
+            if (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 1)
+            {
+                if (point2OnContourEdgeIndices[0] == 0)
+                    bOnEdge1Count++;
+                else if (point2OnContourEdgeIndices[0] == 1)
+                    bOnEdge2Count++;
+                else if (point2OnContourEdgeIndices[0] == 2)
+                    bOnEdge3Count++;
+            }
+            if (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 1)
+            {
+                if (point3OnContourEdgeIndices[0] == 0)
+                    bOnEdge1Count++;
+                else if (point3OnContourEdgeIndices[0] == 1)
+                    bOnEdge2Count++;
+                else if (point3OnContourEdgeIndices[0] == 2)
+                    bOnEdge3Count++;
+            }
+
+            //Find the index of the edge the two points share. If they are on different edges there is a non-null intersection
+            int sharedEdgeIndex;
+            if (bOnVertex1 && bOnVertex2)
+                sharedEdgeIndex = 0;
+            else if (bOnVertex2 && bOnVertex3)
+                sharedEdgeIndex = 1;
+            else if (bOnVertex1 && bOnVertex3)
+                sharedEdgeIndex = 2;
+            else if ((bOnVertex1 || bOnVertex2) && bOnEdge1Count == 1)
+                sharedEdgeIndex = 0;
+            else if ((bOnVertex2 || bOnVertex3) && bOnEdge2Count == 1)
+                sharedEdgeIndex = 1;
+            else if ((bOnVertex3 || bOnVertex1) && bOnEdge3Count == 1)
+                sharedEdgeIndex = 2;
+            else if (bOnEdge1Count == 2)
+                sharedEdgeIndex = 0;
+            else if (bOnEdge2Count == 2)
+                sharedEdgeIndex = 1;
+            else if (bOnEdge3Count == 2)
+                sharedEdgeIndex = 2;
+            else //one point on a different edge each time ==> non-null intersection
+                return true;
+
+            //Find the point that is not on the contour
+            Vector2 offContourPoint;
+            if (point1OnContourEdgeIndices == null)
+                offContourPoint = triangle.m_points[0];
+            else if (point2OnContourEdgeIndices == null)
+                offContourPoint = triangle.m_points[1];
+            else
+                offContourPoint = triangle.m_points[2];
+
+            //Determine the position (left or right) of the off contour point about the edge set previously
+            Vector2 edgePoint1 = m_points[sharedEdgeIndex];
+            Vector2 edgePoint2 = m_points[(sharedEdgeIndex == 2) ? 0 : sharedEdgeIndex + 1];
+            float det = MathUtils.Determinant(edgePoint1, edgePoint2, offContourPoint);
+            return (det > 0); //'left'
+        }
+        else //(pointsOnContourCount == 1)
+        {
+            //Find the index of the point that is on this triangle contour
+            Vector2 pointOnContour;
+            Vector2[] pointsOffContour = new Vector2[2];
+            int[] edgeIndices;
+            if (point1OnContourEdgeIndices != null)
+            {
+                pointOnContour = triangle.m_points[0];
+                pointsOffContour[0] = triangle.m_points[1];
+                pointsOffContour[1] = triangle.m_points[2];
+                edgeIndices = point1OnContourEdgeIndices;
+            }
+            else if (point2OnContourEdgeIndices != null)
+            {
+                pointOnContour = triangle.m_points[1];
+                pointsOffContour[0] = triangle.m_points[0];
+                pointsOffContour[1] = triangle.m_points[2];
+                edgeIndices = point2OnContourEdgeIndices;
+            }
+            else
+            {
+                pointOnContour = triangle.m_points[2];
+                pointsOffContour[0] = triangle.m_points[0];
+                pointsOffContour[1] = triangle.m_points[1];
+                edgeIndices = point3OnContourEdgeIndices;
+            }
+
+            //test if the point is equal to one of the triangle vertices
+            if (edgeIndices.Length == 1)
+            {
+                int edgeIndex = edgeIndices[0];
+                Vector2 edgePoint1 = m_points[edgeIndex];
+                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+
+                //Check if at least one of the two points off contour is on the 'left' of the edge
+                float det = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+                if (det > 0) return true; //'left'
+                det = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+                return (det > 0); //'left'
+            }
+            else // edgeIndices.Length == 2 (point is equal to one of the triangle vertices)
+            {
+                //check if both off contour points are on the left or the right of the first edge
+                int edgeIndex = edgeIndices[0];
+                Vector2 edgePoint1 = m_points[edgeIndex];
+                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+                float det1 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+                float det2 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+
+                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the edge, no intersection
+                    return false;
+
+                //check if both off contour points are on the left or the right of the second edge
+                edgeIndex = edgeIndices[1];
+                edgePoint1 = m_points[edgeIndex];
+                edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+                det1 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+                det2 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+
+                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the edge, no intersection
+                    return false;
+
+                //check if both off contour points are on the left or the right of line directed by the sum of first and second edges
+                Vector2 firstEdgePoint1 = m_points[edgeIndices[0]];
+                Vector2 firstEdgePoint2 = m_points[edgeIndices[0] == 2 ? 0 : edgeIndices[0] + 1];
+                Vector2 secondEdgePoint1 = m_points[edgeIndices[1]];
+                Vector2 secondEdgePoint2 = m_points[edgeIndices[1] == 2 ? 0 : edgeIndices[1] + 1];
+                Vector2 firstEdge = firstEdgePoint2 - firstEdgePoint1;
+                Vector2 secondEdge = secondEdgePoint2 - secondEdgePoint1;
+
+                Vector2 sumResultingEdge = firstEdge + secondEdge;
+
+                det1 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[0]);
+                det2 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[1]);
+
+                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the resulting edge, no intersection
+                    return false;
+
+                return true; //all other cases lead to a non-null intersection
+            }           
+        }
+    }
+
+    /**
+     * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
+     * **/
+    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
+    {
+        for (int i = 0; i != 3; i++)
+        {
+            Vector2 point1 = m_points[i];
+            Vector2 point2 = m_points[(i == 2) ? 0 : i + 1];
+
+            if (GeometryUtils.TwoSegmentsIntersect(point1, point2, edgePoint1, edgePoint2))
+                return true;
+        }
+
+        return false;
     }
 
     /**
@@ -118,6 +704,53 @@ public class BaseTriangle
         }
 
         return true;
+    }
+
+    /**
+     * Tells if the parameter point is on this triangle contour.
+     * Return the indices of edges the point is on (max 2 if point is equal to one of the triangle vertices)
+     * **/
+    public int[] ContourContainsPoint(Vector2 point)
+    {
+        int[] edgeIndices;
+
+        //First check if point equals to one of the triangle vertices
+        if (MathUtils.AreVec2PointsEqual(point, m_points[0]))
+        {
+            edgeIndices = new int[2];
+            edgeIndices[0] = 2;
+            edgeIndices[1] = 0;
+            return edgeIndices;
+        }
+        else if (MathUtils.AreVec2PointsEqual(point, m_points[1]))
+        {
+            edgeIndices = new int[2];
+            edgeIndices[0] = 0;
+            edgeIndices[1] = 1;
+            return edgeIndices;
+        }
+        else if (MathUtils.AreVec2PointsEqual(point, m_points[2]))
+        {
+            edgeIndices = new int[2];
+            edgeIndices[0] = 1;
+            edgeIndices[1] = 2;
+            return edgeIndices;
+        }
+        
+        for (int i = 0; i != 3; i++)
+        {
+            Vector2 edgePoint1 = m_points[i];
+            Vector2 edgePoint2 = m_points[(i == 2) ? 0 : i + 1];
+
+            if (GeometryUtils.IsPointContainedInSegment(point, edgePoint1, edgePoint2))
+            {
+                edgeIndices = new int[1];
+                edgeIndices[0] = i;
+                return edgeIndices;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -753,5 +1386,5 @@ public class BackgroundTriangle : BaseTriangle
         {
             m_points[i] += offset;
         }
-    }
+    }    
 }

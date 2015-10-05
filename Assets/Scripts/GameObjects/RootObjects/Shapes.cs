@@ -338,7 +338,7 @@ public class Shapes : MonoBehaviour
             for (int j = 0; j != clipShapes.Count; j++)
             {
                 Shape clipShape = clipShapes[j];
-                if (clipShape.OverlapsShape(staticShape))
+                if (clipShape.OverlapsShape(staticShape, true))
                 {
                     //bOverlapAtLeastOneStaticShape = true;
 

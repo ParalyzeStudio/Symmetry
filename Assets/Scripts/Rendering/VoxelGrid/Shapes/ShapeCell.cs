@@ -157,10 +157,10 @@ public class ShapeCell : MonoBehaviour
     {
         Shape parentShape = m_parentMesh.m_shapeData;
 
-        if (MathUtils.AreVec2PointsEqual(m_position, new Vector2(25,79)))
+        if (MathUtils.AreVec2PointsEqual(m_position, new Vector2(225, 129)))
             Debug.Log(m_position);
 
-        if (!OverlapsShape(parentShape)) //no intersection, no need to waste resources clipping it
+        if (!OverlapsShapeWithNonNullIntersection(parentShape)) //no intersection, no need to waste resources clipping it
             return false;
 
         Debug.Log("ClipWithParentMesh:" + m_position);
@@ -180,35 +180,51 @@ public class ShapeCell : MonoBehaviour
         return true;
     }
 
+    private bool OverlapsShapeWithNonNullIntersection(Shape shape)
+    {
+        //Split the cell in two triangles
+        BaseTriangle cellTriangle1 = new BaseTriangle();
+        cellTriangle1.m_points[0] = m_voxelA.m_position;
+        cellTriangle1.m_points[1] = m_voxelB.m_position;
+        cellTriangle1.m_points[2] = m_voxelC.m_position;
+
+        BaseTriangle cellTriangle2 = new BaseTriangle();
+        cellTriangle2.m_points[0] = m_voxelB.m_position;
+        cellTriangle2.m_points[1] = m_voxelD.m_position;
+        cellTriangle2.m_points[2] = m_voxelC.m_position;
+
+        return shape.OverlapsTriangle(cellTriangle1, true) || shape.OverlapsTriangle(cellTriangle1, true);
+    }
+
     /**
      * Check if this cell has a non-null intersection with the given shape
      * **/
-    private bool OverlapsShape(Shape shape)
-    {
-        Contour shapeContour = shape.m_contour;
+    //private bool OverlapsShape(Shape shape)
+    //{
+    //    Contour shapeContour = shape.m_contour;
 
-        for (int i = 0; i != shapeContour.Count; i++)
-        {
-            Vector2 contourEdgePoint1 = shapeContour[i];
-            Vector2 contourEdgePoint2 = shapeContour[i == shape.m_contour.Count - 1 ? 0 : i + 1];
+    //    for (int i = 0; i != shapeContour.Count; i++)
+    //    {
+    //        Vector2 contourEdgePoint1 = shapeContour[i];
+    //        Vector2 contourEdgePoint2 = shapeContour[i == shape.m_contour.Count - 1 ? 0 : i + 1];
 
-            if (GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelA.m_position, m_voxelB.m_position) ||
-                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelB.m_position, m_voxelD.m_position) ||
-                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelD.m_position, m_voxelC.m_position) ||
-                GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelC.m_position, m_voxelA.m_position))
-            {
-                if (!ShareOnlyEdgesOrPointsWithShape(shape)) //this is not an 'empty' intersection
-                    return true;
-            }
-        }
+    //        if (GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelA.m_position, m_voxelB.m_position) ||
+    //            GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelB.m_position, m_voxelD.m_position) ||
+    //            GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelD.m_position, m_voxelC.m_position) ||
+    //            GeometryUtils.TwoSegmentsIntersect(contourEdgePoint1, contourEdgePoint2, m_voxelC.m_position, m_voxelA.m_position))
+    //        {
+    //            if (!ShareOnlyEdgesOrPointsWithShape(shape)) //this is not an 'empty' intersection
+    //                return true;
+    //        }
+    //    }
 
-        //Shape does not intersect with one of the 4 edges of the cell, the only remaining possibility is that the shape itself is contained inside the cell (very unlikely but have to test it anyway)
-        //Thus test if the barycentre of the shape is inside the cell. That means that all shape vertices are inside the cell because of no intersection with cell edges
-        if (ContainsPoint(shape.GetBarycentre()))
-            return true;
+    //    //Shape does not intersect with one of the 4 edges of the cell, the only remaining possibility is that the shape itself is contained inside the cell (very unlikely but have to test it anyway)
+    //    //Thus test if the barycentre of the shape is inside the cell. That means that all shape vertices are inside the cell because of no intersection with cell edges
+    //    if (ContainsPoint(shape.GetBarycentre()))
+    //        return true;
 
-        return false;
-    }
+    //    return false;
+    //}
 
     /**
      * Use this method to eliminate case of intersections where two shapes are only touching at some edges or points but with no real intersection

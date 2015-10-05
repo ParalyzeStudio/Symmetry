@@ -99,9 +99,11 @@ public class ShapeMesh : TexturedMesh
         for (int iVoxelIdx = 0; iVoxelIdx != voxels.Length; iVoxelIdx++)
         {
             ShapeVoxel voxel = voxels[iVoxelIdx];
-
+            if (MathUtils.AreVec2PointsEqual(voxel.m_position, new Vector2(150, 54)))
+                Debug.Log("voxel position:" + voxel.m_position);
             if (m_shapeData.ContainsPoint(voxel.m_position))
             {
+               
                 voxel.AddOverlappingShape(m_shapeData);
             }
         }        

@@ -263,24 +263,33 @@ public class GeometryUtils
 
     /**
      * Simply tells if two segments intersect without giving the coordinates of the intersection point
-     * Intersection cannot be one of the 4 points given as parameters. If so, no intersection result is returned
      * **/
     static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
     {
+        bool bSeg1Pt1InSeg2 = IsPointContainedInSegment(segment1Point1, segment2Point1, segment2Point2);
+        bool bSeg1Pt2InSeg2 = IsPointContainedInSegment(segment1Point2, segment2Point1, segment2Point2);
+        bool bSeg2Pt1InSeg1 = IsPointContainedInSegment(segment2Point1, segment1Point1, segment1Point2);
+        bool bSeg2Pt2InSeg1 = IsPointContainedInSegment(segment2Point2, segment1Point1, segment1Point2);
+
+        if ((bSeg1Pt1InSeg2 && !bSeg1Pt2InSeg2) || (!bSeg1Pt1InSeg2 && bSeg1Pt2InSeg2))
+            return true;
+        if ((bSeg2Pt1InSeg1 && !bSeg2Pt2InSeg1) || (bSeg2Pt1InSeg1 && !bSeg2Pt2InSeg1))
+            return true;
+
         float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
         float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
 
         if (MathUtils.AreFloatsEqual(det1, 0) && MathUtils.AreFloatsEqual(det2, 0))
         {
-            //two segments are collinear and on the same line
+            //two segments are collinear and on the same line, they eventually overlap but we do not consider that as an intersection
             return false;
         }
         else if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
         {
-            //one point of the second segment is contained into the first segment but not the other point
-            return true;
+            //points are aligned but cant be on the same segment because we checked that before
+            return false;
         }
-        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs (product can't be zero)
+        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
         {
             float det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1);
             float det4 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point2);
@@ -453,6 +462,10 @@ public class GeometryUtils
         float det1 = MathUtils.Determinant(pointA, pointB, testPoint);
         float det2 = MathUtils.Determinant(pointB, pointC, testPoint);
         float det3 = MathUtils.Determinant(pointC, pointA, testPoint);
+
+        if (MathUtils.AreFloatsEqual(det1, 0)) det1 = 0;
+        if (MathUtils.AreFloatsEqual(det2, 0)) det2 = 0;
+        if (MathUtils.AreFloatsEqual(det3, 0)) det3 = 0;
 
         return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }

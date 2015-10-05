@@ -116,7 +116,7 @@ public class Shape : GridTriangulable
             {
                 subjShape = this;
             }
-            else if (clipShape == null && this.OverlapsShape(shapeData)) //we have not found a clip shape yet
+            else if (clipShape == null && this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
             {
                 clipShape = shapeData;              
             }
@@ -161,13 +161,115 @@ public class Shape : GridTriangulable
      * Does 'this' shape is included inside one triangle of the shape passed as parameter
      * (i.e all triangles of the first shape are inside one of the second shape triangles)
      * **/
-    public bool isIncludedInOneShapeTriangle(Shape shape)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
+    //public bool isIncludedInOneShapeTriangle(Shape shape)
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
 
-            if (triangle.ContainsShape(this)) //'this' shape is contained entirely inside one of the shape triangles
+    //        if (triangle.ContainsShape(this)) //'this' shape is contained entirely inside one of the shape triangles
+    //            return true;
+    //    }
+
+    //    return false;
+    //}
+
+    /**
+     * Does 'this' shape overlaps another shape (i.e intersection is neither a point or null)
+     * We can set an offset (in grid coordiantes) to 'this' shape vertices when the actual shape is being translated
+     * **/
+    //public bool OverlapsShape(Shape shape)
+    //{
+    //    if (this.m_triangles.Count == 0 || shape.m_triangles.Count == 0)
+    //        throw new System.Exception("One (or both) of the shapes is not triangulated");
+
+    //    if (shape == this)
+    //    {
+    //        return true;
+    //    }
+
+    //    //check if 'this' shape is inluded in one of the shape triangles and vice versa
+    //    if (this.isIncludedInOneShapeTriangle(shape) || shape.isIncludedInOneShapeTriangle(this))
+    //    {
+    //        return true;
+    //    }
+
+    //    //Check if one of the triangle edges intersects triangle edges of the second shape
+    //    for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        BaseTriangle triangle = m_triangles[iTriangleIndex];
+    //        for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
+    //        {
+    //            Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex] + m_gridOffsetOnVertices;
+    //            Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
+    //            triangleEdgePoint2 += m_gridOffsetOnVertices;
+
+    //            //the shape intersects or overlaps the edge [triangleEdgePoint1; triangleEdgePoint2]
+    //            if (shape.IntersectsEdge(triangleEdgePoint1, triangleEdgePoint2)
+    //                ||
+    //                shape.OverlapsEdge(triangleEdgePoint1, triangleEdgePoint2))
+    //            {
+    //                //Debug.Log("point1 X:" + triangleEdgePoint1.x + " Y:" + triangleEdgePoint1.y);
+    //                //Debug.Log("point2 X:" + triangleEdgePoint2.x + " Y:" + triangleEdgePoint2.y);
+    //                return true;
+    //            }
+    //        }
+    //    }
+
+    //    return false;
+    //}
+
+    /**
+     * Does 'this' shape intersects the edge passed as parameter
+     * **/
+    //private bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        BaseTriangle triangle = m_triangles[iTriangleIndex];
+    //        for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
+    //        {
+    //            Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
+    //            Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
+
+    //            if (GeometryUtils.TwoSegmentsIntersect(triangleEdgePoint1, triangleEdgePoint2, edgePoint1, edgePoint2))
+    //                return true;
+    //        }
+    //    }
+
+    //    return false;
+    //}
+
+    /**
+     * Does 'this' shape overlaps (i.e both edges are collinear and share a portion of segment) the edge passed as parameter
+     * **/
+    //private bool OverlapsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        BaseTriangle triangle = m_triangles[iTriangleIndex];
+    //        for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
+    //        {
+    //            Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
+    //            Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
+
+    //            if (GeometryUtils.TwoSegmentsOverlap(triangleEdgePoint1, triangleEdgePoint2, edgePoint1, edgePoint2))
+    //                return true;
+    //        }
+    //    }
+
+    //    return false;
+    //}
+
+    /**
+    * Does 'this' shape overlaps the shape passed as parameter
+    * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
+    * **/
+    public bool OverlapsShape(Shape shape, bool bEnsureNonNullIntersection)
+    {
+        for (int i = 0; i != shape.m_triangles.Count; i++)
+        {
+            if (OverlapsTriangle(shape.m_triangles[i], bEnsureNonNullIntersection))
                 return true;
         }
 
@@ -175,85 +277,21 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * Does 'this' shape overlaps another shape (i.e intersection is neither a point or null)
-     * We can set an offset (in grid coordiantes) to 'this' shape vertices when the actual shape is being translated
-     * **/
-    public bool OverlapsShape(Shape shape)
+    * Does 'this' shape overlaps the triangle passed as parameter
+     * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
+    * **/
+    public bool OverlapsTriangle(BaseTriangle triangle, bool bEnsureNonNullIntersection)
     {
-        if (this.m_triangles.Count == 0 || shape.m_triangles.Count == 0)
-            throw new System.Exception("One (or both) of the shapes is not triangulated");
-
-        if (shape == this)
+        for (int i = 0; i != m_triangles.Count; i++)
         {
-            return true;
-        }
-
-        //check if 'this' shape is inluded in one of the shape triangles and vice versa
-        if (this.isIncludedInOneShapeTriangle(shape) || shape.isIncludedInOneShapeTriangle(this))
-        {
-            return true;
-        }
-
-        //Check if one of the triangle edges intersects triangle edges of the second shape
-        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = m_triangles[iTriangleIndex];
-            for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
+            if (bEnsureNonNullIntersection)
             {
-                Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex] + m_gridOffsetOnVertices;
-                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
-                triangleEdgePoint2 += m_gridOffsetOnVertices;
-
-                //the shape intersects or overlaps the edge [triangleEdgePoint1; triangleEdgePoint2]
-                if (shape.IntersectsEdge(triangleEdgePoint1, triangleEdgePoint2)
-                    ||
-                    shape.OverlapsEdge(triangleEdgePoint1, triangleEdgePoint2))
-                {
-                    //Debug.Log("point1 X:" + triangleEdgePoint1.x + " Y:" + triangleEdgePoint1.y);
-                    //Debug.Log("point2 X:" + triangleEdgePoint2.x + " Y:" + triangleEdgePoint2.y);
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Does 'this' shape intersects the edge passed as parameter
-     * **/
-    private bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = m_triangles[iTriangleIndex];
-            for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
-            {
-                Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
-                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
-
-                if (GeometryUtils.TwoSegmentsIntersect(triangleEdgePoint1, triangleEdgePoint2, edgePoint1, edgePoint2))
+                if (m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle))
                     return true;
             }
-        }
-
-        return false;
-    }
-
-    /**
-     * Does 'this' shape overlaps (i.e both edges are collinear and share a portion of segment) the edge passed as parameter
-     * **/
-    private bool OverlapsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = m_triangles[iTriangleIndex];
-            for (int iEdgeIndex = 0; iEdgeIndex != 3; iEdgeIndex++)
+            else
             {
-                Vector2 triangleEdgePoint1 = triangle.m_points[iEdgeIndex];
-                Vector2 triangleEdgePoint2 = (iEdgeIndex == 2) ? triangle.m_points[0] : triangle.m_points[iEdgeIndex + 1];
-
-                if (GeometryUtils.TwoSegmentsOverlap(triangleEdgePoint1, triangleEdgePoint2, edgePoint1, edgePoint2))
+                if (m_triangles[i].IntersectsTriangle(triangle))
                     return true;
             }
         }

@@ -97,29 +97,41 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
         ShowElements();
 
+        Vector2 point1 = new Vector2(300, 354);
+        Vector2 point2 = new Vector2(0, 54);
+        Vector2 point3 = new Vector2(-150, -96);
+        Vector2 point4 = new Vector2(0, -96);
+
+        bool bIntersect = GeometryUtils.TwoSegmentsIntersect(point1, point2, point3, point4);
+
+        /**
+         * TEST TRIANGLES INTERSECTIONS
+         * **/
+        BaseTriangle.UnitTests();
+
         /**
          * TEST OVERLAP TIME
          * **/
-        Contour contourShape1 = new Contour(4);
-        contourShape1.Add(new Vector2(0, 0));
-        contourShape1.Add(new Vector2(1, 0));
-        contourShape1.Add(new Vector2(1, 1));
-        contourShape1.Add(new Vector2(0, 1));
+        //Contour contourShape1 = new Contour(4);
+        //contourShape1.Add(new Vector2(0, 0));
+        //contourShape1.Add(new Vector2(1, 0));
+        //contourShape1.Add(new Vector2(1, 1));
+        //contourShape1.Add(new Vector2(0, 1));
 
-        Shape shape1 = new Shape(true, contourShape1);
-        shape1.Triangulate();
+        //Shape shape1 = new Shape(true, contourShape1);
+        //shape1.Triangulate();
 
-        Contour contourShape2 = new Contour(4);
-        contourShape2.Add(new Vector2(1, 1));
-        contourShape2.Add(new Vector2(1, 0));
-        contourShape2.Add(new Vector2(2, 0));
-        contourShape2.Add(new Vector2(2, 1));
+        //Contour contourShape2 = new Contour(4);
+        //contourShape2.Add(new Vector2(1, 1));
+        //contourShape2.Add(new Vector2(1, 0));
+        //contourShape2.Add(new Vector2(2, 0));
+        //contourShape2.Add(new Vector2(2, 1));
 
-        Shape shape2 = new Shape(true, contourShape2);
-        shape2.Triangulate();
+        //Shape shape2 = new Shape(true, contourShape2);
+        //shape2.Triangulate();
 
-        bool bOverlap = shape1.OverlapsShape(shape2);
-        Debug.Log("Overlaps:" + bOverlap);
+        //bool bOverlap = shape1.OverlapsShape(shape2);
+        //Debug.Log("Overlaps:" + bOverlap);
 
         //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
@@ -195,7 +207,7 @@ public class GameScene : GUIScene
 
         //Voxel grid
         m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(8);
+        m_voxelGrid.Init(2);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
