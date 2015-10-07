@@ -88,5 +88,43 @@ public class ShapeVoxelGrid : MonoBehaviour
 
         m_voxels[i] = voxel;
     }
+
+    /**
+     * Find voxels that are inside the parameter 'shape' and add a reference to them
+     * **/
+    public void AssignShapeToVoxels(Shape shape)
+    {
+        for (int iVoxelIdx = 0; iVoxelIdx != m_voxels.Length; iVoxelIdx++)
+        {
+            ShapeVoxel voxel = m_voxels[iVoxelIdx];
+            if (shape.ContainsPoint(voxel.m_position))
+            {               
+                voxel.AddOverlappingShape(shape);
+            }
+        }  
+    }
+
+    /**
+     * Find voxels that have been referenced by the parameter 'shape' and remove it
+     * **/
+    public void UnassignShapeFromVoxels(Shape shape)
+    {
+        for (int iVoxelIdx = 0; iVoxelIdx != m_voxels.Length; iVoxelIdx++)
+        {
+            ShapeVoxel voxel = m_voxels[iVoxelIdx];              
+            voxel.RemoveOverlappingShape(shape);
+        }  
+    }
+
+    /**
+     * Clear each voxel in this grid from shapes that could have been added to them
+     * **/
+    public void ClearVoxels()
+    {
+        for (int i = 0; i != m_voxels.Length; i++)
+        {
+            m_voxels[i].ClearOverlappingShapes();
+        }
+    }
 }
 

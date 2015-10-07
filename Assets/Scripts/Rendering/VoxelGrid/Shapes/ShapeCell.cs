@@ -157,13 +157,8 @@ public class ShapeCell : MonoBehaviour
     {
         Shape parentShape = m_parentMesh.m_shapeData;
 
-        if (MathUtils.AreVec2PointsEqual(m_position, new Vector2(225, 129)))
-            Debug.Log(m_position);
-
         if (!OverlapsShapeWithNonNullIntersection(parentShape)) //no intersection, no need to waste resources clipping it
             return false;
-
-        Debug.Log("ClipWithParentMesh:" + m_position);
 
         Contour cellContour = new Contour(4);
         cellContour.Add(m_voxelA.m_position);
@@ -193,7 +188,7 @@ public class ShapeCell : MonoBehaviour
         cellTriangle2.m_points[1] = m_voxelD.m_position;
         cellTriangle2.m_points[2] = m_voxelC.m_position;
 
-        return shape.OverlapsTriangle(cellTriangle1, true) || shape.OverlapsTriangle(cellTriangle1, true);
+        return shape.OverlapsTriangle(cellTriangle1, true) || shape.OverlapsTriangle(cellTriangle2, true);
     }
 
     /**

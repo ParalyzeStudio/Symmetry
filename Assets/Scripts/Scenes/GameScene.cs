@@ -21,7 +21,7 @@ public class GameScene : GUIScene
     public ShapeVoxelGrid m_voxelGrid { get; set; }
     public Counter m_counter { get; set; }
     public Outlines m_outlines { get; set; }
-    public Shapes m_shapes { get; set; }
+    public Shapes m_shapesHolder { get; set; }
     public Axes m_axes { get; set; }
 
     //holders
@@ -107,7 +107,12 @@ public class GameScene : GUIScene
         /**
          * TEST TRIANGLES INTERSECTIONS
          * **/
-        BaseTriangle.UnitTests();
+        //UnitTests.TestTrianglesIntersections();
+
+        /**
+         * TEST SHAPE CLIPPING
+         * **/
+        //UnitTests.TestShapesClipping();
 
         /**
          * TEST OVERLAP TIME
@@ -207,7 +212,7 @@ public class GameScene : GUIScene
 
         //Voxel grid
         m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(2);
+        m_voxelGrid.Init(8);
 
         ///*** DEBUG TMP ***/
         //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
@@ -498,9 +503,9 @@ public class GameScene : GUIScene
      * **/
     private void ShowInitialShapes()
     {
-        m_shapes = this.gameObject.GetComponentInChildren<Shapes>();
-        m_shapes.gameObject.transform.parent = this.gameObject.transform;
-        m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
+        m_shapesHolder = this.gameObject.GetComponentInChildren<Shapes>();
+        m_shapesHolder.gameObject.transform.parent = this.gameObject.transform;
+        m_shapesHolder.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
@@ -511,13 +516,13 @@ public class GameScene : GUIScene
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
 
-            m_shapes.CreateShapeObjectFromData(shape, false);
+            m_shapesHolder.CreateShapeObjectFromData(shape, false);
 
             //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
             //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
 
-        m_shapes.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
+        m_shapesHolder.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
         //GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         //shapesAnimator.SetOpacity(0);

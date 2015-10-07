@@ -29,6 +29,18 @@ public class ShapeVoxel : MonoBehaviour
         return true;
     }
 
+    public void RemoveOverlappingShape(Shape shape)
+    {
+        for (int i = 0; i != m_overlappingShapes.Count; i++)
+        {
+            if (m_overlappingShapes[i] == shape)
+            {
+                m_overlappingShapes.Remove(shape);
+                return;
+            }
+        }
+    }
+
     public bool IsOverlappedByShape(Shape shape)
     {
         for (int i = 0; i != m_overlappingShapes.Count; i++)

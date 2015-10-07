@@ -68,9 +68,9 @@ public class ShapeMesh : TexturedMesh
 
         if (bCellRendering) //render shape using cells
         {
-            AssignVoxels();
+            GetVoxelGrid().AssignShapeToVoxels(m_shapeData);
             BuildCells();
-            //TODO clear the voxel grid after building cells
+            //GetVoxelGrid().UnassignShapeFromVoxels(m_shapeData);
         }
         else //render shape with simple triangulation
         {
@@ -87,26 +87,6 @@ public class ShapeMesh : TexturedMesh
             m_meshIndicesDirty = true;
             m_meshColorsDirty = true;
         }
-    }
-
-    /**
-     * Assign this shape to every voxel contained in it
-     **/
-    private void AssignVoxels()
-    {
-        ShapeVoxel[] voxels = GetVoxelGrid().Voxels;
-
-        for (int iVoxelIdx = 0; iVoxelIdx != voxels.Length; iVoxelIdx++)
-        {
-            ShapeVoxel voxel = voxels[iVoxelIdx];
-            if (MathUtils.AreVec2PointsEqual(voxel.m_position, new Vector2(150, 54)))
-                Debug.Log("voxel position:" + voxel.m_position);
-            if (m_shapeData.ContainsPoint(voxel.m_position))
-            {
-               
-                voxel.AddOverlappingShape(m_shapeData);
-            }
-        }        
     }
 
     /**
@@ -203,7 +183,7 @@ public class ShapeMesh : TexturedMesh
 
         if (allCellsSwept && m_renderedWithCells) //we just swept all cells, we can now render this whole mesh with simple triangles
         {
-            //OnMeshSwept();
+            OnMeshSwept();
         }
     }
 
@@ -232,10 +212,16 @@ public class ShapeMesh : TexturedMesh
      * **/
     private void OnMeshSwept()
     {
-        Debug.Log("OnMeshSwept");
+        bool bFusionOccured = Shapes.PerformFusionOnShape(this.m_shapeData);
+        Debug.Log("bFusionOccured:" + bFusionOccured);
+
+        if (bFusionOccured)
+            m_shapeData.Triangulate();
+
+        //re-render this shape that grew if other static shapes fusion with it or stayed the same if no fusion occured
         DestroyCells();
         Render(false);
-        //GetShapesHolder().MakeDynamicShapeStatic(m_shapeData);
+        m_shapeData.m_state = Shape.ShapeState.STATIC;
     }
 
     //public void ShowVoxelCell(ShapeCell cell)

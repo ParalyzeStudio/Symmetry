@@ -149,7 +149,16 @@ public class ClippingBooleanOperations
             }
         }
 
-        //Debug.Log("ShapeOperation:" + clipOperation + "result:" + resultingShapes.Count);
+        //Set color to each resulting shape
+        for (int i = 0; i != resultingShapes.Count; i++)
+        {
+            if (clipOperation == ClipType.ctUnion)
+                resultingShapes[i].m_color = subjShape.m_color;
+            else if (clipOperation == ClipType.ctIntersection)
+                resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+            else if (clipOperation == ClipType.ctDifference)
+                resultingShapes[i].m_color = subjShape.m_color;
+        }
 
         return resultingShapes;
     }

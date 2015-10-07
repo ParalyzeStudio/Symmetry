@@ -37,11 +37,14 @@ public class Symmetrizer : MonoBehaviour
         Shape ribbonRightClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonRightSubShape;
 
         //Clip all shapes
-        List<Shape> staticShapes = GetGameScene().GetComponentInChildren<Shapes>().m_staticShapes;
+        List<Shape> shapes = GetGameScene().GetComponentInChildren<Shapes>().m_shapes;
 
-        for (int i = 0; i != staticShapes.Count; i++)
+        for (int i = 0; i != shapes.Count; i++)
         {
-            Shape shape = staticShapes[i];
+            Shape shape = shapes[i];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                continue;
 
             if (ribbonLeftClipShape != null)
             {

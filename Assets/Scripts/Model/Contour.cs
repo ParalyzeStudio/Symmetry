@@ -199,6 +199,46 @@ public class Contour : List<Vector2>
 
         return false;
     }
+
+    /**
+     * Test if the contour passed as parameter is the same as this contour
+     * Offer the possibility to check if they have the same points despite an opposite winding order
+     * **/
+    public bool EqualsContour(Contour contour, bool bSameWindingOrder = true)
+    {
+        if (this.Count != contour.Count) //not the same number of elements in those two contours
+            return false;
+
+        //Find the same point as the one with index 0 in this contour and define an offset
+        int offset = -1;
+        for (int i = 0; i != contour.Count; i++)
+        {
+            if (MathUtils.AreVec2PointsEqual(contour[i], this[0]))
+                offset = i;
+        }
+
+        if (offset < 0)
+            return false;
+
+        //now check if other points are equal
+        for (int i = 0; i != this.Count; i++)
+        {
+            Vector2 contour1Point = this[i];
+            Vector2 contour2Point;
+            if (bSameWindingOrder)
+            {
+                contour2Point = contour[(i + offset) > contour.Count - 1 ? offset - (contour.Count - i) : i + offset];
+                if (!MathUtils.AreVec2PointsEqual(contour1Point, contour2Point))
+                    return false;
+            }
+            else
+            {
+                //TODO treat the case where we can test also the opposite winding number
+            }
+        }
+
+        return true;
+    }
 }
 
 /**

@@ -8,6 +8,14 @@ public class Shape : GridTriangulable
     public Vector2 m_gridOffsetOnVertices { get; set; }
     public ShapeMesh m_parentMesh { get; set; }
 
+    public enum ShapeState
+    {
+        MARKED_TO_BE_DESTROYED = 0,
+        DYNAMIC,
+        STATIC
+    }
+    public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
+
     public Shape(bool gridPointMode)
         : base(gridPointMode)
     {
@@ -90,59 +98,50 @@ public class Shape : GridTriangulable
     //}
 
     /**
-     * Fusion this shape with every shape that overlaps it. 
-     * Every shape except 'this' is destroyed and their triangle are added to 'this' shape
-     * Returns the shape resulting from the fusion or null if no fusion occured
+     * Fusion this shape with every static shape that overlaps it. 
+     * A new static shape is created if a fusion occured and old fusioned shapes are destroyed
+     * Else null is returned
      * **/
-    public Shape Fusion()
+    public bool Fusion()
     {
         GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        List<Shape> shapeObjects = gameScene.m_shapes.m_staticShapes;
+        List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
 
-        //Find the first shape that overlaps this shape
-        Shape subjShape = null;
+        Shape subjShape = this;
         Shape clipShape = null;
-        GameObject subjShapeObject = null;
-        GameObject clipShapeObject = null;
 
-        for (int iShapeIndex = 0; iShapeIndex != shapeObjects.Count; iShapeIndex++)
+        //Find the first static shape that overlaps this shape
+        for (int iShapeIndex = 0; iShapeIndex != shapes.Count; iShapeIndex++)
         {
-            Shape shapeData = shapeObjects[iShapeIndex];
+            Shape shapeData = shapes[iShapeIndex];
+
+            if (shapeData.m_state != ShapeState.STATIC) //check only static shapes
+                continue;
 
             if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
                 continue;
 
-            if (this == shapeData)
-            {
-                subjShape = this;
-            }
-            else if (clipShape == null && this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
-            {
-                clipShape = shapeData;              
-            }
+            if (clipShape == null && this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
+                clipShape = shapeData;
 
             if (clipShape != null && subjShape != null) //we have both subj and clip shape we can break the loop
                 break;
         }
 
         if (clipShape == null) //no shape overlaps 'this' shape
-            return null;
+            return false;
 
         List<Shape> resultingShapes = ClippingBooleanOperations.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
-        if (resultingShapes.Count > 1)
-        {
-            Shape resultingShape = resultingShapes[0];
-            gameScene.m_shapes.CreateShapeObjectFromData(resultingShape, false);
-
-            gameScene.m_shapes.DestroyShape(subjShapeObject);
-            gameScene.m_shapes.DestroyShape(clipShapeObject);
-            gameScene.m_shapes.RemoveStaticShape(subjShape);
-            gameScene.m_shapes.RemoveStaticShape(clipShape);
-
-            return resultingShape;
+        if (resultingShapes.Count == 1)
+        {             
+            Shape fusionedShape = resultingShapes[0];
+            this.m_contour = fusionedShape.m_contour;
+            this.m_holes = fusionedShape.m_holes;
+            clipShape.m_state = ShapeState.MARKED_TO_BE_DESTROYED;
+            return true;
         }
 
-        return null;
+        return false;
     }
 
     public bool IntersectsOutline(DottedOutline contour)
