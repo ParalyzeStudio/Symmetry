@@ -15,6 +15,7 @@ public class Symmetrizer : MonoBehaviour
     private SymmetryType m_symmetryType;
 
     private GameScene m_gameScene;
+    private ClippingManager m_clippingManager;
 
     public void Awake()
     {
@@ -26,8 +27,8 @@ public class Symmetrizer : MonoBehaviour
      * **/
     public void SymmetrizeByAxis()
     {
-        Shapes shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
-        AxisRenderer axis = this.GetComponent<AxisRenderer>();
+        Shapes shapesHolder = GetGameScene().m_shapesHolder;
+        AxisRenderer axis = this.GetComponent<AxisRenderer>();       
 
         //Split the ribbon first
         axis.SplitRibbon(m_symmetryType);
@@ -37,8 +38,7 @@ public class Symmetrizer : MonoBehaviour
         Shape ribbonRightClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonRightSubShape;
 
         //Clip all shapes
-        List<Shape> shapes = GetGameScene().GetComponentInChildren<Shapes>().m_shapes;
-
+        List<Shape> shapes = shapesHolder.m_shapes;
         for (int i = 0; i != shapes.Count; i++)
         {
             Shape shape = shapes[i];
@@ -48,13 +48,15 @@ public class Symmetrizer : MonoBehaviour
 
             if (ribbonLeftClipShape != null)
             {
-                List<Shape> lResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection);
+                List<Shape> lResultShapes = GetClippingManager().ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection); //16ms if first clip
+
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
                     Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(axis);
                     lSymmetricShape.Triangulate();
                     lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
-                    shapesHolder.ClipAgainstStaticShapes(lSymmetricShape);
+
+                    shapesHolder.ClipAgainstStaticShapes(lSymmetricShape); //16ms creation of shape objects
                 }
             }
 
@@ -70,7 +72,7 @@ public class Symmetrizer : MonoBehaviour
             //    }
             //}
         }
-
+        
         //Callback on the AxisRenderer
         axis.OnPerformSymmetry(m_symmetryType);
     }
@@ -484,5 +486,13 @@ public class Symmetrizer : MonoBehaviour
         if (m_gameScene == null)
             m_gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
         return m_gameScene;
+    }
+
+    private ClippingManager GetClippingManager()
+    {
+        if (m_clippingManager == null)
+            m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+
+        return m_clippingManager;
     }
 }

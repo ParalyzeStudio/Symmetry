@@ -12,17 +12,18 @@ public class Outlines : MonoBehaviour
     }
 
     public void Build()
-    {
+    {       
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("GameController");
         LevelManager levelManager = levelManagerObject.GetComponent<LevelManager>();
-
+                
         List<DottedOutline> outlines = levelManager.m_currentLevel.m_outlines;
+       
         foreach (DottedOutline outline in outlines)
-        {
+        {            
             DottedOutline clonedOutline = new DottedOutline(outline);
-            clonedOutline.TogglePointMode(); //swtich from grid coordinates to world position
-            m_outlinesList.Add(clonedOutline);
-
+            clonedOutline.TogglePointMode(); //swtich from grid coordinates to world position            
+            m_outlinesList.Add(clonedOutline);            
+            
             //First triangulate the outline
             clonedOutline.Triangulate();
 

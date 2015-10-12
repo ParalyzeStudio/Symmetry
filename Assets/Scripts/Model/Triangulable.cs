@@ -41,25 +41,21 @@ public class Triangulable
     public Triangulable(Triangulable other)
     {
         //deep copy triangles
-        m_triangles = new List<BaseTriangle>();
-        m_triangles.Capacity = other.m_triangles.Count;
+        m_triangles = new List<BaseTriangle>(other.m_triangles.Count);
         for (int i = 0; i != other.m_triangles.Count; i++)
         {
             m_triangles.Add(new BaseTriangle(other.m_triangles[i]));
         }
 
         //deep copy contour
-        m_contour = new Contour();
-        m_contour.Capacity = other.m_contour.Count;
+        m_contour = new Contour(other.m_contour.Count);
         m_contour.AddRange(other.m_contour); //Vector2 is a value type so no need to clone them deeply
 
         //deep copy holes
-        m_holes = new List<Contour>();
-        m_holes.Capacity = other.m_holes.Count;
+        m_holes = new List<Contour>(other.m_holes.Count);
         for (int i = 0; i != other.m_holes.Count; i++)
         {
-            Contour holesVec = new Contour();
-            holesVec.Capacity = other.m_holes[i].Count;
+            Contour holesVec = new Contour(other.m_holes[i].Count);
             holesVec.AddRange(other.m_holes[i]); //Vector2 is a value type so no need to clone them deeply
             m_holes.Add(holesVec);
         } 
@@ -74,6 +70,8 @@ public class Triangulable
 
         if (m_contour.Count == 3 && m_holes.Count == 0) //only one triangle
         {
+            m_triangles.Capacity = 1;
+
             BaseTriangle triangle = new BaseTriangle();
             triangle.m_points[0] = m_contour[0];
             triangle.m_points[1] = m_contour[1];
@@ -85,9 +83,11 @@ public class Triangulable
         else
         {
             Vector2[] triangles = Triangulation.P2tTriangulate(this);
-
+           
             for (int iVertexIndex = 0; iVertexIndex != triangles.Length; iVertexIndex += 3)
             {
+                m_triangles.Capacity = triangles.Length;
+
                 BaseTriangle triangle = new BaseTriangle();
                 triangle.m_points[0] = triangles[iVertexIndex];
                 triangle.m_points[1] = triangles[iVertexIndex + 1];
@@ -96,7 +96,7 @@ public class Triangulable
                 m_triangles.Add(triangle);
                 m_area += triangle.GetArea();
             }
-        }
+        }       
     }
 
     /**

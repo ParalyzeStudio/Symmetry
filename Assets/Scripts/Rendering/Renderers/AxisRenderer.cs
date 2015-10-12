@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class AxisRenderer : MonoBehaviour
 {
-    public const float SWEEP_LINE_SPEED = 300.0f;
+    public const float SWEEP_LINE_SPEED = 500.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
 
     //Shared prefabs
@@ -324,19 +324,6 @@ public class AxisRenderer : MonoBehaviour
     }
 
     /**
-     * Sweep cells on all shapes
-     * **/
-    private void SweepShapeCells()
-    {
-        //List<GameObject> allShapeObjects = GetShapesHolder().m_shapesObjects;
-        //for (int i = 0; i != allShapeObjects.Count; i++)
-        //{
-        //    ShapeMesh shapeMesh = allShapeObjects[i].GetComponent<ShapeMesh>();
-        //    shapeMesh.SweepCellsWithLine(m_leftSweepingLine, bLeftSide);
-        //}
-    }
-
-    /**
      * Split ribbon in two sub-shapes for each side of the axis
      * **/
     public void SplitRibbon(Symmetrizer.SymmetryType symmetryType)
@@ -364,11 +351,15 @@ public class AxisRenderer : MonoBehaviour
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
             Vector2 clockwiseAxisNormal = GetAxisNormal();
+            Vector2 axisDirection = GetAxisDirection();
+            float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
+            
             //m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
             m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, clockwiseAxisNormal);
 
             //debug objects
-            Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
+            //Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
+            Quaternion sweepLineRotation = Quaternion.AngleAxis(axisAngle, Vector3.forward);
             //m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
             //m_debugLeftSweepLineObject.transform.parent = this.transform;
             //m_debugLeftSweepLineObject.transform.localRotation = sweepLineRotation;

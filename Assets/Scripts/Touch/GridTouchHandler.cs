@@ -92,10 +92,15 @@ public class GridTouchHandler : TouchHandler
 
             if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
             {
-
                 Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
+
                 symmetrizer.SymmetrizeByAxis();
-                //symmetrizer.SymmetrizeByAxis();
+                sw.Stop();
+
+                Debug.Log("Symmetry took " + sw.ElapsedMilliseconds + " ms");
             }
 
             //remove the axis from the axes list and destroy the object

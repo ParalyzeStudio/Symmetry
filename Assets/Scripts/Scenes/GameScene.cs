@@ -24,6 +24,13 @@ public class GameScene : GUIScene
     public Shapes m_shapesHolder { get; set; }
     public Axes m_axes { get; set; }
 
+    //root objects
+    public GameObject m_shapesHolderPfb;
+    public GameObject m_gridPfb;
+    public GameObject m_outlinesPfb;
+    public GameObject m_counterPfb;
+    public GameObject m_axesPfb;
+
     //holders
     public GameObject m_interfaceButtonsHolder { get; set; }
 
@@ -55,6 +62,8 @@ public class GameScene : GUIScene
 
     //is the current scene displayed entirely
     public bool m_isShown { get; set; }
+
+    private ClippingManager m_clippingManager;
 
     public void Init()
     {
@@ -94,7 +103,7 @@ public class GameScene : GUIScene
         
         //Show all elements
         //CallFuncHandler callFuncHandler = GetCallFuncHandler();
-        //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);
+        //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
         Vector2 point1 = new Vector2(300, 354);
@@ -109,10 +118,42 @@ public class GameScene : GUIScene
          * **/
         //UnitTests.TestTrianglesIntersections();
 
+        Contour subjShapeContour1 = new Contour(4);
+        subjShapeContour1.Add(new Vector2(0, 0));
+        subjShapeContour1.Add(new Vector2(300, 0));
+        subjShapeContour1.Add(new Vector2(300, 300));
+        subjShapeContour1.Add(new Vector2(0, 300));
+        Contour clipShapeContour1 = new Contour(4);
+        clipShapeContour1.Add(new Vector2(200, 200));
+        clipShapeContour1.Add(new Vector2(500, 200));
+        clipShapeContour1.Add(new Vector2(500, 500));
+        clipShapeContour1.Add(new Vector2(200, 500));
+        Shape subjShape1 = new Shape(true, subjShapeContour1);
+        Shape clipShape1 = new Shape(true, clipShapeContour1);
+
+        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+        //sw.Start();
+        //for (int i = 0; i != 100; i++)
+        //{
+        //m_shapesHolder.CreateShapeObjectFromData(subjShape1, true);
+        //}
+        //sw.Stop();
+        //Debug.Log("cellRendering took " + sw.ElapsedMilliseconds + " ms");
+        //sw = new System.Diagnostics.Stopwatch();
+        //sw.Start();
+        //for (int i = 0; i != 100; i++)
+        //{
+            //m_shapesHolder.CreateShapeObjectFromData(subjShape1, false);
+        //}
+        //sw.Stop();
+        //Debug.Log("normalRendering took " + sw.ElapsedMilliseconds + " ms");
+
         /**
          * TEST SHAPE CLIPPING
          * **/
+       
         //UnitTests.TestShapesClipping();
+       
 
         /**
          * TEST OVERLAP TIME
@@ -188,8 +229,7 @@ public class GameScene : GUIScene
         ShowInitialShapes();
 
         //Build Axes holder
-        m_axes = this.gameObject.GetComponentInChildren<Axes>();
-        m_axes.transform.localPosition = new Vector3(0, 0, AXES_Z_VALUE);
+        BuildAxesHolder();       
     }
 
     /**
@@ -201,32 +241,20 @@ public class GameScene : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Visible grid
-        m_grid = this.gameObject.GetComponentInChildren<Grid>();
-        m_grid.gameObject.transform.parent = this.gameObject.transform;
+        GameObject gridObject = (GameObject)Instantiate(m_gridPfb);
+        gridObject.name = "Grid";
+        gridObject.transform.parent = this.transform;
+        m_grid = gridObject.GetComponent<Grid>();
         m_grid.Build();
 
-        GameObjectAnimator gridAnimator = m_grid.gameObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 0.5f, fDelay);
         gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
-
-        //Voxel grid
-        m_voxelGrid = this.gameObject.GetComponentInChildren<ShapeVoxelGrid>();
-        m_voxelGrid.Init(8);
-
-        ///*** DEBUG TMP ***/
-        //Grid grid = GameObject.FindGameObjectWithTag("Grid").GetComponent<Grid>();
-        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL);
-        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL);
-        ////List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(8, 9), Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT);
-        //List<GameObject> anchors = grid.GetAnchorsConstrainedBySymmetryType(new Vector2(19, 1), Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL);
-        //foreach (GameObject anchor in anchors)
-        //{
-        //    Vector2 gridPos = grid.GetGridCoordinatesFromWorldCoordinates(anchor.transform.position);
-        //    Vector3 selectedAnchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
-        //    Instantiate(m_gridAnchorSelectedPfb, selectedAnchorPosition, Quaternion.identity);
-        //}
-        ///*** DEBUG TMP ***/
+        
+        //Voxel grid       
+        m_voxelGrid = gridObject.GetComponentInChildren<ShapeVoxelGrid>();
+        m_voxelGrid.Init(8);        
     }
 
     /**
@@ -362,16 +390,18 @@ public class GameScene : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        m_counter = this.gameObject.GetComponentInChildren<Counter>();
-        m_counter.gameObject.transform.parent = this.gameObject.transform;
-        m_counter.gameObject.transform.localPosition = new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE);
+        GameObject counterObject = (GameObject)Instantiate(m_counterPfb);
+        counterObject.name = "Counter";
+        counterObject.transform.parent = this.transform;
+        m_counter = counterObject.GetComponent<Counter>();
 
         m_counter.Init();
         m_counter.Build();
 
-        GameObjectAnimator counterAnimator = m_counter.gameObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator counterAnimator = counterObject.GetComponent<GameObjectAnimator>();
         counterAnimator.SetOpacity(0);
         counterAnimator.FadeTo(1, 0.2f, fDelay);
+        counterAnimator.SetPosition(new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE));
     }
 
     /**
@@ -379,13 +409,15 @@ public class GameScene : GUIScene
      * **/
     private void ShowOutlines(float fDelay = 0.0f)
     {
-        m_outlines = this.gameObject.GetComponentInChildren<Outlines>();
-        m_outlines.transform.parent = this.gameObject.transform;
-        m_outlines.transform.localPosition = new Vector3(0, 0, CONTOURS_Z_VALUE);
+        GameObject outlinesObject = (GameObject)Instantiate(m_outlinesPfb);
+        outlinesObject.name = "Outlines";
+        outlinesObject.transform.parent = this.transform;
+        m_outlines = outlinesObject.GetComponent<Outlines>();
         m_outlines.Build();
 
-        GameObjectAnimator outlinesAnimator = m_outlines.gameObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator outlinesAnimator = outlinesObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetOpacity(0);
+        outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
         m_outlines.Show(true, 0.5f, fDelay);
     }
 
@@ -503,9 +535,13 @@ public class GameScene : GUIScene
      * **/
     private void ShowInitialShapes()
     {
-        m_shapesHolder = this.gameObject.GetComponentInChildren<Shapes>();
-        m_shapesHolder.gameObject.transform.parent = this.gameObject.transform;
-        m_shapesHolder.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
+        GameObject shapesHolderObject = (GameObject)Instantiate(m_shapesHolderPfb);
+        shapesHolderObject.name = "Shapes";
+        shapesHolderObject.transform.parent = this.transform;
+        m_shapesHolder = shapesHolderObject.GetComponent<Shapes>();
+
+        GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
+        shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
 
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
@@ -515,14 +551,13 @@ public class GameScene : GUIScene
 
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
+            shape.m_state = Shape.ShapeState.STATIC;
 
             m_shapesHolder.CreateShapeObjectFromData(shape, false);
 
             //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
             //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
-
-        m_shapesHolder.gameObject.transform.localPosition = new Vector3(0, 0, SHAPES_Z_VALUE);
 
         //GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
         //shapesAnimator.SetOpacity(0);
@@ -534,6 +569,15 @@ public class GameScene : GUIScene
         //GameObject shapeObject = m_shapes.m_shapesObj[0];
         //Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
         //Shapes.PerformFusionOnShape(fusionShape);
+    }
+
+    private void BuildAxesHolder()
+    {        
+        GameObject axesHolderObject = (GameObject)Instantiate(m_axesPfb);
+        axesHolderObject.transform.parent = this.transform;
+        m_axes = axesHolderObject.GetComponent<Axes>();
+        GameObjectAnimator axesAnimator = axesHolderObject.GetComponent<GameObjectAnimator>();
+        axesAnimator.SetPosition(new Vector3(0, 0, AXES_Z_VALUE));
     }
 
     /**
@@ -646,5 +690,13 @@ public class GameScene : GUIScene
             return Instantiate(m_diagonalAxesMaterial);
 
         return null;
+    }
+
+    public ClippingManager GetClippingManager()
+    {
+        if (m_clippingManager == null)
+            m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+
+        return m_clippingManager;
     }
 }

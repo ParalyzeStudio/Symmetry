@@ -62,7 +62,7 @@ public class Grid : MonoBehaviour
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
-        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);       
+        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
 
         //Build anchors
         m_gridAnchorMaterial = Instantiate(m_positionColorMaterial);

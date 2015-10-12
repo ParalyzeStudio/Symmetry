@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class ShapeCell : MonoBehaviour
+public class ShapeCell
 {
     private int m_index; //the index of the cell in the parent mesh cell array
 
@@ -46,7 +46,7 @@ public class ShapeCell : MonoBehaviour
     public ShapeCell m_bottomCell { get; set; }
     public ShapeCell m_rightCell { get; set; }
 
-    public void Init(int index, ShapeMesh parentMesh, ShapeVoxel a, ShapeVoxel b, ShapeVoxel c, ShapeVoxel d)
+    public ShapeCell(int index, ShapeMesh parentMesh, ShapeVoxel a, ShapeVoxel b, ShapeVoxel c, ShapeVoxel d)
     {
         m_index = index;
         m_parentMesh = parentMesh;
@@ -78,7 +78,7 @@ public class ShapeCell : MonoBehaviour
         }
         else //triangulation led to an empty cell so remove it
         {
-            m_parentMesh.DestroyAndNullifyCellAtIndex(m_index);
+            m_parentMesh.NullifyCellAtIndex(m_index);
         }
     }
 
@@ -105,8 +105,7 @@ public class ShapeCell : MonoBehaviour
         //    callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_rightCell.Show), ShapeMesh.CELL_APPARITION_INTERVAL);
 
         //animate cell by fading in it
-        ShapeCellAnimator cellAnimator = this.gameObject.GetComponent<ShapeCellAnimator>();
-        cellAnimator.SetColor(m_parentMesh.m_shapeData.m_color);
+        SetColor(m_parentMesh.m_shapeData.m_color);
     }
 
     /**
@@ -166,7 +165,7 @@ public class ShapeCell : MonoBehaviour
         cellContour.Add(m_voxelD.m_position);
         cellContour.Add(m_voxelC.m_position);
         Shape cellShape = new Shape(false, cellContour);
-        List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(parentShape, cellShape, ClipperLib.ClipType.ctIntersection);
+        List<Shape> clipResult = m_parentMesh.GetClippingManager().ShapesOperation(parentShape, cellShape, ClipperLib.ClipType.ctIntersection);
 
         if (clipResult.Count == 0) //no intersection
             return false;

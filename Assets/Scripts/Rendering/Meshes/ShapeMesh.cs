@@ -8,8 +8,6 @@ using ClipperLib;
  * **/
 public class ShapeMesh : TexturedMesh
 {
-    //public const float SWEEP_LINE_ANGLE = -45.0f;
-    //public const float SWEEP_LINE_SPEED = 300.0f;
     public const float CELL_APPARITION_INTERVAL = 0.05f;
     public const int SHAPE_TEXTURES_TILING = 6; //textures is 6x6 squares
 
@@ -17,34 +15,17 @@ public class ShapeMesh : TexturedMesh
 
     //Prefabs
     public Material m_shapeTilesMaterial;
-    public GameObject m_shapeCellPfb;
 
     //cells
     public bool m_renderedWithCells { get; set; }
-    //public List<ShapeCell> m_cells { get; set; }
     public ShapeCell[] m_cells { get; set; }
 
-    //sweep line
-    //private Vector2 m_sweepLineDirection;
-    //private Vector2 m_sweepLinePoint;
-    //private float m_sweepLineSpeed;
-    //private bool m_sweeping;
-
-    //public GameObject m_sweepLinePfb;
-    //private GameObject m_debugSweepLineObject;
-
-    private Grid m_grid; //global instance of the game scene grid
-    private ShapeVoxelGrid m_voxelGrid; //global instance of the game scene voxel grid
-    private CallFuncHandler m_callFuncHandler; //global instance of the CallFunc Handler
-    private Shapes m_shapesHolder; //global instance of the Shapes holder
     private GameScene m_gameScene; //global instance of the Shapes holder
 
     public override void Init()
     {
         base.Init();
         m_mesh.name = "ShapeMesh";
-
-        //m_cells = new List<ShapeCell>();
     }
 
     /**
@@ -116,11 +97,7 @@ public class ShapeMesh : TexturedMesh
                     c.IsOverlappedByShape(this.m_shapeData) ||
                     d.IsOverlappedByShape(this.m_shapeData))
                 {
-                    GameObject cellObject = Instantiate(m_shapeCellPfb);
-                    cellObject.name = "Cell";
-                    cellObject.transform.parent = this.transform;
-                    ShapeCell cell = cellObject.GetComponent<ShapeCell>();
-                    cell.Init(i, this, a, b, c, d);
+                    ShapeCell cell = new ShapeCell(i, this, a, b, c, d);
                     if ((i % XCellsCount) > 0) //cell is not at the beginning of a line
                     {
                         ShapeCell leftCell = m_cells[i - 1];
@@ -155,7 +132,7 @@ public class ShapeMesh : TexturedMesh
     {
         for (int i = 0; i != m_cells.Length; i++)
         {
-            DestroyAndNullifyCellAtIndex(i);
+            NullifyCellAtIndex(i);
         }
     }
 
@@ -198,11 +175,10 @@ public class ShapeMesh : TexturedMesh
     /**
      * Set a cell to null (for instance if the result of triangulation leads to an empty cell)
      * **/
-    public void DestroyAndNullifyCellAtIndex(int index)
+    public void NullifyCellAtIndex(int index)
     {
         if (m_cells[index] != null)
         {
-            Destroy(m_cells[index].gameObject);
             m_cells[index] = null;
         }
     }
@@ -212,9 +188,12 @@ public class ShapeMesh : TexturedMesh
      * **/
     private void OnMeshSwept()
     {
-        bool bFusionOccured = Shapes.PerformFusionOnShape(this.m_shapeData);
-        Debug.Log("bFusionOccured:" + bFusionOccured);
+        //render the shape with cropped previously
+        if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
+            GetShapesHolder().PerformDifferenceOnOverlappedStaticShapeForShape(this.m_shapeData);
 
+        //Fusion the shape
+        bool bFusionOccured = GetShapesHolder().PerformFusionOnShape(this.m_shapeData);
         if (bFusionOccured)
             m_shapeData.Triangulate();
 
@@ -391,50 +370,27 @@ public class ShapeMesh : TexturedMesh
 
     private Grid GetGrid()
     {
-        if (m_grid == null)
-        {
-            if (m_voxelGrid == null)
-            {
-                m_grid = GetGameScene().GetComponentInChildren<Grid>();
-                m_voxelGrid = m_grid.gameObject.GetComponent<ShapeVoxelGrid>();
-            }
-            else
-                m_grid = m_voxelGrid.gameObject.GetComponent<Grid>();
-        }
-
-        return m_grid;
+        return GetGameScene().m_grid;
     }
 
     private ShapeVoxelGrid GetVoxelGrid()
     {
-        if (m_voxelGrid == null)
-        {
-            if (m_grid == null)
-            {
-                m_voxelGrid = GetGameScene().GetComponentInChildren<ShapeVoxelGrid>();
-                m_grid = m_voxelGrid.gameObject.GetComponent<Grid>();
-            }
-            else
-                m_voxelGrid = m_grid.gameObject.GetComponent<ShapeVoxelGrid>();
-        }
-
-        return m_voxelGrid;
+        return GetGameScene().m_voxelGrid;
     }
 
     public CallFuncHandler GetCallFuncHandler()
     {
-        if (m_callFuncHandler == null)
-            m_callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
-
-        return m_callFuncHandler;
+        return GetGameScene().GetCallFuncHandler();
     }
 
-    private Shapes GetShapesHolder()
+    public Shapes GetShapesHolder()
     {
-        if (m_shapesHolder == null)
-            m_shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
+        return GetGameScene().m_shapesHolder;
+    }
 
-        return m_shapesHolder;
+    public ClippingManager GetClippingManager()
+    {
+        return GetGameScene().GetClippingManager();
     }
 
     //-------------------------------------------------------------//

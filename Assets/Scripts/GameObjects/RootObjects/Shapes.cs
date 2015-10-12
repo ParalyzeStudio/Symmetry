@@ -18,6 +18,8 @@ public class Shapes : MonoBehaviour
     //public List<GameObject> m_substitutionShapeObjects { get; set; } //the list of shapes that will replace the actual shapes that are overlapping
     //public List<GameObject> m_overlappingShapeObjects { get; set; } //the list shape objects that are currently overlapping and needs to be masked
 
+    private ClippingManager m_clippingManager;
+
     public void Awake()
     {
         //m_staticShapeObjects = new List<GameObject>();
@@ -47,18 +49,9 @@ public class Shapes : MonoBehaviour
         shapeMesh.SetShapeData(shapeData);
         shapeMesh.Render(bCellRendering);
 
-        if (!bCellRendering)
-        {
-            ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
-            shapeAnimator.SetColor(shapeData.m_color);
-            shapeAnimator.SetOpacity(0);
-            shapeAnimator.FadeTo(SHAPES_OPACITY, 0.3f);
-        }
+        ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
+        shapeAnimator.SetColor(shapeData.m_color);
 
-        if (bCellRendering)
-            shapeData.m_state = Shape.ShapeState.DYNAMIC;
-        else
-            shapeData.m_state = Shape.ShapeState.STATIC;
         m_shapes.Add(shapeData);
 
         //if (bSubstitutionShape)
@@ -172,7 +165,7 @@ public class Shapes : MonoBehaviour
      * Calls recursively Shape.Fusion() on the shape passed as parameter and then on the shape resulting from previous fusion
      * This way we are sure that the initial shape is fusionned to every shape that overlapped it at the beginning
      * **/
-    public static bool PerformFusionOnShape(Shape shape)
+    public bool PerformFusionOnShape(Shape shape)
     {
         bool bFusionOccured = false;
         bool bFusioning = false;
@@ -185,6 +178,27 @@ public class Shapes : MonoBehaviour
         while (bFusioning);
 
         return bFusionOccured;
+    }
+
+    /**
+     * 
+     * **/
+    public void PerformDifferenceOnOverlappedStaticShapeForShape(Shape shape)
+    {
+        List<Shape> resultShapes = GetClippingManager().ShapesOperation(shape.m_overlappedStaticShape, shape, ClipperLib.ClipType.ctDifference);
+        for (int i = 0; i != resultShapes.Count; i++)
+        {
+            Debug.Log("make static with color:" + resultShapes[i].m_color);
+            resultShapes[i].m_state = Shape.ShapeState.STATIC;
+            CreateShapeObjectFromData(resultShapes[i], false);
+        }
+        
+        //Destroy the old overlapped static shape
+        Destroy(shape.m_overlappedStaticShape.m_parentMesh.gameObject, 0.5f);
+        //DestroyShapeObjectForShape(shape.m_overlappedStaticShape);
+        //shape.m_overlappedStaticShape.m_state = Shape.ShapeState.MARKED_TO_BE_DESTROYED;
+        m_shapes.Remove(shape.m_overlappedStaticShape);
+        shape.m_overlappedStaticShape = null;
     }
 
     /**
@@ -245,7 +259,7 @@ public class Shapes : MonoBehaviour
     //    }
 
     //    InvalidateOpacityOnShapeObjects();
-        
+
     //    ////Render temporary shape objects
     //    for (int i = 0; i != resultingShapes1.Count; i++)
     //    {
@@ -322,8 +336,10 @@ public class Shapes : MonoBehaviour
     {
         for (int i = 0; i != m_shapes.Count; i++)
         {
-            if (m_shapes[i].m_state == Shape.ShapeState.DYNAMIC)
+            if (m_shapes[i].m_state == Shape.ShapeState.DYNAMIC_INTERSECTION || m_shapes[i].m_state == Shape.ShapeState.DYNAMIC_DIFFERENCE)
+            {
                 m_shapes[i].m_parentMesh.SweepCellsWithLine(line, bLeftSide);
+            }
         }
 
         //Once we swept all shapes, destroy all shapes that we marked as dead
@@ -335,99 +351,75 @@ public class Shapes : MonoBehaviour
      * **/
     public void ClipAgainstStaticShapes(Shape subjShape)
     {
-        Debug.Log(">>>>>>>>>>>>>>ClipAgainstStaticShapes");
-
-        List<Shape> clipShapes = new List<Shape>(4); //build a list with big enough capacity to store result of clipping on subjShape
-        clipShapes.Add(subjShape);
+        List<Shape> clipDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
+        List<Shape> clipInterShapes = new List<Shape>(10);
+        clipDiffShapes.Add(subjShape);
 
         for (int i = 0; i != m_shapes.Count; i++)
         {
+            Debug.Log("ClipAgainstStaticShapes");
             Shape shape = m_shapes[i];
 
             if (shape.m_state != Shape.ShapeState.STATIC)
                 continue;
 
-            //bool bOverlapAtLeastOneStaticShape = false;
             List<Shape> clippedDifferenceShapes = new List<Shape>(10);
-            List<Shape> clippedIntersectionShapes = new List<Shape>(10);
-            for (int j = 0; j != clipShapes.Count; j++)
+            for (int j = 0; j != clipDiffShapes.Count; j++)
             {
-                Shape clipShape = clipShapes[j];
+                Shape clipShape = clipDiffShapes[j];
                 if (clipShape.OverlapsShape(shape, true))
                 {
-                    //bOverlapAtLeastOneStaticShape = true;
-
-                    List<Shape> differenceShapes = ClippingBooleanOperations.ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
+                    //difference
+                    List<Shape> differenceShapes = GetClippingManager().ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
+                    for (int k = 0; k != differenceShapes.Count; k++)
+                    {
+                        differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                        differenceShapes[k].m_color = clipShape.m_color; //same color as original
+                    }
                     clippedDifferenceShapes.AddRange(differenceShapes);
+
+                    //intersection
                     List<Shape> intersectionShapes = new List<Shape>(5);
                     if (differenceShapes.Count == 0) //no difference, so intersection is the full clipShape
                         intersectionShapes.Add(clipShape);
                     else
-                        intersectionShapes.AddRange(ClippingBooleanOperations.ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctIntersection));
-
-                    clippedIntersectionShapes.AddRange(intersectionShapes);
-
-                    //Color
-                    for (int iShapeIdx = 0; iShapeIdx != differenceShapes.Count; iShapeIdx++)
                     {
-                        Shape differenceShape = differenceShapes[iShapeIdx];
-                        differenceShape.m_color = clipShape.m_color; //same color as original
-                    }
-                    for (int iShapeIdx = 0; iShapeIdx != intersectionShapes.Count; iShapeIdx++)
-                    {
-                        Shape intersectionShape = intersectionShapes[iShapeIdx];
-                        intersectionShape.m_color = 0.5f * (clipShape.m_color + shape.m_color); //mid color of intersected shapes
+                        intersectionShapes.AddRange(GetClippingManager().ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctIntersection, false)); //same polygon sets
                     }
 
-                    ////TODO create and add clipped static shape objects
-                    //for (int iStaticShapeIdx = 0; iStaticShapeIdx != clippedStaticShapes.Count; iStaticShapeIdx++)
-                    //{
-                    //    AddStaticShape(clippedStaticShapes[iStaticShapeIdx]);
-                    //    CreateShapeObjectFromData(clippedStaticShapes[iStaticShapeIdx], false);
-                    //}
-
-                    //TODO remove clipShape from clipShapes and add each element of dynamicShapes instead
-                    //clipShapes.Remove(clipShape);
-                    //clipShapes.AddRange(dynamicShapes);
-
-                    ////TODO create and add new dynamic shape objects
-                    //for (int iDynShapeIdx = 0; iDynShapeIdx != dynamicShapes.Count; iDynShapeIdx++)
-                    //{
-                    //    GameObject dynShapeObject = CreateShapeObjectFromData(dynamicShapes[iDynShapeIdx], true);
-                    //    m_dynamicShapeObjects.Add(dynShapeObject);
-                    //}
-
-                    //TODO Calculate intersection shapes and add them to dynamic shape objects
+                    for (int k = 0; k != intersectionShapes.Count; k++)
+                    {
+                        intersectionShapes[k].m_state = Shape.ShapeState.DYNAMIC_INTERSECTION;
+                        intersectionShapes[k].m_overlappedStaticShape = shape;
+                        //intersectionShapes[k].m_color = 0.5f * (clipShape.m_color + shape.m_color); //mid color of intersected shapes
+                        //intersectionShapes[k].m_color = Color.magenta;
+                    }
+                    clipInterShapes.AddRange(intersectionShapes);
                 }
                 else //no intersection, add the full clipShape to clippedDifferenceShapes
                 {
+                    clipShape.m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
                     clippedDifferenceShapes.Add(clipShape);
                 }
             }
-
-            clipShapes.Clear();
-            clipShapes.AddRange(clippedDifferenceShapes);
-            clipShapes.AddRange(clippedIntersectionShapes);
-
-            //if (!bOverlapAtLeastOneStaticShape) //no clipping done just add it to the dynamic shape list
-            //{
-            //    CreateShapeObjectFromData(clipShape, false);
-            //    AddDynamicShape(clipShape);
-            //}
+           
+            clipDiffShapes.Clear();
+            clipDiffShapes.AddRange(clippedDifferenceShapes);
         }
-
-        //TODO make clipShapes as dynamic shapes
-        for (int i = 0; i != clipShapes.Count; i++)
+                
+        //build the difference shape objects
+        for (int i = 0; i != clipDiffShapes.Count; i++)
         {
-            clipShapes[i].Triangulate();
-            CreateShapeObjectFromData(clipShapes[i], true);
+            clipDiffShapes[i].Triangulate();
+            CreateShapeObjectFromData(clipDiffShapes[i], true);
         }
-
-        ////TODO make clipShapes as static shapes
-        //for (int i = 0; i != clipShapes.Count; i++)
-        //{
-        //    CreateShapeObjectFromData(clipShapes[i], false);
-        //}
+        
+        //build the intersection shape objects
+        for (int i = 0; i != clipInterShapes.Count; i++)
+        {
+            clipInterShapes[i].Triangulate();
+            CreateShapeObjectFromData(clipInterShapes[i], true);
+        }
     }
 
     /**
@@ -462,17 +454,33 @@ public class Shapes : MonoBehaviour
     /**
      * Destroy shapes we marked as dead
      * **/
-    private void DeleteDeadShapes()
+    private void DeleteDeadShapes(bool bDestroyRelatedObject = true)
     {
         for (int i = 0; i != m_shapes.Count; i++)
         {
             Shape shape = m_shapes[i];
             if (shape.m_state == Shape.ShapeState.MARKED_TO_BE_DESTROYED)
             {
+                shape.m_state = Shape.ShapeState.NONE;
+                if (bDestroyRelatedObject)
+                    DestroyShapeObjectForShape(shape);
+
                 m_shapes.Remove(shape);
                 i--;
-                DestroyShapeObjectForShape(shape);
             }
         }
+    }
+
+    private ClippingManager GetClippingManager()
+    {
+        if (m_clippingManager == null)
+            m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+
+        return m_clippingManager;
+    }
+
+    public void Update()
+    {
+        DeleteDeadShapes();
     }
 }

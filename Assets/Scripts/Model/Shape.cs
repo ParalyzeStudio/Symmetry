@@ -10,17 +10,23 @@ public class Shape : GridTriangulable
 
     public enum ShapeState
     {
-        MARKED_TO_BE_DESTROYED = 0,
-        DYNAMIC,
+        NONE = 0,
+        MARKED_TO_BE_DESTROYED,
+        DYNAMIC_INTERSECTION, //this dynamic shape is the result of the intersection of two shapes
+        DYNAMIC_DIFFERENCE, //this dynamic shape is the result of the difference between two shapes
         STATIC
     }
     public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
+
+    public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
 
     public Shape(bool gridPointMode)
         : base(gridPointMode)
     {
         m_offsetOnVertices = Vector2.zero;
         m_gridOffsetOnVertices = Vector2.zero;
+        m_state = ShapeState.NONE;
+        m_parentMesh = null;
     }
 
     public Shape(bool gridPointMode, Contour contour)
@@ -28,6 +34,8 @@ public class Shape : GridTriangulable
     {
         m_offsetOnVertices = Vector2.zero;
         m_gridOffsetOnVertices = Vector2.zero;
+        m_state = ShapeState.NONE;
+        m_parentMesh = null;
     }
 
     public Shape(bool gridPointMode, Contour contour, List<Contour> holes)
@@ -35,6 +43,8 @@ public class Shape : GridTriangulable
     {
         m_offsetOnVertices = Vector2.zero;
         m_gridOffsetOnVertices = Vector2.zero;
+        m_state = ShapeState.NONE;
+        m_parentMesh = null;
     }
 
     public Shape(Shape other)
@@ -43,6 +53,7 @@ public class Shape : GridTriangulable
         m_color = other.m_color;
         m_offsetOnVertices = other.m_offsetOnVertices;
         m_gridOffsetOnVertices = other.m_gridOffsetOnVertices;
+        m_state = other.m_state;
     }
 
     /**
@@ -104,8 +115,7 @@ public class Shape : GridTriangulable
      * **/
     public bool Fusion()
     {
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
+        List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
 
         Shape subjShape = this;
         Shape clipShape = null;
@@ -131,7 +141,7 @@ public class Shape : GridTriangulable
         if (clipShape == null) //no shape overlaps 'this' shape
             return false;
 
-        List<Shape> resultingShapes = ClippingBooleanOperations.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
+        List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
         if (resultingShapes.Count == 1)
         {             
             Shape fusionedShape = resultingShapes[0];
