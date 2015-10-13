@@ -20,6 +20,9 @@ public class ShapeMesh : TexturedMesh
     public bool m_renderedWithCells { get; set; }
     public ShapeCell[] m_cells { get; set; }
 
+    //sweeping line associated to this dynamic shape
+    public AxisRenderer.SweepingLine m_sweepingLine { get; set; }
+
     private GameScene m_gameScene; //global instance of the Shapes holder
 
     public override void Init()
@@ -141,6 +144,9 @@ public class ShapeMesh : TexturedMesh
      * **/
     public void SweepCellsWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
     {
+        if (line != m_sweepingLine)
+            return;
+
         bool allCellsSwept = true;
         for (int i = 0; i != m_cells.Length; i++)
         {
@@ -151,7 +157,7 @@ public class ShapeMesh : TexturedMesh
                 allCellsSwept = false;
 
             //Test the position of this cell about the axis
-            float det = MathUtils.Determinant(line.PointA, line.PointB, cell.m_position);
+            float det = MathUtils.Determinant(m_sweepingLine.PointA, m_sweepingLine.PointB, cell.m_position);
             if ((bLeftSide && det >= 0) || (!bLeftSide && det <= 0))
             {
                 cell.TriangulateAndShow();
@@ -203,88 +209,6 @@ public class ShapeMesh : TexturedMesh
         m_shapeData.m_state = Shape.ShapeState.STATIC;
     }
 
-    //public void ShowVoxelCell(ShapeCell cell)
-    //{
-    //    TriangulateVoxelCell(cell);
-    //}
-
-    /**
-     * Triangulate some voxel cell and add vertices to this mesh
-     * **/
-    //public bool TriangulateVoxelCell(ShapeCell cell)
-    //{
-    //    int cellType = 0;
-    //    if (cell.m_voxelA.IsOverlappedByShape(this.m_shapeData))
-    //    {
-    //        cellType |= 1;
-    //    }
-    //    if (cell.m_voxelB.IsOverlappedByShape(this.m_shapeData))
-    //    {
-    //        cellType |= 2;
-    //    }
-    //    if (cell.m_voxelC.IsOverlappedByShape(this.m_shapeData))
-    //    {
-    //        cellType |= 4;
-    //    }
-    //    if (cell.m_voxelD.IsOverlappedByShape(this.m_shapeData))
-    //    {
-    //        cellType |= 8;
-    //    }
-
-    //    if (cellType > 0)
-    //    {
-    //        if (cellType == 15)
-    //        {
-    //            TriangulateFullQuadCell(cell);
-    //            return true;
-    //        }
-    //        else
-    //            return ClipCell(cell);
-    //    }
-
-    //    return false;
-    //}
-
-    /**
-     * TRIANGULATION CASES
-     * **/
-    //private void TriangulateFullQuadCell(ShapeCell cell)
-    //{
-    //    cell.m_startIndex = m_vertices.Count;
-    //    AddQuad(cell.m_voxelA.m_position, cell.m_voxelC.m_position, cell.m_voxelB.m_position, cell.m_voxelD.m_position);
-    //    cell.m_endIndex = m_vertices.Count - 1;
-    //}
-
-    //private bool ClipCell(ShapeCell cell)
-    //{
-    //    Contour cellContour = new Contour(4);
-    //    cellContour.Add(cell.m_voxelA.m_position);
-    //    cellContour.Add(cell.m_voxelB.m_position);
-    //    cellContour.Add(cell.m_voxelD.m_position);
-    //    cellContour.Add(cell.m_voxelC.m_position);
-    //    Shape cellShape = new Shape(false, cellContour);
-    //    List<Shape> clipResult = ClippingBooleanOperations.ShapesOperation(this.m_shapeData, cellShape, ClipType.ctIntersection);
-
-    //    if (clipResult.Count == 0) //no intersection
-    //        return false;
-
-    //    cell.m_startIndex = m_vertices.Count;
-
-    //    for (int i = 0; i != clipResult.Count; i++)
-    //    {
-    //        Shape resultShape = clipResult[i];
-    //        resultShape.Triangulate();
-    //        for (int j = 0; j != resultShape.m_triangles.Count; j++)
-    //        {
-    //            BaseTriangle triangle = resultShape.m_triangles[j];
-    //            AddTriangle(triangle.m_points[0], triangle.m_points[2], triangle.m_points[1]);
-    //        }
-    //    }
-    //    cell.m_endIndex = m_vertices.Count - 1;
-
-    //    return true;
-    //}
-
     public void AddFullQuadCell(ShapeCell cell)
     {
         cell.m_startIndex = m_vertices.Count;
@@ -320,6 +244,9 @@ public class ShapeMesh : TexturedMesh
         m_meshColorsDirty = true;
     }
 
+    /**
+    * Set the tint color of this cell
+    * **/
     public void SetCellTintColor(ShapeCell cell, Color color)
     {        
         for (int i = cell.m_startIndex; i != cell.m_endIndex + 1; i++)
@@ -328,6 +255,14 @@ public class ShapeMesh : TexturedMesh
         }
 
         m_meshColorsDirty = true;
+    }
+
+    /**
+     * Return the tint color of this cell (i.e the color of the first vertex of this cell as all cell vertices share the same color)
+     * **/
+    public Color GetCellTintColor(ShapeCell cell)
+    {
+        return m_colors[cell.m_startIndex];
     }
 
     /**
@@ -358,6 +293,32 @@ public class ShapeMesh : TexturedMesh
         }
 
         m_meshColorsDirty = true;
+    }
+
+    /**
+     * Tells if a point is contained inside the visible parts of this mesh (i.e with full opacity)
+     * **/
+    public bool ContainsPointInsideVisibleMesh(Vector2 point)
+    {
+        if (m_renderedWithCells)
+        {
+            for (int i = 0; i != m_cells.Length; i++)
+            {
+                ShapeCell cell = m_cells[i];
+                if (cell != null)
+                {
+                    float cellOpacity = cell.GetColor().a;
+                    if (cellOpacity > 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        else
+            return m_shapeData.ContainsPoint(point);
+
+        return false;
     }
 
     private GameScene GetGameScene()

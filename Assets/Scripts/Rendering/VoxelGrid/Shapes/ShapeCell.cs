@@ -292,4 +292,12 @@ public class ShapeCell
     {
         m_parentMesh.SetCellTintColor(this, color);
     }
+
+    /**
+     * Return the color of this cell
+     * **/
+    public Color GetColor()
+    {
+        return m_parentMesh.GetCellTintColor(this);
+    }
 }

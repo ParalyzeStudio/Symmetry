@@ -346,12 +346,14 @@ public class AxisRenderer : MonoBehaviour
      * Callback used when a symmetry is performed on the grid
      * **/
     public void OnPerformSymmetry(Symmetrizer.SymmetryType symmetryType)
-    {   
+    {
+        Vector2 axisDirection = GetAxisDirection();
+
         //Create and animate sweeping lines
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
             Vector2 clockwiseAxisNormal = GetAxisNormal();
-            Vector2 axisDirection = GetAxisDirection();
+            
             float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
             
             //m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
@@ -380,7 +382,22 @@ public class AxisRenderer : MonoBehaviour
             m_leftSweepingLine = null;
         }
 
+        //Assign a sweeping line to each dynamic shape
+        List<Shape> allShapes = GetShapesHolder().m_shapes;
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            Shape shape = allShapes[i];
+            ShapeMesh shapeMesh = shape.m_parentMesh;
+            if (MathUtils.Determinant(m_endpoint1Position, m_endpoint2Position, shape.GetBarycentre()) >= 0) //on the 'left' of the axis
+                shapeMesh.m_sweepingLine = m_leftSweepingLine;
+            else //on the 'right' of the axis
+                shapeMesh.m_sweepingLine = m_rightSweepingLine;
+        }
+
+        //Destroy ribbon
         Destroy(m_ribbonMesh.gameObject);
+
+        //Start sweeping
         LaunchSweepingLines();
     }
 

@@ -382,162 +382,28 @@ public class Grid : MonoBehaviour
         }
     }
 
-    ///**
-    // * Returns the list of anchors the player can draw an axis on knowing the position of the axis start point
-    // * For example on a vertical axis return the anchors on the same column as the start point
-    // * **/
-    //private void InvalidateConstraintAnchors(Vector2 gridPoint, Symmetrizer.SymmetryType symmetryType)
+    /**
+     * Check if anchors are overlapped by a shape mesh and set their opacities accordingly
+     * **/
+    public void RefreshAnchorsStates()
+    {
+        GameScene gameScene = this.transform.parent.gameObject.GetComponent<GameScene>();
+        Shapes shapesHolder = gameScene.m_shapesHolder;
+        for (int i = 0; i != m_anchors.Length; i++)
+        {
+            Vector2 anchorPosition = m_anchors[i].transform.position;
+
+            for (int j = 0; j != shapesHolder.m_shapes.Count; j++)
+            {
+                ShapeMesh shapeMesh = shapesHolder.m_shapes[j].m_parentMesh;
+                if (shapeMesh.ContainsPointInsideVisibleMesh(anchorPosition))
+                    m_anchors[i].GetComponent<GameObjectAnimator>().SetOpacity(0.5f);
+            }
+        }
+    }
+
+    //public void Update()
     //{
-    //    RemoveConstraintAnchors();
-
-    //    GameObject constraintAnchorsHolder = new GameObject();
-    //    constraintAnchorsHolder.name = "ConstraintAnchorsHolder";
-    //    constraintAnchorsHolder.tag = "ConstraintAnchorsHolder";
-    //    constraintAnchorsHolder.transform.parent = this.transform;
-    //    constraintAnchorsHolder.transform.localPosition = Vector3.zero;
-
-    //    bool bStraightAxes = false;
-    //    bool bDiagonalAxes = false;
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_STRAIGHT)
-    //        bStraightAxes = true;
-
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_DIAGONALS)
-    //        bDiagonalAxes = true;
-
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ALL)
-    //    {
-    //        bStraightAxes = true;
-    //        bDiagonalAxes = true;
-    //    }
-
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_HORIZONTAL || bStraightAxes)
-    //    {
-    //        for (int iColumnNumber = 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
-    //        {
-    //            m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, gridPoint.y)));
-    //        }
-    //    }
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_VERTICAL || bStraightAxes)
-    //    {
-    //        for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
-    //        {
-    //            m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(gridPoint.x, iLineNumber)));
-    //        }
-    //    }
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_LEFT || bDiagonalAxes)
-    //    {
-    //        int iPointColumnNumber = Mathf.RoundToInt(gridPoint.x);
-    //        int iPointLineNumber = Mathf.RoundToInt(gridPoint.y);
-
-    //        //find anchors on the left of the reference anchor
-    //        int belowLinesCount = iPointLineNumber - 1;
-    //        int leftColumnsCount = iPointColumnNumber - 1;
-    //        int minDimension = Mathf.Min(leftColumnsCount, belowLinesCount);
-    //        if (minDimension == belowLinesCount)
-    //        {
-    //            for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iPointLineNumber - iLineNumber), iLineNumber)));
-    //            }
-    //        }
-    //        else
-    //        {
-    //            for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iPointColumnNumber - iColumnNumber))));
-    //            }
-    //        }
-
-    //        //and on the right
-    //        int aboveLinesCount = m_numLines - iPointLineNumber;
-    //        int rightColumnsCount = m_numColumns - iPointColumnNumber;
-    //        minDimension = Mathf.Min(rightColumnsCount, aboveLinesCount);
-    //        if (minDimension == aboveLinesCount)
-    //        {
-    //            for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iLineNumber - iPointLineNumber), iLineNumber)));
-    //            }
-    //        }
-    //        else
-    //        {
-    //            for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iColumnNumber - iPointColumnNumber))));
-    //            }
-    //        }
-    //    }
-    //    if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXIS_DIAGONAL_RIGHT || bDiagonalAxes)
-    //    {
-    //        int iPointColumnNumber = Mathf.RoundToInt(gridPoint.x);
-    //        int iPointLineNumber = Mathf.RoundToInt(gridPoint.y);
-
-    //        //find anchors on the right of the reference anchor
-    //        int belowLinesCount = iPointLineNumber - 1;
-    //        int rightColumnsCount = m_numColumns - iPointColumnNumber;
-    //        int minDimension = Mathf.Min(rightColumnsCount, belowLinesCount);
-    //        if (minDimension == belowLinesCount)
-    //        {
-    //            for (int iLineNumber = iPointLineNumber - 1; iLineNumber != 0; iLineNumber--)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber + (iPointLineNumber - iLineNumber), iLineNumber)));
-    //            }
-    //        }
-    //        else
-    //        {
-    //            for (int iColumnNumber = iPointColumnNumber + 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber - (iColumnNumber - iPointColumnNumber))));
-    //            }
-    //        }
-
-    //        //and on the left
-    //        int aboveLinesCount = m_numLines - iPointLineNumber;
-    //        int leftColumnsCount = iPointColumnNumber - 1;
-    //        minDimension = Mathf.Min(leftColumnsCount, aboveLinesCount);
-    //        if (minDimension == aboveLinesCount)
-    //        {
-    //            for (int iLineNumber = iPointLineNumber + 1; iLineNumber != m_numLines + 1; iLineNumber++)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iPointColumnNumber - (iLineNumber - iPointLineNumber), iLineNumber)));
-    //            }
-    //        }
-    //        else
-    //        {
-    //            for (int iColumnNumber = iPointColumnNumber - 1; iColumnNumber != 0; iColumnNumber--)
-    //            {
-    //                m_constraintAnchors.Add(GetAnchorAtGridPosition(new Vector2(iColumnNumber, iPointLineNumber + (iPointColumnNumber - iColumnNumber))));
-    //            }
-    //        }
-    //    }
-    //}
-
-    ///**
-    // * Render the constraint anchors when user witch axis mode for instance
-    // * **/
-    //public void RenderConstraintAnchors(Vector2 gridPoint, Symmetrizer.SymmetryType symmetryType)
-    //{
-    //    InvalidateConstraintAnchors(gridPoint, symmetryType);
-
-    //    GameObject constraintAnchorsHolder = GameObject.FindGameObjectWithTag("ConstraintAnchorsHolder");
-    //    for (int iAnchorIndex = 0; iAnchorIndex != m_constraintAnchors.Count; iAnchorIndex++)
-    //    {
-    //        GameObject anchor = m_constraintAnchors[iAnchorIndex];
-    //        Vector3 anchorPosition = GeometryUtils.BuildVector3FromVector2(anchor.transform.position, -10);
-    //        GameObject clonedConstraintAnchor = (GameObject) Instantiate(m_gridConstraintAnchorPfb, anchorPosition, Quaternion.identity);
-
-    //        clonedConstraintAnchor.transform.parent = constraintAnchorsHolder.transform;
-    //    }
-    //}
-
-    ///**
-    // * Remove all constraint anchors from scene
-    // * **/
-    //public void RemoveConstraintAnchors()
-    //{
-    //    GameObject constraintAnchorsHolder = GameObject.FindGameObjectWithTag("ConstraintAnchorsHolder");
-    //    if (constraintAnchorsHolder != null)
-    //        DestroyImmediate(constraintAnchorsHolder);
-    //    m_constraintAnchors.Clear();
+    //    RefreshAnchorsStates();
     //}
 }

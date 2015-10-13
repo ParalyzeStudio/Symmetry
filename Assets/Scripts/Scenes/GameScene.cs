@@ -7,9 +7,9 @@ public class GameScene : GUIScene
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -15.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
 
-    public const float GRID_Z_VALUE = -10.0f;
+    public const float GRID_Z_VALUE = -200.0f;
     public const float CONTOURS_Z_VALUE = -200.0f;
-    public const float SHAPES_Z_VALUE = -20.0f;
+    public const float SHAPES_Z_VALUE = -10.0f;
     public const float AXES_Z_VALUE = -210.0f;
 
     //shared prefabs
