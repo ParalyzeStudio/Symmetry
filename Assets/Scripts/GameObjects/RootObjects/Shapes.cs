@@ -378,7 +378,10 @@ public class Shapes : MonoBehaviour
                     //intersection
                     List<Shape> intersectionShapes = new List<Shape>(5);
                     if (differenceShapes.Count == 0) //no difference, so intersection is the full clipShape
+                    {
+                        clipShape.m_color = 0.5f * (clipShape.m_color + shape.m_color);
                         intersectionShapes.Add(clipShape);
+                    }
                     else
                     {
                         intersectionShapes.AddRange(GetClippingManager().ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctIntersection, false)); //same polygon sets
