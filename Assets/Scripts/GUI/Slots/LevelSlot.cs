@@ -89,7 +89,7 @@ public class LevelSlot : BaseSlot
         base.Dismiss();
     }
 
-    protected override void ShowSlotBackground()
+    public override void ShowSlotBackground()
     {
         if (m_background != null)
         {
@@ -100,7 +100,7 @@ public class LevelSlot : BaseSlot
         }
     }
 
-    protected override void ShowSlotContour()
+    public override void ShowSlotContour()
     {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
 
@@ -108,7 +108,7 @@ public class LevelSlot : BaseSlot
         slotContourAnimator.FadeTo(1.0f, 0.5f);
     }
 
-    protected override void ShowSlotInformation()
+    public override void ShowSlotInformation()
     {
         GameObjectAnimator slotInfoContainerAnimator = m_levelNumberText.GetComponent<GameObjectAnimator>();
 
@@ -116,19 +116,19 @@ public class LevelSlot : BaseSlot
         slotInfoContainerAnimator.FadeTo(1.0f, 0.5f);
     }
 
-    protected override void DismissSlotBackground(bool bDestroyOnFinish)
+    public override void DismissSlotBackground(bool bDestroyOnFinish)
     {
         CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
         slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
-    protected override void DismissSlotContour(bool bDestroyOnFinish)
+    public override void DismissSlotContour(bool bDestroyOnFinish)
     {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
         slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
-    protected override void DismissSlotInformation(bool bDestroyOnFinish)
+    public override void DismissSlotInformation(bool bDestroyOnFinish)
     {
         GameObjectAnimator slotInfoContainerAnimator = m_levelNumberText.GetComponent<GameObjectAnimator>();
         slotInfoContainerAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);

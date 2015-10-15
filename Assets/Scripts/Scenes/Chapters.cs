@@ -49,6 +49,15 @@ public class Chapters : GUIScene
     }
 
     /**
+     * Dismiss the chapters scene by removing chapter slot and selection arrows
+     * **/
+    protected override void DismissSelf()
+    {
+        m_chapterSlot.Dismiss();
+        DismissSelectionArrows();
+    }
+
+    /**
      * Show chapter selection arrows
      * **/
     public void ShowSelectionArrows(float fDelay = 0.0f)
@@ -64,10 +73,11 @@ public class Chapters : GUIScene
         leftArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS;
         leftArrowButton.m_touchArea = new Vector2(256, 256);
 
+         GameObjectAnimator leftArrowAnimator = m_leftArrowObject.GetComponent<GameObjectAnimator>();
         float backgroundTrianglesColumnWidth = screenSize.x / BackgroundTrianglesRenderer.NUM_COLUMNS;
         float leftArrowPositionX = 3.5f * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
-        leftArrowPositionX -= 0.5f * screenSize.x;
-        m_leftArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
+        leftArrowPositionX -= 0.5f * screenSize.x;       
+        leftArrowAnimator.SetPosition(new Vector3(leftArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
 
         ChapterSelectionArrowButton arrowButton = m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
         arrowButton.Init(null);
@@ -81,9 +91,10 @@ public class Chapters : GUIScene
         rightArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT;
         rightArrowButton.m_touchArea = new Vector2(256, 256);
 
+        GameObjectAnimator rightArrowAnimator = m_rightArrowObject.GetComponent<GameObjectAnimator>();
         float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth;
         rightArrowPositionX -= 0.5f * screenSize.x;
-        m_rightArrowObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
+        rightArrowAnimator.SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
 
         arrowButton = m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
         arrowButton.Init(null);
@@ -91,14 +102,21 @@ public class Chapters : GUIScene
         m_rightArrowObject.transform.localRotation = Quaternion.AngleAxis(180, Vector3.forward);
 
         //Fade in arrows
-        leftArrowButton.SetState((m_displayedChapterIndex > 0) ? true : false);
-        rightArrowButton.SetState((m_displayedChapterIndex < LevelManager.CHAPTERS_COUNT - 1) ? true : false);
-    }
-
-    protected override void DismissSelf()
-    {
-        m_chapterSlot.Dismiss();
-        DismissSelectionArrows();    
+        if (m_displayedChapterIndex == 0)
+        {
+            leftArrowAnimator.SetOpacity(0);
+            rightArrowButton.SetState(true);
+        }
+        else if (m_displayedChapterIndex == LevelManager.CHAPTERS_COUNT - 1)
+        {
+            rightArrowAnimator.SetOpacity(0);
+            leftArrowButton.SetState(true);
+        }
+        else
+        {
+            leftArrowButton.SetState(true);
+            rightArrowButton.SetState(true);
+        }
     }
 
     /**
@@ -110,6 +128,40 @@ public class Chapters : GUIScene
         leftArrowAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
         GameObjectAnimator rightArrowAnimator = m_rightArrowObject.GetComponent<GameObjectAnimator>();
         rightArrowAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+    }
+
+    /**
+     * Set the correct state and visibility for both selection arrows depending on the current chapter index
+     * **/
+    private void UpdateSelectionArrows()
+    {
+        if (m_displayedChapterIndex == 0)
+        {
+            m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(false);
+            m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(true);
+        }
+        else if (m_displayedChapterIndex == LevelManager.CHAPTERS_COUNT - 1)
+        {
+            m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(true);
+            m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(false);
+        }
+        else
+        {
+            m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(true);
+            m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>().SetState(true);
+        }
+    }
+
+    public void OnClickSelectionArrow()
+    {
+        UpdateSelectionArrows();
+
+        UpdateBackgroundGradient();
+
+        m_chapterSlot.UpdateChapterSlotBackgroundColor();
+        m_chapterSlot.DismissSlotInformation(false);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.UpdateChapterSlotInformation), 0.5f);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.ShowSlotInformation), 0.5f);
     }
 
     /**
@@ -126,11 +178,16 @@ public class Chapters : GUIScene
         chapterSlotAnimator.SetPosition(m_chapterSlotPosition - new Vector3(0, 100.0f, 0));
 
         m_chapterSlot = chapterSlotObject.GetComponent<ChapterSlot>();
-        m_chapterSlot.Init(this, m_displayedChapterIndex + 1);
+        m_chapterSlot.Init(this);
         m_chapterSlot.UpdateChapterSlotInformation();
 
         //Show chapter slot with animation
         m_chapterSlot.Show();
+    }
+
+    public void DismissChapterSlot()
+    {
+
     }
 
     /**

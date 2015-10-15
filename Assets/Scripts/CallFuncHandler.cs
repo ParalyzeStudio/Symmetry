@@ -34,14 +34,7 @@ public class CallFuncHandler : MonoBehaviour
 
     private void RemoveCallFuncInstance(CallFuncObject callFuncObject)
     {
-        for (int i = 0; i != m_callFuncInstances.Count; i++)
-        {
-            if (m_callFuncInstances[i] == callFuncObject)
-            {
-                m_callFuncInstances.Remove(callFuncObject);
-                return;
-            }
-        }
+        m_callFuncInstances.Remove(callFuncObject);
     }
 
     private void ProcessCallFunc(CallFunc callFunc)

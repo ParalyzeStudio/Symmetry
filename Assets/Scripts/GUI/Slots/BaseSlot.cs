@@ -34,7 +34,7 @@ public class BaseSlot : MonoBehaviour
     /**
     * Show the slot hexagon background 
     * **/
-    protected virtual void ShowSlotBackground()
+    public virtual void ShowSlotBackground()
     {
         
     }
@@ -42,7 +42,7 @@ public class BaseSlot : MonoBehaviour
     /**
     * Show the slot hexagon contour 
     * **/
-    protected virtual void ShowSlotContour()
+    public virtual void ShowSlotContour()
     {
 
     }
@@ -50,7 +50,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Show the slot hexagon background 
      * **/
-    protected virtual void ShowSlotInformation()
+    public virtual void ShowSlotInformation()
     {
 
     }
@@ -58,7 +58,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out background with eventually destroying the object at zero opacity
      * **/
-    protected virtual void DismissSlotBackground(bool bDestroyOnFinish)
+    public virtual void DismissSlotBackground(bool bDestroyOnFinish)
     {
 
     }
@@ -66,7 +66,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out contour with eventually destroying the object at zero opacity
      * **/
-    protected virtual void DismissSlotContour(bool bDestroyOnFinish)
+    public virtual void DismissSlotContour(bool bDestroyOnFinish)
     {
 
     }
@@ -74,7 +74,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out information with eventually destroying the object at zero opacity
      * **/
-    protected virtual void DismissSlotInformation(bool bDestroyOnFinish)
+    public virtual void DismissSlotInformation(bool bDestroyOnFinish)
     {
         
     }

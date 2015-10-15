@@ -8,7 +8,7 @@ public class ChapterSelectionArrowButton : GUIButton
     public GameObject m_arrowObject; //the small arrow that indicates the direction left or right
     private UVQuad m_arrow;
     private TexturedQuadAnimator m_arrowAnimator;
-    public bool m_activeState { get; set; } //the state of the button (active/inactive)
+    private bool m_activeState; //the state of the button (active/inactive)
     public Material m_chapterSelectionArrowTriangleMaterial;
     public Material m_chapterSelectionArrowHexagonMaterial;
 
@@ -64,6 +64,11 @@ public class ChapterSelectionArrowButton : GUIButton
      * **/
     public void SetState(bool bNewState)
     {
+        if (m_activeState == bNewState)
+            return;
+
+        m_activeState = bNewState;
+
         GameObjectAnimator arrowAnimator = this.GetComponent<GameObjectAnimator>();
 
         if (bNewState)
@@ -75,8 +80,30 @@ public class ChapterSelectionArrowButton : GUIButton
         else
         {
             m_arrowTranslating = false;
-            arrowAnimator.SetOpacity(0);
+            arrowAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, false);
         }
+    }
+
+    public override void OnClick()
+    {
+        SceneManager sceneManager = GetSceneManager();
+        Chapters chapters = (Chapters)sceneManager.m_currentScene;
+
+        if (m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS && chapters.DecrementChapterIndex() ||
+            m_ID == GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT && chapters.IncrementChapterIndex())
+        {
+            chapters.OnClickSelectionArrow();
+
+            //dismiss old chapter slot information
+            //chapters.DismissChapterSlot(false, false, false);
+            //update background gradient and chapter slot backgorund color
+            //chapters.UpdateBackgroundGradient();
+            //chapters.UpdateChapterSlotBackgroundColor();
+            ////update chapter slot information when opacity is 0
+            //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.UpdateChapterSlotInformation), 0.5f);
+            ////wait a bit and then display the new information
+            //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(chapters.ShowChapterSlotInformation), 0.8f);
+        }     
     }
 
     public void Update()

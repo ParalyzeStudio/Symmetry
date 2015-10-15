@@ -117,6 +117,8 @@ public class Chapter
             int iDoneLevelsCount = 0;
             for (int iLevelIdx = 0; iLevelIdx != previousChapter.m_levels.Length; iLevelIdx++)
             {
+                if (previousChapter.m_levels[iLevelIdx] == null)//TODO remove this condition when all chapters are built with 15 levels in each
+                    break;
                 if (previousChapter.m_levels[iLevelIdx].IsDone())
                     iDoneLevelsCount++;
             }
