@@ -261,34 +261,79 @@ public class GeometryUtils
         }
     }
 
+    public const int SEGMENTS_OVERLAP = 1; //segments share more than 1 vertex (i.e intersection is a segment)
+    public const int SEGMENTS_INTERSECTION_IS_ENDPOINT = 2; //segments share one vertex and this vertex is a segment endpoint
+    public const int SEGMENTS_STRICT_INTERSECTION = 4; //segments share one vertex and this is not a segment endpoint
+
     /**
      * Simply tells if two segments intersect without giving the coordinates of the intersection point
+     * Set bStrictIntersection to true if we must check if the intersection is a single point that differs from the 4 segment endpoints
      * **/
-    static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2)
+    static public bool TwoSegmentsIntersect(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2, int bFilters = SEGMENTS_OVERLAP | SEGMENTS_INTERSECTION_IS_ENDPOINT | SEGMENTS_STRICT_INTERSECTION)
     {
         bool bSeg1Pt1InSeg2 = IsPointContainedInSegment(segment1Point1, segment2Point1, segment2Point2);
         bool bSeg1Pt2InSeg2 = IsPointContainedInSegment(segment1Point2, segment2Point1, segment2Point2);
         bool bSeg2Pt1InSeg1 = IsPointContainedInSegment(segment2Point1, segment1Point1, segment1Point2);
         bool bSeg2Pt2InSeg1 = IsPointContainedInSegment(segment2Point2, segment1Point1, segment1Point2);
 
-        if ((bSeg1Pt1InSeg2 && !bSeg1Pt2InSeg2) || (!bSeg1Pt1InSeg2 && bSeg1Pt2InSeg2))
-            return true;
-        if ((bSeg2Pt1InSeg1 && !bSeg2Pt2InSeg1) || (bSeg2Pt1InSeg1 && !bSeg2Pt2InSeg1))
-            return true;
-
         float det1 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point1);
         float det2 = MathUtils.Determinant(segment1Point1, segment1Point2, segment2Point2);
+        if (MathUtils.AreFloatsEqual(det1, 0) && MathUtils.AreFloatsEqual(det2, 0)) //4 endpoints are aligned, segments are collinear and on the same line
+        {
+            //one segment is contained in the other
+            if (bSeg1Pt1InSeg2 && bSeg1Pt2InSeg2 || bSeg2Pt1InSeg1 && bSeg2Pt2InSeg1)
+                if ((bFilters & SEGMENTS_OVERLAP) > 0)
+                    return true;
 
-        if (MathUtils.AreFloatsEqual(det1, 0) && MathUtils.AreFloatsEqual(det2, 0))
-        {
-            //two segments are collinear and on the same line, they eventually overlap but we do not consider that as an intersection
+            //check if segments share at least 1 endpoint
+            float dotProduct = 0;
+            if (MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point1))
+                dotProduct = MathUtils.DotProduct(segment1Point1 - segment1Point2, segment2Point2 - segment2Point1);
+            else if (MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point2))
+                dotProduct = MathUtils.DotProduct(segment1Point1 - segment1Point2, segment2Point1 - segment2Point2);
+            else if (MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point1))
+                dotProduct = MathUtils.DotProduct(segment1Point2 - segment1Point1, segment2Point2 - segment2Point1);
+            else if (MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point2))
+                dotProduct = MathUtils.DotProduct(segment1Point2 - segment1Point1, segment2Point1 - segment2Point2);
+
+            if (dotProduct != 0)
+            {
+                if (dotProduct > 0)
+                {
+                    if ((bFilters & SEGMENTS_OVERLAP) > 0)
+                        return true;
+                }
+                else
+                {
+                    if ((bFilters & SEGMENTS_INTERSECTION_IS_ENDPOINT) > 0)
+                        return true;
+                }
+            }
+
+            //check if one segment endpoint is strictly contained in the other segment
+            if (bSeg1Pt1InSeg2 || bSeg1Pt2InSeg2)
+                if ((bFilters & SEGMENTS_OVERLAP) > 0)
+                    return true;
+
+            //all other cases = no intersection
             return false;
         }
-        else if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0))
+        else if (MathUtils.AreFloatsEqual(det1, 0) || MathUtils.AreFloatsEqual(det2, 0)) //3 points are aligned
         {
-            //points are aligned but cant be on the same segment because we checked that before
+            //1 endpoint is shared
+            //if (MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point1) ||
+            //    MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point1) ||
+            //    MathUtils.AreVec2PointsEqual(segment1Point1, segment2Point2) ||
+            //    MathUtils.AreVec2PointsEqual(segment1Point2, segment2Point2))
+            //    return SegmentsIntersection.INTERSECTION_IS_ENDPOINT;
+
+
+            if (bSeg1Pt1InSeg2 || bSeg1Pt2InSeg2 || bSeg2Pt1InSeg1 || bSeg2Pt2InSeg1)
+                if ((bFilters & SEGMENTS_INTERSECTION_IS_ENDPOINT) > 0)
+                    return true;
+
             return false;
-        }
+        }        
         else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
         {
             float det3 = MathUtils.Determinant(segment2Point1, segment2Point2, segment1Point1);
@@ -296,7 +341,7 @@ public class GeometryUtils
 
             if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
             {
-                return true;
+                return (bFilters & SEGMENTS_STRICT_INTERSECTION) > 0; //we only check the strict intersection here
             }
             else
             {
@@ -313,83 +358,83 @@ public class GeometryUtils
     /**
      * Find the intersection of two segments if it exists
      * **/
-    static public void TwoSegmentsIntersection(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2, out bool intersects, out Vector2 intersection)
-    {
-        //order points by ascending x
-        if (segment1Point1.x > segment1Point2.x)
-        {
-            Vector2 tmpPoint = segment1Point2;
-            segment1Point2 = segment1Point1;
-            segment1Point1 = tmpPoint;
-        }
-        if (segment2Point1.x > segment2Point2.x)
-        {
-            Vector2 tmpPoint = segment2Point2;
-            segment2Point2 = segment2Point1;
-            segment2Point1 = tmpPoint;
-        }
+    //static public void TwoSegmentsIntersection(Vector2 segment1Point1, Vector2 segment1Point2, Vector2 segment2Point1, Vector2 segment2Point2, out bool intersects, out Vector2 intersection)
+    //{
+    //    //order points by ascending x
+    //    if (segment1Point1.x > segment1Point2.x)
+    //    {
+    //        Vector2 tmpPoint = segment1Point2;
+    //        segment1Point2 = segment1Point1;
+    //        segment1Point1 = tmpPoint;
+    //    }
+    //    if (segment2Point1.x > segment2Point2.x)
+    //    {
+    //        Vector2 tmpPoint = segment2Point2;
+    //        segment2Point2 = segment2Point1;
+    //        segment2Point1 = tmpPoint;
+    //    }
 
-        //Both lines equation
-        float x, y;
-        if (!MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && !MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //y = a1x + b1 && y = a2x + b2
-        {
-            float a1 = (segment1Point2.y - segment1Point1.y) / (segment1Point2.x - segment1Point1.x);
-            float b1 = segment1Point1.y - a1 * segment1Point1.x;
-            float a2 = (segment2Point2.y - segment2Point1.y) / (segment2Point2.x - segment2Point1.x);
-            float b2 = segment2Point1.y - a2 * segment2Point1.x;
+    //    //Both lines equation
+    //    float x, y;
+    //    if (!MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && !MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //y = a1x + b1 && y = a2x + b2
+    //    {
+    //        float a1 = (segment1Point2.y - segment1Point1.y) / (segment1Point2.x - segment1Point1.x);
+    //        float b1 = segment1Point1.y - a1 * segment1Point1.x;
+    //        float a2 = (segment2Point2.y - segment2Point1.y) / (segment2Point2.x - segment2Point1.x);
+    //        float b2 = segment2Point1.y - a2 * segment2Point1.x;
 
-            if (a1 == a2) //parallel lines
-            {
-                intersects = false;
-                intersection = Vector2.zero;
-                return;
-            }
-            else
-            {
-                x = (b2 - b1) / (a1 - a2);
-                y = a1 * x + b1;
-            }
-        }
-        else if (!MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //y = a1x + b1 && x = a2
-        {
-            float a1 = (segment1Point2.y - segment1Point1.y) / (segment1Point2.x - segment1Point1.x);
-            float b1 = segment1Point1.y - a1 * segment1Point1.x;
-            float a2 = segment2Point1.x;
+    //        if (a1 == a2) //parallel lines
+    //        {
+    //            intersects = false;
+    //            intersection = Vector2.zero;
+    //            return;
+    //        }
+    //        else
+    //        {
+    //            x = (b2 - b1) / (a1 - a2);
+    //            y = a1 * x + b1;
+    //        }
+    //    }
+    //    else if (!MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //y = a1x + b1 && x = a2
+    //    {
+    //        float a1 = (segment1Point2.y - segment1Point1.y) / (segment1Point2.x - segment1Point1.x);
+    //        float b1 = segment1Point1.y - a1 * segment1Point1.x;
+    //        float a2 = segment2Point1.x;
 
-            x = a2;
-            y = a1 * a2 + b1;
-        }
-        else if (MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && !MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //x = a1 && y = a2x + b2
-        {
-            float a1 = segment1Point1.x;
-            float a2 = (segment2Point2.y - segment2Point1.y) / (segment2Point2.x - segment2Point1.x);
-            float b2 = segment2Point1.y - a2 * segment2Point1.x;
+    //        x = a2;
+    //        y = a1 * a2 + b1;
+    //    }
+    //    else if (MathUtils.AreFloatsEqual(segment1Point1.x, segment1Point2.x) && !MathUtils.AreFloatsEqual(segment2Point1.x, segment2Point2.x)) //x = a1 && y = a2x + b2
+    //    {
+    //        float a1 = segment1Point1.x;
+    //        float a2 = (segment2Point2.y - segment2Point1.y) / (segment2Point2.x - segment2Point1.x);
+    //        float b2 = segment2Point1.y - a2 * segment2Point1.x;
 
-            x = a1;
-            y = a2 * a1 + b2;
-        }
-        else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
-        {
-            intersects = false;
-            intersection = Vector2.zero;
-            return;
-        }
+    //        x = a1;
+    //        y = a2 * a1 + b2;
+    //    }
+    //    else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
+    //    {
+    //        intersects = false;
+    //        intersection = Vector2.zero;
+    //        return;
+    //    }
 
 
-        //Check if (x, y) point is contained in both segments
-        if (MathUtils.isValueInInterval(x, segment1Point1.x, segment1Point2.x)
-            &&
-            MathUtils.isValueInInterval(x, segment2Point1.x, segment2Point2.x))
-        {
-            intersects = true;
-            intersection = new Vector2(x, y);
-        }
-        else
-        {
-            intersects = false;
-            intersection = Vector2.zero;
-        }
-    }
+    //    //Check if (x, y) point is contained in both segments
+    //    if (MathUtils.isValueInInterval(x, segment1Point1.x, segment1Point2.x)
+    //        &&
+    //        MathUtils.isValueInInterval(x, segment2Point1.x, segment2Point2.x))
+    //    {
+    //        intersects = true;
+    //        intersection = new Vector2(x, y);
+    //    }
+    //    else
+    //    {
+    //        intersects = false;
+    //        intersection = Vector2.zero;
+    //    }
+    //}
 
     /**
      * Tells if 2 segments are equal

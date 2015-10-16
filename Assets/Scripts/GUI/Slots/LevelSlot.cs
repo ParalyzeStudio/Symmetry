@@ -79,9 +79,9 @@ public class LevelSlot : BaseSlot
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         slotAnimator.SetScale(new Vector3(0, 0, 1));
-        float randomDelay = Random.value;
-        randomDelay *= 0.5f;
-        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.5f, randomDelay);
+
+        float localDelay = (m_levelNumber - 1) * 0.025f;
+        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.2f, localDelay);
     }
 
     public override void Dismiss()

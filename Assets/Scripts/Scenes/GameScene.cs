@@ -106,30 +106,23 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        Vector2 point1 = new Vector2(300, 354);
-        Vector2 point2 = new Vector2(0, 54);
-        Vector2 point3 = new Vector2(-150, -96);
-        Vector2 point4 = new Vector2(0, -96);
-
-        bool bIntersect = GeometryUtils.TwoSegmentsIntersect(point1, point2, point3, point4);
-
         /**
          * TEST TRIANGLES INTERSECTIONS
          * **/
         //UnitTests.TestTrianglesIntersections();
 
-        Contour subjShapeContour1 = new Contour(4);
-        subjShapeContour1.Add(new Vector2(0, 0));
-        subjShapeContour1.Add(new Vector2(300, 0));
-        subjShapeContour1.Add(new Vector2(300, 300));
-        subjShapeContour1.Add(new Vector2(0, 300));
-        Contour clipShapeContour1 = new Contour(4);
-        clipShapeContour1.Add(new Vector2(200, 200));
-        clipShapeContour1.Add(new Vector2(500, 200));
-        clipShapeContour1.Add(new Vector2(500, 500));
-        clipShapeContour1.Add(new Vector2(200, 500));
-        Shape subjShape1 = new Shape(true, subjShapeContour1);
-        Shape clipShape1 = new Shape(true, clipShapeContour1);
+        //Contour subjShapeContour1 = new Contour(4);
+        //subjShapeContour1.Add(new Vector2(0, 0));
+        //subjShapeContour1.Add(new Vector2(300, 0));
+        //subjShapeContour1.Add(new Vector2(300, 300));
+        //subjShapeContour1.Add(new Vector2(0, 300));
+        //Contour clipShapeContour1 = new Contour(4);
+        //clipShapeContour1.Add(new Vector2(200, 200));
+        //clipShapeContour1.Add(new Vector2(500, 200));
+        //clipShapeContour1.Add(new Vector2(500, 500));
+        //clipShapeContour1.Add(new Vector2(200, 500));
+        //Shape subjShape1 = new Shape(true, subjShapeContour1);
+        //Shape clipShape1 = new Shape(true, clipShapeContour1);
 
         //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         //sw.Start();
@@ -148,10 +141,17 @@ public class GameScene : GUIScene
         //sw.Stop();
         //Debug.Log("normalRendering took " + sw.ElapsedMilliseconds + " ms");
 
+
+        /**
+         * TEST SEGMENTS INTERSECTION
+         * **/
+
+        //UnitTests.TestSegmentsIntersecion();
+
         /**
          * TEST SHAPE CLIPPING
          * **/
-       
+
         //UnitTests.TestShapesClipping();
        
 

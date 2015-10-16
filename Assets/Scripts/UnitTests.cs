@@ -4,6 +4,102 @@ using System.Collections.Generic;
 public class UnitTests
 {
     /**
+     * Test segment intersection
+     * **/
+    public static void TestSegmentsIntersecion()
+    {
+        //-----TEST 0-----//
+        Vector2 seg1Pt1 = new Vector2(0, 0);
+        Vector2 seg1Pt2 = new Vector2(2, 2);
+        Vector2 seg2Pt1 = new Vector2(1, 1);
+        Vector2 seg2Pt2 = new Vector2(3, 3);
+
+        bool b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        bool b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        bool b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (!b1 && b2 && !b3)
+            Debug.Log("TEST 0 SUCCESS");
+        else
+            Debug.Log("TEST 0 FAILURE");
+
+        //-----TEST 1-----//
+        seg1Pt1 = new Vector2(0, 0);
+        seg1Pt2 = new Vector2(-1, 0);
+        seg2Pt1 = new Vector2(1, 1);
+        seg2Pt2 = new Vector2(3, 3);
+
+        b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (!b1 && !b2 && !b3)
+            Debug.Log("TEST 1 SUCCESS");
+        else
+            Debug.Log("TEST 1 FAILURE");
+
+        //-----TEST 2-----//
+        seg1Pt1 = new Vector2(0, 0);
+        seg1Pt2 = new Vector2(3, 0);
+        seg2Pt1 = new Vector2(5, 6);
+        seg2Pt2 = new Vector2(3, 0);
+
+        b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (b1 && !b2 && !b3)
+            Debug.Log("TEST 2 SUCCESS");
+        else
+            Debug.Log("TEST 2 FAILURE");
+
+        //-----TEST 3-----//
+        seg1Pt1 = new Vector2(0, 0);
+        seg1Pt2 = new Vector2(7, 7);
+        seg2Pt1 = new Vector2(2, 5);
+        seg2Pt2 = new Vector2(6, 0);
+
+        b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (!b1 && !b2 && b3)
+            Debug.Log("TEST 3 SUCCESS");
+        else
+            Debug.Log("TEST 3 FAILURE");
+
+        //-----TEST 4-----//
+        seg1Pt1 = new Vector2(6, 0);
+        seg1Pt2 = new Vector2(6, 6);
+        seg2Pt1 = new Vector2(0, 0);
+        seg2Pt2 = new Vector2(6, 3);
+
+        b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (b1 && !b2 && !b3)
+            Debug.Log("TEST 4 SUCCESS");
+        else
+            Debug.Log("TEST 4 FAILURE");
+
+        //-----TEST 5-----//
+        seg1Pt1 = new Vector2(0, 0);
+        seg1Pt2 = new Vector2(5, 5);
+        seg2Pt1 = new Vector2(8, 8);
+        seg2Pt2 = new Vector2(7, 7);
+
+        b1 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT);
+        b2 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_OVERLAP);
+        b3 = GeometryUtils.TwoSegmentsIntersect(seg1Pt1, seg1Pt2, seg2Pt1, seg2Pt2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION);
+
+        if (!b1 && !b2 && !b3)
+            Debug.Log("TEST 5 SUCCESS");
+        else
+            Debug.Log("TEST 5 FAILURE");
+    }
+
+    /**
      * Test the clipping operations specified in the ClippingBooleanOperations.cs class between two shapes
      * **/
     public static void TestShapesClipping()
@@ -45,6 +141,7 @@ public class UnitTests
         Shape subjShape2 = new Shape(true, subjShapeContour2);
         Shape clipShape2 = new Shape(true, clipShapeContour2, clipShapeHoles);
         result = clippingManager.ShapesOperation(subjShape2, clipShape2, ClipperLib.ClipType.ctIntersection);
+        
 
         ////-----TEST 1-----//
         //Contour subjShapeContour = new Contour(4);

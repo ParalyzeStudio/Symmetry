@@ -63,9 +63,9 @@ public class GameController : MonoBehaviour
 
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
         //ShowMainMenu();
-        DebugShowChapters();
+        //DebugShowChapters();
         //DebugShowLevels(1);
-        //DebugShowSpecificLevel(1, 1, false);
+        DebugShowSpecificLevel(1, 1, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -167,8 +167,50 @@ public class GameController : MonoBehaviour
      * Calculate the sum of the areas of contours and compare it to the area occupied by all the shapes
      * **/
     public bool IsVictory()
-    {
-        return false; //TODO remove this line
+    {   
+        //First we check if every shape is static and has a non-empty intersection with one of the dotted outlines
+        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+        List<Shape> allShapes = gameScene.m_shapesHolder.m_shapes;
+        List<DottedOutline> outlines = gameScene.m_outlines.m_outlinesList;
+
+        for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
+        {
+            Shape shape = allShapes[iShapeIdx];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                return false;
+            
+            bool bOverlapsOutline = false;
+            for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
+            {
+                DottedOutline outline = outlines[iOutlineIdx];
+                if (outline.OverlapsShape(shape, true))
+                {
+                    bOverlapsOutline = true;
+                    break;
+                }
+            }
+
+            if (!bOverlapsOutline) //shape does not intersect outline
+                return false;
+        }
+
+        //check if the sum of shapes areas is equal to the sum of outlines areas
+        float shapesArea = 0;
+        float outlinesArea = 0;
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            allShapes[i].CalculateArea();
+            shapesArea += allShapes[i].m_area;
+        }
+
+        for (int i = 0; i != outlines.Count; i++)
+        {
+            outlines[i].CalculateArea();
+            outlinesArea += outlines[i].m_area;
+        }
+
+        return (shapesArea == outlinesArea);
 
         ////First we check if one of the shapes intersects a contour
         //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;

@@ -26,4 +26,13 @@ public class DottedOutline : GridTriangulable
     {
 
     }
+
+    /**
+     * Same as Shape.OverlapsShape but with an outline as first parameter
+     * **/
+    public bool OverlapsShape(Shape shape, bool bEnsureNonNullIntersection)
+    {
+        Shape outlineShape = new Shape(false, this.m_contour, this.m_holes);
+        return outlineShape.OverlapsShape(shape, bEnsureNonNullIntersection);
+    }
 }
