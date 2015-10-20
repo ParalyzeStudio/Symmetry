@@ -220,7 +220,7 @@ public class AxisRenderer : MonoBehaviour
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
 
         //render ribbon if axis is not too small
-        if ((pointB - pointA).sqrMagnitude > 10.0f)
+        if ((m_endpoint1Position - m_endpoint2Position).sqrMagnitude > 10.0f)
             RenderRibbon();
     }
 

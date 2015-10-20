@@ -91,7 +91,7 @@ public class GridTouchHandler : TouchHandler
         {
             if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED)
             {
-                Debug.Log("OnPointerUp currentAxis");
+                Debug.Log("OnPointerUp SNAPPED");
                 currentAxis.m_type = AxisRenderer.AxisType.STATIC; //make the axis static
                 Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
 
@@ -102,14 +102,13 @@ public class GridTouchHandler : TouchHandler
                 sw.Stop();
 
                 Debug.Log("Symmetry took " + sw.ElapsedMilliseconds + " ms");
-
-
             }
             else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {
+                Debug.Log("OnPointerUp UNSNAPPED");
                 //remove the axis from the axes list and destroy the object
                 gameScene.m_axes.RemoveAxis(currentAxis.gameObject);
-                Destroy(currentAxis);
+                Destroy(currentAxis.gameObject);
             }
         }
     }
