@@ -116,10 +116,10 @@ public class Grid : MonoBehaviour
     /**
      * Fades out the grid (when a level ends for instance)
      * **/
-    public void Dismiss(float fDuration, float fDelay)
+    public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
         GameObjectAnimator gridAnimator = this.GetComponent<GameObjectAnimator>();
-        gridAnimator.FadeTo(0, fDuration, fDelay);
+        gridAnimator.FadeTo(0, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -291,28 +291,36 @@ public class Grid : MonoBehaviour
         GridBoxPoint[] intersections = new GridBoxPoint[2];
         int intersectionIndex = 0;
 
-        //bool intersects;
-        //Vector2 intersection;
+        int intersectionCount = 0;
+
         //Check intersection with left grid border
         GridBoxPoint intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.LEFT, linePoint, lineDirection);
-        AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+        if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
+            intersectionCount++;
+
 
         //Check intersection with top grid border
         intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.TOP, linePoint, lineDirection);
-        AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+        if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+            if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
+                intersectionCount++;
 
         //Check intersection with right grid border
         if (intersectionIndex < 2)
         {
             intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.RIGHT, linePoint, lineDirection);
-            AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+            if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+                if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
+                    intersectionCount++;
         }
 
         //Check intersection with bottom grid border
         if (intersectionIndex < 2)
         {
             intersectionPoint = CheckLineIntersectionOnGridEdge(GridEdge.BOTTOM, linePoint, lineDirection);
-            AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint);
+            if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+                if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
+                    intersectionCount++;
         }
 
         return intersections;
@@ -361,7 +369,7 @@ public class Grid : MonoBehaviour
     /**
      * Add a point in the array of intersection grid box points
      * **/
-    private void AddIntersectionGridBoxPointAtIndex(ref GridBoxPoint[] array, ref int index, GridBoxPoint point)
+    private bool AddIntersectionGridBoxPointAtIndex(ref GridBoxPoint[] array, ref int index, GridBoxPoint point)
     {
         if (point.m_edge != GridEdge.NONE)
         {
@@ -379,7 +387,11 @@ public class Grid : MonoBehaviour
                 array[0] = point;
                 index++;
             }
+
+            return true;
         }
+
+        return false;
     }
 
     /**

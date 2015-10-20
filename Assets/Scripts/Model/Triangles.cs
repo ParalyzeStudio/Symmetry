@@ -62,7 +62,7 @@ public class BaseTriangle
      * **/
     public bool IntersectsTriangle(BaseTriangle triangle)
     {
-        bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) || 
+        bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) ||
                                IntersectsEdge(triangle.m_points[1], triangle.m_points[2]) ||
                                IntersectsEdge(triangle.m_points[2], triangle.m_points[1]);
 
@@ -296,14 +296,14 @@ public class BaseTriangle
     /**
      * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
      * **/
-    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2)
+    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP)
     {
         for (int i = 0; i != 3; i++)
         {
             Vector2 point1 = m_points[i];
             Vector2 point2 = m_points[(i == 2) ? 0 : i + 1];
 
-            if (GeometryUtils.TwoSegmentsIntersect(point1, point2, edgePoint1, edgePoint2))
+            if (GeometryUtils.TwoSegmentsIntersect(point1, point2, edgePoint1, edgePoint2, bFilters))
                 return true;
         }
 
@@ -313,23 +313,40 @@ public class BaseTriangle
     /**
     * Tells if one of the edges of this triangle intersects the contour passed as parameter
     **/
-    public bool IntersectsContour(DottedOutline contour)
+    public bool IntersectsContour(DottedOutline outline, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP)
     {
-        Contour contourPoints = contour.m_contour;
+        //check if triangle intersect outline main contour
+        Contour contourPoints = outline.m_contour;
         for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
         {
             Vector2 contourSegmentPoint1 = contourPoints[iContourPointIndex];
             Vector2 contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
 
-            for (int iTriangleEdgeIndex = 0; iTriangleEdgeIndex != 3; iTriangleEdgeIndex++)
-            {
-                Vector2 triangleEdgePoint1 = m_points[iTriangleEdgeIndex];
-                Vector2 triangleEdgePoint2 = (iTriangleEdgeIndex == 2) ? m_points[0] : m_points[iTriangleEdgeIndex + 1];
+            if (IntersectsEdge(contourSegmentPoint1, contourSegmentPoint2, bFilters))
+                return true;
 
-                if (GeometryUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2))
-                    return true;
-            }
+            //for (int iTriangleEdgeIndex = 0; iTriangleEdgeIndex != 3; iTriangleEdgeIndex++)
+            //{
+            //    Vector2 triangleEdgePoint1 = m_points[iTriangleEdgeIndex];
+            //    Vector2 triangleEdgePoint2 = (iTriangleEdgeIndex == 2) ? m_points[0] : m_points[iTriangleEdgeIndex + 1];
+
+            //    if (GeometryUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
+            //        return true;
+            //}
         }
+
+        //check if triangle intersect outline holes
+        List<Contour> outlineHoles = outline.m_holes;
+        for (int i = 0; i != outlineHoles.Count; i++)
+        {
+            Contour hole = outlineHoles[i];
+            Vector2 holeSegmentPoint1 = hole[i];
+            Vector2 holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
+
+            if (IntersectsEdge(holeSegmentPoint1, holeSegmentPoint2, bFilters))
+                return true;
+        }
+
         return false;
     }
 

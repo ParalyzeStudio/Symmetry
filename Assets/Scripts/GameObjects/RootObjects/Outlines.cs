@@ -82,12 +82,9 @@ public class Outlines : MonoBehaviour
     /**
      * Dismiss the outlines holder (when a level ends for instance)
      * **/
-    public void Dismiss(bool bAnimated = true, float fDuration = 0.5f, float fDelay = 0.0f)
+    public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
         GameObjectAnimator outlinesAnimator = this.GetComponent<GameObjectAnimator>();
-        if (bAnimated)
-            outlinesAnimator.FadeTo(0, fDuration, fDelay);
-        else
-            outlinesAnimator.SetOpacity(1);
+        outlinesAnimator.FadeTo(0, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 }

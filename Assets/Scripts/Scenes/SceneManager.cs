@@ -36,13 +36,13 @@ public class SceneManager : MonoBehaviour
      * Replace a scene with another
      * **/
     public void SwitchDisplayedContent(DisplayContent contentToDisplay, 
-                                       bool bAnimated = true, 
+                                       bool bHideWithAnimation = true,
                                        float fHideDuration = 0.5f)
     {
         m_contentToDisplay = contentToDisplay;
 
-        HideContent(m_displayedContent, bAnimated, fHideDuration);
-        ShowContent(m_contentToDisplay, bAnimated, fHideDuration); //show next content 1 second after hiding the previous one
+        HideContent(m_displayedContent, bHideWithAnimation, fHideDuration);
+        ShowContent(m_contentToDisplay, true, fHideDuration); //show next content 1 second after hiding the previous one
     }
 
     /**

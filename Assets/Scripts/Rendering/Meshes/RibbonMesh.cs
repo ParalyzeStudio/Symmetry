@@ -38,6 +38,11 @@ public class RibbonMesh : ColorMesh
         m_ribbonPointA = axis.m_endpoint1Position;
         m_ribbonPointB = axis.m_endpoint2Position;
 
+        if (((axis.m_endpoint2GridPosition - new Vector2(5.041469f, 3.041469f)).sqrMagnitude) < 1.0E-12)            
+        {
+            Debug.Log("STOP");
+        }
+
         //clear the mesh
         ClearMesh();
         m_mesh.Clear();

@@ -231,7 +231,7 @@ public class GeometryUtils
         //Check if ((x, y) point is contained in the segment
         if (MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x))
         {
-            if (MathUtils.isValueInInterval(y, segmentPoint1.y, segmentPoint2.y))
+            if (MathUtils.isValueInInterval(y, segmentPoint1.y, segmentPoint2.y, 0))
             {
                 intersects = true;
                 intersection = new Vector2(x, y);
@@ -246,7 +246,7 @@ public class GeometryUtils
         }
         else
         {
-            if (MathUtils.isValueInInterval(x, segmentPoint1.x, segmentPoint2.x))
+            if (MathUtils.isValueInInterval(x, segmentPoint1.x, segmentPoint2.x, 0))
             {
                 intersects = true;
                 intersection = new Vector2(x, y);

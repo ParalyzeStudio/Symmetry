@@ -62,10 +62,40 @@ public class Axes : MonoBehaviour
         m_childrenAxes.Clear();
     }
 
-    public GameObject GetAxisBeingBuilt()
+    ///**
+    // * Return the axes whose type is either DYNAMIC_SNAPPED or DYNAMIC_UNSNAPPED
+    // * **/
+    //public List<AxisRenderer> GetDynamicAxes()
+    //{
+    //    List<AxisRenderer> dynamicAxes = new List<AxisRenderer>(); //dynamicAxes Count is likely to be 1 so set no capacity here
+    //    for (int i = 0; i != m_childrenAxes.Count; i++)
+    //    {
+    //        AxisRenderer axis = m_childrenAxes[i].GetComponent<AxisRenderer>();
+    //        if (axis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED ||
+    //            axis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED)
+    //        {
+    //            dynamicAxes.Add(axis);
+    //        }
+    //    }
+
+    //    return dynamicAxes;
+    //}
+
+    /**
+     * Return the axis the player is currently drawing
+     * **/
+    public AxisRenderer GetAxisBeingDrawn()
     {
-        if (m_childrenAxes.Count > 0)
-            return m_childrenAxes[m_childrenAxes.Count - 1];
+        for (int i = 0; i != m_childrenAxes.Count; i++)
+        {
+            AxisRenderer axis = m_childrenAxes[i].GetComponent<AxisRenderer>();
+            //stop at the first dynamic axis as th
+            if (axis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED ||
+                axis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED)
+            {
+                return axis;
+            }
+        }
 
         return null;
     }
@@ -91,5 +121,14 @@ public class Axes : MonoBehaviour
         circleAnimator.AnimateOuterRadiusTo(22, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
         circleAnimator.SetOpacity(1);
         circleAnimator.FadeTo(0, 0.3f, 0, ValueAnimator.InterpolationType.LINEAR, true);
+    }
+
+    /**
+     * Dismiss the axes holder (when a level ends for instance)
+     * **/
+    public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        GameObjectAnimator axesAnimator = this.GetComponent<GameObjectAnimator>();
+        axesAnimator.FadeTo(0, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 }

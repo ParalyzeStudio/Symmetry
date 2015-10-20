@@ -124,21 +124,23 @@ public class TouchManager : MonoBehaviour
                 if (!bProcessed) //pointer event has not been processed by GUI, try HUD first
                 {
                     GameScene gameScene = (GameScene)sceneManager.m_currentScene;
-
-                    ////try to process the event on the grid itself
-                    GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
-                    gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
-
-                    //or the shapes
-                    if (gameScene == null)
-                        Debug.Log("TouchManager.cs GameScene NULL");
-                    if (gameScene.m_shapesHolder == null)
-                        Debug.Log("TouchManager.cs GameScene.m_shapes NULL");
-                    List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
-                    for (int iShapeIdx = 0; iShapeIdx != shapes.Count; iShapeIdx++)
+                    if (gameScene.m_gameStatus == GameScene.GameStatus.RUNNING)
                     {
-                        ShapeTouchHandler shapeTouchHandler = shapes[iShapeIdx].m_parentMesh.gameObject.GetComponent<ShapeTouchHandler>();
-                        shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                        ////try to process the event on the grid itself
+                        GridTouchHandler gridTouchHandler = gameScene.m_grid.GetComponent<GridTouchHandler>();
+                        gridTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+
+                        //or the shapes
+                        if (gameScene == null)
+                            Debug.Log("TouchManager.cs GameScene NULL");
+                        if (gameScene.m_shapesHolder == null)
+                            Debug.Log("TouchManager.cs GameScene.m_shapes NULL");
+                        List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
+                        for (int iShapeIdx = 0; iShapeIdx != shapes.Count; iShapeIdx++)
+                        {
+                            ShapeTouchHandler shapeTouchHandler = shapes[iShapeIdx].m_parentMesh.gameObject.GetComponent<ShapeTouchHandler>();
+                            shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType);
+                        }
                     }
                 }
             }

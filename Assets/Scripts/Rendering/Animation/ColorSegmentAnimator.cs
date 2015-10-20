@@ -7,7 +7,7 @@ public class ColorSegmentAnimator : GameObjectAnimator
         base.SetOpacity(fOpacity, bPassOnChildren);
 
         ColorSegment colorSegment = this.GetComponent<ColorSegment>();
-        colorSegment.SetColor(m_color);
+        colorSegment.SetColor(m_color);       
     }
 
     public override void SetColor(Color color)

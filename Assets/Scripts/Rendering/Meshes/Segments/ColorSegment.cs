@@ -2,8 +2,6 @@
 
 public class ColorSegment : Segment
 {
-    protected Color m_color; //the color of the segment
-
     protected Color[] m_meshColors;
     protected bool m_meshColorsDirty;
 
@@ -13,14 +11,15 @@ public class ColorSegment : Segment
 
         if (bUpdateColor)
         {
+            Color color = GetComponent<ColorSegmentAnimator>().m_color;
             Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
 
-            int colorsLength = mesh.vertices.Length;
+            int colorsLength = m_meshVertices.Length;
             if (m_meshColors == null)
                 m_meshColors = new Color[colorsLength];
             for (int i = 0; i != colorsLength; i++)
             {
-                m_meshColors[i] = m_color;
+                m_meshColors[i] = color;
             }
 
             m_meshColorsDirty = true;
@@ -29,9 +28,9 @@ public class ColorSegment : Segment
 
     public virtual void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color color, int numSegmentsPerHalfCircle = DEFAULT_NUM_SEGMENTS_PER_HALF_CIRCLE)
     {
-        m_color = color;
         base.InitBasicVariables(pointA, pointB, thickness, material, numSegmentsPerHalfCircle);
         RenderInternal(); //builds the mesh
+        GetComponent<ColorSegmentAnimator>().SetColor(color);
     }
 
     /**
@@ -41,7 +40,6 @@ public class ColorSegment : Segment
     {
         RenderInternal(false, false, true);
     }
-
 
     public override void Update()
     {

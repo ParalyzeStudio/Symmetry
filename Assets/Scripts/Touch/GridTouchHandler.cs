@@ -49,7 +49,7 @@ public class GridTouchHandler : TouchHandler
             return false;
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
+        AxisRenderer currentAxis = gameScene.m_axes.GetAxisBeingDrawn();
 
         if (currentAxis == null)
             return false;
@@ -85,13 +85,14 @@ public class GridTouchHandler : TouchHandler
             return;
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        GameObject currentAxis = gameScene.m_axes.GetAxisBeingBuilt();
+        AxisRenderer currentAxis = gameScene.m_axes.GetAxisBeingDrawn();
+
         if (currentAxis != null)
         {
-            AxisRenderer axisRenderer = currentAxis.GetComponent<AxisRenderer>();
-
-            if (axisRenderer.isAxisSnapped()) //axis is snapped we can perform symmetry
+            if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED)
             {
+                Debug.Log("OnPointerUp currentAxis");
+                currentAxis.m_type = AxisRenderer.AxisType.STATIC; //make the axis static
                 Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
 
                 System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -101,11 +102,15 @@ public class GridTouchHandler : TouchHandler
                 sw.Stop();
 
                 Debug.Log("Symmetry took " + sw.ElapsedMilliseconds + " ms");
-            }
 
-            //remove the axis from the axes list and destroy the object
-            //gameScene.m_axes.RemoveAxis(currentAxis);
-            //Destroy(currentAxis);
+
+            }
+            else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
+            {
+                //remove the axis from the axes list and destroy the object
+                gameScene.m_axes.RemoveAxis(currentAxis.gameObject);
+                Destroy(currentAxis);
+            }
         }
     }
 }

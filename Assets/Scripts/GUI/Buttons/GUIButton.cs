@@ -49,7 +49,10 @@ public class GUIButton : MonoBehaviour
         ID_MOVE_SHAPE,
         ID_OPERATION_ADD,
         ID_OPERATION_SUBSTRACT,
-        ID_COLOR_FILTER
+        ID_COLOR_FILTER,
+
+        //temporary debug
+        ID_DEBUG_SKIP_LEVEL
     }
 
     public GUIButtonID m_ID;
@@ -160,6 +163,8 @@ public class GUIButton : MonoBehaviour
         GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
         guiManager.m_selectedSideButtonID = m_ID;
 
+        Debug.Log("OnClick");
+
         if (m_ID == GUIButtonID.ID_OPTIONS_BUTTON)
         {
             if (!guiManager.m_sideButtonsOverlayDisplayed)
@@ -219,7 +224,13 @@ public class GUIButton : MonoBehaviour
 
             //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             //guiManager.DismissPauseWindow();
-        }        
+        }
+        else if (m_ID == GUIButtonID.ID_DEBUG_SKIP_LEVEL)
+        {
+            Debug.Log("ID_DEBUG_SKIP_LEVEL");
+            GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+            gameScene.EndLevel(GameScene.GameStatus.VICTORY);
+        }
     }
 
     protected GUIManager GetGUIManager()

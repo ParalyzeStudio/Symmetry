@@ -17,8 +17,6 @@ public class ShapeVoxelGrid : MonoBehaviour
         }
     }
 
-    private GameObject m_voxelsHolder;
-    private GameObject m_cellsHolder;
     private int m_size;
     private int m_xVoxelsCount; //the number of voxels along the x-dimension of the grid
     public int XVoxelsCount
@@ -42,14 +40,6 @@ public class ShapeVoxelGrid : MonoBehaviour
      * ***/
     public void Init(int density)
     {
-        m_voxelsHolder = new GameObject("Voxels");
-        m_voxelsHolder.transform.parent = this.transform;
-        m_voxelsHolder.transform.localPosition = Vector3.zero;
-
-        m_cellsHolder = new GameObject("Cells");
-        m_cellsHolder.transform.parent = this.transform;
-        m_cellsHolder.transform.localPosition = Vector3.zero;
-
         Grid parentGrid = this.GetComponent<Grid>();
 
         m_xVoxelsCount = (parentGrid.m_numColumns - 1) * (density - 1) + 1; 

@@ -57,6 +57,7 @@ public class GUIManager : MonoBehaviour
     public Material m_skinHints;
     public Material m_skinRetry;
     public Material m_skinPause;
+    public Material m_skinDebugSkipLevel;
 
     //Materials for action buttons
     public Material m_skinSymmetryTwoSides;
@@ -165,6 +166,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinOperationSubstract;
         else if (iID == GUIButton.GUIButtonID.ID_COLOR_FILTER)
             skinMaterial = m_skinColorFilter;
+        else if (iID == GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL)
+            skinMaterial = m_skinDebugSkipLevel;
         else
             skinMaterial = m_skinOptions;
 

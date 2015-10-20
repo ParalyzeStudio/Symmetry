@@ -154,12 +154,15 @@ public class Shape : GridTriangulable
         return false;
     }
 
-    public bool IntersectsOutline(DottedOutline contour)
+    /**
+     * Check if this shape intersects stricly one of the contours of this shape (main contour and holes)
+     * **/
+    public bool IntersectsOutline(DottedOutline outline)
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             BaseTriangle triangle = m_triangles[iTriangleIndex];
-            if (triangle.IntersectsContour(contour))
+            if (triangle.IntersectsContour(outline, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
                 return true;
         }
 

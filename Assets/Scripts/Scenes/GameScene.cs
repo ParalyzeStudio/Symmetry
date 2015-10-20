@@ -32,7 +32,8 @@ public class GameScene : GUIScene
     public GameObject m_axesPfb;
 
     //holders
-    public GameObject m_interfaceButtonsHolder { get; set; }
+    private GameObject m_interfaceButtonsHolder;
+    private GameObject m_axisConstraintsIconsHolder;
 
     //interface buttons
     public Material m_glowRectangleMaterial;
@@ -60,14 +61,11 @@ public class GameScene : GUIScene
     public Material m_rightDiagonalAxisMaterial;
     public Material m_diagonalAxesMaterial;
 
-    //is the current scene displayed entirely
-    public bool m_isShown { get; set; }
-
     private ClippingManager m_clippingManager;
 
     public void Init()
     {
-        m_isShown = false;
+        m_gameStatus = GameStatus.WAITING_FOR_START;
     }
 
     public override void Show()
@@ -200,7 +198,7 @@ public class GameScene : GUIScene
         //sw.Stop();
         //Debug.Log("2>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
 
-        m_isShown = true;
+       
     }
 
     public void ShowElements()
@@ -229,7 +227,16 @@ public class GameScene : GUIScene
         ShowInitialShapes();
 
         //Build Axes holder
-        BuildAxesHolder();       
+        BuildAxesHolder();
+
+        //add small debug button to skip the level
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        GameObject skipLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL, new Vector2(128, 128));
+        skipLevelButtonObject.name = "DebugSkipLevel";
+        skipLevelButtonObject.transform.parent = this.transform;
+        skipLevelButtonObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(0.5f * screenSize.x - 64.0f, 0, -10));
+
+        m_gameStatus = GameStatus.RUNNING;
     }
 
     /**
@@ -249,7 +256,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetOpacity(0);
-        gridAnimator.FadeTo(1, 0.5f, fDelay);
+        gridAnimator.FadeTo(1, 1.0f, fDelay);
         gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
         
         //Voxel grid       
@@ -267,6 +274,8 @@ public class GameScene : GUIScene
         m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
         m_interfaceButtonsHolder.transform.parent = this.gameObject.transform;
         m_interfaceButtonsHolder.transform.localPosition = new Vector3(0, 0, -10);
+
+        m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
 
         //Build buttons contours
         Color contourTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
@@ -377,10 +386,10 @@ public class GameScene : GUIScene
     /**
      * Fades out interface buttons holder
      * **/
-    public void DismissInterfaceButtons(float fDuration, float fDelay)
+    public void DismissInterfaceButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
         GameObjectAnimator interfaceButtonsHolderAnimator = m_interfaceButtonsHolder.GetComponent<GameObjectAnimator>();
-        interfaceButtonsHolderAnimator.FadeTo(0.0f, fDuration, fDelay);
+        interfaceButtonsHolderAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -400,8 +409,16 @@ public class GameScene : GUIScene
 
         GameObjectAnimator counterAnimator = counterObject.GetComponent<GameObjectAnimator>();
         counterAnimator.SetOpacity(0);
-        counterAnimator.FadeTo(1, 0.2f, fDelay);
+        counterAnimator.FadeTo(1, 1.0f, fDelay);
         counterAnimator.SetPosition(new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE));
+    }
+
+    /**
+     * Fades out and remove the counter
+     * **/
+    private void DismissCounter(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        m_counter.GetComponent<GameObjectAnimator>().FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -418,7 +435,7 @@ public class GameScene : GUIScene
         GameObjectAnimator outlinesAnimator = outlinesObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetOpacity(0);
         outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
-        m_outlines.Show(true, 0.5f, fDelay);
+        m_outlines.Show(true, 1.0f, fDelay);
     }
 
     /**
@@ -428,14 +445,11 @@ public class GameScene : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        GameObject iconsHolder = new GameObject("AxisConstraintsIconsHolder");
-        iconsHolder.transform.parent = this.transform;
+        m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
+        m_axisConstraintsIconsHolder.transform.parent = this.transform;
 
         float iconHolderLeftMargin = 30.0f;
         float iconHolderTopMargin = 30.0f;
-
-        GameObjectAnimator iconsHolderAnimator = iconsHolder.AddComponent<GameObjectAnimator>();
-        iconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
 
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
 
@@ -446,7 +460,7 @@ public class GameScene : GUIScene
         {
             GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
             iconObject.name = "ConstraintAxisIcon";
-            iconObject.transform.parent = iconsHolder.transform;
+            iconObject.transform.parent = m_axisConstraintsIconsHolder.transform;
 
             UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
             iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
@@ -457,6 +471,17 @@ public class GameScene : GUIScene
             float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
             iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
         }
+
+        GameObjectAnimator iconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
+        iconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
+        iconsHolderAnimator.SetOpacity(0);
+        iconsHolderAnimator.FadeTo(1.0f, 0.5f);
+    }
+
+    public void DismissAxisConstraintsIcons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        GameObjectAnimator iconsHolderAnimator = m_axisConstraintsIconsHolder.GetComponent<GameObjectAnimator>();
+        iconsHolderAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -517,6 +542,13 @@ public class GameScene : GUIScene
         m_bottomActionButton.Show(fDelay + 0.4f);
     }
 
+    private void DismissActionButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        m_topActionButton.Dismiss(fDuration, fDelay, bDestroyOnFinish);
+        m_middleActionButton.Dismiss(fDuration, fDelay + 0.1f, bDestroyOnFinish);
+        m_bottomActionButton.Dismiss(fDuration, fDelay + 0.2f, bDestroyOnFinish);
+    }
+
     /**
      * Returns the current ID of the action button at specified location
      * **/
@@ -540,9 +572,6 @@ public class GameScene : GUIScene
         shapesHolderObject.transform.parent = this.transform;
         m_shapesHolder = shapesHolderObject.GetComponent<Shapes>();
 
-        GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
-        shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
-
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
@@ -559,9 +588,9 @@ public class GameScene : GUIScene
             //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
 
-        //GameObjectAnimator shapesAnimator = m_shapes.gameObject.GetComponent<GameObjectAnimator>();
-        //shapesAnimator.SetOpacity(0);
-        //shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 0.5f, fDelay);
+        GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
+        shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
+        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
 
         //m_voxelGrid.Refresh();
 
@@ -698,5 +727,255 @@ public class GameScene : GUIScene
             m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
 
         return m_clippingManager;
+    }
+
+
+
+    //----------------------------------------------------------------------------------------------------//
+    //--------------------------------------------END OF LEVEL--------------------------------------------//
+    //----------------------------------------------------------------------------------------------------//
+
+    public enum GameStatus
+    {
+        WAITING_FOR_START, //game has not started yet
+        RUNNING, //game is ready and running
+        PAUSED, //player has paused the game by showing some menus for instance
+        VICTORY, //player has just won this level
+        DEFEAT, //level has ended with a defeat
+        FINISHED //the level is done and player is waiting for current level to restart or next level to start
+    };
+
+    public GameStatus m_gameStatus { get; set; }
+
+    /**
+     * Returns the current status of the game
+     * **/
+    public GameStatus GetGameStatus()
+    {
+        if (m_gameStatus == GameStatus.DEFEAT || m_gameStatus == GameStatus.VICTORY || m_gameStatus == GameStatus.FINISHED)
+            return m_gameStatus;
+
+        bool victory = IsVictory();
+        if (victory)
+            m_gameStatus = GameStatus.VICTORY;
+        else
+        {
+            bool defeat = IsDefeat();
+            if (defeat)
+                m_gameStatus = GameStatus.DEFEAT;
+            else //neither victory nor defeat, keep playing
+                m_gameStatus = GameStatus.RUNNING;
+        }
+
+        return m_gameStatus;
+    }
+
+    /**
+     * Checks if the contour is filled exactly
+     * Calculate the sum of the areas of contours and compare it to the area occupied by all the shapes
+     * **/
+    public bool IsVictory()
+    {
+        //First we check if every shape is static and is fully inside one of the dotted outlines
+        List<Shape> allShapes = m_shapesHolder.m_shapes;
+        List<DottedOutline> outlines = m_outlines.m_outlinesList;
+
+        for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
+        {
+            Shape shape = allShapes[iShapeIdx];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                return false;
+
+            bool bInsideContour = false;
+            for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
+            {
+                DottedOutline outline = outlines[iOutlineIdx];
+                if (shape.IntersectsOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
+                    return false;
+
+                //check if the shape is fully inside or outside this contour by checking the center of the first shape triangle for instance
+                if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
+                {
+                    bInsideContour = true;
+                    break;
+                }
+            }
+
+            if (!bInsideContour) //shape is fully outside every outline, so not a victory yet
+                return false;
+        }
+
+        //check if the sum of shapes areas is equal to the sum of outlines areas
+        float shapesArea = 0;
+        float outlinesArea = 0;
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            allShapes[i].CalculateArea();
+            shapesArea += allShapes[i].m_area;
+        }
+
+        for (int i = 0; i != outlines.Count; i++)
+        {
+            outlines[i].CalculateArea();
+            outlinesArea += outlines[i].m_area;
+        }
+
+        return (shapesArea == outlinesArea);
+
+        ////First we check if one of the shapes intersects a contour
+        //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+
+        //if (!gameScene.m_isShown)
+        //    return false;
+
+        //List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObjects;
+        //List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
+        //float shapesArea = 0;
+        //for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
+        //{
+        //    Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
+        //    bool shapeInsideOutline = false;
+        //    for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
+        //    {
+        //        DottedOutline outline = allContours[iOutlineIndex];
+        //        if (shape.IntersectsOutline(outline)) //we check if this shape intersects an outline
+        //        {
+        //            return false;
+        //        }
+        //        else //if not we check if this shape is inside an outline
+        //        {
+        //            if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
+        //            {
+        //                shapeInsideOutline = true;
+        //                break;
+        //            }
+        //        }
+        //    }
+
+        //    if (!shapeInsideOutline)
+        //        return false;
+
+        //    shapesArea += shape.m_area;
+        //}
+
+        ////Debug.Log("1: NO SHAPE/OUTLINE INTERSECTION");
+
+        ////finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
+        //float contoursArea = 0;
+        //for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
+        //{
+        //    DottedOutline contour = allContours[iContourIndex];
+        //    contoursArea += contour.m_area;
+        //}
+
+        ////Debug.Log("contoursArea:" + contoursArea);
+        ////Debug.Log("shapesArea:" + shapesArea);
+
+        ////if (contoursArea == shapesArea)
+        ////    Debug.Log("3: SAME AREA");
+
+        //return (contoursArea == shapesArea);
+    }
+
+    /**
+     * Simply checks if counter is at maximum fill, because we know that conditions of victory have already been checked out negatively at this point
+     * **/
+    public bool IsDefeat()
+    {
+        return false; //TODO remove this line
+
+        //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+
+        //if (!gameScene.m_isShown)
+        //    return false;
+
+        //bool bDefeat = gameScene.m_counter.isFull();
+        //if (bDefeat)
+        //    Debug.Log("DEFEAT");
+        //return gameScene.m_counter.isFull();
+    }
+
+    /**
+     * If victory:
+     * -Ends the current level by fading out the grid and contours and disabling touch
+     * -After a few seconds launch next level
+     * If defeat:
+     * -Restart the level
+     * **/
+    public void EndLevel(GameStatus gameStatus)
+    {
+        if (m_gameStatus == GameStatus.FINISHED)
+            return;
+
+        m_gameStatus = GameStatus.FINISHED;
+
+        if (gameStatus == GameStatus.VICTORY)
+        {
+            Debug.Log("EndLevel VICTORY");
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(DismissSceneElementsOnVictory), 2.0f);
+
+            LevelManager levelManager = GetLevelManager();
+            int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
+            if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
+            {
+                levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
+                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
+            }
+            else
+            {
+                //TODO go to next chapter by showing chapter menu for instance
+            }
+
+            //Save the status of this level to preferences
+            GetPersistentDataManager().SetLevelDone(currentLevelNumber);
+
+        }
+        else if (gameStatus == GameStatus.DEFEAT)
+        {
+            Debug.Log("EndLevel DEFEAT");
+            //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
+        }
+    }
+
+    /**
+     * Fade out and remove every scene element except shapes holder when player completed a level
+     * **/
+    private void DismissSceneElementsOnVictory()
+    {
+        m_grid.Dismiss(1.0f);
+        m_outlines.Dismiss(1.0f);
+        m_axes.Dismiss(1.0f);
+        DismissInterfaceButtons(0.5f);
+        DismissActionButtons(1.0f);
+        DismissAxisConstraintsIcons(0.5f);
+        DismissCounter(0.5f);
+    }
+
+    /**
+     * Function called when all scene elements have been faded out except shapes (victory)
+     * Time to switch scene and go to next level or next chapter (if level 16 has been reached)
+     * **/
+    private void OnFinishEndingLevelVictory()
+    {
+        m_shapesHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.5f, 0.0f);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(StartLevelIntroScene), 0.5f);
+    }
+
+    private void StartLevelIntroScene()
+    {
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false); //restart the level
+    }
+
+    public void Update()
+    {
+        if (m_gameStatus == GameStatus.RUNNING)
+        {
+            GameStatus gameStatus = GetGameStatus();
+            if (gameStatus == GameStatus.VICTORY || gameStatus == GameStatus.DEFEAT)
+            {
+                EndLevel(gameStatus);                
+            }
+        }
     }
 }

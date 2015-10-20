@@ -105,7 +105,7 @@ public class ActionButton : GUIButton
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         float buttonPositionY = buttonAnimator.GetPosition().y;
         Vector3 buttonToPosition = new Vector3(-0.5f * screenSize.x + 128.0f, buttonPositionY, ACTION_BUTTON_Z_VALUE);
-        buttonAnimator.TranslateTo(buttonToPosition, 0.5f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
+        buttonAnimator.TranslateTo(buttonToPosition, 1.0f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
 
         //Show the name label
         ShowButtonName();
@@ -133,16 +133,21 @@ public class ActionButton : GUIButton
         nameAnimator.FadeTo(1.0f, 0.3f, 0.5f);
     }
 
-    ///**
-    // * -Rotate the background object
-    // * -Fade out the shadow
-    // * -Fade out the skin
-    // * -translate the whole button from right to left
-    // * **/
-    //public void Dismiss()
-    //{
+    /**
+     * -Rotate the background object
+     * -Fade out the shadow
+     * -Fade out the skin
+     * -translate the whole button from right to left
+     * **/
+    public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-    //}
+        GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
+        float buttonPositionY = buttonAnimator.GetPosition().y;
+        Vector3 buttonToPosition = new Vector3(-0.5f * screenSize.x - 128.0f, buttonPositionY, ACTION_BUTTON_Z_VALUE);
+        buttonAnimator.TranslateTo(buttonToPosition, fDuration, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL, bDestroyOnFinish);
+    }
 
     /**
      * Switch to next button child ID if possible

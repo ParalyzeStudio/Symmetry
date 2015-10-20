@@ -25,6 +25,17 @@ public class AxisRenderer : MonoBehaviour
     private GameScene m_gameScene;
     private Shapes m_shapesHolder;
 
+    //Type of the axis
+    public enum AxisType
+    {
+        STATIC, //player has finished drawing the axis and symmetry has been done
+        DYNAMIC_UNSNAPPED, //player is currently drawing the axis but it is not snapped to a grid anchor
+        DYNAMIC_SNAPPED,  //same but this time axis is snapped
+        HINT //axis is displayed when the player has requested some help
+    }
+
+    public AxisType m_type { get; set; }
+
     //Ribbon
     public GameObject m_ribbonPfb;
     public Material m_ribbonMaterial;
@@ -132,7 +143,7 @@ public class AxisRenderer : MonoBehaviour
         axisSegmentObject.transform.parent = this.transform;
         axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.black);
+        m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.white);
 
         //endpoint 1
         m_endpoint1 = (GameObject)Instantiate(m_circleMeshPfb);
@@ -162,6 +173,8 @@ public class AxisRenderer : MonoBehaviour
 
         //ribbon
         CreateRibbon();
+
+        m_type = AxisType.DYNAMIC_UNSNAPPED;
     }
 
     /**
@@ -206,7 +219,9 @@ public class AxisRenderer : MonoBehaviour
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
 
-        RenderRibbon();
+        //render ribbon if axis is not too small
+        if ((pointB - pointA).sqrMagnitude > 10.0f)
+            RenderRibbon();
     }
 
     /**
@@ -257,6 +272,7 @@ public class AxisRenderer : MonoBehaviour
                 if (fDistanceToAnchor <= m_snapDistance) //we can snap the anchor
                 {
                     m_snappedAnchor = snapAnchor;
+                    m_type = AxisType.DYNAMIC_SNAPPED;
                     //Render(m_endpoint1Position, snapAnchorPosition, false);
                     Render(m_endpoint1GridPosition, snapAnchorGridPosition, true);
 
@@ -281,6 +297,7 @@ public class AxisRenderer : MonoBehaviour
         if (fDistanceFromMouseToAnchor > m_snapDistance)
         {
             m_snappedAnchor = null;
+            m_type = AxisType.DYNAMIC_UNSNAPPED;
             Render(m_endpoint1Position, pointerLocation, false);
         }
     }

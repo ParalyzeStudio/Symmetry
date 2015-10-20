@@ -39,17 +39,6 @@
 			</contour>
 		</shape>
 		
-		<shape color="0,1,1">
-			<contour>
-				<point column="6" line="3"/>
-				<point column="9" line="3"/>
-				<point column="9" line="7"/>
-				<point column="7" line="7"/>
-				<point column="7" line="4"/>
-				<point column="6" line="4"/>
-			</contour>
-		</shape>
-		
 <!--		<shape color="1,1,0">
 			<contour>
 				<point column="6" line="3"/>
