@@ -20,7 +20,7 @@ public class GUIScene : MonoBehaviour
 
     public virtual void Show()
     {
-
+        GetSceneManager().OnSceneShown();
     }
 
     /**

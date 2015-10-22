@@ -34,7 +34,32 @@ public class Chapters : GUIScene
 
         //Show chapter selection arrows
         ShowSelectionArrows();
+
+        //m_debugVariable = 2;
+        //LogDebugVariable();
+        //GetCallFuncHandler().AddCallFuncInstance(ModifyDebugVariable, 1.0f);
+        //GetCallFuncHandler().AddCallFuncInstance(ModifyDebugVariable, 1.0f);
+        //GetCallFuncHandler().AddCallFuncInstance(LogDebugVariable, 1.5f);
+        //m_debugVariable = 68;
+        //LogDebugVariable();
     }
+
+    //private int m_debugVariable;
+    //private GameObject m_debugObject;
+
+    //private void ModifyDebugVariable()
+    //{
+    //    m_debugVariable = (int) (Random.value * 1000);
+    //    m_debugObject = new GameObject("dbgObject" + Random.value);
+    //    LogDebugVariable();
+    //}
+
+    //private void LogDebugVariable()
+    //{
+    //    Debug.Log("m_debugVariable:" + m_debugVariable);
+    //    if (m_debugObject != null)
+    //        Debug.Log(m_debugObject.name);
+    //}
 
     private void ApplyGradientOnBackground(Gradient gradient, float fDelay = 0.0f)
     {

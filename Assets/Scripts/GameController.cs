@@ -47,10 +47,10 @@ public class GameController : MonoBehaviour
         bgRenderer.gameObject.transform.localPosition = new Vector3(0, 0, BackgroundTrianglesRenderer.BACKGROUND_TRIANGLES_Z_VALUE);
 
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
-        //ShowMainMenu();
+        ShowMainMenu();
         //DebugShowChapters();
         //DebugShowLevels(1);
-        DebugShowSpecificLevel(1, 1, false);
+        //DebugShowSpecificLevel(1, 1, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -58,7 +58,7 @@ public class GameController : MonoBehaviour
 
     public void ShowMainMenu()
     {
-        GetSceneManager().ShowContent(SceneManager.DisplayContent.MENU, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.MENU, 0.5f);
 
         GetGUIManager().ShowSideButtons(true, 1.0f);
     }
@@ -68,7 +68,7 @@ public class GameController : MonoBehaviour
      * **/
     public void DebugShowChapters()
     {
-        GetSceneManager().ShowContent(SceneManager.DisplayContent.CHAPTERS, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.CHAPTERS, 0.5f);
     }
 
     /**
@@ -80,7 +80,7 @@ public class GameController : MonoBehaviour
 
         GetBackgroundRenderer().Offset(2 * ScreenUtils.GetScreenSize().y);
 
-        GetSceneManager().ShowContent(SceneManager.DisplayContent.LEVELS, true, 0.5f);
+        GetSceneManager().ShowContent(SceneManager.DisplayContent.LEVELS, 0.5f);
     }
 
     /**
@@ -92,13 +92,13 @@ public class GameController : MonoBehaviour
         levelManager.SetCurrentChapterByNumber(iChapterNumber);
         levelManager.SetLevelOnCurrentChapter(iLevelNumber);
 
-        GetSceneManager().ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, true, 0.5f);
+        GetSceneManager().ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, 0.5f);
     }  
 
     public SceneManager GetSceneManager()
     {
         if (m_sceneManager == null)
-            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            m_sceneManager = GetComponent<SceneManager>();
 
         return m_sceneManager;
     }
@@ -114,7 +114,7 @@ public class GameController : MonoBehaviour
     public LevelManager GetLevelManager()
     {
         if (m_levelManager == null)
-            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+            m_levelManager = GetComponent<LevelManager>();
 
         return m_levelManager;
     }
@@ -122,7 +122,7 @@ public class GameController : MonoBehaviour
     public PersistentDataManager GetPersistentManager()
     {
         if (m_persistentDataManager == null)
-            m_persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
+            m_persistentDataManager = GetComponent<PersistentDataManager>();
 
         return m_persistentDataManager;
     }
@@ -130,7 +130,7 @@ public class GameController : MonoBehaviour
     public BackgroundTrianglesRenderer GetBackgroundRenderer()
     {
         if (m_backgroundRenderer == null)
-            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
 
         return m_backgroundRenderer;
     }

@@ -205,6 +205,7 @@ public class GameScene : GUIScene
     {
         //Display the grid
         ShowGrid();
+        Debug.Log("Grid built");
 
         //Display interface buttons (pause, retry and hints)
         ShowInterfaceButtons();

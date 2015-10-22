@@ -60,15 +60,24 @@ public class PersistentDataManager : MonoBehaviour
         //try to open every level data file, each time the file is not found create it with default level data
         for (int iLevelNumber = 1; iLevelNumber != totalLevelCount + 1; iLevelNumber++)
         {
-            try
-            {
-                File.Open(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
-            }
-            catch (FileNotFoundException)
+            if (!File.Exists(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat"))
             {
                 LevelData defaultLevelData = new LevelData(iLevelNumber);
                 SaveLevelDataToFile(defaultLevelData);
+                return;
             }
+            //try
+            //{
+                
+            //    FileStream fs = File.Open(Application.persistentDataPath + "/level_" + iLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
+            //    fs.Close();
+            //}
+            //catch (Exception) //FileNotFountException or IsolatedStorageException
+            //{
+            //    LevelData defaultLevelData = new LevelData(iLevelNumber);
+            //    SaveLevelDataToFile(defaultLevelData);
+            //    return;
+            //}
         }
     }
 
@@ -118,20 +127,37 @@ public class PersistentDataManager : MonoBehaviour
         BinaryFormatter bf = new BinaryFormatter();
         FileStream fs = null;
         LevelData levelData = null;
-        try
+
+        string filePath = Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat";
+        if (File.Exists(filePath))
         {
-            fs = File.Open(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
+            fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+            levelData = (LevelData)bf.Deserialize(fs);
+            
         }
-        catch (FileNotFoundException)
+        else
         {
             levelData = new LevelData(iAbsoluteLevelNumber);
             fs = File.Create(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat");
-            fs.Close();
-            return levelData;
         }
-        levelData = (LevelData)bf.Deserialize(fs);
+
         fs.Close();
         return levelData;
+
+        //try
+        //{
+        //    fs = File.Open(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
+        //}
+        //catch (Exception)
+        //{
+        //    levelData = new LevelData(iAbsoluteLevelNumber);
+        //    fs = File.Create(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat");
+        //    fs.Close();
+        //    return levelData;
+        //}
+        //levelData = (LevelData)bf.Deserialize(fs);
+        //fs.Close();
+        //return levelData;
     }
 }
 

@@ -21,7 +21,7 @@ public class SceneManager : MonoBehaviour
     }
 
     public DisplayContent m_displayedContent { get; set; }
-    private DisplayContent m_contentToDisplay;
+    private DisplayContent m_pendingContent; //the content waiting to be displayed
 
     /**
      * Init some variables
@@ -29,7 +29,6 @@ public class SceneManager : MonoBehaviour
     public void Init()
     {
         m_displayedContent = DisplayContent.NONE;
-        m_contentToDisplay = DisplayContent.NONE;
     }
 
     /**
@@ -39,18 +38,16 @@ public class SceneManager : MonoBehaviour
                                        bool bHideWithAnimation = true,
                                        float fHideDuration = 0.5f)
     {
-        m_contentToDisplay = contentToDisplay;
-
         HideContent(m_displayedContent, bHideWithAnimation, fHideDuration);
-        ShowContent(m_contentToDisplay, true, fHideDuration); //show next content 1 second after hiding the previous one
+        ShowContent(contentToDisplay, fHideDuration); //show next content 1 second after hiding the previous one
     }
 
     /**
      * Shows the specified scene passed as parameter
      * **/
-    public void ShowContent(DisplayContent contentToDisplay, bool bAnimated = true, float fDelay = 0.0f)
+    public void ShowContent(DisplayContent contentToDisplay, float fDelay = 0.0f)
     {
-        m_displayedContent = contentToDisplay;
+        m_pendingContent = contentToDisplay;
 
         if (contentToDisplay == DisplayContent.MENU)
         {
@@ -109,5 +106,21 @@ public class SceneManager : MonoBehaviour
 
         m_currentScene = null;
         m_displayedContent = DisplayContent.NONE;
+    }
+
+    /**
+     * Set the pendingContent as the new displayedContent
+     * **/
+    private void UpdateDisplayedContent()
+    {
+        m_displayedContent = m_pendingContent;
+    }
+
+    /**
+     * Callback when a new scene is displayed
+     * **/
+    public void OnSceneShown()
+    {
+        UpdateDisplayedContent();
     }
 }

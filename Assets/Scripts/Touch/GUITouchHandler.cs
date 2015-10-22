@@ -95,10 +95,7 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void OnClickSkipIntro()
     {
-        //GUIScene levelIntroScene = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        //SceneAnimator sceneAnimator = levelIntroScene.gameObject.GetComponent<SceneAnimator>();
-        //sceneAnimator.FadeTo(0, 0.7f);
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 1.4f);
+        ((LevelIntro)GetSceneManager().m_currentScene).LaunchGameScene();
     }
 
     /**
@@ -197,17 +194,9 @@ public class GUITouchHandler : TouchHandler
                    clickLocation.y >= slotPosition.y - triangleHeight && clickLocation.y <= slotPosition.y + triangleHeight)
                 {
                     levels.OnClickLevelSlot(i);
+                    break;
                 }
             }
-
-            //for (int i = 0; i != levels.m_levelSlots.Length; i++)
-            //{
-            //    if (levels.m_levelSlots[i].ContainsPoint(clickLocation))
-            //    {
-            //        levels.OnClickLevelSlot(i);
-            //        break;
-            //    }
-            //}
         }
     }
 

@@ -5,6 +5,7 @@ public class LevelIntro : GUIScene
     private const float TITLE_Z_VALUE = -10.0f;
 
     public GameObject m_textMeshPfb;
+    private bool m_gameSceneLaunched;
 
     public override void Show()
     {
@@ -13,6 +14,7 @@ public class LevelIntro : GUIScene
         ShowChapterAndLevel();
         ShowSkipButton();
 
+        m_gameSceneLaunched = false;
         GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(LaunchGameScene), 5.0f);
     }
 
@@ -57,7 +59,11 @@ public class LevelIntro : GUIScene
 
     public void LaunchGameScene()
     {
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.5f);
+        if (m_gameSceneLaunched)
+            return;
+
+        m_gameSceneLaunched = true;
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 1.0f);
     }
 }
 
