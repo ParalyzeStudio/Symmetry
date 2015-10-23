@@ -92,13 +92,13 @@ public class Chapters : GUIScene
         //Left selection arrow
         m_leftArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
         m_leftArrowObject.name = "LeftSelectionArrow";
-        m_leftArrowObject.transform.parent = this.gameObject.transform;
 
         ChapterSelectionArrowButton leftArrowButton = m_leftArrowObject.GetComponent<ChapterSelectionArrowButton>();
         leftArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_PREVIOUS;
         leftArrowButton.m_touchArea = new Vector2(256, 256);
 
-         GameObjectAnimator leftArrowAnimator = m_leftArrowObject.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator leftArrowAnimator = m_leftArrowObject.GetComponent<GameObjectAnimator>();
+        leftArrowAnimator.SetParentTransform(this.transform);
         float backgroundTrianglesColumnWidth = screenSize.x / BackgroundTrianglesRenderer.NUM_COLUMNS;
         float leftArrowPositionX = 3.5f * backgroundTrianglesColumnWidth; //put the arrow on the fourth column
         leftArrowPositionX -= 0.5f * screenSize.x;       
@@ -110,13 +110,13 @@ public class Chapters : GUIScene
         //Right selection arrow
         m_rightArrowObject = (GameObject)Instantiate(m_chapterSelectionArrowPfb);
         m_rightArrowObject.name = "RightSelectionArrow";
-        m_rightArrowObject.transform.parent = this.gameObject.transform;
 
         ChapterSelectionArrowButton rightArrowButton = m_rightArrowObject.GetComponent<ChapterSelectionArrowButton>();
         rightArrowButton.m_ID = GUIButton.GUIButtonID.ID_CHAPTER_SELECTION_ARROW_NEXT;
         rightArrowButton.m_touchArea = new Vector2(256, 256);
 
         GameObjectAnimator rightArrowAnimator = m_rightArrowObject.GetComponent<GameObjectAnimator>();
+        rightArrowAnimator.SetParentTransform(this.transform);
         float rightArrowPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS - 3.5f) * backgroundTrianglesColumnWidth;
         rightArrowPositionX -= 0.5f * screenSize.x;
         rightArrowAnimator.SetPosition(new Vector3(rightArrowPositionX, m_chapterSlotPosition.y, SELECTION_ARROWS_Z_VALUE));
@@ -195,11 +195,11 @@ public class Chapters : GUIScene
     public void ShowChapterSlot()
     {
         GameObject chapterSlotObject = (GameObject)Instantiate(m_chapterSlotPfb);
-        chapterSlotObject.transform.parent = this.transform;
 
         float chapterSlotPositionY = GetBackgroundRenderer().GetNearestTriangleToScreenYPosition(0, BackgroundTrianglesRenderer.NUM_COLUMNS / 2, 180).GetCenter().y;
         m_chapterSlotPosition = new Vector3(0, chapterSlotPositionY, CHAPTER_SLOT_Z_VALUE);
         GameObjectAnimator chapterSlotAnimator = chapterSlotObject.GetComponent<GameObjectAnimator>();
+        chapterSlotAnimator.SetParentTransform(this.transform);
         chapterSlotAnimator.SetPosition(m_chapterSlotPosition - new Vector3(0, 100.0f, 0));
 
         m_chapterSlot = chapterSlotObject.GetComponent<ChapterSlot>();

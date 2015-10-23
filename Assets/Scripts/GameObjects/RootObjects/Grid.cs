@@ -29,8 +29,10 @@ public class Grid : MonoBehaviour
     public void Build()
     {
         GameObject pointsHolder = new GameObject("Points");
-        pointsHolder.transform.parent = this.transform;
-        pointsHolder.transform.localPosition = Vector3.zero;
+
+        GameObjectAnimator pointsHolderAnimator = pointsHolder.AddComponent<GameObjectAnimator>();
+        pointsHolderAnimator.SetParentTransform(this.transform);
+        pointsHolderAnimator.SetPosition(Vector3.zero);
 
         //Get the number of min lines and min columns we want for this level
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
@@ -95,13 +97,13 @@ public class Grid : MonoBehaviour
 
                 Vector3 anchorLocalPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
-                clonedGridAnchor.transform.parent = pointsHolder.transform;
 
                 CircleMesh gridAnchorQuad = clonedGridAnchor.GetComponent<CircleMesh>();
                 gridAnchorQuad.Init(m_gridAnchorMaterial);
                 int iAnchorIndex = (iLineNumber - 1) * exactNumColumns + (iColumnNumber - 1);
 
                 CircleMeshAnimator anchorAnimator = clonedGridAnchor.GetComponent<CircleMeshAnimator>();
+                anchorAnimator.SetParentTransform(pointsHolder.transform);
                 anchorAnimator.SetNumSegments(4, false);
                 anchorAnimator.SetInnerRadius(0, false);
                 anchorAnimator.SetOuterRadius(4, true);

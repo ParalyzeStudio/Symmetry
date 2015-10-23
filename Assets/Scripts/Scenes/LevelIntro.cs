@@ -28,10 +28,10 @@ public class LevelIntro : GUIScene
         int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
 
         GameObject titleObject = (GameObject) Instantiate(m_textMeshPfb);
-        titleObject.transform.parent = this.gameObject.transform;
         titleObject.GetComponent<TextMesh>().text = currentChapterNumber.ToString() + " - " + currentLevelNumber.ToString();
 
         TextMeshAnimator levelIntroTitleAnimator = titleObject.GetComponent<TextMeshAnimator>();
+        levelIntroTitleAnimator.SetParentTransform(this.transform);
         levelIntroTitleAnimator.SetPosition(new Vector3(0, 0, TITLE_Z_VALUE));
         levelIntroTitleAnimator.SetFontHeight(80);
         levelIntroTitleAnimator.SetColor(Color.white);
@@ -45,11 +45,11 @@ public class LevelIntro : GUIScene
     public void ShowSkipButton()
     {
         GameObject skipTextObject = (GameObject)Instantiate(m_textMeshPfb);
-        skipTextObject.transform.parent = this.gameObject.transform;
 
         skipTextObject.GetComponent<TextMesh>().text = "Skip>>>";
         
         TextMeshAnimator skipButtonAnimator = skipTextObject.GetComponent<TextMeshAnimator>();
+        skipButtonAnimator.SetParentTransform(this.transform);
         skipButtonAnimator.SetPosition(new Vector3(0, -100, TITLE_Z_VALUE));
         skipButtonAnimator.SetFontHeight(30);
         skipButtonAnimator.SetOpacity(0);

@@ -6,12 +6,21 @@ public class ApertureTransitionAnimator : CircleMeshAnimator
 
     public override void OnFinishAnimatingInnerRadius()
     {
-        base.OnFinishAnimatingInnerRadius();
-        
-        if (m_innerRadius == 0)
+        if (m_innerRadiusAnimationDestroyOnFinish)
+            Destroy(this.gameObject);
+        else
         {
-            AnimateInnerRadiusTo(m_outerRadius, 0.5f, 0.0f, InterpolationType.SINUSOIDAL, true);
-            GetSceneManager().SwitchDisplayedContent(m_toSceneContent, false);
+            if (m_toSceneContent == SceneManager.DisplayContent.LEVEL_INTRO)
+            {
+                if (m_innerRadius == 0)
+                {
+                    AnimateInnerRadiusTo(m_outerRadius, 0.5f, 0.0f, InterpolationType.SINUSOIDAL, true);
+                    GetSceneManager().SwitchDisplayedContent(m_toSceneContent, false);
+
+                    //remove side buttons
+                    GetGUIManager().DismissSideButtons(false);
+                }
+            }
         }
     }
 }

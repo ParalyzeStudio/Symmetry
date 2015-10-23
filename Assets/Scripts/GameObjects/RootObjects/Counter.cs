@@ -32,7 +32,6 @@ public class Counter : MonoBehaviour
         for (int i = 0; i != maxActions; i++)
         {
             GameObject clonedCounterElement = (GameObject) Instantiate(m_counterElementPfb);
-            clonedCounterElement.transform.parent = this.gameObject.transform;
 
             float counterElementPositionX;
             if (maxActions % 2 == 0) //even number of actions
@@ -41,6 +40,7 @@ public class Counter : MonoBehaviour
                 counterElementPositionX = ((i - maxActions / 2) * elementSpacing);
 
             GameObjectAnimator counterElementAnimator = clonedCounterElement.gameObject.GetComponent<GameObjectAnimator>();
+            counterElementAnimator.SetParentTransform(this.transform);
             counterElementAnimator.SetPosition(new Vector3(counterElementPositionX, 0, 0));
 
             //Create the counter element

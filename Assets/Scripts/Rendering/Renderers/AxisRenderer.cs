@@ -140,18 +140,19 @@ public class AxisRenderer : MonoBehaviour
 
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
-        axisSegmentObject.transform.parent = this.transform;
+        GameObjectAnimator axisSegmentAnimator = axisSegmentObject.GetComponent<GameObjectAnimator>();
+        axisSegmentAnimator.SetParentTransform(this.transform);
         axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
         m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.white);
 
         //endpoint 1
         m_endpoint1 = (GameObject)Instantiate(m_circleMeshPfb);
-        m_endpoint1.transform.parent = this.gameObject.transform;
         m_endpoint1.name = "AxisEndpoint1";
         CircleMesh endpoint1Mesh = m_endpoint1.GetComponent<CircleMesh>();
         endpoint1Mesh.Init(axisMaterial);
         CircleMeshAnimator endpoint1Animator = m_endpoint1.GetComponent<CircleMeshAnimator>();
+        endpoint1Animator.SetParentTransform(this.transform);
         endpoint1Animator.SetNumSegments(6, false);
         endpoint1Animator.SetInnerRadius(0, false);
         endpoint1Animator.SetOuterRadius(8, true);
@@ -159,12 +160,12 @@ public class AxisRenderer : MonoBehaviour
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
 
         //endpoint 2
-        m_endpoint2 = (GameObject)Instantiate(m_circleMeshPfb);
-        m_endpoint2.transform.parent = this.gameObject.transform;
+        m_endpoint2 = (GameObject)Instantiate(m_circleMeshPfb);        
         m_endpoint2.name = "AxisEndpoint2";
         CircleMesh endpoint2Mesh = m_endpoint2.GetComponent<CircleMesh>();
         endpoint2Mesh.Init(axisMaterial);
         CircleMeshAnimator endpoint2Animator = m_endpoint2.GetComponent<CircleMeshAnimator>();
+        endpoint2Animator.SetParentTransform(this.transform);
         endpoint2Animator.SetNumSegments(6, false);
         endpoint2Animator.SetInnerRadius(0, false);
         endpoint2Animator.SetOuterRadius(8, true);
@@ -230,7 +231,6 @@ public class AxisRenderer : MonoBehaviour
     private void CreateRibbon()
     {
         GameObject ribbonObject = (GameObject) Instantiate(m_ribbonPfb);
-        ribbonObject.transform.parent = this.transform;
         ribbonObject.name = "Ribbon";
 
         m_ribbonMesh = ribbonObject.GetComponent<RibbonMesh>();
@@ -242,6 +242,7 @@ public class AxisRenderer : MonoBehaviour
 
         //Set the color of the ribbon
         RibbonAnimator ribbonAnimator = ribbonObject.GetComponent<RibbonAnimator>();
+        ribbonAnimator.SetParentTransform(this.transform);
         ribbonAnimator.SetColor(new Color(1, 1, 1, 0.5f));
         ribbonAnimator.SetPosition(Vector3.zero);
     }
@@ -377,24 +378,33 @@ public class AxisRenderer : MonoBehaviour
             m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, clockwiseAxisNormal);
 
             //debug objects
-            //Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
-            Quaternion sweepLineRotation = Quaternion.AngleAxis(axisAngle, Vector3.forward);
+            //Quaternion sweepLineRotation = Quaternion.AngleAxis(axisAngle, Vector3.forward);
             //m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            //m_debugLeftSweepLineObject.transform.parent = this.transform;
-            //m_debugLeftSweepLineObject.transform.localRotation = sweepLineRotation;
-            //m_debugLeftSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
             m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            m_debugRightSweepLineObject.transform.parent = this.transform;
-            m_debugRightSweepLineObject.transform.localRotation = sweepLineRotation;
-            m_debugRightSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
+
+            //GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
+            //debugLeftSweepLineAnimator.SetParentTransform(this.transform);
+            //debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
+            //debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            //debugLeftSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
+            GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
+            debugRightSweepLineAnimator.SetParentTransform(this.transform);
+            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
+            debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            debugRightSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
         }
         else if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ONE_SIDE)
         {
+            float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
+
             m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, GetAxisNormal());
-            Quaternion sweepLineRotation = Quaternion.FromToRotation(new Vector3(1, 0, 0), GeometryUtils.BuildVector3FromVector2(GetAxisDirection(), 0));
             m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            m_debugRightSweepLineObject.transform.localRotation = sweepLineRotation;
-            m_debugRightSweepLineObject.transform.localPosition = GetAxisCenterInWorldCoordinates();
+
+            GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
+            debugRightSweepLineAnimator.SetParentTransform(this.transform);
+            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
+            debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            debugRightSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
 
             m_leftSweepingLine = null;
         }
@@ -412,6 +422,7 @@ public class AxisRenderer : MonoBehaviour
         }
 
         //Destroy ribbon
+        m_ribbonMesh.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
         Destroy(m_ribbonMesh.gameObject);
 
         //Start sweeping
@@ -484,6 +495,7 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_leftSweepingLine = null;
                 m_sweepingLeft = false;
+                m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_debugLeftSweepLineObject);
                 m_debugLeftSweepLineObject = null;
             }
@@ -506,6 +518,7 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_rightSweepingLine = null;
                 m_sweepingRight = false;
+                m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_debugRightSweepLineObject);
                 m_debugRightSweepLineObject = null;
             }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [ExecuteInEditMode]
 public class ValueAnimator : MonoBehaviour 
@@ -16,6 +17,8 @@ public class ValueAnimator : MonoBehaviour
         RGB = 1,
         TSB = 2
     }
+
+    private List<ValueAnimator> m_childAnimators; 
 
     //Variables to handle fading
     protected bool m_fading;
@@ -93,6 +96,47 @@ public class ValueAnimator : MonoBehaviour
         m_prevOpacity = 1;
         m_color = Color.black;
         m_prevColor = m_color;
+    }
+
+
+    private void CreateChildAnimatorsListIfNull()
+    {
+        if (m_childAnimators == null)
+            m_childAnimators = new List<ValueAnimator>();
+    }
+
+    public void AddChildAnimator(ValueAnimator animator)
+    {
+        CreateChildAnimatorsListIfNull();
+        m_childAnimators.Add(animator);
+    }
+
+    public void RemoveChildAnimator(ValueAnimator animator)
+    {
+        if (m_childAnimators != null)
+            m_childAnimators.Remove(animator);
+    }
+
+    /**
+     * Set this animator and the related GameObject as a child of the object passed as parameter
+     * **/
+    public void SetParentTransform(Transform parentTransform)
+    {
+        this.gameObject.transform.parent = parentTransform;
+        ValueAnimator parentAnimator = parentTransform.gameObject.GetComponent<ValueAnimator>();
+        if (parentAnimator != null)
+            parentAnimator.AddChildAnimator(this);
+    }
+
+    /**
+     * Remove this animator from the list of its parent chid animators
+     * **/
+    public void DetachFromParent()
+    {
+        Transform parentTransform = this.gameObject.transform.parent;
+        ValueAnimator parentAnimator = parentTransform.gameObject.GetComponent<ValueAnimator>();
+        if (parentAnimator != null)
+            parentAnimator.RemoveChildAnimator(this);
     }
 
     public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyObjectOnFinish = false)
@@ -174,12 +218,11 @@ public class ValueAnimator : MonoBehaviour
         m_prevColor.a = fOpacity;
         OnOpacityChanged();
 
-        if (bPassOnChildren)
+        if (bPassOnChildren && m_childAnimators != null)
         {
-            ValueAnimator[] childAnimators = this.gameObject.GetComponentsInChildren<ValueAnimator>();
-            for (int i = 0; i != childAnimators.Length; i++)
+            for (int i = 0; i != m_childAnimators.Count; i++)
             {
-                ValueAnimator childAnimator = childAnimators[i];
+                ValueAnimator childAnimator = m_childAnimators[i];
                 if (childAnimator != this)
                 {
                     childAnimator.SetOpacity(fOpacity, false); //do not pass to this object's children because they are already in the list of childAnimators
@@ -308,13 +351,19 @@ public class ValueAnimator : MonoBehaviour
     public virtual void OnFinishFading()
     {
         if (m_destroyObjectOnFinishFading)
+        {
+            OnPreDestroyObject();
             Destroy(this.gameObject);
+        }
     }
 
     public virtual void OnFinishTranslating()
     {
         if (m_destroyObjectOnFinishTranslating)
+        {
+            OnPreDestroyObject();
             Destroy(this.gameObject);
+        }
     }
 
     public virtual void OnFinishScaling()
@@ -527,6 +576,17 @@ public class ValueAnimator : MonoBehaviour
         UpdateRotation(dt);
         UpdateScale(dt);
         UpdateColor(dt);
+    }
+
+    /**
+     * Call this method before destroying an object
+     * It will remove the animator of 'this' object from its parent child animator list
+     * **/
+    public void OnPreDestroyObject()
+    {
+        ValueAnimator parentAnimator = this.transform.parent.GetComponent<ValueAnimator>();
+        if (parentAnimator != null)
+            parentAnimator.RemoveChildAnimator(this);
     }
 
     /**

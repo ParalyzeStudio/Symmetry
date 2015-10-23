@@ -40,7 +40,9 @@ public class Outlines : MonoBehaviour
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
                 outlineSegment.Build(gridPointA, gridPointB, Color.white); //TODO replace white color by contour segment color
-                outlineSegment.transform.parent = outlineObject.transform;
+
+                TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
+                outlineSegmentAnimator.SetParentTransform(outlineObject.transform);
             }
 
             //Draw holes
@@ -56,14 +58,15 @@ public class Outlines : MonoBehaviour
                     GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                     OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
                     outlineSegment.Build(holeGridPointA, holeGridPointB, Color.white);
-                    outlineSegment.transform.parent = outlineObject.transform;
+
+                    TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
+                    outlineSegmentAnimator.SetParentTransform(outlineObject.transform);
                 }
             }
 
-            outlineObject.transform.parent = this.gameObject.transform;
-            outlineObject.transform.localPosition = Vector3.zero;
-
-            outlineObject.AddComponent<GameObjectAnimator>();
+            GameObjectAnimator outlineAnimator = outlineObject.AddComponent<GameObjectAnimator>();
+            outlineAnimator.SetParentTransform(this.transform);
+            outlineAnimator.SetPosition(Vector3.zero);
         }
     }
 

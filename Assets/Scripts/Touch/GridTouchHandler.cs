@@ -108,6 +108,7 @@ public class GridTouchHandler : TouchHandler
                 Debug.Log("OnPointerUp UNSNAPPED");
                 //remove the axis from the axes list and destroy the object
                 gameScene.m_axes.RemoveAxis(currentAxis.gameObject);
+                currentAxis.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(currentAxis.gameObject);
             }
         }

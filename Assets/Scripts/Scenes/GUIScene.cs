@@ -42,6 +42,7 @@ public class GUIScene : MonoBehaviour
 
     public virtual void OnSceneDismissed()
     {
+        this.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
         Destroy(this.gameObject); //Destroy the scene object
     }
 

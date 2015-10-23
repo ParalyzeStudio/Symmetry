@@ -62,8 +62,8 @@ public class CounterElement : MonoBehaviour
     {
         m_skin = Instantiate(m_colorQuadPfb);
         m_skin.GetComponent<ColorQuad>().Init();
-        m_skin.transform.parent = this.gameObject.transform;
         ColorQuadAnimator skinAnimator = m_skin.GetComponent<ColorQuadAnimator>();
+        skinAnimator.SetParentTransform(this.transform);
         skinAnimator.SetRotationAxis(Vector3.forward);
         skinAnimator.SetRotationAngle(45);
         skinAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
@@ -72,9 +72,9 @@ public class CounterElement : MonoBehaviour
         SetStatus(CounterElementStatus.WAITING);
 
         m_shadow = Instantiate(m_colorQuadPfb);
-        m_shadow.transform.parent = this.gameObject.transform;
         m_shadow.GetComponent<ColorQuad>().Init();
         ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
+        shadowAnimator.SetParentTransform(this.transform);
         shadowAnimator.SetRotationAxis(Vector3.forward);
         shadowAnimator.SetRotationAngle(45);
         shadowAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
@@ -89,9 +89,9 @@ public class CounterElement : MonoBehaviour
     private void InitOverlay()
     {
         m_overlay = Instantiate(m_colorQuadPfb);
-        m_overlay.transform.parent = this.transform;
         m_overlay.GetComponent<ColorQuad>().Init(m_overlayMaterial);
         ColorQuadAnimator overlayAnimator = m_overlay.GetComponent<ColorQuadAnimator>();
+        overlayAnimator.SetParentTransform(this.transform);
         overlayAnimator.SetRotationAxis(Vector3.forward);
         overlayAnimator.SetRotationAngle(45);
         overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
@@ -106,9 +106,11 @@ public class CounterElement : MonoBehaviour
     {
         m_status = status;
 
+        
         //check previous status and remove overlay if CounterElementStatus.CURRENT
         if (m_prevStatus == CounterElementStatus.CURRENT)
         {
+            m_overlay.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
             Destroy(m_overlay);
         }
 
@@ -124,6 +126,7 @@ public class CounterElement : MonoBehaviour
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
             if (m_overlay != null)
             {
+                m_overlay.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_overlay);
                 m_overlay = null;
             }

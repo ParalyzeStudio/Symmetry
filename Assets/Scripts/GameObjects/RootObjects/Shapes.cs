@@ -41,8 +41,6 @@ public class Shapes : MonoBehaviour
     public GameObject CreateShapeObjectFromData(Shape shapeData, bool bCellRendering/*, bool bSubstitutionShape = false*/)
     {
         GameObject clonedShapeObject = (GameObject)Instantiate(m_shapePfb);
-        clonedShapeObject.transform.parent = this.gameObject.transform;
-        clonedShapeObject.transform.localPosition = Vector3.zero;
 
         ShapeMesh shapeMesh = clonedShapeObject.GetComponent<ShapeMesh>();
         shapeMesh.Init();
@@ -50,6 +48,8 @@ public class Shapes : MonoBehaviour
         shapeMesh.Render(bCellRendering);
 
         ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
+        shapeAnimator.SetParentTransform(this.transform);
+        shapeAnimator.SetPosition(Vector3.zero);
         shapeAnimator.SetColor(shapeData.m_color);
 
         m_shapes.Add(shapeData);
@@ -67,7 +67,10 @@ public class Shapes : MonoBehaviour
      * **/
     public void DestroyShapeObjectForShape(Shape shape, float delay = 0.0f)
     {
-        Destroy(shape.m_parentMesh.gameObject, delay);
+        GameObject shapeObject = shape.m_parentMesh.gameObject;
+        GameObjectAnimator shapeAnimator = shapeObject.GetComponent<GameObjectAnimator>();
+        shapeAnimator.OnPreDestroyObject();
+        Destroy(shapeObject, delay);
     }
 
     /**

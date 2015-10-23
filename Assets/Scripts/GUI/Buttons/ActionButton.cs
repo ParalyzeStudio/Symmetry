@@ -58,7 +58,6 @@ public class ActionButton : GUIButton
         //Build the background
         GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
         buttonBackgroundObject.name = "Background";
-        buttonBackgroundObject.transform.parent = this.transform;
 
         m_background = buttonBackgroundObject.GetComponent<UVQuad>();
         m_background.Init(m_actionButtonFrameMaterial);
@@ -66,6 +65,7 @@ public class ActionButton : GUIButton
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
+        backgroundAnimator.SetParentTransform(this.transform);
         backgroundAnimator.SetScale(new Vector2(256, 256));
         backgroundAnimator.SetColorChannels(levelManager.m_currentChapter.GetThemeTintValues()[0], ValueAnimator.ColorMode.TSB);
         backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
@@ -118,13 +118,13 @@ public class ActionButton : GUIButton
     {
         m_buttonNameObject = (GameObject)Instantiate(m_textMeshPfb);
         m_buttonNameObject.name = "Name";
-        m_buttonNameObject.transform.parent = this.transform;
 
         TextMesh nameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
         nameTextMesh.text = GetButtonName();
 
         Vector3 nameTextMeshPosition = new Vector3(0, -115, 0);
         TextMeshAnimator nameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
+        nameAnimator.SetParentTransform(this.transform);
         nameAnimator.SetFontHeight(24);
         nameAnimator.SetColor(Color.white);
         nameAnimator.SetPosition(nameTextMeshPosition - new Vector3(0.0f, 10.0f, 0.0f));

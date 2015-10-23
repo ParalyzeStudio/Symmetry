@@ -18,6 +18,7 @@ public class LevelSlot : BaseSlot
 
         //Add a background only if level is completed        
         int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
+        CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
         if (m_parentScene.GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
         {
             Color slotColor = m_parentScene.GetLevelManager().m_currentChapter.GetThemeColors()[2];
@@ -25,7 +26,6 @@ public class LevelSlot : BaseSlot
             CircleMesh slotBgHexaMesh = m_background.GetComponent<CircleMesh>();
             slotBgHexaMesh.Init(((Levels)m_parentScene).m_slotBackgroundMaterial);
 
-            CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
             slotBgAnimator.SetNumSegments(6, false);
             slotBgAnimator.SetInnerRadius(0, false);
             slotBgAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, true);
@@ -33,6 +33,7 @@ public class LevelSlot : BaseSlot
         }
         else
         {
+            slotBgAnimator.OnPreDestroyObject();
             Destroy(m_background);
             m_background = null;
         }
@@ -49,13 +50,13 @@ public class LevelSlot : BaseSlot
         //Then create a sharp contour with some thickness
         GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
         contourHexaObject.name = "ContourHexagon";
-        contourHexaObject.transform.parent = m_contour.transform;
 
         CircleMesh sharpContour = contourHexaObject.GetComponent<CircleMesh>();
         sharpContour.Init(((Levels)m_parentScene).m_slotSharpContourMaterial);
 
         float contourThickness = 4.0f;
         CircleMeshAnimator sharpContourAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
+        sharpContourAnimator.SetParentTransform(m_contour.transform);
         sharpContourAnimator.SetNumSegments(6, false);
         sharpContourAnimator.SetInnerRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
         sharpContourAnimator.SetOuterRadius(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourThickness, true);
@@ -79,9 +80,11 @@ public class LevelSlot : BaseSlot
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         slotAnimator.SetScale(new Vector3(0, 0, 1));
+        slotAnimator.SetOpacity(0);
 
         float localDelay = (m_levelNumber - 1) * 0.025f;
-        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.2f, localDelay);
+        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 1.0f, localDelay);
+        //slotAnimator.FadeTo(1.0f, 0.5f, localDelay);
     }
 
     public override void Dismiss()
@@ -118,8 +121,11 @@ public class LevelSlot : BaseSlot
 
     public override void DismissSlotBackground(bool bDestroyOnFinish)
     {
-        CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
-        slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        if (m_background != null)
+        {
+            CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
+            slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        }
     }
 
     public override void DismissSlotContour(bool bDestroyOnFinish)

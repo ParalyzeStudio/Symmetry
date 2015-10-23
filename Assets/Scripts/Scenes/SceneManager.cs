@@ -49,46 +49,47 @@ public class SceneManager : MonoBehaviour
     {
         m_pendingContent = contentToDisplay;
 
+        GameObject sceneObject = null;
         if (contentToDisplay == DisplayContent.MENU)
         {
             //build the content
-            GameObject clonedMainMenuScene = (GameObject)Instantiate(m_mainMenuPfb);
-            clonedMainMenuScene.transform.parent = this.gameObject.transform;
+            sceneObject = (GameObject)Instantiate(m_mainMenuPfb);
 
-            m_currentScene = clonedMainMenuScene.GetComponent<MainMenu>();
+            m_currentScene = sceneObject.GetComponent<MainMenu>();
         }
         else if (contentToDisplay == DisplayContent.CHAPTERS)
         {
             //build the content
-            GameObject clonedChaptersScene = (GameObject)Instantiate(m_chaptersPfb);
-            clonedChaptersScene.transform.parent = this.gameObject.transform;
+            sceneObject = (GameObject)Instantiate(m_chaptersPfb);
 
-            m_currentScene = clonedChaptersScene.GetComponent<Chapters>();
+            m_currentScene = sceneObject.GetComponent<Chapters>();
         }
         else if (contentToDisplay == DisplayContent.LEVELS)
         {
             //build the content
-            GameObject clonedLevelsScene = (GameObject)Instantiate(m_levelsPfb);
-            clonedLevelsScene.transform.parent = this.gameObject.transform;
+            sceneObject = (GameObject)Instantiate(m_levelsPfb);
 
-            m_currentScene = clonedLevelsScene.GetComponent<Levels>();
+            m_currentScene = sceneObject.GetComponent<Levels>();
         }
         else if (contentToDisplay == DisplayContent.LEVEL_INTRO)
         {
             //build the content
-            GameObject clonedLevelIntroScene = (GameObject)Instantiate(m_levelIntroPfb);
-            clonedLevelIntroScene.transform.parent = this.gameObject.transform;
+            sceneObject = (GameObject)Instantiate(m_levelIntroPfb);
 
-            m_currentScene = clonedLevelIntroScene.GetComponent<LevelIntro>();
+            m_currentScene = sceneObject.GetComponent<LevelIntro>();
         }
         else if (contentToDisplay == DisplayContent.GAME)
         {
             //build the content
-            GameObject clonedGameScene = (GameObject)Instantiate(m_gameScenePfb);
-            clonedGameScene.transform.parent = this.gameObject.transform;
+            sceneObject = (GameObject)Instantiate(m_gameScenePfb);
 
-            m_currentScene = clonedGameScene.GetComponent<GameScene>();
+            m_currentScene = sceneObject.GetComponent<GameScene>();
         }
+
+        if (sceneObject == null) 
+            return;
+
+        sceneObject.GetComponent<GameObjectAnimator>().SetParentTransform(this.transform);
 
         CallFuncHandler callFuncHandler = this.gameObject.GetComponent<CallFuncHandler>();
         callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_currentScene.Show), fDelay);
@@ -102,7 +103,10 @@ public class SceneManager : MonoBehaviour
         if (bAnimated)
             m_currentScene.Dismiss(fDuration, fDelay);
         else
+        {
+            m_currentScene.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
             Destroy(m_currentScene.gameObject);
+        }
 
         m_currentScene = null;
         m_displayedContent = DisplayContent.NONE;

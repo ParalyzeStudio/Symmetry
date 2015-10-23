@@ -24,8 +24,9 @@ public class Axes : MonoBehaviour
     public GameObject BuildAxis(Vector2 gridStartPosition)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
-        newAxis.transform.parent = this.gameObject.transform;
-        newAxis.transform.localPosition = Vector3.zero;
+        GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
+        axisAnimator.SetParentTransform(this.transform);
+        axisAnimator.SetPosition(Vector3.zero);
 
         //Set the symmetry type
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
@@ -103,25 +104,24 @@ public class Axes : MonoBehaviour
     /**
      * Simple animation with circle scaling up and fading out when an axis snaps
      * **/
-    public void LaunchSnapCircleAnimation(Vector2 position)
-    {
-        GameObject clonedCircle = (GameObject)Instantiate(m_circlePfb);
-        //clonedCircle.transform.parent = this.transform;
-        clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
-        CircleMesh circleMesh = clonedCircle.GetComponent<CircleMesh>();
-        circleMesh.Init(m_circleMaterial);
+    //public void LaunchSnapCircleAnimation(Vector2 position)
+    //{
+    //    GameObject clonedCircle = (GameObject)Instantiate(m_circlePfb);
+    //    clonedCircle.transform.localPosition = GeometryUtils.BuildVector3FromVector2(position, -10);
+    //    CircleMesh circleMesh = clonedCircle.GetComponent<CircleMesh>();
+    //    circleMesh.Init(m_circleMaterial);
 
-        CircleMeshAnimator circleAnimator = clonedCircle.GetComponent<CircleMeshAnimator>();
-        circleAnimator.SetNumSegments(64, false);
-        circleAnimator.SetInnerRadius(0, false);
-        circleAnimator.SetOuterRadius(2, true);
-        circleAnimator.SetColor(Color.white);
+    //    CircleMeshAnimator circleAnimator = clonedCircle.GetComponent<CircleMeshAnimator>();
+    //    circleAnimator.SetNumSegments(64, false);
+    //    circleAnimator.SetInnerRadius(0, false);
+    //    circleAnimator.SetOuterRadius(2, true);
+    //    circleAnimator.SetColor(Color.white);
 
-        circleAnimator.AnimateInnerRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
-        circleAnimator.AnimateOuterRadiusTo(22, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
-        circleAnimator.SetOpacity(1);
-        circleAnimator.FadeTo(0, 0.3f, 0, ValueAnimator.InterpolationType.LINEAR, true);
-    }
+    //    circleAnimator.AnimateInnerRadiusTo(20, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+    //    circleAnimator.AnimateOuterRadiusTo(22, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+    //    circleAnimator.SetOpacity(1);
+    //    circleAnimator.FadeTo(0, 0.3f, 0, ValueAnimator.InterpolationType.LINEAR, true);
+    //}
 
     /**
      * Dismiss the axes holder (when a level ends for instance)

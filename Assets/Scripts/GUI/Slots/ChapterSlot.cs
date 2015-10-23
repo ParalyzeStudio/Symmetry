@@ -63,13 +63,13 @@ public class ChapterSlot : BaseSlot
         //Then create a sharp contour with some thickness
         GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
         contourHexaObject.name = "ContourHexagon";
-        contourHexaObject.transform.parent = m_contour.transform;
 
         CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
         contourMesh.Init(Instantiate(m_positionColorMaterial));
 
         float contourThickness = 8.0f;
         CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
+        contourMeshAnimator.SetParentTransform(m_contour.transform);
         contourMeshAnimator.SetNumSegments(6, false);
         contourMeshAnimator.SetInnerRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
         contourMeshAnimator.SetOuterRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourThickness, true);
@@ -97,9 +97,9 @@ public class ChapterSlot : BaseSlot
     //    BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
 
     //    m_progressBar = new GameObject("ProgressBar");
-    //    m_progressBar.transform.parent = m_infoContainer.transform;
 
     //    GameObjectAnimator progressBarAnimator = m_progressBar.AddComponent<GameObjectAnimator>();
+    //    progressBarAnimator.SetParentTransform(m_infoContainer.transform);
     //    progressBarAnimator.SetPosition(new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0));
 
     //    float progressBarWidth = 5.5f * bgRenderer.m_triangleHeight;
@@ -111,36 +111,36 @@ public class ChapterSlot : BaseSlot
 
     //    //Background
     //    m_progressBarBackgroundObject = Instantiate(m_progressBarBgGameObject);
-    //    m_progressBarBackgroundObject.transform.parent = m_progressBar.transform;
 
     //    ColorQuad colorQuad = m_progressBarBackgroundObject.GetComponent<ColorQuad>();
     //    colorQuad.Init(progressBarBgMaterial);
 
     //    ColorQuadAnimator progressBarBgAnimator = m_progressBarBackgroundObject.GetComponent<ColorQuadAnimator>();
+    //    progressBarBgAnimator.SetParentTransform(m_progressBar.transform);
     //    progressBarBgAnimator.SetPosition(Vector3.zero);
     //    progressBarBgAnimator.SetScale(m_progressBarSize);
 
     //    //Fill
     //    m_progressBarFillObject = Instantiate(m_progressBarBgGameObject);
-    //    m_progressBarFillObject.transform.parent = m_progressBar.transform;
 
     //    colorQuad = m_progressBarFillObject.GetComponent<ColorQuad>();
     //    colorQuad.Init(progressBarFillMaterial);
 
     //    ColorQuadAnimator progressBarFillAnimator = m_progressBarFillObject.GetComponent<ColorQuadAnimator>();
+    //    progressBarFillAnimator.SetParentTransform(m_progressBar.transform);
     //    progressBarFillAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
     //    progressBarFillAnimator.SetPosition(new Vector3(-0.5f * progressBarWidth, 0, -1));
     //    progressBarFillAnimator.SetColor(Color.white);
 
     //    //completion info
     //    m_progressBarCompletionTextObject = Instantiate(m_textMeshPfb);
-    //    m_progressBarCompletionTextObject.transform.parent = m_progressBar.transform;
 
     //    TextMesh completionTextMesh = m_progressBarCompletionTextObject.GetComponent<TextMesh>();
     //    completionTextMesh.text = (0.5f * 100) + "% " + LanguageUtils.GetTranslationForTag("progress_bar_completion");
 
     //    TextMeshAnimator completionTextAnimator = m_progressBarCompletionTextObject.GetComponent<TextMeshAnimator>();
     //    float fontHeight = 0.33f * bgRenderer.m_triangleEdgeLength;
+    //    completionTextAnimator.SetParentTransform(m_progressBar.transform);
     //    completionTextAnimator.SetFontHeight(fontHeight);
     //    completionTextAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
     //    completionTextAnimator.SetPosition(new Vector3(0.5f * progressBarWidth, -0.5f * progressBarHeight - fontHeight - 8.0f, 0));
@@ -272,12 +272,12 @@ public class ChapterSlot : BaseSlot
     {
         GameObject fadingHexagonObject = (GameObject)Instantiate(m_blurryContourObject); //instantiate a second contour that will serve as a fading object
         fadingHexagonObject.name = "FadingHexagon";
-        fadingHexagonObject.transform.parent = this.transform;
 
         UVQuad fadingHexagon = fadingHexagonObject.GetComponent<UVQuad>();
         fadingHexagon.Init(Instantiate(m_glowContourMaterial));
 
         TexturedQuadAnimator fadingHexagonAnimator = fadingHexagonObject.GetComponent<TexturedQuadAnimator>();
+        fadingHexagonAnimator.SetParentTransform(this.transform);
         fadingHexagonAnimator.SetScale(m_blurryContourScale);
         fadingHexagonAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
         fadingHexagonAnimator.SetOpacity(1); //for the moment hide the fading hexagon

@@ -191,17 +191,22 @@ public class CircleMeshAnimator : GameObjectAnimator
     /***
      * Callbacks
      * */
-
     public virtual void OnFinishAnimatingInnerRadius()
     {
         if (m_innerRadiusAnimationDestroyOnFinish)
-            Destroy(this.gameObject);  
+        {
+            OnPreDestroyObject();
+            Destroy(this.gameObject);
+        }
     }
 
     public virtual void OnFinishAnimatingOuterRadius()
     {
         if (m_outerRadiusAnimationDestroyOnFinish)
+        {
+            OnPreDestroyObject();
             Destroy(this.gameObject);
+        }
     }
 
     protected override void Update()

@@ -90,8 +90,9 @@ public class SegmentTree : MonoBehaviour
             SegmentTreeNode childNode = node.m_children[iChildIdx];
 
             GameObject segmentObject = (GameObject)Instantiate(m_segmentObjectPfb);
-            segmentObject.transform.parent = m_parentHolder.transform;
             TexturedSegment segment = segmentObject.GetComponent<TexturedSegment>();
+            TexturedSegmentAnimator segmentAnimator = segmentObject.GetComponent<TexturedSegmentAnimator>();
+            segmentAnimator.SetParentTransform(m_parentHolder.transform);
 
             if (bAnimated)
             {                
@@ -103,7 +104,7 @@ public class SegmentTree : MonoBehaviour
                               TextureWrapMode.Clamp);
 
                 float distanceToCover = (childNode.m_position - node.m_position).magnitude;
-                TexturedSegmentAnimator segmentAnimator = segmentObject.GetComponent<TexturedSegmentAnimator>();
+                
                 segmentAnimator.TranslatePointBTo(childNode.m_position, distanceToCover / segmentGrowSpeed);
 
                 node.m_active = false;
