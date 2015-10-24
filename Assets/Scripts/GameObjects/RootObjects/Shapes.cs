@@ -69,7 +69,6 @@ public class Shapes : MonoBehaviour
     {
         GameObject shapeObject = shape.m_parentMesh.gameObject;
         GameObjectAnimator shapeAnimator = shapeObject.GetComponent<GameObjectAnimator>();
-        shapeAnimator.OnPreDestroyObject();
         Destroy(shapeObject, delay);
     }
 

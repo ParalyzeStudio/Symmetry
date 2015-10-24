@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class GUITouchHandler : TouchHandler
 {
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
-        {            
-            GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
+        {
+            GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();          
 
             for (int i = 0; i != allButtons.Length; i++)
             {
@@ -165,7 +166,7 @@ public class GUITouchHandler : TouchHandler
 
         if (!HandleClickOnChildGUIButtons(chapters.gameObject, clickLocation))
         {
-            BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+            BackgroundTrianglesRenderer bgRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
             float triangleHeight = bgRenderer.m_triangleHeight;
 
             if (clickLocation.x >= -4 * triangleHeight && clickLocation.x <= 4 * triangleHeight &&

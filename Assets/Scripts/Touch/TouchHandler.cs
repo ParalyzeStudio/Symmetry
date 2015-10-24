@@ -212,7 +212,7 @@ public class TouchHandler : MonoBehaviour
     public BackgroundTrianglesRenderer GetBackgroundRenderer()
     {
         if (m_backgroundRenderer == null)
-            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
 
         return m_backgroundRenderer;
     }

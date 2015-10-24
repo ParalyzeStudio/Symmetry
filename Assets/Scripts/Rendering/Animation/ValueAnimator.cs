@@ -18,8 +18,6 @@ public class ValueAnimator : MonoBehaviour
         TSB = 2
     }
 
-    private List<ValueAnimator> m_childAnimators; 
-
     //Variables to handle fading
     protected bool m_fading;
     public float m_opacity;
@@ -98,45 +96,12 @@ public class ValueAnimator : MonoBehaviour
         m_prevColor = m_color;
     }
 
-
-    private void CreateChildAnimatorsListIfNull()
-    {
-        if (m_childAnimators == null)
-            m_childAnimators = new List<ValueAnimator>();
-    }
-
-    public void AddChildAnimator(ValueAnimator animator)
-    {
-        CreateChildAnimatorsListIfNull();
-        m_childAnimators.Add(animator);
-    }
-
-    public void RemoveChildAnimator(ValueAnimator animator)
-    {
-        if (m_childAnimators != null)
-            m_childAnimators.Remove(animator);
-    }
-
     /**
      * Set this animator and the related GameObject as a child of the object passed as parameter
      * **/
     public void SetParentTransform(Transform parentTransform)
     {
         this.gameObject.transform.parent = parentTransform;
-        ValueAnimator parentAnimator = parentTransform.gameObject.GetComponent<ValueAnimator>();
-        if (parentAnimator != null)
-            parentAnimator.AddChildAnimator(this);
-    }
-
-    /**
-     * Remove this animator from the list of its parent chid animators
-     * **/
-    public void DetachFromParent()
-    {
-        Transform parentTransform = this.gameObject.transform.parent;
-        ValueAnimator parentAnimator = parentTransform.gameObject.GetComponent<ValueAnimator>();
-        if (parentAnimator != null)
-            parentAnimator.RemoveChildAnimator(this);
     }
 
     public void FadeTo(float toOpacity, float duration, float delay = 0.0f, InterpolationType interpolType = InterpolationType.LINEAR, bool bDestroyObjectOnFinish = false)
@@ -218,11 +183,13 @@ public class ValueAnimator : MonoBehaviour
         m_prevColor.a = fOpacity;
         OnOpacityChanged();
 
-        if (bPassOnChildren && m_childAnimators != null)
+        ValueAnimator[] childAnimators = this.GetComponentsInChildren<ValueAnimator>();
+
+        if (bPassOnChildren && childAnimators != null)
         {
-            for (int i = 0; i != m_childAnimators.Count; i++)
+            for (int i = 0; i != childAnimators.Length; i++)
             {
-                ValueAnimator childAnimator = m_childAnimators[i];
+                ValueAnimator childAnimator = childAnimators[i];
                 if (childAnimator != this)
                 {
                     childAnimator.SetOpacity(fOpacity, false); //do not pass to this object's children because they are already in the list of childAnimators
@@ -352,7 +319,6 @@ public class ValueAnimator : MonoBehaviour
     {
         if (m_destroyObjectOnFinishFading)
         {
-            OnPreDestroyObject();
             Destroy(this.gameObject);
         }
     }
@@ -361,7 +327,6 @@ public class ValueAnimator : MonoBehaviour
     {
         if (m_destroyObjectOnFinishTranslating)
         {
-            OnPreDestroyObject();
             Destroy(this.gameObject);
         }
     }
@@ -579,17 +544,6 @@ public class ValueAnimator : MonoBehaviour
     }
 
     /**
-     * Call this method before destroying an object
-     * It will remove the animator of 'this' object from its parent child animator list
-     * **/
-    public void OnPreDestroyObject()
-    {
-        ValueAnimator parentAnimator = this.transform.parent.GetComponent<ValueAnimator>();
-        if (parentAnimator != null)
-            parentAnimator.RemoveChildAnimator(this);
-    }
-
-    /**
      * Getters for global instances
      * **/
     public GUIManager GetGUIManager()
@@ -603,7 +557,7 @@ public class ValueAnimator : MonoBehaviour
     public BackgroundTrianglesRenderer GetBackgroundRenderer()
     {
         if (m_backgroundRenderer == null)
-            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponentInChildren<BackgroundTrianglesRenderer>();
+            m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
 
         return m_backgroundRenderer;
     }

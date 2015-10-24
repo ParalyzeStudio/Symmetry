@@ -195,7 +195,6 @@ public class CircleMeshAnimator : GameObjectAnimator
     {
         if (m_innerRadiusAnimationDestroyOnFinish)
         {
-            OnPreDestroyObject();
             Destroy(this.gameObject);
         }
     }
@@ -204,7 +203,6 @@ public class CircleMeshAnimator : GameObjectAnimator
     {
         if (m_outerRadiusAnimationDestroyOnFinish)
         {
-            OnPreDestroyObject();
             Destroy(this.gameObject);
         }
     }

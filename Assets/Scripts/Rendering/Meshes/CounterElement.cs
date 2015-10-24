@@ -110,7 +110,6 @@ public class CounterElement : MonoBehaviour
         //check previous status and remove overlay if CounterElementStatus.CURRENT
         if (m_prevStatus == CounterElementStatus.CURRENT)
         {
-            m_overlay.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
             Destroy(m_overlay);
         }
 
@@ -126,7 +125,6 @@ public class CounterElement : MonoBehaviour
             m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
             if (m_overlay != null)
             {
-                m_overlay.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_overlay);
                 m_overlay = null;
             }

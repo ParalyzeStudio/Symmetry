@@ -23,7 +23,6 @@ public class AxisRenderer : MonoBehaviour
     public float m_snapDistance;
 
     private GameScene m_gameScene;
-    private Shapes m_shapesHolder;
 
     //Type of the axis
     public enum AxisType
@@ -422,7 +421,6 @@ public class AxisRenderer : MonoBehaviour
         }
 
         //Destroy ribbon
-        m_ribbonMesh.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
         Destroy(m_ribbonMesh.gameObject);
 
         //Start sweeping
@@ -467,10 +465,7 @@ public class AxisRenderer : MonoBehaviour
 
     private Shapes GetShapesHolder()
     {
-        if (m_shapesHolder == null)
-            m_shapesHolder = GetGameScene().GetComponentInChildren<Shapes>();
-
-        return m_shapesHolder;
+        return GetGameScene().m_shapesHolder;
     }
 
     public void Update()
@@ -495,7 +490,6 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_leftSweepingLine = null;
                 m_sweepingLeft = false;
-                m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_debugLeftSweepLineObject);
                 m_debugLeftSweepLineObject = null;
             }
@@ -518,7 +512,6 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_rightSweepingLine = null;
                 m_sweepingRight = false;
-                m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
                 Destroy(m_debugRightSweepLineObject);
                 m_debugRightSweepLineObject = null;
             }

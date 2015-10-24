@@ -105,9 +105,6 @@ public class GUIManager : MonoBehaviour
         //Set the size of the button skin
         button.SetSize(size);
 
-        //add an animator
-        buttonObject.AddComponent<GameObjectAnimator>();
-
         return buttonObject;
     }
 
@@ -278,7 +275,6 @@ public class GUIManager : MonoBehaviour
         }
         else
         {
-            sideButtonsHolderAnimator.OnPreDestroyObject();
             Destroy(m_sideButtonsHolder);
         }
     }

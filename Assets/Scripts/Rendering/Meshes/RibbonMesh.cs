@@ -13,7 +13,6 @@ public class RibbonMesh : ColorMesh
     public Shape m_ribbonLeftSubShape { get; set; }
     public Shape m_ribbonRightSubShape { get; set; }
 
-    private Grid m_grid;
     private Color m_color; //the color set by the animator (read-only)
 
     public enum PointSorting
@@ -274,9 +273,7 @@ public class RibbonMesh : ColorMesh
 
     private Grid GetGrid()
     {
-        if (m_grid == null)
-            m_grid = ((GameScene) (GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene)).GetComponentInChildren<Grid>();
-
-        return m_grid;
+        GameScene gameScene = this.transform.parent.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
+        return gameScene.m_grid;
     }
 }

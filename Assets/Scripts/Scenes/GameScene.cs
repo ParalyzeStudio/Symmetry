@@ -264,7 +264,7 @@ public class GameScene : GUIScene
         gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
 
         //Voxel grid       
-        m_voxelGrid = gridObject.GetComponentInChildren<ShapeVoxelGrid>();
+        m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
         m_voxelGrid.Init(8);
     }
 

@@ -104,7 +104,6 @@ public class SceneManager : MonoBehaviour
             m_currentScene.Dismiss(fDuration, fDelay);
         else
         {
-            m_currentScene.GetComponent<GameObjectAnimator>().OnPreDestroyObject();
             Destroy(m_currentScene.gameObject);
         }
 

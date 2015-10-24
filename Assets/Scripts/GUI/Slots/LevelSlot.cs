@@ -33,7 +33,6 @@ public class LevelSlot : BaseSlot
         }
         else
         {
-            slotBgAnimator.OnPreDestroyObject();
             Destroy(m_background);
             m_background = null;
         }
