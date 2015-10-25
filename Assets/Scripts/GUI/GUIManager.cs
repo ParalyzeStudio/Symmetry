@@ -262,6 +262,9 @@ public class GUIManager : MonoBehaviour
 
     public void DismissSideButtons(bool bAnimated = true)
     {
+        if (m_sideButtonsHolder == null) //this case may happen when we start directly from a scene different than MainMenu scene (debug)
+            return;
+
         GameObjectAnimator sideButtonsHolderAnimator = m_sideButtonsHolder.GetComponent<GameObjectAnimator>();
         if (bAnimated)
         {

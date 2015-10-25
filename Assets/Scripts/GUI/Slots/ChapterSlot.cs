@@ -14,12 +14,12 @@ public class ChapterSlot : BaseSlot
     public GameObject m_chapterNumberText;
 
     public Material m_glowContourMaterial;
-
     private Vector2 m_blurryContourScale;
+
+    private bool m_slotDismissed;
 
     //hexagons growing and fading around chapter slot if chapter is unlocked
     private GameObject m_blurryContourObject;
-    //private bool m_generatingFadingHexagons;
     private float m_fadingHexagonsGenerationTimeInterval;
     private float m_fadingHexagonsGenerationElapsedTime;
 
@@ -184,6 +184,7 @@ public class ChapterSlot : BaseSlot
     public override void Show()
     {
         base.Show();
+        m_slotDismissed = false;
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
         slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 100.0f, 0), 0.5f);
@@ -192,27 +193,31 @@ public class ChapterSlot : BaseSlot
     public override void Dismiss()
     {
         base.Dismiss();
+        m_slotDismissed = true;
+
+        //detach the slot from its parent scene
+        this.transform.parent = null;
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 100.0f, 0), 0.5f);
+        slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 800.0f, 0), 4.0f);
     }
 
     /**
      * Fade out the information inside the chapter slot with eventually the background
      * **/
-    public void DismissChapterSlot()
-    {
-        //translate the slot up
-        float translationLength = 200.0f;
-        GameObjectAnimator slotBackgroundAnimator = m_background.GetComponent<GameObjectAnimator>();
-        slotBackgroundAnimator.TranslateTo(slotBackgroundAnimator.GetPosition() + new Vector3(0, translationLength, 0), 0.5f);
-        GameObjectAnimator slotInfoContainerAnimator = m_infoContainer.GetComponent<GameObjectAnimator>();
-        slotInfoContainerAnimator.TranslateTo(slotInfoContainerAnimator.GetPosition() + new Vector3(0, translationLength, 0), 0.5f);
+    //public void DismissChapterSlot()
+    //{
+    //    //translate the slot up
+    //    float translationLength = 200.0f;
+    //    GameObjectAnimator slotBackgroundAnimator = m_background.GetComponent<GameObjectAnimator>();
+    //    slotBackgroundAnimator.TranslateTo(slotBackgroundAnimator.GetPosition() + new Vector3(0, translationLength, 0), 0.5f);
+    //    GameObjectAnimator slotInfoContainerAnimator = m_infoContainer.GetComponent<GameObjectAnimator>();
+    //    slotInfoContainerAnimator.TranslateTo(slotInfoContainerAnimator.GetPosition() + new Vector3(0, translationLength, 0), 0.5f);
 
-        DismissSlotBackground(true);
-        DismissSlotContour(true);
-        DismissSlotInformation(true);
-    }
+    //    DismissSlotBackground(true);
+    //    DismissSlotContour(true);
+    //    DismissSlotInformation(true);
+    //}
 
     public override void ShowSlotBackground()
     {
@@ -325,7 +330,7 @@ public class ChapterSlot : BaseSlot
 
         int chapterNumber = ((Chapters)m_parentScene).m_displayedChapterIndex + 1;
         Chapter displayedChapter = m_parentScene.GetLevelManager().GetChapterForNumber(chapterNumber);
-        if (!displayedChapter.IsLocked()) //chapter unlocked, generate fading hexagons
+        if (!displayedChapter.IsLocked() && !m_slotDismissed) //chapter unlocked, generate fading hexagons
         {
             if (m_fadingHexagonsGenerationElapsedTime > m_fadingHexagonsGenerationTimeInterval)
             {

@@ -33,6 +33,7 @@ public class LevelSlot : BaseSlot
         }
         else
         {
+            m_background.transform.parent = null;
             Destroy(m_background);
             m_background = null;
         }
@@ -82,8 +83,8 @@ public class LevelSlot : BaseSlot
         slotAnimator.SetOpacity(0);
 
         float localDelay = (m_levelNumber - 1) * 0.025f;
-        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 1.0f, localDelay);
-        //slotAnimator.FadeTo(1.0f, 0.5f, localDelay);
+        slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.5f, localDelay);
+        slotAnimator.FadeTo(1.0f, 0.5f, localDelay);
     }
 
     public override void Dismiss()

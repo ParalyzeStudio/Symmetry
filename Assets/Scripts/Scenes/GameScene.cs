@@ -207,7 +207,6 @@ public class GameScene : GUIScene
     {
         //Display the grid
         ShowGrid();
-        Debug.Log("Grid built");
 
         //Display interface buttons (pause, retry and hints)
         ShowInterfaceButtons();
@@ -255,17 +254,17 @@ public class GameScene : GUIScene
         GameObject gridObject = (GameObject)Instantiate(m_gridPfb);
         gridObject.name = "Grid";
         m_grid = gridObject.GetComponent<Grid>();
-        m_grid.Build();
-
-        GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
-        gridAnimator.SetParentTransform(this.transform);
-        gridAnimator.SetOpacity(0);
-        gridAnimator.FadeTo(1, 1.0f, fDelay);
-        gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
+        m_grid.Build();        
 
         //Voxel grid       
         m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
         m_voxelGrid.Init(8);
+
+        GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
+        gridAnimator.SetParentTransform(this.transform);
+        gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
+        gridAnimator.SetOpacity(0);
+        gridAnimator.FadeTo(1, 1.5f, fDelay);
     }
 
     /**
@@ -441,7 +440,7 @@ public class GameScene : GUIScene
         outlinesAnimator.SetParentTransform(this.transform);
         outlinesAnimator.SetOpacity(0);
         outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
-        m_outlines.Show(true, 1.0f, fDelay);
+        m_outlines.Show(true, 1.5f, fDelay);
     }
 
     /**
@@ -604,6 +603,7 @@ public class GameScene : GUIScene
         GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetParentTransform(this.transform);
         shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
+        shapesAnimator.SetOpacity(0);
         shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
 
         //m_voxelGrid.Refresh();

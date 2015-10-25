@@ -27,8 +27,8 @@ public class Levels : GUIScene
     public override void Show()
     {
         base.Show();
-        
-        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowLevelsSlots), 1.0f);        
+
+        ShowLevelsSlots();  
     }
 
     /**
