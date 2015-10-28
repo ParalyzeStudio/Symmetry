@@ -205,17 +205,19 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_MENU_BUTTON)
         {
+            Debug.Log("CLICK MENU");
             //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
             //guiManager.ShowPauseWindow();
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
-            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.5f);
+            Debug.Log("CLICK RETRY");
+            //SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.5f);
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {
-            Debug.Log("HINTS");
+            Debug.Log("CLICK HINTS");
         }
         else if (m_ID == GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
         {

@@ -23,9 +23,9 @@ public class RibbonMesh : ColorMesh
         DESCENDING_Y = 4
     }
 
-    public override void Init()
+    public override void Init(Material material = null)
     {
-        base.Init();
+        base.Init(material);
         m_mesh.name = "RibbonMesh";
     }
 

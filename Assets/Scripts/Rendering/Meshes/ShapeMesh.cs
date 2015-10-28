@@ -25,9 +25,9 @@ public class ShapeMesh : TexturedMesh
 
     private GameScene m_gameScene; //global instance of the Shapes holder
 
-    public override void Init()
+    public override void Init(Material material = null)
     {
-        base.Init();
+        base.Init(material);
         m_mesh.name = "ShapeMesh";
     }
 

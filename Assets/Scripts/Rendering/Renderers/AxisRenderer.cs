@@ -5,6 +5,8 @@ public class AxisRenderer : MonoBehaviour
 {
     public const float SWEEP_LINE_SPEED = 500.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
+    private const float AXIS_ENDPOINT_INNER_RADIUS = 30.0f;
+    private const float AXIS_ENDPOINT_CIRCLE_THICKNESS = 4.0f;
 
     //Shared prefabs
     public Material m_plainWhiteMaterial;
@@ -14,6 +16,8 @@ public class AxisRenderer : MonoBehaviour
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
+    public GameObject m_endpoint1Circle { get; set; }
+    public GameObject m_endpoint2Circle { get; set; }
     public Vector2 m_endpoint1Position { get; set; } //the world position of the first endpoint
     public Vector2 m_endpoint2Position { get; set; } //the world position of the second endpoint
     public Vector2 m_endpoint1GridPosition { get; set; } //the grid position of the first endpoint
@@ -158,6 +162,19 @@ public class AxisRenderer : MonoBehaviour
         endpoint1Animator.SetColor(Color.white);
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
 
+        //endpoint 1 circle
+        m_endpoint1Circle = (GameObject)Instantiate(m_circleMeshPfb);
+        m_endpoint1Circle.name = "AxisEndpoint1Circle";
+        CircleMesh endpoint1CircleMesh = m_endpoint1Circle.GetComponent<CircleMesh>();
+        endpoint1CircleMesh.Init(axisMaterial);
+        CircleMeshAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<CircleMeshAnimator>();
+        endpoint1CircleAnimator.SetParentTransform(this.transform);
+        endpoint1CircleAnimator.SetNumSegments(64, false);
+        endpoint1CircleAnimator.SetInnerRadius(AXIS_ENDPOINT_INNER_RADIUS, false);
+        endpoint1CircleAnimator.SetOuterRadius(AXIS_ENDPOINT_INNER_RADIUS + AXIS_ENDPOINT_CIRCLE_THICKNESS, true);
+        endpoint1CircleAnimator.SetColor(Color.white);
+        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
+
         //endpoint 2
         m_endpoint2 = (GameObject)Instantiate(m_circleMeshPfb);        
         m_endpoint2.name = "AxisEndpoint2";
@@ -170,6 +187,19 @@ public class AxisRenderer : MonoBehaviour
         endpoint2Animator.SetOuterRadius(8, true);
         endpoint2Animator.SetColor(Color.white);
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+
+        //endpoint 2 circle
+        m_endpoint2Circle = (GameObject)Instantiate(m_circleMeshPfb);
+        m_endpoint2Circle.name = "AxisEndpoint2Circle";
+        CircleMesh endpoint2CircleMesh = m_endpoint2Circle.GetComponent<CircleMesh>();
+        endpoint2CircleMesh.Init(axisMaterial);
+        CircleMeshAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<CircleMeshAnimator>();
+        endpoint2CircleAnimator.SetParentTransform(this.transform);
+        endpoint2CircleAnimator.SetNumSegments(64, false);
+        endpoint2CircleAnimator.SetInnerRadius(AXIS_ENDPOINT_INNER_RADIUS, false);
+        endpoint2CircleAnimator.SetOuterRadius(AXIS_ENDPOINT_INNER_RADIUS + AXIS_ENDPOINT_CIRCLE_THICKNESS, true);
+        endpoint2CircleAnimator.SetColor(Color.white);
+        endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
 
         //ribbon
         CreateRibbon();
@@ -214,10 +244,14 @@ public class AxisRenderer : MonoBehaviour
         m_axisSegment.SetPointB(m_endpoint2Position, true);
         
         //Set correct position for both endpoints
-        GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();        
         GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<GameObjectAnimator>();
+        GameObjectAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<GameObjectAnimator>();
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
+        endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
 
         //render ribbon if axis is not too small
         if ((m_endpoint1Position - m_endpoint2Position).sqrMagnitude > 10.0f)
@@ -233,11 +267,7 @@ public class AxisRenderer : MonoBehaviour
         ribbonObject.name = "Ribbon";
 
         m_ribbonMesh = ribbonObject.GetComponent<RibbonMesh>();
-        m_ribbonMesh.Init();
-
-        //Set a simple material on the ribbon
-        MeshRenderer ribbonRenderer = ribbonObject.GetComponent<MeshRenderer>();
-        ribbonRenderer.material = Instantiate(m_ribbonMaterial);
+        m_ribbonMesh.Init(Instantiate(m_ribbonMaterial));
 
         //Set the color of the ribbon
         RibbonAnimator ribbonAnimator = ribbonObject.GetComponent<RibbonAnimator>();
@@ -422,6 +452,17 @@ public class AxisRenderer : MonoBehaviour
 
         //Destroy ribbon
         Destroy(m_ribbonMesh.gameObject);
+
+        //Fade out and scale up axis endpoint circles
+        float scaleToInnerRadius = 2 * AXIS_ENDPOINT_INNER_RADIUS;
+        CircleMeshAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<CircleMeshAnimator>();
+        endpoint1CircleAnimator.FadeTo(0.0f, 1.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        endpoint1CircleAnimator.AnimateInnerRadiusTo(scaleToInnerRadius, 1.0f);
+        endpoint1CircleAnimator.AnimateOuterRadiusTo(scaleToInnerRadius + AXIS_ENDPOINT_CIRCLE_THICKNESS, 1.0f);
+        CircleMeshAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<CircleMeshAnimator>();
+        endpoint2CircleAnimator.FadeTo(0.0f, 1.0f);
+        endpoint2CircleAnimator.AnimateInnerRadiusTo(scaleToInnerRadius, 1.0f);
+        endpoint2CircleAnimator.AnimateOuterRadiusTo(scaleToInnerRadius + AXIS_ENDPOINT_CIRCLE_THICKNESS, 1.0f);
 
         //Start sweeping
         LaunchSweepingLines();

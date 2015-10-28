@@ -6,9 +6,9 @@ public class ColorMesh : BaseMesh
     protected List<Color> m_colors;
     public bool m_meshColorsDirty { get; set; }
 
-    public override void Init()
+    public override void Init(Material material = null)
     {
-        base.Init();
+        base.Init(material);
         m_mesh.name = "ColorMesh";
         m_colors = new List<Color>();
         m_meshColorsDirty = false;

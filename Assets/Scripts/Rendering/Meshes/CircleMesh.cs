@@ -3,20 +3,15 @@
 /**
  * Use this class to render a circle
  * **/
-public class CircleMesh : MonoBehaviour
+public class CircleMesh : ColorMesh
 {
     private float m_innerRadius;
     private int m_numSegments;
 
-    public void Init(Material material = null)
+    public override void Init(Material material = null)
     {
-        Mesh mesh = new Mesh();
-        mesh.name = "CircleMesh";
-
-        GetComponent<MeshFilter>().sharedMesh = mesh;
-
-        if (material != null)
-            GetComponent<MeshRenderer>().sharedMaterial = material;
+        base.Init(material);
+        m_mesh.name = "CircleMesh";
     }
 
     /** Render this circle as a polygon with a certain number of segments
@@ -29,13 +24,6 @@ public class CircleMesh : MonoBehaviour
 
         m_innerRadius = innerRadius;
         m_numSegments = numSegments;
-
-        Mesh circleMesh = GetComponent<MeshFilter>().sharedMesh;
-        if (circleMesh == null)
-        {
-            Init();
-            circleMesh = GetComponent<MeshFilter>().sharedMesh;
-        }
 
         Vector3[] meshVertices;
         int[] meshIndices;
@@ -106,9 +94,9 @@ public class CircleMesh : MonoBehaviour
         }
 
         //Build the actual mesh
-        circleMesh.Clear();
-        circleMesh.vertices = meshVertices;
-        circleMesh.triangles = meshIndices;
+        m_mesh.Clear();
+        m_mesh.vertices = meshVertices;
+        m_mesh.triangles = meshIndices;
 
         //set the circle color
         SetColor(color);

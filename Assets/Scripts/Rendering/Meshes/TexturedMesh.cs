@@ -6,9 +6,9 @@ public class TexturedMesh : ColorMesh
     protected List<Vector2> m_UVs;
     public bool m_meshUVsDirty { get; set; }
 
-    public override void Init()
+    public override void Init(Material material = null)
     {
-        base.Init();
+        base.Init(material);
         m_mesh.name = "TexturedMesh";
         m_UVs = new List<Vector2>();
         m_meshUVsDirty = false;

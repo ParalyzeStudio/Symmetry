@@ -358,6 +358,9 @@ public class GameScene : GUIScene
         GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
         pauseButtonObject.name = "PauseButton";
 
+        GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();
+        pauseButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+
         GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
         pauseButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
         float pauseButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight;
@@ -369,6 +372,9 @@ public class GameScene : GUIScene
         GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
         retryButtonObject.name = "RetryButton";
 
+        GUIButton retryButton = retryButtonObject.GetComponent<GUIButton>();
+        retryButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+
         GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
         retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
         float retryButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight - 4.0f; //offset a bit the texture, otherwise it gives a weird impression
@@ -377,10 +383,13 @@ public class GameScene : GUIScene
         retryButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
 
         //hints
-        GameObject hintsuttonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
-        hintsuttonObject.name = "HintsButton";
+        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
+        hintsButtonObject.name = "HintsButton";
 
-        GameObjectAnimator hintsButtonAnimator = hintsuttonObject.GetComponent<GameObjectAnimator>();
+        GUIButton hintsButton = hintsButtonObject.GetComponent<GUIButton>();
+        hintsButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+
+        GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
         hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
         float hintsButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight;
         float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;

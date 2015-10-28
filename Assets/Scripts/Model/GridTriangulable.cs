@@ -31,7 +31,6 @@ public class GridTriangulable : Triangulable
 
     public void TogglePointMode()
     {
-        Debug.Log("TogglePointMode");
         m_gridPointMode = !m_gridPointMode;
         SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
         GameScene gameScene = (GameScene) sceneManager.m_currentScene;

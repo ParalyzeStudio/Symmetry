@@ -19,7 +19,7 @@ public class BaseMesh : MonoBehaviour
     public bool m_meshVerticesDirty { get; set; }
     public bool m_meshIndicesDirty { get; set; }
 
-    public virtual void Init()
+    public virtual void Init(Material material = null)
     {
         m_mesh = new Mesh();
         m_mesh.name = "BaseMesh";
@@ -31,6 +31,9 @@ public class BaseMesh : MonoBehaviour
 
         m_meshVerticesDirty = false;
         m_meshIndicesDirty = false;
+
+        if (material != null)
+            this.GetComponent<MeshRenderer>().sharedMaterial = material;
     }
 
     protected virtual void ClearMesh()

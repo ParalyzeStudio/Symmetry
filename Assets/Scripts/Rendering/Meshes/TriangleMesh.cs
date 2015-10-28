@@ -1,16 +1,11 @@
 ﻿using UnityEngine;
 
-public class TriangleMesh : MonoBehaviour
+public class TriangleMesh : ColorMesh
 {
-    public void Init(Material material = null)
+    public override void Init(Material material = null)
     {
-        Mesh mesh = new Mesh();
-        mesh.name = "TriangleMesh";
-
-        GetComponent<MeshFilter>().sharedMesh = mesh;
-
-        if (material != null)
-            GetComponent<MeshRenderer>().sharedMaterial = material;
+        base.Init(material);
+        m_mesh.name = "TriangleMesh";
     }
 
     /** Render this triangle

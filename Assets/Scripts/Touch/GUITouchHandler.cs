@@ -82,13 +82,13 @@ public class GUITouchHandler : TouchHandler
         
         //Translate of a even number of triangles
         int numTrianglesPerColumn = GetBackgroundRenderer().m_numTrianglesPerColumn;
-        int translationLengthInTriangleUnits = Mathf.RoundToInt(0.6f * numTrianglesPerColumn);
+        int translationLengthInTriangleUnits = Mathf.RoundToInt(0.3f * numTrianglesPerColumn);
         if (translationLengthInTriangleUnits % 2 == 1) //make it even
             translationLengthInTriangleUnits += 1;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
         animator.TranslateTo(new Vector3(0, translationLengthInTriangleUnits * triangleEdgeLength, 0), 0.1f, 5.0f);
 
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 5.0f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 5.1f);
     }
 
     /**
