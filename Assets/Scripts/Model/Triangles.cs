@@ -825,44 +825,70 @@ public class BackgroundTriangle : BaseTriangle
         m_color = color;
         SetInnerTriangleColor(color);
 
+
+        //recalculate the color of the edge separating the two neighbors
+        this.InvalidateEdge1Color();
         if (m_edge1Neighbor != null)
-        {
-            //recalculate the color of the edge separating the two neighbors
-            this.SetEdge1Neighbor(m_edge1Neighbor);
-            m_edge1Neighbor.SetEdge1Neighbor(this);
-        }
+            m_edge1Neighbor.InvalidateEdge1Color();
+
+        //recalculate the color of the edge separating the two neighbors
+        this.InvalidateEdge2Color();
         if (m_edge2Neighbor != null)
-        {
-            //recalculate the color of the edge separating the two neighbors
-            this.SetEdge2Neighbor(m_edge2Neighbor);
-            m_edge2Neighbor.SetEdge2Neighbor(this);
-        }
+            m_edge2Neighbor.InvalidateEdge2Color();
+
+        //recalculate the color of the edge separating the two neighbors
+        this.InvalidateEdge3Color();
         if (m_edge3Neighbor != null)
-        {
-            //recalculate the color of the edge separating the two neighbors
-            this.SetEdge3Neighbor(m_edge3Neighbor);
-            m_edge3Neighbor.SetEdge3Neighbor(this);
-        }
+            m_edge3Neighbor.InvalidateEdge3Color();
 
         m_parentColumn.m_parentRenderer.m_meshColorsDirty = true;
     }
 
+    /**
+     * Set the triangle that share this triangle edge 1 as a neighbor
+     * **/
     public void SetEdge1Neighbor(BackgroundTriangle neighbor)
     {
         m_edge1Neighbor = neighbor;
-        Color edgeColor;
-        if (neighbor != null)
-        {
-            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+        InvalidateEdge1Color();
+    }
 
-            edgeColor = ColorUtils.IntensifyColorChannels(edgeColor, 
-                                                          true, 
-                                                          true, 
-                                                          true, 
-                                                          Mathf.Clamp(rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 0, 1), 
+    /**
+     * Set the triangle that share this triangle edge 2 as a neighbor
+     * **/
+    public void SetEdge2Neighbor(BackgroundTriangle neighbor)
+    {
+        m_edge2Neighbor = neighbor;
+        InvalidateEdge2Color();
+    }
+
+    /**
+     * Set the triangle that share this triangle edge 3 as a neighbor
+     * **/
+    public void SetEdge3Neighbor(BackgroundTriangle neighbor)
+    {
+        m_edge3Neighbor = neighbor;
+        InvalidateEdge3Color();
+    }
+
+    /**
+     * Recalculate the color of the edge1 based on the color of the relevant neighbor
+     * **/
+    private void InvalidateEdge1Color()
+    {
+        Color edgeColor;
+        if (m_edge1Neighbor != null)
+        {
+            float rDist = Mathf.Abs(m_edge1Neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(m_edge1Neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(m_edge1Neighbor.m_color.b - this.m_color.b);
+            edgeColor = 0.5f * (m_edge1Neighbor.m_color + this.m_color);
+
+            edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
+                                                          true,
+                                                          true,
+                                                          true,
+                                                          Mathf.Clamp(rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 0, 1),
                                                           Mathf.Clamp(gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 0, 1),
                                                           Mathf.Clamp(bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b, 0, 1));
         }
@@ -872,24 +898,26 @@ public class BackgroundTriangle : BaseTriangle
         SetEdge1Color(edgeColor);
     }
 
-    public void SetEdge2Neighbor(BackgroundTriangle neighbor)
+    /**
+     * Recalculate the color of the edge2 based on the color of the relevant neighbor
+     * **/
+    private void InvalidateEdge2Color()
     {
-        m_edge2Neighbor = neighbor;
         Color edgeColor;
-        if (neighbor != null)
+        if (m_edge2Neighbor != null)
         {
-            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+            float rDist = Mathf.Abs(m_edge2Neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(m_edge2Neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(m_edge2Neighbor.m_color.b - this.m_color.b);
+            edgeColor = 0.5f * (m_edge2Neighbor.m_color + this.m_color);
 
             edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
                                                           true,
                                                           true,
                                                           true,
-                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r,
-                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g,
-                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
+                                                          Mathf.Clamp(rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 0, 1),
+                                                          Mathf.Clamp(gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 0, 1),
+                                                          Mathf.Clamp(bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b, 0, 1));
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
@@ -897,31 +925,36 @@ public class BackgroundTriangle : BaseTriangle
         SetEdge2Color(edgeColor);
     }
 
-    public void SetEdge3Neighbor(BackgroundTriangle neighbor)
+    /**
+     * Recalculate the color of the edge3 based on the color of the relevant neighbor
+     * **/
+    private void InvalidateEdge3Color()
     {
-        m_edge3Neighbor = neighbor;
         Color edgeColor;
-        if (neighbor != null)
+        if (m_edge3Neighbor != null)
         {
-            float rDist = Mathf.Abs(neighbor.m_color.r - this.m_color.r);
-            float gDist = Mathf.Abs(neighbor.m_color.g - this.m_color.g);
-            float bDist = Mathf.Abs(neighbor.m_color.b - this.m_color.b);
-            edgeColor = 0.5f * (neighbor.m_color + this.m_color);
+            float rDist = Mathf.Abs(m_edge3Neighbor.m_color.r - this.m_color.r);
+            float gDist = Mathf.Abs(m_edge3Neighbor.m_color.g - this.m_color.g);
+            float bDist = Mathf.Abs(m_edge3Neighbor.m_color.b - this.m_color.b);
+            edgeColor = 0.5f * (m_edge3Neighbor.m_color + this.m_color);
 
             edgeColor = ColorUtils.IntensifyColorChannels(edgeColor,
                                                           true,
                                                           true,
                                                           true,
-                                                          rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r,
-                                                          gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g,
-                                                          bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b);
+                                                          Mathf.Clamp(rDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.r, 0, 1),
+                                                          Mathf.Clamp(gDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.g, 0, 1),
+                                                          Mathf.Clamp(bDist * EDGE_COLOR_INTENSIFY_FACTOR * edgeColor.b, 0, 1));
         }
         else
             edgeColor = m_color; //set the edge color the same as the inner triangle
-        
+
         SetEdge3Color(edgeColor);
     }
 
+    /**
+     * Modify the mesh colors arrays to apply the edge 1 color
+     * **/
     public void SetEdge1Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
@@ -933,6 +966,9 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge1FirstVerticesArrayIndex + 3] = color;
     }
 
+    /**
+     * Modify the mesh colors arrays to apply the edge 2 color
+     * **/
     public void SetEdge2Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
@@ -944,6 +980,9 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge2FirstVerticesArrayIndex + 3] = color;
     }
 
+    /**
+     * Modify the mesh colors arrays to apply the edge 3 color
+     * **/
     public void SetEdge3Color(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;
@@ -955,6 +994,9 @@ public class BackgroundTriangle : BaseTriangle
         parentRenderer.m_meshColors[edge3FirstVerticesArrayIndex + 3] = color;
     }
 
+    /**
+     * Modify the mesh colors arrays to apply the inner color of this triangle
+     * **/
     private void SetInnerTriangleColor(Color color)
     {
         BackgroundTrianglesRenderer parentRenderer = m_parentColumn.m_parentRenderer;

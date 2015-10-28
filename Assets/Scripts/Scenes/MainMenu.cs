@@ -482,8 +482,7 @@ public class MainMenu : GUIScene
         DismissTitle();
 
         //dismiss play button
-        DismissPlayButton();
-        
+        DismissPlayButton();        
     }
 
     public void Update()
