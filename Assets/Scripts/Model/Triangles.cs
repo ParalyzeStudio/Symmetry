@@ -296,7 +296,7 @@ public class BaseTriangle
     /**
      * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
      * **/
-    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP)
+    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
     {
         for (int i = 0; i != 3; i++)
         {

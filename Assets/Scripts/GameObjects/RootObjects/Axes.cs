@@ -30,6 +30,7 @@ public class Axes : MonoBehaviour
 
         //Set the symmetry type
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
+        symmetrizer.Init();
         GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
         symmetrizer.SetSymmetryTypeFromActionButtonID(parentScene.GetActionButtonID(ActionButton.Location.TOP));
 

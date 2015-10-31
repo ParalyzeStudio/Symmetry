@@ -47,10 +47,11 @@ public class GameController : MonoBehaviour
         bgRenderer.gameObject.transform.localPosition = new Vector3(0, 0, BackgroundTrianglesRenderer.BACKGROUND_TRIANGLES_Z_VALUE);
 
         m_levelManager.m_currentChapter = m_levelManager.m_chapters[0];
-        ShowMainMenu();
+        
+        //ShowMainMenu();
         //DebugShowChapters();
         //DebugShowLevels(1);
-        //DebugShowSpecificLevel(1, 8, false);
+        DebugShowSpecificLevel(1, 1, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;

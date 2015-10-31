@@ -194,16 +194,39 @@ public class ShapeMesh : TexturedMesh
      * **/
     private void OnMeshSwept()
     {
+        //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
+        GetGameScene().GetClippingManager();
+
+        GetGameScene().GetThreadedJobsManager().AddAndRunJob
+            (
+            new ThreadedJob
+                (
+                new ThreadedJob.ThreadFunction(PerformClippingOperationsOnMeshSwept),
+                null,
+                new ThreadedJob.ThreadFunction(MakeSweptShapeStatic)
+                )
+            );
+    }
+
+    private void PerformClippingOperationsOnMeshSwept()
+    {
         //render the shape with cropped previously
         if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
-            GetShapesHolder().PerformDifferenceOnOverlappedStaticShapeForShape(this.m_shapeData);
+            m_shapeData.PerformDifferenceOnOverlappedStaticShape();
 
         //Fusion the shape
-        bool bFusionOccured = GetShapesHolder().PerformFusionOnShape(this.m_shapeData);
+        bool bFusionOccured = m_shapeData.PerformFusion();
         if (bFusionOccured)
             m_shapeData.Triangulate();
+    }
 
-        //re-render this shape that grew if other static shapes fusion with it or stayed the same if no fusion occured
+    /**
+     * Re-render this shape that grew if other static shapes fusion with it or stayed the same if no fusion occured
+     * and make it static
+     * **/
+    private void MakeSweptShapeStatic()
+    {
+        Debug.Log("MakeSweptShapeStatic");
         DestroyCells();
         Render(false);
         m_shapeData.m_state = Shape.ShapeState.STATIC;
@@ -321,7 +344,7 @@ public class ShapeMesh : TexturedMesh
         return false;
     }
 
-    private GameScene GetGameScene()
+    public GameScene GetGameScene()
     {
         if (m_gameScene == null)
             m_gameScene = ((GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene);

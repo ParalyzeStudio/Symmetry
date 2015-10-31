@@ -19,6 +19,7 @@ public class Shape : GridTriangulable
     public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
 
     public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
+    private List<Shape> m_overlappedStaticShapeDiffShapes; //use a global member to store the result of the difference between this shape and overlapped static shape through threading
 
     public Shape(bool gridPointMode)
         : base(gridPointMode)
@@ -342,5 +343,50 @@ public class Shape : GridTriangulable
         }
 
         return holesWithOffset;
+    }
+
+    /**
+     * Calls recursively Shape.Fusion() on this shape and then on the shape resulting from previous fusion
+     * This way we are sure that the initial shape is fusionned to every shape that overlapped it at the beginning
+     * **/
+    public bool PerformFusion()
+    {
+        bool bFusionOccured = false;
+        bool bFusioning = false;
+        do
+        {
+            bFusioning = Fusion();
+            if (bFusioning)
+                bFusionOccured = true;
+        }
+        while (bFusioning);
+
+        return bFusionOccured;
+    }
+
+    /**
+     * Calculate the difference between the shape that we found overlapping 'this' shape and 'this' shape
+     * **/
+    public void PerformDifferenceOnOverlappedStaticShape()
+    {
+        m_overlappedStaticShapeDiffShapes = m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference);        
+    }
+
+    /**
+     * Called when thread has finished calculating the difference shapes on the current overlapped static shape
+     * **/
+    private void OnFinishDifferenceOnOverlappedStaticShape()
+    {
+        for (int i = 0; i != m_overlappedStaticShapeDiffShapes.Count; i++)
+        {
+            m_overlappedStaticShapeDiffShapes[i].m_state = Shape.ShapeState.STATIC;
+            m_parentMesh.GetShapesHolder().CreateShapeObjectFromData(m_overlappedStaticShapeDiffShapes[i], false);
+        }
+
+        //Destroy the old overlapped static shape
+        m_overlappedStaticShape.m_parentMesh.GetComponent<ShapeAnimator>().SetOpacity(0);//Set zero opacity on this shape during the time it is waiting for its destruction
+        m_parentMesh.GetShapesHolder().DestroyShapeObjectForShape(m_overlappedStaticShape, 0.5f); //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch
+        m_parentMesh.GetShapesHolder().m_shapes.Remove(m_overlappedStaticShape);
+        m_overlappedStaticShape = null;
     }
 }

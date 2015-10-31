@@ -62,6 +62,7 @@ public class GameScene : GUIScene
     public Material m_diagonalAxesMaterial;
 
     private ClippingManager m_clippingManager;
+    private ThreadedJobsManager m_threadedJobsManager;
 
     public void Init()
     {
@@ -70,7 +71,7 @@ public class GameScene : GUIScene
 
     public override void Show()
     {
-        base.Show();
+        base.Show();      
 
         //Gradient
         Chapter displayedChapter = GetLevelManager().m_currentChapter;
@@ -81,14 +82,18 @@ public class GameScene : GUIScene
                               displayedChapter.GetThemeColors()[0],
                               displayedChapter.GetThemeColors()[1]);
 
-        GetBackgroundRenderer().ApplyGradient(gradient,
-                                              0.02f,
-                                              true,
-                                              BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
-                                              0.5f,
-                                              0.0f,
-                                              0.0f,
-                                              false);
+        if (GetBackgroundRenderer().m_gradient == null)
+        {
+            GetBackgroundRenderer().ApplyGradient(gradient,
+                                                  0.02f,
+                                                  true,
+                                                  BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
+                                                  0.5f,
+                                                  0.0f,
+                                                  0.0f,
+                                                  false);
+        }
+
         //GameObject radialGradientBackground = Instantiate(m_radialGradientPfb);
 
         //GradientQuad gradientQuad = radialGradientBackground.GetComponent<GradientQuad>();
@@ -199,8 +204,6 @@ public class GameScene : GUIScene
         //}
         //sw.Stop();
         //Debug.Log("2>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
-
-
     }
 
     public void ShowElements()
@@ -240,6 +243,9 @@ public class GameScene : GUIScene
         skipLevelButtonAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 64.0f, 0, -10));
 
         m_gameStatus = GameStatus.RUNNING;
+
+        //Set up the ClippingManager
+        InitClippingManager();
     }
 
     /**
@@ -592,6 +598,7 @@ public class GameScene : GUIScene
         GameObject shapesHolderObject = (GameObject)Instantiate(m_shapesHolderPfb);
         shapesHolderObject.name = "Shapes";
         m_shapesHolder = shapesHolderObject.GetComponent<Shapes>();
+        m_shapesHolder.Init();
 
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
@@ -630,6 +637,31 @@ public class GameScene : GUIScene
         GameObjectAnimator axesAnimator = axesHolderObject.GetComponent<GameObjectAnimator>();
         axesAnimator.SetParentTransform(this.transform);
         axesAnimator.SetPosition(new Vector3(0, 0, AXES_Z_VALUE));
+    }
+
+    private void InitClippingManager()
+    {
+        m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+        m_clippingManager.Init();
+
+        //make a dummy clipping to speed up the next clipping
+        GetThreadedJobsManager().AddAndRunJob(new ThreadedJob(new ThreadedJob.ThreadFunction(MakeFirstDummyClippingOperation)));        
+    }
+
+    /**
+     * To speed up the effective clipping operations we will do when drawing axes, we thread here a simple random clipping operation when the game starts
+     * **/
+    private void MakeFirstDummyClippingOperation()
+    {
+        Contour dummyContour = new Contour(4);
+        dummyContour.Add(new Vector2(0, 0));
+        dummyContour.Add(new Vector2(10, 0));
+        dummyContour.Add(new Vector2(0, 5));
+        Shape dummySubjShape = new Shape(false, dummyContour);
+        Shape dummyClipShape = new Shape(false, dummyContour);
+
+
+        m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
     }
 
     /**
@@ -752,6 +784,14 @@ public class GameScene : GUIScene
         return m_clippingManager;
     }
 
+    public ThreadedJobsManager GetThreadedJobsManager()
+    {
+        if (m_threadedJobsManager == null)
+            m_threadedJobsManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ThreadedJobsManager>();
+
+        return m_threadedJobsManager;
+    }
+
 
 
     //----------------------------------------------------------------------------------------------------//
@@ -810,24 +850,26 @@ public class GameScene : GUIScene
             if (shape.m_state != Shape.ShapeState.STATIC)
                 return false;
 
-            bool bInsideContour = false;
             for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
             {
                 DottedOutline outline = outlines[iOutlineIdx];
                 if (shape.IntersectsOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
                     return false;
 
-                //check if the shape is fully inside or outside this contour by checking the center of the first shape triangle for instance
-                if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
+                //Check if every point of every triangle in shape and its center is inside the outline
+                for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
                 {
-                    bInsideContour = true;
-                    break;
+                    BaseTriangle triangle = shape.m_triangles[iTriangleIdx];
+                    if (!outline.ContainsPoint(triangle.m_points[0]) ||
+                        !outline.ContainsPoint(triangle.m_points[1]) ||
+                        !outline.ContainsPoint(triangle.m_points[2]) ||
+                        !outline.ContainsPoint(triangle.GetCenter()))
+                    {
+                        return false;
+                    }
                 }
             }
-
-            if (!bInsideContour) //shape is fully outside every outline, so not a victory yet
-                return false;
-        }
+        }        
 
         //check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -843,6 +885,9 @@ public class GameScene : GUIScene
             outlines[i].CalculateArea();
             outlinesArea += outlines[i].m_area;
         }
+
+        if (shapesArea == outlinesArea)
+            Debug.Log("STOP");
 
         return (shapesArea == outlinesArea);
 

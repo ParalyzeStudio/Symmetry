@@ -5,10 +5,12 @@ using ClipperLib;
 public class ClippingManager : MonoBehaviour
 {
     private Clipper m_clipper;
-
-    public void Awake()
+    private Shapes m_shapesHolder;
+    
+    public void Init()
     {
         m_clipper = new Clipper();
+        m_shapesHolder = ((GameScene) this.GetComponent<SceneManager>().m_currentScene).m_shapesHolder;
     }
 
     private List<IntPoint> CreatePathFromContour(Contour contour)
@@ -81,7 +83,6 @@ public class ClippingManager : MonoBehaviour
             m_clipper.AddPaths(clipsPaths, PolyType.ptClip, true);
         }
         //else do nothing, paths are in place just clip them
-          
 
         PolyTree polytree = new PolyTree();
         bool result = m_clipper.Execute(clipOperation, polytree, PolyFillType.pftEvenOdd, PolyFillType.pftEvenOdd);
@@ -95,7 +96,7 @@ public class ClippingManager : MonoBehaviour
             while (polynode != null)
             {
                 //contour
-                Contour polynodeContour = CreateContourFromPath(polynode.Contour, false);
+                Contour polynodeContour = CreateContourFromPath(polynode.Contour, false);                
                 List<Contour> splitContours = polynodeContour.Split();
 
                 //eliminate repeated points and down scale them
@@ -171,7 +172,69 @@ public class ClippingManager : MonoBehaviour
             else if (clipOperation == ClipType.ctDifference)
                 resultingShapes[i].m_color = subjShape.m_color;
         }
-
         return resultingShapes;
+    }
+
+    /**
+     * Clip a shape against all the static shapes
+     * **/
+    public void ClipAgainstStaticShapes(Shape subjShape, out List<Shape> clippedInterShapes, out List<Shape> clippedDiffShapes)
+    {
+        List<Shape> allShapes = m_shapesHolder.m_shapes;
+        clippedDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
+        clippedInterShapes = new List<Shape>(10);
+        clippedDiffShapes.Add(subjShape);
+
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            Shape shape = allShapes[i];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                continue;
+
+            List<Shape> clippedDifferenceShapes = new List<Shape>(10);
+            for (int j = 0; j != clippedDiffShapes.Count; j++)
+            {
+                Shape clipShape = clippedDiffShapes[j];
+                if (clipShape.OverlapsShape(shape, true))
+                {
+                    //difference
+                    List<Shape> differenceShapes = ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
+                    for (int k = 0; k != differenceShapes.Count; k++)
+                    {
+                        differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                        differenceShapes[k].m_color = clipShape.m_color; //same color as original
+                    }
+                    clippedDifferenceShapes.AddRange(differenceShapes);
+
+                    //intersection
+                    List<Shape> intersectionShapes = new List<Shape>(5);
+                    if (differenceShapes.Count == 0) //no difference, so intersection is the full clipShape
+                    {
+                        clipShape.m_color = 0.5f * (clipShape.m_color + shape.m_color);
+                        intersectionShapes.Add(clipShape);
+                    }
+                    else
+                    {
+                        intersectionShapes.AddRange(ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctIntersection, false)); //same polygon sets
+                    }
+
+                    for (int k = 0; k != intersectionShapes.Count; k++)
+                    {
+                        intersectionShapes[k].m_state = Shape.ShapeState.DYNAMIC_INTERSECTION;
+                        intersectionShapes[k].m_overlappedStaticShape = shape;
+                    }
+                    clippedInterShapes.AddRange(intersectionShapes);
+                }
+                else //no intersection, add the full clipShape to clippedDifferenceShapes
+                {
+                    clipShape.m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                    clippedDifferenceShapes.Add(clipShape);
+                }
+            }
+
+            clippedDiffShapes.Clear();
+            clippedDiffShapes.AddRange(clippedDifferenceShapes);
+        }
     }
 }

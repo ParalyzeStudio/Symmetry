@@ -35,6 +35,11 @@ public class Shapes : MonoBehaviour
         //m_overlappingShapeObjects.Capacity = 16;
     }
 
+    public void Init()
+    {
+        m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+    }
+
     /**
      * Build a shape game object from shape data (contour/triangles, holes, color)
      * **/
@@ -162,44 +167,6 @@ public class Shapes : MonoBehaviour
 
     //    m_substitutionShapeObjects.Clear();
     //}
-
-    /**
-     * Calls recursively Shape.Fusion() on the shape passed as parameter and then on the shape resulting from previous fusion
-     * This way we are sure that the initial shape is fusionned to every shape that overlapped it at the beginning
-     * **/
-    public bool PerformFusionOnShape(Shape shape)
-    {
-        bool bFusionOccured = false;
-        bool bFusioning = false;
-        do
-        {
-            bFusioning = shape.Fusion();
-            if (bFusioning)
-                bFusionOccured = true;
-        }
-        while (bFusioning);
-
-        return bFusionOccured;
-    }
-
-    /**
-     * Calculate the difference between the shape that we found overlapping 'this' shape and 'this' shape
-     * **/
-    public void PerformDifferenceOnOverlappedStaticShapeForShape(Shape shape)
-    {
-        List<Shape> resultShapes = GetClippingManager().ShapesOperation(shape.m_overlappedStaticShape, shape, ClipperLib.ClipType.ctDifference);
-        for (int i = 0; i != resultShapes.Count; i++)
-        {
-            resultShapes[i].m_state = Shape.ShapeState.STATIC;
-            CreateShapeObjectFromData(resultShapes[i], false);
-        }
-        
-        //Destroy the old overlapped static shape
-        shape.m_overlappedStaticShape.m_parentMesh.GetComponent<ShapeAnimator>().SetOpacity(0);//Set zero opacity on this shape during the time it is waiting for its destruction
-        DestroyShapeObjectForShape(shape.m_overlappedStaticShape, 0.5f); //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch
-        m_shapes.Remove(shape.m_overlappedStaticShape);
-        shape.m_overlappedStaticShape = null;
-    }
 
     /**
      * If two or more shape objects overlap
@@ -347,111 +314,6 @@ public class Shapes : MonoBehaviour
     }
 
     /**
-     * Clip a shape against all the static shapes
-     * **/
-    public void ClipAgainstStaticShapes(Shape subjShape)
-    {
-        List<Shape> clipDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
-        List<Shape> clipInterShapes = new List<Shape>(10);
-        clipDiffShapes.Add(subjShape);
-
-        for (int i = 0; i != m_shapes.Count; i++)
-        {
-            Shape shape = m_shapes[i];
-
-            if (shape.m_state != Shape.ShapeState.STATIC)
-                continue;
-
-            List<Shape> clippedDifferenceShapes = new List<Shape>(10);
-            for (int j = 0; j != clipDiffShapes.Count; j++)
-            {
-                Shape clipShape = clipDiffShapes[j];
-                if (clipShape.OverlapsShape(shape, true))
-                {
-                    //difference
-                    List<Shape> differenceShapes = GetClippingManager().ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
-                    for (int k = 0; k != differenceShapes.Count; k++)
-                    {
-                        differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
-                        differenceShapes[k].m_color = clipShape.m_color; //same color as original
-                    }
-                    clippedDifferenceShapes.AddRange(differenceShapes);
-
-                    //intersection
-                    List<Shape> intersectionShapes = new List<Shape>(5);
-                    if (differenceShapes.Count == 0) //no difference, so intersection is the full clipShape
-                    {
-                        clipShape.m_color = 0.5f * (clipShape.m_color + shape.m_color);
-                        intersectionShapes.Add(clipShape);
-                    }
-                    else
-                    {
-                        intersectionShapes.AddRange(GetClippingManager().ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctIntersection, false)); //same polygon sets
-                    }
-
-                    for (int k = 0; k != intersectionShapes.Count; k++)
-                    {
-                        intersectionShapes[k].m_state = Shape.ShapeState.DYNAMIC_INTERSECTION;
-                        intersectionShapes[k].m_overlappedStaticShape = shape;
-                    }
-                    clipInterShapes.AddRange(intersectionShapes);
-                }
-                else //no intersection, add the full clipShape to clippedDifferenceShapes
-                {
-                    clipShape.m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
-                    clippedDifferenceShapes.Add(clipShape);
-                }
-            }
-           
-            clipDiffShapes.Clear();
-            clipDiffShapes.AddRange(clippedDifferenceShapes);
-        }
-                
-        //build the difference shape objects
-        for (int i = 0; i != clipDiffShapes.Count; i++)
-        {
-            clipDiffShapes[i].Triangulate();
-            CreateShapeObjectFromData(clipDiffShapes[i], true);
-        }
-        
-        //build the intersection shape objects
-        for (int i = 0; i != clipInterShapes.Count; i++)
-        {
-            clipInterShapes[i].Triangulate();
-            CreateShapeObjectFromData(clipInterShapes[i], true);
-        }
-    }
-
-    /**
-     * Add a shape to the static shapes array
-     * **/
-    //private void AddShape(Shape shape)
-    //{
-    //    for (int i = 0; i != m_shapes.Count; i++)
-    //    {
-    //        if (shape == m_shapes[i])
-    //            return;
-    //    }
-
-    //    m_shapes.Add(shape);
-    //}
-
-    /**
-     * Remove a shape from the static shapes array
-     * **/
-    //private void RemoveShape(Shape shape)
-    //{
-    //    for (int shapeIndex = 0; shapeIndex != m_shapes.Count; shapeIndex++)
-    //    {
-    //        if (m_shapes[shapeIndex] == shape)
-    //        {
-    //            m_shapes.Remove(shape);
-    //            return;
-    //        }
-    //    }
-    //}
-
-    /**
      * Destroy shapes we marked as dead
      * **/
     private void DeleteDeadShapes(bool bDestroyRelatedObject = true)
@@ -469,13 +331,5 @@ public class Shapes : MonoBehaviour
                 i--;
             }
         }
-    }
-
-    private ClippingManager GetClippingManager()
-    {
-        if (m_clippingManager == null)
-            m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
-
-        return m_clippingManager;
     }
 }

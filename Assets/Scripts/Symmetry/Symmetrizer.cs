@@ -14,12 +14,27 @@ public class Symmetrizer : MonoBehaviour
 
     private SymmetryType m_symmetryType;
 
+    private AxisRenderer m_axis;
     private GameScene m_gameScene;
     private ClippingManager m_clippingManager;
+
+    //Lists to store the results of the symmetry on both left and right sides
+    private List<Shape> m_leftClippedInterShapes;
+    private List<Shape> m_leftClippedDiffShapes;
+    private List<Shape> m_rightClippedInterShapes;
+    private List<Shape> m_rightClippedDiffShapes;
 
     public void Awake()
     {
         m_symmetryType = SymmetryType.NONE;
+    }
+
+    public void Init()
+    {
+        GameObject gameControllerObject = (GameObject) GameObject.FindGameObjectWithTag("GameController");
+        m_gameScene = (GameScene) GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
+        m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+        m_axis = this.GetComponent<AxisRenderer>();
     }
 
     /**
@@ -27,18 +42,18 @@ public class Symmetrizer : MonoBehaviour
      * **/
     public void SymmetrizeByAxis()
     {
-        Shapes shapesHolder = GetGameScene().m_shapesHolder;
-        AxisRenderer axis = this.GetComponent<AxisRenderer>();       
+        Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
         //Split the ribbon first
-        axis.SplitRibbon(m_symmetryType);
+        m_axis.SplitRibbon(m_symmetryType);
 
         //Get ribbon left and right clip shapes
-        Shape ribbonLeftClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonLeftSubShape;
-        Shape ribbonRightClipShape = this.GetComponent<AxisRenderer>().Ribbon.m_ribbonRightSubShape;
+        Shape ribbonLeftClipShape = m_axis.Ribbon.m_ribbonLeftSubShape;
+        Shape ribbonRightClipShape = m_axis.Ribbon.m_ribbonRightSubShape;
 
         //Clip all shapes
         List<Shape> shapes = shapesHolder.m_shapes;
+
         for (int i = 0; i != shapes.Count; i++)
         {
             Shape shape = shapes[i];
@@ -48,33 +63,90 @@ public class Symmetrizer : MonoBehaviour
 
             if (ribbonLeftClipShape != null)
             {
-                List<Shape> lResultShapes = GetClippingManager().ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection); //16ms if first clip
-
+                List<Shape> lResultShapes = m_clippingManager.ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection);
+                
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
-                    Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(axis);
+                    Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(m_axis);
                     lSymmetricShape.Triangulate();
                     lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
 
-                    shapesHolder.ClipAgainstStaticShapes(lSymmetricShape); //16ms creation of shape objects
+                    m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out m_leftClippedInterShapes, out m_leftClippedDiffShapes);
                 }
             }
 
-            //if (ribbonRightClipShape != null)
-            //{
-            //    List<Shape> rResultShapes = ClippingBooleanOperations.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
-            //    for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
-            //    {
-            //        Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(axis);
-            //        rSymmetricShape.Triangulate();
-            //        rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
-            //        shapesHolder.ClipAgainstStaticShapes(rSymmetricShape);
-            //    }
-            //}
+            if (ribbonRightClipShape != null)
+            {
+                List<Shape> rResultShapes = m_clippingManager.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
+                for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
+                {
+                    Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(m_axis);
+                    rSymmetricShape.Triangulate();
+                    rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
+
+                    m_clippingManager.ClipAgainstStaticShapes(rSymmetricShape, out m_rightClippedInterShapes, out m_rightClippedDiffShapes);
+                }
+            }            
+        }        
+    }
+
+    /**
+     * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
+     * **/
+    public void OnSymmetryDone()
+    {
+        Debug.Log("OnSymmetryDone");
+        Shapes shapesHolder = m_gameScene.m_shapesHolder;
+
+        //build the difference shape objects
+        if (m_leftClippedInterShapes != null)
+        {
+            for (int p = 0; p != m_leftClippedInterShapes.Count; p++)
+            {
+                m_leftClippedInterShapes[p].Triangulate();
+                shapesHolder.CreateShapeObjectFromData(m_leftClippedInterShapes[p], true);
+            }
         }
-        
+
+        //build the intersection shape objects
+        if (m_leftClippedDiffShapes != null)
+        {
+            for (int p = 0; p != m_leftClippedDiffShapes.Count; p++)
+            {
+                m_leftClippedDiffShapes[p].Triangulate();
+                shapesHolder.CreateShapeObjectFromData(m_leftClippedDiffShapes[p], true);
+            }
+        }
+
+        //build the difference shape objects
+        if (m_rightClippedInterShapes != null)
+        {
+            for (int p = 0; p != m_rightClippedInterShapes.Count; p++)
+            {
+                m_rightClippedInterShapes[p].Triangulate();
+                shapesHolder.CreateShapeObjectFromData(m_rightClippedInterShapes[p], true);
+            }
+        }
+
+        //build the intersection shape objects
+        if (m_rightClippedDiffShapes != null)
+        {
+            for (int p = 0; p != m_rightClippedDiffShapes.Count; p++)
+            {
+                m_rightClippedDiffShapes[p].Triangulate();
+                shapesHolder.CreateShapeObjectFromData(m_rightClippedDiffShapes[p], true);
+            }
+        }
+
+
         //Callback on the AxisRenderer
+        AxisRenderer axis = this.GetComponent<AxisRenderer>(); 
         axis.OnPerformSymmetry(m_symmetryType);
+    }
+
+    private void BuildSymmetrizedObjects()
+    {
+
     }
 
     //public void SymmetrizeByAxis()
@@ -319,11 +391,10 @@ public class Symmetrizer : MonoBehaviour
         List<Vector2> intersections = new List<Vector2>();
         intersections.Capacity = 2;
 
-        GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        Vector2 gridTopLeft = new Vector2(1, gameScene.m_grid.m_numLines);
-        Vector2 gridTopRight = new Vector2(gameScene.m_grid.m_numColumns, gameScene.m_grid.m_numLines);
+        Vector2 gridTopLeft = new Vector2(1, m_gameScene.m_grid.m_numLines);
+        Vector2 gridTopRight = new Vector2(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines);
         Vector2 gridBottomLeft = new Vector2(1, 1);
-        Vector2 gridBottomRight = new Vector2(gameScene.m_grid.m_numColumns, 1);
+        Vector2 gridBottomRight = new Vector2(m_gameScene.m_grid.m_numColumns, 1);
 
         bool intersects;
         Vector2 intersection;
@@ -479,20 +550,5 @@ public class Symmetrizer : MonoBehaviour
     public SymmetryType GetSymmetryType()
     {
         return m_symmetryType;
-    }
-
-    private GameScene GetGameScene()
-    {
-        if (m_gameScene == null)
-            m_gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        return m_gameScene;
-    }
-
-    private ClippingManager GetClippingManager()
-    {
-        if (m_clippingManager == null)
-            m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
-
-        return m_clippingManager;
     }
 }

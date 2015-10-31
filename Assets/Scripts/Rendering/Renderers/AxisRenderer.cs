@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class AxisRenderer : MonoBehaviour
 {
-    public const float SWEEP_LINE_SPEED = 500.0f;
+    public const float SWEEP_LINE_SPEED = 300.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
     private const float AXIS_ENDPOINT_INNER_RADIUS = 30.0f;
     private const float AXIS_ENDPOINT_CIRCLE_THICKNESS = 4.0f;

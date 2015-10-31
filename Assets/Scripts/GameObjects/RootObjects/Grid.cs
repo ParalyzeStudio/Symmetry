@@ -46,8 +46,8 @@ public class Grid : MonoBehaviour
         //get the screen viewport dimensions
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //The grid occupies at maximum 85% of the screen height and 90% of the screen width
-        m_gridSize = new Vector2(0.9f * screenSize.x, 0.78f * screenSize.y);
+        //The grid occupies at maximum 78% of the screen height and 75% of the screen width
+        m_gridSize = new Vector2(0.75f * screenSize.x, 0.78f * screenSize.y);
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
             lineGridSpacing = m_gridSize.y / (float)(exactNumLines - 1);
