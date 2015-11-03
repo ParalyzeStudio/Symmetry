@@ -15,7 +15,7 @@ public class GameScene : GUIScene
     //shared prefabs
     public GameObject m_radialGradientPfb;
     public GameObject m_texQuadPfb;
-    public GameObject m_texRoundedSegmentPfb;
+    public GameObject m_blurrySegmentPfb;
 
     public Grid m_grid { get; set; }
     public ShapeVoxelGrid m_voxelGrid { get; set; }
@@ -36,8 +36,11 @@ public class GameScene : GUIScene
     private GameObject m_axisConstraintsIconsHolder;
 
     //interface buttons
+    public GameObject m_debugBlurrySegmentObjectPfb;
+    public GameObject m_debugSimplifiedRoundedSegmentObjectPfb;
     public Material m_glowRectangleMaterial;
-    public Material m_glowSegmentMaterial;
+    public Material m_blurrySegmentMaterial;
+    public Material m_sharpSegmentMaterial;
 
     //Action buttons
     private ActionButton m_topActionButton;
@@ -287,15 +290,26 @@ public class GameScene : GUIScene
         interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, -10));
 
         //Build buttons contours
-        Color contourTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
+        Color blurrySegmentTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
+        Color sharpSegmentTintColor = ColorUtils.LightenColor(blurrySegmentTintColor, 0.75f);
+        blurrySegmentTintColor.a = 0.5f;
 
         GameObject buttonsContour = new GameObject("ButtonsContour");
         
         GameObjectAnimator buttonsContourAnimator = buttonsContour.AddComponent<GameObjectAnimator>();
         buttonsContourAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+        buttonsContourAnimator.SetPosition(Vector3.zero);
 
         SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
-        contourSegmentTree.Init(m_interfaceButtonsHolder, m_texRoundedSegmentPfb, 16.0f, Instantiate(m_glowSegmentMaterial), contourTintColor);
+        contourSegmentTree.Init(SegmentTree.SegmentType.BLURRY,
+                                buttonsContour,
+                                m_blurrySegmentPfb, 
+                                4.0f,
+                                16.0f,
+                                Instantiate(m_sharpSegmentMaterial),
+                                Instantiate(m_blurrySegmentMaterial),
+                                sharpSegmentTintColor,
+                                blurrySegmentTintColor);
 
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;

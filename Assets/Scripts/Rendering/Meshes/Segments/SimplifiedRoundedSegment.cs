@@ -54,8 +54,8 @@ public class SimplifiedRoundedSegment : TexturedSegment
             //right vertices
             meshVertices[2] = localPointB - new Vector3(0, halfThickness, 0);
             meshVertices[3] = localPointB + new Vector3(0, halfThickness, 0);
-            meshVertices[6] = localPointA + halfThickness * new Vector3(1, -1, 0);
-            meshVertices[7] = localPointA + halfThickness * new Vector3(1, 1, 0);            
+            meshVertices[6] = localPointB + halfThickness * new Vector3(1, -1, 0);
+            meshVertices[7] = localPointB + halfThickness * new Vector3(1, 1, 0);            
 
             roundedSegmentMesh.vertices = meshVertices;
 
@@ -102,7 +102,7 @@ public class SimplifiedRoundedSegment : TexturedSegment
         }
     }
 
-    public void Build(Vector2 pointA, Vector2 pointB, float thickness, Material material, Color tintColor)
+    public void Build(Vector3 pointA, Vector3 pointB, float thickness, Material material, Color tintColor)
     {
         InitBasicVariables(pointA, pointB, thickness, material);
 
@@ -131,15 +131,15 @@ public class SimplifiedRoundedSegment : TexturedSegment
         mesh.uv = meshUVs;
     }
 
-    public override void SetPointA(Vector2 pointB, bool bRenderSegment = true)
+    public override void SetPointA(Vector3 pointA, bool bRenderSegment = true)
     {
-        m_pointB = pointB;
+        m_pointA = pointA;
 
         if (bRenderSegment)
             RenderInternal(true, false, false);
     }
 
-    public override void SetPointB(Vector2 pointB, bool bRenderSegment = true)
+    public override void SetPointB(Vector3 pointB, bool bRenderSegment = true)
     {
         m_pointB = pointB;
 

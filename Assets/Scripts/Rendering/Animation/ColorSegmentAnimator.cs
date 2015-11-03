@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ColorSegmentAnimator : GameObjectAnimator
+public class ColorSegmentAnimator : SegmentAnimator
 {
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {

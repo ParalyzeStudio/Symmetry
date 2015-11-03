@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SegmentAnimator : ValueAnimator
+public class SegmentAnimator : GameObjectAnimator
 {
     //Variables to handle pointA position
     protected bool m_translatingPointA;
@@ -102,16 +102,6 @@ public class SegmentAnimator : ValueAnimator
         m_translatingPointBDelay = delay;
         m_translatingPointBElapsedTime = 0;
         m_translatingPointBInterpolationType = interpolType;
-
-        Vector2 psdPointBFromPosition = (m_pointBFromPosition * 5);
-        psdPointBFromPosition.x += 500.0f;
-        psdPointBFromPosition.y += 500.0f;
-        psdPointBFromPosition.y = 1000.0f - psdPointBFromPosition.y;
-
-        Vector2 psdPointBToPosition = (m_pointBToPosition * 5);
-        psdPointBToPosition.x += 500.0f;
-        psdPointBToPosition.y += 500.0f;
-        psdPointBToPosition.y = 1000.0f - psdPointBToPosition.y;
     }
 
     public virtual void SetPointBPosition(Vector3 position)

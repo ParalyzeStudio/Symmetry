@@ -15,12 +15,14 @@ public class ColorUtils
     public static Color DarkenColor(Color inColor, float t)
     {
         Color outColor = Color.Lerp(inColor, Color.black, t);
+        outColor.a = inColor.a; //let opacity unchanged
         return outColor;
     }
 
     public static Color LightenColor(Color inColor, float t)
     {
         Color outColor = Color.Lerp(inColor, Color.white, t);
+        outColor.a = inColor.a; //let opacity unchanged
         return outColor;
     }
 

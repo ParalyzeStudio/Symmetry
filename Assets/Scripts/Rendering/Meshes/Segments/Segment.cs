@@ -175,7 +175,7 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointA. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointA(Vector2 pointA, bool bRenderSegment = true)
+    public virtual void SetPointA(Vector3 pointA, bool bRenderSegment = true)
     {
         m_pointA = pointA;
 
@@ -186,7 +186,7 @@ public class Segment : MonoBehaviour
     /**
      * Set new coordinates for pointB. Set bGridPoint to true is the passed pointB is in grid coordinates
      * **/
-    public virtual void SetPointB(Vector2 pointB, bool bRenderSegment = true)
+    public virtual void SetPointB(Vector3 pointB, bool bRenderSegment = true)
     {
         m_pointB = pointB;
 
