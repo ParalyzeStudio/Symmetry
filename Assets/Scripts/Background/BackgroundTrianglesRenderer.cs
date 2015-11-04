@@ -80,7 +80,7 @@ public class BackgroundTrianglesRenderer : MonoBehaviour
         //GenerateChapterGradient();
         //GenerateTransitionGradients();
 
-        BuildMesh(0.138f);
+        BuildMesh(0.1f);
 
         //init the position of the animator to 0
         BackgroundTriangleAnimator animator = this.GetComponent<BackgroundTriangleAnimator>();

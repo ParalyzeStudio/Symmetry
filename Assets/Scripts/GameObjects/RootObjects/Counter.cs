@@ -3,8 +3,10 @@ using System.Collections.Generic;
 
 public class Counter : MonoBehaviour
 {
-    //shared prefabs
-    public Material m_positionColorMaterial;
+    //Material shared across counter elements
+    public Material m_filledElementMaterial;
+    public Material m_emptyElementMaterial;
+    public Material m_outerContourMaterial;
 
     public GameObject m_counterElementPfb;
     public List<CounterElement> m_elements { get; set; }
@@ -20,15 +22,15 @@ public class Counter : MonoBehaviour
     public void Build()
     {
         //First clone materials that will be passed to each counter element
-        Material clonedShadowMaterial = (Material)Instantiate(m_positionColorMaterial);
-        Material clonedSkinOnMaterial = (Material)Instantiate(m_positionColorMaterial);
-        Material clonedSkinOffMaterial = (Material)Instantiate(m_positionColorMaterial);
-        Material clonedOverlayMaterial = (Material)Instantiate(m_positionColorMaterial);
+        Material filledElementMaterial = Instantiate(m_filledElementMaterial);
+        Material emptyElementMaterial = Instantiate(m_emptyElementMaterial);
+        Material outerContourMaterial = Instantiate(m_outerContourMaterial);
 
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         float elementSpacing = 115.0f;
         int maxActions = levelManager.m_currentLevel.m_maxActions;
+        maxActions = 4; //TODO remove this line
         for (int i = 0; i != maxActions; i++)
         {
             GameObject clonedCounterElement = (GameObject) Instantiate(m_counterElementPfb);
@@ -45,7 +47,9 @@ public class Counter : MonoBehaviour
 
             //Create the counter element
             CounterElement counterElementComponent = clonedCounterElement.gameObject.GetComponent<CounterElement>();
-            counterElementComponent.Init(clonedShadowMaterial, clonedSkinOnMaterial, clonedSkinOffMaterial, clonedOverlayMaterial);
+            Color tmpColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255)); //TODO obtain the color from the theme
+            counterElementComponent.Init(tmpColor, filledElementMaterial, emptyElementMaterial, outerContourMaterial);
+            counterElementComponent.SetStatus(i == 0 ? CounterElement.CounterElementStatus.CURRENT : CounterElement.CounterElementStatus.WAITING);
 
             m_elements.Add(counterElementComponent);
         }

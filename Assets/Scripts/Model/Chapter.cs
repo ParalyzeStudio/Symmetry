@@ -35,10 +35,15 @@ public class Chapter
 
             if (m_number == 1)
             {
-                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
-                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
-                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 47, 125, 255));
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(159, 162, 24, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(60, 61, 9, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(212, 185, 0, 255));
                 m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+
+                //m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
+                //m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                //m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 47, 125, 255));
+                //m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
             }
             else if (m_number == 2)
             {

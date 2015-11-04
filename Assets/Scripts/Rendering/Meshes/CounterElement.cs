@@ -2,101 +2,99 @@
 
 public class CounterElement : MonoBehaviour
 {
-    public const float SHADOW_Z_VALUE = 1.0f;
-    public const float SKIN_Z_VALUE = 0.0f;
-    public const float OVERLAY_Z_VALUE = -1.0f;
-
-    //shared prefabs
-    public GameObject m_colorQuadPfb;
-
-    private GameObject m_overlay; //the overlay that is displayed on the current action
-    private GameObject m_skin; //the skin of this element
-    private GameObject m_shadow; //the shadow behind the skin
-
-    //colors
-    private Color m_shadowColor;
-    private Color m_skinColor;
-    private Color m_overlayColor;
+    public GameObject m_texQuadPfb;
 
     //materials used for each of the above game objects MeshRenderers
-    private Material m_shadowMaterial;
-    private Material m_skinOnMaterial;
-    private Material m_skinOffMaterial;
-    private Material m_overlayMaterial;
+    private Material m_filledMaterial;
+    private Material m_emptyMaterial;
+    private Material m_outerContourMaterial;
+
+    private Color m_color;
+
+    private GameObject m_filledObject;
+    private GameObject m_emptyObject;
+    private GameObject m_outerContourObject;
 
     public enum CounterElementStatus
     {
+        NONE = 0,
         DONE, //an action has been realised and this element is marked as done
         CURRENT, //display an overlay for the CURRENT element
         WAITING //this element is waiting for previous ones to complete
     };
 
     public CounterElementStatus m_status { get; set; }
-    private CounterElementStatus m_prevStatus;
 
-    public void Init(Material shadowMaterial, Material skinOnMaterial, Material skinOffMaterial, Material overlayMaterial)
+    public void Awake()
     {
-        //Set cloned materials shared among counter elements to global variables
-        m_shadowMaterial = shadowMaterial;
-        m_skinOnMaterial = skinOnMaterial;
-        m_skinOffMaterial = skinOffMaterial;
-        m_overlayMaterial = overlayMaterial;
-
-        m_status = CounterElementStatus.WAITING;
-        m_prevStatus = m_status;
-        InitElementsColors();
-        InitSkinAndShadow();
-    }
-
-    public void InitElementsColors()
-    {
-        m_shadowColor = new Color(0,0,0,1);
-        m_skinColor = new Color(1,1,1,1);
-        m_overlayColor = new Color(0,0,0,1);
+        m_status = CounterElementStatus.NONE;
     }
 
     /**
-     * Init the skin and shadow quads of this counter element
+     * Set up materials to build the counter element for each of the 3 status it may have.
+     * DONE: filledMaterial + outerContourMaterial
+     * CURRENT: filledMaterial
+     * WAITING: emptyMaterial
      * **/
-    private void InitSkinAndShadow()
+    public void Init(Color color, Material filledMaterial, Material emptyMaterial, Material outerContourMaterial)
     {
-        m_skin = Instantiate(m_colorQuadPfb);
-        m_skin.GetComponent<ColorQuad>().Init();
-        ColorQuadAnimator skinAnimator = m_skin.GetComponent<ColorQuadAnimator>();
-        skinAnimator.SetParentTransform(this.transform);
-        skinAnimator.SetRotationAxis(Vector3.forward);
-        skinAnimator.SetRotationAngle(45);
-        skinAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
-        skinAnimator.SetPosition(new Vector3(0, 6, SKIN_Z_VALUE));
-        skinAnimator.SetColor(m_skinColor);
-        SetStatus(CounterElementStatus.WAITING);
-
-        m_shadow = Instantiate(m_colorQuadPfb);
-        m_shadow.GetComponent<ColorQuad>().Init();
-        ColorQuadAnimator shadowAnimator = m_shadow.GetComponent<ColorQuadAnimator>();
-        shadowAnimator.SetParentTransform(this.transform);
-        shadowAnimator.SetRotationAxis(Vector3.forward);
-        shadowAnimator.SetRotationAngle(45);
-        shadowAnimator.SetScale(new Vector3(40.0f, 40.0f, 1.0f));
-        shadowAnimator.SetPosition(new Vector3(0, -6, SHADOW_Z_VALUE));
-        shadowAnimator.SetColor(m_shadowColor);
-        m_shadow.GetComponent<MeshRenderer>().sharedMaterial = m_shadowMaterial;
+        m_color = color;
+        m_filledMaterial = filledMaterial;
+        m_emptyMaterial = emptyMaterial;
+        m_outerContourMaterial = outerContourMaterial;
     }
 
-    /**
-     * Init the overlay quad of this counter element
-     * **/
-    private void InitOverlay()
+    private void SetAsDoneElement()
     {
-        m_overlay = Instantiate(m_colorQuadPfb);
-        m_overlay.GetComponent<ColorQuad>().Init(m_overlayMaterial);
-        ColorQuadAnimator overlayAnimator = m_overlay.GetComponent<ColorQuadAnimator>();
-        overlayAnimator.SetParentTransform(this.transform);
-        overlayAnimator.SetRotationAxis(Vector3.forward);
-        overlayAnimator.SetRotationAngle(45);
-        overlayAnimator.SetScale(new Vector3(18.0f, 18.0f, 1.0f));
-        overlayAnimator.SetPosition(new Vector3(0, 6, OVERLAY_Z_VALUE));
-        overlayAnimator.SetColor(m_overlayColor);
+        //build the outer contour element and animate it
+        m_outerContourObject = (GameObject)Instantiate(m_texQuadPfb);
+        m_outerContourObject.name = "OuterContour";
+
+        UVQuad outerContour = m_outerContourObject.GetComponent<UVQuad>();
+        outerContour.Init(m_outerContourMaterial);
+
+        TexturedQuadAnimator outerContourAnimator = m_outerContourObject.GetComponent<TexturedQuadAnimator>();
+        outerContourAnimator.SetParentTransform(this.transform);
+        outerContourAnimator.SetScale(new Vector3(128, 128, 1));
+        outerContourAnimator.SetColor(m_color);
+    }
+
+    private void SetAsCurrentElement()
+    {
+        if (m_status == CounterElementStatus.NONE) //first time we build this element (the first one in the list when game starts)
+        {
+            //build the filled element
+            m_filledObject = (GameObject)Instantiate(m_texQuadPfb);
+            m_filledObject.name = "Filled";
+
+            UVQuad filledElement = m_filledObject.GetComponent<UVQuad>();
+            filledElement.Init(m_filledMaterial);
+
+            TexturedQuadAnimator filledElementAnimator = m_filledObject.GetComponent<TexturedQuadAnimator>();
+            filledElementAnimator.SetParentTransform(this.transform);
+            filledElementAnimator.SetScale(new Vector3(64, 64, 1));
+            filledElementAnimator.SetColor(m_color);
+        }
+        else //we just switched from WAITING to CURRENT, so just replace the material
+        {
+            UVQuad filledElement = m_filledObject.GetComponent<UVQuad>();
+            filledElement.SetMaterial(m_filledMaterial);
+        }
+    }
+
+    private void SetAsWaitingElement()
+    {
+        //build the empty element
+        m_emptyObject = (GameObject)Instantiate(m_texQuadPfb);
+        m_emptyObject.name = "Empty";
+
+        UVQuad emptyElement = m_emptyObject.GetComponent<UVQuad>();
+        emptyElement.Init(m_emptyMaterial);
+
+        TexturedQuadAnimator emptyElementAnimator = m_emptyObject.GetComponent<TexturedQuadAnimator>();
+        emptyElementAnimator.SetParentTransform(this.transform);
+        emptyElementAnimator.SetScale(new Vector3(64, 64, 1));
+        emptyElementAnimator.SetColor(m_color);
     }
 
     /**
@@ -104,36 +102,19 @@ public class CounterElement : MonoBehaviour
      * **/
     public void SetStatus(CounterElementStatus status)
     {
-        m_status = status;
-
-        
-        //check previous status and remove overlay if CounterElementStatus.CURRENT
-        if (m_prevStatus == CounterElementStatus.CURRENT)
-        {
-            Destroy(m_overlay);
-        }
-
-        //Set correct materials depending on the status
         if (status == CounterElementStatus.CURRENT)
         {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
-
-            InitOverlay();
+            SetAsCurrentElement();
         }
         else if (status == CounterElementStatus.DONE)
         {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOnMaterial;
-            if (m_overlay != null)
-            {
-                Destroy(m_overlay);
-                m_overlay = null;
-            }
+            SetAsDoneElement();
         }
         else if (status == CounterElementStatus.WAITING)
         {
-            m_skin.GetComponent<MeshRenderer>().sharedMaterial = m_skinOffMaterial;
+            SetAsWaitingElement();
         }
 
-        m_prevStatus = m_status;
+        m_status = status;
     }
 }

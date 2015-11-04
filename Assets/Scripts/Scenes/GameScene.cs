@@ -478,16 +478,17 @@ public class GameScene : GUIScene
     private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
+        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;       
 
+        //Show icons
         m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
+        
+        float iconHolderLeftMargin = 30.0f;
+        float iconHolderTopMargin = 30.0f; 
 
         GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
         axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-
-        float iconHolderLeftMargin = 30.0f;
-        float iconHolderTopMargin = 30.0f;
-
-        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
+        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));              
 
         float horizontalDistanceBetweenIcons = 65.0f;
         Vector2 iconSize = new Vector2(64, 64);
@@ -507,11 +508,32 @@ public class GameScene : GUIScene
             float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
             iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
         }
+        
+        axisConstraintsIconsHolderAnimator.SetOpacity(0);
+        axisConstraintsIconsHolderAnimator.FadeTo(1.0f, 0.5f);
 
-        GameObjectAnimator iconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
-        iconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
-        iconsHolderAnimator.SetOpacity(0);
-        iconsHolderAnimator.FadeTo(1.0f, 0.5f);
+        //Show some underline
+        GameObject underlineObject = (GameObject)Instantiate(m_blurrySegmentPfb);
+        underlineObject.name = "Underline";
+
+        BlurrySegmentAnimator underlineAnimator = underlineObject.GetComponent<BlurrySegmentAnimator>();
+        underlineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+        underlineAnimator.SetPosition(Vector3.zero);
+
+        float underlineTopMargin = 20.0f;
+        BlurrySegment underline = underlineObject.GetComponent<BlurrySegment>();
+        Vector3 underlinePointA = new Vector3(-iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
+        Vector3 underlinePointB = new Vector3(-iconHolderLeftMargin + axisConstraints.Count * iconSize.x + 2 * iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
+        underline.Build(underlinePointA,
+                        underlinePointA,
+                        4,
+                        16,
+                        Instantiate(m_sharpSegmentMaterial),
+                        Instantiate(m_blurrySegmentMaterial),
+                        Color.white,
+                        ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255))); //TODO obtain the color from the theme;
+
+        underlineAnimator.TranslatePointBTo(underlinePointB, 0.5f);
     }
 
     public void DismissAxisConstraintsIcons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
