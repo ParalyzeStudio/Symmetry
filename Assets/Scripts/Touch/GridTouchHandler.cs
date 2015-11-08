@@ -63,18 +63,20 @@ public class GridTouchHandler : TouchHandler
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
         pointerLocation = axisRenderer.m_endpoint1Position + constrainedDirection * projectionLength;
 
-        if (axisRenderer.isAxisSnapped())
-        {
-            axisRenderer.TryToUnsnap(pointerLocation);
-        }
-        else
-        {
-            //try to snap, if not just render the axis normally
-            if (!axisRenderer.TryToSnapAxisEndpointToClosestAnchor())
-            {
-                axisRenderer.Render(axisRenderer.m_endpoint1Position, pointerLocation, false);
-            }
-        }
+        axisRenderer.SnapAxisEndpointToClosestAnchor(pointerLocation);
+
+        //if (axisRenderer.isAxisSnapped())
+        //{
+        //    axisRenderer.TryToUnsnap(pointerLocation);
+        //}
+        //else
+        //{
+        //    //try to snap, if not just render the axis normally
+        //    if (!axisRenderer.TryToSnapAxisEndpointToClosestAnchor())
+        //    {
+        //        axisRenderer.Render(axisRenderer.m_endpoint1Position, pointerLocation, false);
+        //    }
+        //}
 
         return true;
     }

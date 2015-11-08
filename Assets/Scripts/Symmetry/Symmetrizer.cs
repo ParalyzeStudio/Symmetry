@@ -32,8 +32,8 @@ public class Symmetrizer : MonoBehaviour
     public void Init()
     {
         GameObject gameControllerObject = (GameObject) GameObject.FindGameObjectWithTag("GameController");
-        m_gameScene = (GameScene) GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-        m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
+        m_gameScene = (GameScene)gameControllerObject.GetComponent<SceneManager>().m_currentScene;
+        m_clippingManager = gameControllerObject.GetComponent<ClippingManager>();
         m_axis = this.GetComponent<AxisRenderer>();
     }
 

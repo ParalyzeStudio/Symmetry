@@ -50,8 +50,8 @@ public class GameController : MonoBehaviour
         
         //ShowMainMenu();
         //DebugShowChapters();
-        //DebugShowLevels(1);
-        DebugShowSpecificLevel(1, 1, false);
+        DebugShowLevels(1);
+        //DebugShowSpecificLevel(1, 1, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -78,8 +78,6 @@ public class GameController : MonoBehaviour
     public void DebugShowLevels(int iChapterNumber)
     {
         GetLevelManager().SetCurrentChapterByNumber(iChapterNumber);
-
-        GetBackgroundRenderer().Offset(2 * ScreenUtils.GetScreenSize().y);
 
         GetSceneManager().ShowContent(SceneManager.DisplayContent.LEVELS, 0.5f);
     }

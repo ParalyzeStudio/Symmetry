@@ -28,7 +28,33 @@ public class Levels : GUIScene
     {
         base.Show();
 
+        ApplyBackgroundGradient();
+
         ShowLevelsSlots();  
+    }
+
+    private void ApplyBackgroundGradient()
+    {
+        if (GetBackgroundRenderer().m_gradient == null)
+        {
+            Chapter displayedChapter = GetLevelManager().m_currentChapter;
+
+            Gradient gradient = new Gradient();
+            gradient.CreateRadial(Vector2.zero,
+                                  960,
+                                  displayedChapter.GetThemeColors()[0],
+                                  displayedChapter.GetThemeColors()[1]);
+
+
+            GetBackgroundRenderer().ApplyGradient(gradient,
+                                                  0.02f,
+                                                  true,
+                                                  BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
+                                                  0.5f,
+                                                  0.0f,
+                                                  0.0f,
+                                                  false);
+        }
     }
 
     /**

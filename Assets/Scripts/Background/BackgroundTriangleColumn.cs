@@ -311,6 +311,10 @@ public class BackgroundTriangleColumn : List<BackgroundTriangle>
                     trianglePositionY -= 0.5f * screenSize.y;
                 }
                 Vector2 trianglePosition = new Vector2(trianglePositionX, trianglePositionY);
+
+                ////if gradient is null that means we accessed the levels scene directly without coming from the chapters scenes
+                //if (m_parentRenderer.m_gradient == null)
+                //    GenerateBackgroundGradient();
                 
                 Color triangleColor = m_parentRenderer.m_gradient.GetColorAtPosition(trianglePosition - new Vector2(0, verticalOffset));
                 BackgroundTriangle triangle = new BackgroundTriangle(new Vector2(trianglePositionX, trianglePositionY),

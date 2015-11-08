@@ -211,9 +211,8 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
-            Debug.Log("CLICK RETRY");
-            //SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
-            //sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.5f);
+            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.5f);
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {

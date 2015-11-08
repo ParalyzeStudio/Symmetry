@@ -74,40 +74,10 @@ public class GameScene : GUIScene
 
     public override void Show()
     {
-        base.Show();      
+        base.Show();
 
         //Gradient
-        Chapter displayedChapter = GetLevelManager().m_currentChapter;
-
-        Gradient gradient = new Gradient();
-        gradient.CreateRadial(Vector2.zero,
-                              960,
-                              displayedChapter.GetThemeColors()[0],
-                              displayedChapter.GetThemeColors()[1]);
-
-        if (GetBackgroundRenderer().m_gradient == null)
-        {
-            GetBackgroundRenderer().ApplyGradient(gradient,
-                                                  0.02f,
-                                                  true,
-                                                  BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
-                                                  0.5f,
-                                                  0.0f,
-                                                  0.0f,
-                                                  false);
-        }
-
-        //GameObject radialGradientBackground = Instantiate(m_radialGradientPfb);
-
-        //GradientQuad gradientQuad = radialGradientBackground.GetComponent<GradientQuad>();
-        //gradientQuad.InitRadial(ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255)),
-        //                        ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255)),
-        //                        500);
-
-        //GameObjectAnimator gradientAnimator = radialGradientBackground.GetComponent<GameObjectAnimator>();
-        //gradientAnimator.SetParentTransform(this.transform);
-        //gradientAnimator.SetPosition(new Vector3(0, 0, -5.1f));
-        //gradientAnimator.SetScale(GeometryUtils.BuildVector3FromVector2(ScreenUtils.GetScreenSize(), 1));
+        ApplyBackgroundGradient();
 
         //Show all elements
         //CallFuncHandler callFuncHandler = GetCallFuncHandler();
@@ -207,6 +177,32 @@ public class GameScene : GUIScene
         //}
         //sw.Stop();
         //Debug.Log("2>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
+    }
+
+    public GameObject m_debugSweepLinePfb;
+
+    private void ApplyBackgroundGradient()
+    {
+        if (GetBackgroundRenderer().m_gradient == null)
+        {
+            Chapter displayedChapter = GetLevelManager().m_currentChapter;
+
+            Gradient gradient = new Gradient();
+            gradient.CreateRadial(Vector2.zero,
+                                  960,
+                                  displayedChapter.GetThemeColors()[0],
+                                  displayedChapter.GetThemeColors()[1]);
+
+
+            GetBackgroundRenderer().ApplyGradient(gradient,
+                                                  0.02f,
+                                                  true,
+                                                  BackgroundTrianglesRenderer.GradientAnimationPattern.EXPANDING_CIRCLE,
+                                                  0.5f,
+                                                  0.0f,
+                                                  0.0f,
+                                                  false);
+        }
     }
 
     public void ShowElements()
@@ -478,7 +474,8 @@ public class GameScene : GUIScene
     private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;       
+        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
+        Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
         //Show icons
         m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
@@ -504,7 +501,7 @@ public class GameScene : GUIScene
             TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
             iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
             iconAnimator.SetScale(iconSize);
-            iconAnimator.SetColor(Color.white);
+            iconAnimator.SetColor(tintColor);
             float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
             iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
         }
@@ -531,7 +528,7 @@ public class GameScene : GUIScene
                         Instantiate(m_sharpSegmentMaterial),
                         Instantiate(m_blurrySegmentMaterial),
                         Color.white,
-                        ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255))); //TODO obtain the color from the theme;
+                        tintColor); //TODO obtain the color from the theme;
 
         underlineAnimator.TranslatePointBTo(underlinePointB, 0.5f);
     }
@@ -633,8 +630,14 @@ public class GameScene : GUIScene
     {
         GameObject shapesHolderObject = (GameObject)Instantiate(m_shapesHolderPfb);
         shapesHolderObject.name = "Shapes";
+
         m_shapesHolder = shapesHolderObject.GetComponent<Shapes>();
-        m_shapesHolder.Init();
+
+        GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
+        shapesAnimator.SetParentTransform(this.transform);
+        shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
+        shapesAnimator.SetOpacity(0);
+        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
 
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
@@ -647,23 +650,7 @@ public class GameScene : GUIScene
             shape.m_state = Shape.ShapeState.STATIC;
 
             m_shapesHolder.CreateShapeObjectFromData(shape, false);
-
-            //ShapeAnimator shapeAnimator = shapeObject.GetComponent<ShapeAnimator>();
-            //shapeAnimator.SetOpacity(Shapes.SHAPES_OPACITY);
         }
-
-        GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
-        shapesAnimator.SetParentTransform(this.transform);
-        shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
-        shapesAnimator.SetOpacity(0);
-        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
-
-        //m_voxelGrid.Refresh();
-
-        ////fusion initial shapes
-        //GameObject shapeObject = m_shapes.m_shapesObj[0];
-        //Shape fusionShape = shapeObject.GetComponent<ShapeRenderer>().m_shape;
-        //Shapes.PerformFusionOnShape(fusionShape);
     }
 
     private void BuildAxesHolder()

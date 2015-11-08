@@ -18,8 +18,6 @@ public class Shapes : MonoBehaviour
     //public List<GameObject> m_substitutionShapeObjects { get; set; } //the list of shapes that will replace the actual shapes that are overlapping
     //public List<GameObject> m_overlappingShapeObjects { get; set; } //the list shape objects that are currently overlapping and needs to be masked
 
-    private ClippingManager m_clippingManager;
-
     public void Awake()
     {
         //m_staticShapeObjects = new List<GameObject>();
@@ -33,11 +31,6 @@ public class Shapes : MonoBehaviour
         //m_substitutionShapeObjects = new List<GameObject>();
         //m_overlappingShapeObjects = new List<GameObject>();
         //m_overlappingShapeObjects.Capacity = 16;
-    }
-
-    public void Init()
-    {
-        m_clippingManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<ClippingManager>();
     }
 
     /**
@@ -73,7 +66,6 @@ public class Shapes : MonoBehaviour
     public void DestroyShapeObjectForShape(Shape shape, float delay = 0.0f)
     {
         GameObject shapeObject = shape.m_parentMesh.gameObject;
-        GameObjectAnimator shapeAnimator = shapeObject.GetComponent<GameObjectAnimator>();
         Destroy(shapeObject, delay);
     }
 

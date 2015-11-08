@@ -47,8 +47,8 @@ public class Counter : MonoBehaviour
 
             //Create the counter element
             CounterElement counterElementComponent = clonedCounterElement.gameObject.GetComponent<CounterElement>();
-            Color tmpColor = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255)); //TODO obtain the color from the theme
-            counterElementComponent.Init(tmpColor, filledElementMaterial, emptyElementMaterial, outerContourMaterial);
+            Color tintColor = levelManager.m_currentChapter.GetThemeColors()[4];
+            counterElementComponent.Init(tintColor, filledElementMaterial, emptyElementMaterial, outerContourMaterial);
             counterElementComponent.SetStatus(i == 0 ? CounterElement.CounterElementStatus.CURRENT : CounterElement.CounterElementStatus.WAITING);
 
             m_elements.Add(counterElementComponent);

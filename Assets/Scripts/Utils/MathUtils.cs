@@ -6,7 +6,6 @@ public class MathUtils
 
     static public bool AreFloatsEqual(float floatA, float floatB, float epsilon = DEFAULT_EPSILON)
     {
-        float abs = Mathf.Abs(floatA - floatB);
         return Mathf.Abs(floatA - floatB) <= epsilon;
     }
 

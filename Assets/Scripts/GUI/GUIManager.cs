@@ -71,8 +71,6 @@ public class GUIManager : MonoBehaviour
     public Material m_skinOperationAdd;
     public Material m_skinOperationSubstract;
     public Material m_skinColorFilter;
-    public Material m_GUIButtonBackground;
-    public Material m_GUIButtonShadow;
 
     public Color[] m_framesColors;
 

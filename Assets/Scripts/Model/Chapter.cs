@@ -26,12 +26,13 @@ public class Chapter
      * -[0-1]: inner and outer colors for bg radial gradient
      * -2: color of central item background
      * -3: color of the progress bar background
+     * -4: tint color of most game scene elements (counter, axis, axis constraints...)
      * **/
     public Color[] GetThemeColors()
     {
         if (m_themeColors == null)
         {
-            m_themeColors = new Color[4];
+            m_themeColors = new Color[5];
 
             if (m_number == 1)
             {
@@ -39,6 +40,7 @@ public class Chapter
                 m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(60, 61, 9, 255));
                 m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(212, 185, 0, 255));
                 m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
 
                 //m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(146, 21, 51, 255));
                 //m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
@@ -51,6 +53,7 @@ public class Chapter
                 m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 9, 10, 255));
                 m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
                 m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
             }
             else if (m_number == 3)
             {
@@ -58,6 +61,7 @@ public class Chapter
                 m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(61, 34, 9, 255));
                 m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
                 m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
             }
             else if (m_number == 4)
             {
@@ -65,6 +69,7 @@ public class Chapter
                 m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
                 m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
                 m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
             }
         }
 
@@ -82,7 +87,7 @@ public class Chapter
 
         if (m_number == 1)
         {
-            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[0] = new Vector3(55, 1.0f, 1.0f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
             m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
         }

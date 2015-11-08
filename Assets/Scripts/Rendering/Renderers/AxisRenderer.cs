@@ -5,13 +5,15 @@ public class AxisRenderer : MonoBehaviour
 {
     public const float SWEEP_LINE_SPEED = 300.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
-    private const float AXIS_ENDPOINT_INNER_RADIUS = 30.0f;
-    private const float AXIS_ENDPOINT_CIRCLE_THICKNESS = 4.0f;
 
     //Shared prefabs
     public Material m_plainWhiteMaterial;
+    public GameObject m_texQuadPfb;
     public GameObject m_axisSegmentPfb;
-    public GameObject m_circleMeshPfb;
+
+    //materials
+    public Material m_endpointMaterial;
+    public Material m_endpointOuterContourMaterial;
 
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
@@ -130,6 +132,7 @@ public class AxisRenderer : MonoBehaviour
     public void BuildElements(Vector2 startPosition)
     {
         GameScene gameScene = GetGameScene();
+        Color axisTintColor = gameScene.GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
         //Set axis endpoints coordinates (both world and grid ones)
         m_endpoint1GridPosition = startPosition;
@@ -139,7 +142,13 @@ public class AxisRenderer : MonoBehaviour
         m_endpoint2Position = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(startPosition);
 
         //One material per axis
-        Material axisMaterial = m_plainWhiteMaterial = Instantiate(m_plainWhiteMaterial);
+        Material axisMaterial = Instantiate(m_plainWhiteMaterial);
+        Material endpointMaterial = Instantiate(m_endpointMaterial);
+        Material endpointOuterContourMaterial = Instantiate(m_endpointOuterContourMaterial);
+
+        //dimensions of each element
+        Vector3 endpointSize = new Vector3(64, 64, 1);
+        Vector3 endpointOuterContourSize = new Vector3(128, 128, 1);
 
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
@@ -147,59 +156,51 @@ public class AxisRenderer : MonoBehaviour
         axisSegmentAnimator.SetParentTransform(this.transform);
         axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, m_plainWhiteMaterial, Color.white);
+        m_axisSegment.Build(m_endpoint1Position, m_endpoint2Position, DEFAULT_AXIS_THICKNESS, axisMaterial, axisTintColor);
 
         //endpoint 1
-        m_endpoint1 = (GameObject)Instantiate(m_circleMeshPfb);
+        m_endpoint1 = (GameObject)Instantiate(m_texQuadPfb);
         m_endpoint1.name = "AxisEndpoint1";
-        CircleMesh endpoint1Mesh = m_endpoint1.GetComponent<CircleMesh>();
-        endpoint1Mesh.Init(axisMaterial);
-        CircleMeshAnimator endpoint1Animator = m_endpoint1.GetComponent<CircleMeshAnimator>();
-        endpoint1Animator.SetParentTransform(this.transform);
-        endpoint1Animator.SetNumSegments(6, false);
-        endpoint1Animator.SetInnerRadius(0, false);
-        endpoint1Animator.SetOuterRadius(8, true);
-        endpoint1Animator.SetColor(Color.white);
+        UVQuad endpoint1Mesh = m_endpoint1.GetComponent<UVQuad>();
+        endpoint1Mesh.Init(endpointMaterial);
+        TexturedQuadAnimator endpoint1Animator = m_endpoint1.GetComponent<TexturedQuadAnimator>();
+        endpoint1Animator.SetParentTransform(this.transform);        
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
+        endpoint1Animator.SetScale(endpointSize);
+        endpoint1Animator.SetColor(axisTintColor);
 
-        //endpoint 1 circle
-        m_endpoint1Circle = (GameObject)Instantiate(m_circleMeshPfb);
+        //endpoint 1 outer contour
+        m_endpoint1Circle = (GameObject)Instantiate(m_texQuadPfb);
         m_endpoint1Circle.name = "AxisEndpoint1Circle";
-        CircleMesh endpoint1CircleMesh = m_endpoint1Circle.GetComponent<CircleMesh>();
-        endpoint1CircleMesh.Init(axisMaterial);
-        CircleMeshAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<CircleMeshAnimator>();
+        UVQuad endpoint1CircleMesh = m_endpoint1Circle.GetComponent<UVQuad>();
+        endpoint1CircleMesh.Init(endpointOuterContourMaterial);
+        TexturedQuadAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<TexturedQuadAnimator>();
         endpoint1CircleAnimator.SetParentTransform(this.transform);
-        endpoint1CircleAnimator.SetNumSegments(64, false);
-        endpoint1CircleAnimator.SetInnerRadius(AXIS_ENDPOINT_INNER_RADIUS, false);
-        endpoint1CircleAnimator.SetOuterRadius(AXIS_ENDPOINT_INNER_RADIUS + AXIS_ENDPOINT_CIRCLE_THICKNESS, true);
-        endpoint1CircleAnimator.SetColor(Color.white);
         endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint1Position, 0));
+        endpoint1CircleAnimator.SetScale(endpointOuterContourSize);
+        endpoint1CircleAnimator.SetColor(axisTintColor);
 
         //endpoint 2
-        m_endpoint2 = (GameObject)Instantiate(m_circleMeshPfb);        
+        m_endpoint2 = (GameObject)Instantiate(m_texQuadPfb);
         m_endpoint2.name = "AxisEndpoint2";
-        CircleMesh endpoint2Mesh = m_endpoint2.GetComponent<CircleMesh>();
-        endpoint2Mesh.Init(axisMaterial);
-        CircleMeshAnimator endpoint2Animator = m_endpoint2.GetComponent<CircleMeshAnimator>();
+        UVQuad endpoint2Mesh = m_endpoint2.GetComponent<UVQuad>();
+        endpoint2Mesh.Init(endpointMaterial);
+        TexturedQuadAnimator endpoint2Animator = m_endpoint2.GetComponent<TexturedQuadAnimator>();
         endpoint2Animator.SetParentTransform(this.transform);
-        endpoint2Animator.SetNumSegments(6, false);
-        endpoint2Animator.SetInnerRadius(0, false);
-        endpoint2Animator.SetOuterRadius(8, true);
-        endpoint2Animator.SetColor(Color.white);
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+        endpoint2Animator.SetScale(endpointSize);
+        endpoint2Animator.SetColor(axisTintColor);
 
         //endpoint 2 circle
-        m_endpoint2Circle = (GameObject)Instantiate(m_circleMeshPfb);
+        m_endpoint2Circle = (GameObject)Instantiate(m_texQuadPfb);
         m_endpoint2Circle.name = "AxisEndpoint2Circle";
-        CircleMesh endpoint2CircleMesh = m_endpoint2Circle.GetComponent<CircleMesh>();
-        endpoint2CircleMesh.Init(axisMaterial);
-        CircleMeshAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<CircleMeshAnimator>();
+        UVQuad endpoint2CircleMesh = m_endpoint2Circle.GetComponent<UVQuad>();
+        endpoint2CircleMesh.Init(endpointOuterContourMaterial);
+        TexturedQuadAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<TexturedQuadAnimator>();
         endpoint2CircleAnimator.SetParentTransform(this.transform);
-        endpoint2CircleAnimator.SetNumSegments(64, false);
-        endpoint2CircleAnimator.SetInnerRadius(AXIS_ENDPOINT_INNER_RADIUS, false);
-        endpoint2CircleAnimator.SetOuterRadius(AXIS_ENDPOINT_INNER_RADIUS + AXIS_ENDPOINT_CIRCLE_THICKNESS, true);
-        endpoint2CircleAnimator.SetColor(Color.white);
         endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(m_endpoint2Position, 0));
+        endpoint2CircleAnimator.SetScale(endpointOuterContourSize);
+        endpoint2CircleAnimator.SetColor(axisTintColor);
 
         //ribbon
         CreateRibbon();
@@ -277,15 +278,18 @@ public class AxisRenderer : MonoBehaviour
     }
 
     /**
-     * Try to snap the second endpoint to a grid anchor if the distance to it is small enough
+     * Try to snap the second endpoint of the axis to a grid anchor if the distance between the current touch and anchor is the smallest
      * **/
-    public bool TryToSnapAxisEndpointToClosestAnchor()
+    public bool SnapAxisEndpointToClosestAnchor(Vector2 pointerLocation)
     {
-        if (m_snappedAnchor != null)
-            return false;
+        //if (m_snappedAnchor != null)
+        //    return false;
 
         GameScene gameScene = GetGameScene();
         GameObject[] gridAnchors = gameScene.m_grid.m_anchors;
+
+        float minDistance = float.MaxValue;
+        int minDistanceAnchorIndex = 0;
 
         for (int anchorIndex = 0; anchorIndex != gridAnchors.Length; anchorIndex++)
         {
@@ -294,47 +298,30 @@ public class AxisRenderer : MonoBehaviour
             Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinatesForAnchorIndex(anchorIndex);
             Vector2 snapAnchorWorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(snapAnchorGridPosition);
 
-            float fDistanceToAnchor = (m_endpoint2Position - snapAnchorWorldPosition).magnitude;
-
-            //do not snap on the current snapped anchor or on the anchor under the first axis endpoint
-            if (snapAnchor != m_snappedAnchor && snapAnchorGridPosition != m_endpoint1GridPosition)
+            float fSqrDistanceToAnchor = (pointerLocation - snapAnchorWorldPosition).sqrMagnitude;
+            if (fSqrDistanceToAnchor < minDistance)
             {
-                if (fDistanceToAnchor <= m_snapDistance) //we can snap the anchor
-                {
-                    m_snappedAnchor = snapAnchor;
-                    m_type = AxisType.DYNAMIC_SNAPPED;
-                    //Render(m_endpoint1Position, snapAnchorPosition, false);
-                    Render(m_endpoint1GridPosition, snapAnchorGridPosition, true);
+                minDistance = fSqrDistanceToAnchor;
+                minDistanceAnchorIndex = anchorIndex;
+            }           
+        }
 
-                    //gameScene.m_axes.LaunchSnapCircleAnimation(snapAnchorPosition);
-
-                    return true;
-                }
+        GameObject closestAnchor = gridAnchors[minDistanceAnchorIndex];
+        if (closestAnchor != m_snappedAnchor)
+        {
+            if (MathUtils.AreVec3PointsEqual(closestAnchor.transform.position, m_endpoint1Position))
+                m_type = AxisType.DYNAMIC_UNSNAPPED;
+            else
+            {
+                m_snappedAnchor = closestAnchor;
+                m_type = AxisType.DYNAMIC_SNAPPED;
             }
+            m_endpoint2Position = m_snappedAnchor.transform.position;
+            Render(m_endpoint1Position, m_endpoint2Position, false);
+            return true;
         }
 
         return false;
-    }
-
-    /**
-     * Try to unsnap a the axis second endpoint if the distance to it is big enough ( > m_snapDistance)
-     * **/
-    public void TryToUnsnap(Vector2 pointerLocation)
-    {
-        Vector2 snappedAnchorPosition = m_snappedAnchor.transform.position;
-        Vector2 snappedAnchorPosition2 = m_snappedAnchor.GetComponent<GameObjectAnimator>().GetPosition();
-        float fDistanceFromMouseToAnchor = (pointerLocation - snappedAnchorPosition).magnitude;
-        if (fDistanceFromMouseToAnchor > m_snapDistance)
-        {
-            m_snappedAnchor = null;
-            m_type = AxisType.DYNAMIC_UNSNAPPED;
-            Render(m_endpoint1Position, pointerLocation, false);
-        }
-    }
-
-    public bool isAxisSnapped()
-    {
-        return m_snappedAnchor != null;
     }
 
     public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
@@ -413,13 +400,13 @@ public class AxisRenderer : MonoBehaviour
 
             //GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
             //debugLeftSweepLineAnimator.SetParentTransform(this.transform);
-            //debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
             //debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            //debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
             //debugLeftSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
             GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
             debugRightSweepLineAnimator.SetParentTransform(this.transform);
-            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
             debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
             debugRightSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
         }
         else if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ONE_SIDE)
@@ -453,16 +440,14 @@ public class AxisRenderer : MonoBehaviour
         //Destroy ribbon
         Destroy(m_ribbonMesh.gameObject);
 
-        //Fade out and scale up axis endpoint circles
-        float scaleToInnerRadius = 2 * AXIS_ENDPOINT_INNER_RADIUS;
-        CircleMeshAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<CircleMeshAnimator>();
-        endpoint1CircleAnimator.FadeTo(0.0f, 1.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        endpoint1CircleAnimator.AnimateInnerRadiusTo(scaleToInnerRadius, 1.0f);
-        endpoint1CircleAnimator.AnimateOuterRadiusTo(scaleToInnerRadius + AXIS_ENDPOINT_CIRCLE_THICKNESS, 1.0f);
-        CircleMeshAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<CircleMeshAnimator>();
-        endpoint2CircleAnimator.FadeTo(0.0f, 1.0f);
-        endpoint2CircleAnimator.AnimateInnerRadiusTo(scaleToInnerRadius, 1.0f);
-        endpoint2CircleAnimator.AnimateOuterRadiusTo(scaleToInnerRadius + AXIS_ENDPOINT_CIRCLE_THICKNESS, 1.0f);
+        //Fade out and scale up axis endpoint outer contours
+        Vector3 scaleToValue = new Vector3(256, 256, 1);
+        TexturedQuadAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<TexturedQuadAnimator>();
+        endpoint1CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        endpoint1CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+        TexturedQuadAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<TexturedQuadAnimator>();
+        endpoint2CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        endpoint2CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
 
         //Start sweeping
         LaunchSweepingLines();
