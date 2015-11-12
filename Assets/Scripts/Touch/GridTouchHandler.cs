@@ -96,14 +96,14 @@ public class GridTouchHandler : TouchHandler
                 currentAxis.m_type = AxisRenderer.AxisType.STATIC; //make the axis static
                 Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
 
-                ThreadedJobsManager threadedJobsManager = gameScene.GetThreadedJobsManager();
-                threadedJobsManager.AddAndRunJob(new ThreadedJob
+                QueuedThreadedJobsManager threadedJobsManager = gameScene.GetQueuedThreadedJobsManager();
+                threadedJobsManager.AddJob(new ThreadedJob
                                                 (
                                                     new ThreadedJob.ThreadFunction(symmetrizer.SymmetrizeByAxis),
                                                     null,
                                                     new ThreadedJob.ThreadFunction(symmetrizer.OnSymmetryDone)
-                                                    )
-                                                 );
+                                                )
+                                          );
             }
             else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {

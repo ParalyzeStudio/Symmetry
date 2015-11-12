@@ -3,6 +3,7 @@
 public class SceneManager : MonoBehaviour
 {
     public GUIScene m_currentScene { get; set; }
+    public GUIScene m_pendingScene { get; set; }
 
     public GameObject m_mainMenuPfb; //the prefab containing the main menu scene
     public GameObject m_chaptersPfb; //the prefab containing the chapters scene
@@ -39,7 +40,7 @@ public class SceneManager : MonoBehaviour
                                        float fHideDuration = 0.5f)
     {
         HideContent(m_displayedContent, bHideWithAnimation, fHideDuration);
-        ShowContent(contentToDisplay, fHideDuration); //show next content 1 second after hiding the previous one
+        ShowContent(contentToDisplay, bHideWithAnimation ? fHideDuration : 0.0f); //show next content 1 second after hiding the previous one
     }
 
     /**
@@ -55,35 +56,35 @@ public class SceneManager : MonoBehaviour
             //build the content
             sceneObject = (GameObject)Instantiate(m_mainMenuPfb);
 
-            m_currentScene = sceneObject.GetComponent<MainMenu>();
+            m_pendingScene = sceneObject.GetComponent<MainMenu>();
         }
         else if (contentToDisplay == DisplayContent.CHAPTERS)
         {
             //build the content
             sceneObject = (GameObject)Instantiate(m_chaptersPfb);
 
-            m_currentScene = sceneObject.GetComponent<Chapters>();
+            m_pendingScene = sceneObject.GetComponent<Chapters>();
         }
         else if (contentToDisplay == DisplayContent.LEVELS)
         {
             //build the content
             sceneObject = (GameObject)Instantiate(m_levelsPfb);
 
-            m_currentScene = sceneObject.GetComponent<Levels>();
+            m_pendingScene = sceneObject.GetComponent<Levels>();
         }
         else if (contentToDisplay == DisplayContent.LEVEL_INTRO)
         {
             //build the content
             sceneObject = (GameObject)Instantiate(m_levelIntroPfb);
 
-            m_currentScene = sceneObject.GetComponent<LevelIntro>();
+            m_pendingScene = sceneObject.GetComponent<LevelIntro>();
         }
         else if (contentToDisplay == DisplayContent.GAME)
         {
             //build the content
             sceneObject = (GameObject)Instantiate(m_gameScenePfb);
 
-            m_currentScene = sceneObject.GetComponent<GameScene>();
+            m_pendingScene = sceneObject.GetComponent<GameScene>();
         }
 
         if (sceneObject == null) 
@@ -92,7 +93,7 @@ public class SceneManager : MonoBehaviour
         sceneObject.GetComponent<GameObjectAnimator>().SetParentTransform(this.transform);
 
         CallFuncHandler callFuncHandler = this.gameObject.GetComponent<CallFuncHandler>();
-        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_currentScene.Show), fDelay);
+        callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(m_pendingScene.Show), fDelay);
     }
 
     /**
@@ -120,10 +121,19 @@ public class SceneManager : MonoBehaviour
     }
 
     /**
+     * Set the pnedingScene as the new currentScene
+     * **/
+    private void UpdateCurrentScene()
+    {
+        m_currentScene = m_pendingScene;
+    }
+
+    /**
      * Callback when a new scene is displayed
      * **/
     public void OnSceneShown()
     {
-        UpdateDisplayedContent();
+        UpdateDisplayedContent(); 
+        UpdateCurrentScene();
     }
 }

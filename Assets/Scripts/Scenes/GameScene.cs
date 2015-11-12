@@ -66,6 +66,7 @@ public class GameScene : GUIScene
 
     private ClippingManager m_clippingManager;
     private ThreadedJobsManager m_threadedJobsManager;
+    private QueuedThreadedJobsManager m_queuedThreadedJobsManager;
 
     public void Init()
     {
@@ -83,6 +84,8 @@ public class GameScene : GUIScene
         //CallFuncHandler callFuncHandler = GetCallFuncHandler();
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
+
+        GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(UnitTests.TestShapesClipping)));
 
         /**
          * TEST TRIANGLES INTERSECTIONS
@@ -254,10 +257,15 @@ public class GameScene : GUIScene
     private void ShowGrid(float fDelay = 0.0f)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        //Visible grid
+               
         GameObject gridObject = (GameObject)Instantiate(m_gridPfb);
         gridObject.name = "Grid";
+
+        GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
+        gridAnimator.SetParentTransform(this.transform);
+        gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));        
+
+        //Visible grid
         m_grid = gridObject.GetComponent<Grid>();
         m_grid.Build();        
 
@@ -265,9 +273,6 @@ public class GameScene : GUIScene
         m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
         m_voxelGrid.Init(8);
 
-        GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
-        gridAnimator.SetParentTransform(this.transform);
-        gridAnimator.SetPosition(new Vector3(0, -0.075f * screenSize.y, GRID_Z_VALUE));
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 1.5f, fDelay);
     }
@@ -668,7 +673,7 @@ public class GameScene : GUIScene
         m_clippingManager.Init();
 
         //make a dummy clipping to speed up the next clipping
-        GetThreadedJobsManager().AddAndRunJob(new ThreadedJob(new ThreadedJob.ThreadFunction(MakeFirstDummyClippingOperation)));        
+        GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(MakeFirstDummyClippingOperation)));        
     }
 
     /**
@@ -683,8 +688,7 @@ public class GameScene : GUIScene
         Shape dummySubjShape = new Shape(false, dummyContour);
         Shape dummyClipShape = new Shape(false, dummyContour);
 
-
-        m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
+        List<Shape> result = m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
     }
 
     /**
@@ -815,6 +819,13 @@ public class GameScene : GUIScene
         return m_threadedJobsManager;
     }
 
+    public QueuedThreadedJobsManager GetQueuedThreadedJobsManager()
+    {
+        if (m_queuedThreadedJobsManager == null)
+            m_queuedThreadedJobsManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<QueuedThreadedJobsManager>();
+
+        return m_queuedThreadedJobsManager;
+    }
 
 
     //----------------------------------------------------------------------------------------------------//

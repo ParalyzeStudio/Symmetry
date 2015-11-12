@@ -101,6 +101,7 @@ public class ShapeMesh : TexturedMesh
                     d.IsOverlappedByShape(this.m_shapeData))
                 {
                     ShapeCell cell = new ShapeCell(i, this, a, b, c, d);
+                    //Debug.Log("a:" + a.m_position + " b:" + b.m_position + " c:" + c.m_position + " d:" + d.m_position);
                     if ((i % XCellsCount) > 0) //cell is not at the beginning of a line
                     {
                         ShapeCell leftCell = m_cells[i - 1];
@@ -197,7 +198,7 @@ public class ShapeMesh : TexturedMesh
         //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
         GetGameScene().GetClippingManager();
 
-        GetGameScene().GetThreadedJobsManager().AddAndRunJob
+        GetGameScene().GetQueuedThreadedJobsManager().AddJob
             (
             new ThreadedJob
                 (

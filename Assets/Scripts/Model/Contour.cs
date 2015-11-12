@@ -124,6 +124,28 @@ public class Contour : List<Vector2>
     }
 
     /**
+     *  Remove possible duplicate vertices in this contour
+     * **/
+    public void RemoveDuplicateVertices()
+    {
+        Contour uniqueVerticesContour = new Contour();
+        List<int> duplicatesIndices = new List<int>();
+
+        for (int i = 0; i != this.Count; i++)
+        {
+            if (!uniqueVerticesContour.HasPoint(this[i]))
+                uniqueVerticesContour.Add(this[i]);
+            else
+                duplicatesIndices.Add(i);
+        }
+
+        for (int i = 0; i != duplicatesIndices.Count; i++)
+        {
+            this.Remove(this[duplicatesIndices[i] - i]);
+        }
+    }
+
+    /**
      * If 3 points (or more) belong to the same segment remove the inner points
      * **/
     public void RemoveAlignedVertices()
@@ -194,6 +216,20 @@ public class Contour : List<Vector2>
             Vector2 contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
 
             if (GeometryUtils.IsPointContainedInSegment(point, contourPoint1, contourPoint2))
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Test if one this contour vertices is equal to the 'point' parameter
+     * **/
+    public bool HasPoint(Vector2 point)
+    {
+        for (int i = 0; i != Count; i++)
+        {
+            if (MathUtils.AreVec2PointsEqual(this[i], point))
                 return true;
         }
 

@@ -57,7 +57,7 @@ public class ClippingManager : MonoBehaviour
 
             //subj holes
             List<Contour> holesWithOffset = subjShape.GetHolesWithOffset();
-            for (int iHoleIdx = 0; iHoleIdx != subjShape.m_holes.Count; iHoleIdx++)
+            for (int iHoleIdx = 0; iHoleIdx != holesWithOffset.Count; iHoleIdx++)
             {
                 subjsPaths.Add(CreatePathFromContour(holesWithOffset[iHoleIdx]));
             }
@@ -70,9 +70,10 @@ public class ClippingManager : MonoBehaviour
             clipsPaths.Add(CreatePathFromContour(contourWithOffset));
 
             //clip holes
-            for (int iHoleIdx = 0; iHoleIdx != clipShape.m_holes.Count; iHoleIdx++)
+            holesWithOffset = clipShape.GetHolesWithOffset();
+            for (int iHoleIdx = 0; iHoleIdx != holesWithOffset.Count; iHoleIdx++)
             {
-                clipsPaths.Add(CreatePathFromContour(clipShape.m_holes[iHoleIdx]));
+                clipsPaths.Add(CreatePathFromContour(holesWithOffset[iHoleIdx]));
             }
 
             //clear the clipper paths and refill them after that
@@ -90,89 +91,130 @@ public class ClippingManager : MonoBehaviour
         List<Shape> resultingShapes = new List<Shape>();
         if (result)
         {
-            resultingShapes.Capacity = polytree.Total;
+            resultingShapes = ExtractShapesFromPolyNodes(polytree.Childs);
 
-            PolyNode polynode = polytree.GetFirst();
-            while (polynode != null)
+            //Set color to each resulting shape
+            for (int i = 0; i != resultingShapes.Count; i++)
             {
-                //contour
-                Contour polynodeContour = CreateContourFromPath(polynode.Contour, false);                
-                List<Contour> splitContours = polynodeContour.Split();
+                if (clipOperation == ClipType.ctUnion)
+                    resultingShapes[i].m_color = subjShape.m_color;
+                else if (clipOperation == ClipType.ctIntersection)
+                    resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+                else if (clipOperation == ClipType.ctDifference)
+                    resultingShapes[i].m_color = subjShape.m_color;
+            }
+        }
+        return resultingShapes;
+    }
 
-                //eliminate repeated points and down scale them
-                for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
+    /**
+     * Extract all outers from a PolyNode object and convert them to Shape objects
+     * **/
+    private List<Shape> ExtractShapesFromPolyNodes(List<PolyNode> polynodes)
+    {
+        List<Shape> resultingShapes = new List<Shape>();
+
+        for (int iPolynodeIdx = 0; iPolynodeIdx != polynodes.Count; iPolynodeIdx++)
+        {
+            PolyNode polynode = polynodes[iPolynodeIdx];
+
+            if (polynode.IsHole) //be sure we are dealing with outers
+                continue;
+
+            //split the contour of the PolyNode and build one shape for each
+            List<List<IntPoint>> splitPaths = SplitPath(polynode.Contour);
+            List<Shape> shapes = new List<Shape>();
+            for (int iPathIdx = 0; iPathIdx != splitPaths.Count; iPathIdx++)
+            {
+                Contour shapeContour = CreateContourFromPath(splitPaths[iPathIdx], true);
+                //remove possible duplicate points
+                shapeContour.RemoveDuplicateVertices();
+                if (shapeContour.Count < 3)
+                    continue;
+                //remove aligned vertices
+                shapeContour.RemoveAlignedVertices();
+                if (shapeContour.Count < 3)
+                    continue;
+
+                shapes.Add(new Shape(false, shapeContour));
+            }
+
+            //Get all child holes
+            List<Contour> holesContours = ExtractHolesForPolynode(polynode);
+
+            //only one shape add all holes to it
+            if (shapes.Count == 1)
+            {
+                //child of an outer is always a hole, no need to call IsHole on the child
+                for (int iHoleContourIdx = 0; iHoleContourIdx != holesContours.Count; iHoleContourIdx++)
                 {
-                    Contour splitContour = splitContours[iContourIdx];
-                    splitContour.RemoveAlignedVertices();
-                    splitContour.ScalePoints(1 / (float)GeometryUtils.CONVERSION_FLOAT_PRECISION);
+                    Contour holeContour = holesContours[iHoleContourIdx];
+                    shapes[0].m_holes.Add(holeContour);                   
                 }
-
-                if (splitContours.Count == 1) //only one shape add all holes to it
+            }
+            else
+            {
+                for (int iHoleContourIdx = 0; iHoleContourIdx != holesContours.Count; iHoleContourIdx++)
                 {
-                    Shape shape = new Shape(false);
-                    shape.m_contour = splitContours[0];
+                    Contour holeContour = holesContours[iHoleContourIdx];
+                    Vector2 holeBarycentre = holeContour.GetBarycentre();
 
-                    //child of an outer is always a hole, no need to call IsHole on the child
-                    for (int iChildIdx = 0; iChildIdx != polynode.ChildCount; iChildIdx++)
+                    for (int iShapeIdx = 0; iShapeIdx != shapes.Count; iShapeIdx++)
                     {
-                        PolyNode childHole = polynode.Childs[iChildIdx];
-                        shape.m_holes.Add(CreateContourFromPath(childHole.Contour));
-                    }
-                }
-
-                List<Contour> pendingHoles = new List<Contour>();
-                //Separate shapes from holes from the splitPaths list
-                for (int iContourIdx = 0; iContourIdx != splitContours.Count; iContourIdx++)
-                {
-                    Contour splitContour = splitContours[iContourIdx];
-
-                    float contourArea = splitContour.GetArea();
-
-                    if (contourArea > 0) //counter-clockwise orientation, it is a shape contour
-                    {
-                        Shape shape = new Shape(false, splitContour);
-                        shape.Triangulate(); //tmp triangulation, we will retriangulate if necessary if holes are added
-
-                        resultingShapes.Add(shape);
-                    }
-                    else //a hole
-                    {
-                        pendingHoles.Add(splitContour);
-                    }
-
-                    //Associated each pending hole to one shape
-                    for (int iPendingHoleIdx = 0; iPendingHoleIdx != pendingHoles.Count; iPendingHoleIdx++)
-                    {
-                        Contour holeContour = pendingHoles[iPendingHoleIdx];
-                        Vector2 holeBarycentre = holeContour.GetBarycentre();
-
-                        for (int iResultingShapeIdx = 0; iResultingShapeIdx != resultingShapes.Count; iResultingShapeIdx++)
+                        Shape shape = shapes[iShapeIdx];
+                        if (shape.ContainsPoint(holeBarycentre))
                         {
-                            Shape resultingShape = resultingShapes[iResultingShapeIdx];
-                            if (resultingShape.ContainsPoint(holeBarycentre))
-                            {
-                                resultingShape.m_holes.Add(holeContour);
-                                resultingShape.Triangulate(); //re-triangulate
-                            }
+                            shape.m_holes.Add(holeContour);
                         }
                     }
                 }
+            }
 
-                polynode = polynode.GetNext();
+            //Triangulate each shape
+            for (int iShapeIdx = 0; iShapeIdx != resultingShapes.Count; iShapeIdx++)
+            {
+                resultingShapes[iShapeIdx].Triangulate();
+            }
+
+            //Call recursively the ExtractShapesFromPolyNodes() method on hole Childs (that are outers)
+            List<PolyNode> childHoles = polynode.Childs;
+            for (int iHoleIdx = 0; iHoleIdx != childHoles.Count; iHoleIdx++)
+            {
+                if (childHoles[iHoleIdx].ChildCount > 0)
+                    resultingShapes.AddRange(ExtractShapesFromPolyNodes(childHoles[iHoleIdx].Childs));
+            }
+
+            resultingShapes.AddRange(shapes); //Add these extracted shapes to the list of all resulting shapes
+        }
+
+        return resultingShapes;
+    }
+
+    private List<Contour> ExtractHolesForPolynode(PolyNode polynode)
+    {
+        List<PolyNode> childHoles = polynode.Childs;
+        List<Contour> holesContour = new List<Contour>();
+
+        for (int iHoleIdx = 0; iHoleIdx != childHoles.Count; iHoleIdx++)
+        {
+            //Split each hole
+            List<List<IntPoint>> splitHoles = SplitPath(childHoles[iHoleIdx].Contour);
+            for (int iSplitHoleIdx = 0; iSplitHoleIdx != splitHoles.Count; iSplitHoleIdx++)
+            {
+                Contour holeContour = CreateContourFromPath(splitHoles[iSplitHoleIdx], true);
+                //remove possible duplicate points
+                holeContour.RemoveDuplicateVertices();
+                if (holeContour.Count < 3)
+                    continue;
+                //remove aligned vertices
+                holeContour.RemoveAlignedVertices();
+                if (holeContour.Count < 3)
+                    continue;
+                holesContour.Add(holeContour);
             }
         }
 
-        //Set color to each resulting shape
-        for (int i = 0; i != resultingShapes.Count; i++)
-        {
-            if (clipOperation == ClipType.ctUnion)
-                resultingShapes[i].m_color = subjShape.m_color;
-            else if (clipOperation == ClipType.ctIntersection)
-                resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
-            else if (clipOperation == ClipType.ctDifference)
-                resultingShapes[i].m_color = subjShape.m_color;
-        }
-        return resultingShapes;
+        return holesContour;
     }
 
     /**
@@ -236,5 +278,67 @@ public class ClippingManager : MonoBehaviour
             clippedDiffShapes.Clear();
             clippedDiffShapes.AddRange(clippedDifferenceShapes);
         }
+    }
+
+    /**
+     * Ensure that the path has no vertices that repeat.
+     * If at least 2 vertices repeat in that contour, split it into several contours
+     * **/
+    private List<List<IntPoint>> SplitPath(List<IntPoint> path)
+    {
+        List<List<IntPoint>> splitPaths = new List<List<IntPoint>>();
+
+        bool bRepeatedVertices = false;
+        while (path.Count > 0)
+        {
+            for (int i = 0; i != path.Count; i++)
+            {
+                bRepeatedVertices = false;
+
+                IntPoint pathVertex = path[i];
+
+                int farthestEqualVertexIndex = -1;
+                for (int j = i + 1; j != path.Count; j++)
+                {
+                    IntPoint pathTestVertex = path[j]; //the vertex to be test against contourVertex for equality
+
+                    if (pathTestVertex.Equals(pathVertex))
+                        farthestEqualVertexIndex = j;
+                }
+
+                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
+                {
+                    bRepeatedVertices = true;
+
+                    //extract the first split contour
+                    List<IntPoint> splitPath = new List<IntPoint>();
+                    splitPath.Capacity = path.Count - farthestEqualVertexIndex + i;
+                    for (int k = farthestEqualVertexIndex; k != path.Count; k++)
+                    {
+                        splitPath.Add(path[k]);
+                    }
+                    for (int k = 0; k != i; k++)
+                    {
+                        splitPath.Add(path[k]);
+                    }
+
+                    if (splitPath.Count > 2)
+                        splitPaths.Add(splitPath);
+
+                    //replace the contour with the sub contour
+                    path = new List<IntPoint>(path.GetRange(i, farthestEqualVertexIndex - i));
+
+                    break; //break the for loop and continue on the while loop
+                }
+            }
+            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
+            {
+                if (path.Count > 2)
+                    splitPaths.Add(path);
+                break;
+            }
+        }
+
+        return splitPaths;
     }
 }

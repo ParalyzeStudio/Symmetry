@@ -8,6 +8,7 @@
 	<string tag="sound" value="SOUND"/>
 	<string tag="reset" value="RESET"/>
 	<string tag="progress_bar_completion" value="completed"/>
+	<string tag="skip" value="Click to skip"/>
 	
 	<!-- Action buttons-->
 	<string tag="action_symmetry_two_sides" value="SYM 2 SIDES"/>

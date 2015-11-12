@@ -8,6 +8,7 @@
 	<string tag="sound" value="SON"/>
 	<string tag="reset" value="REINITIALISER"/>
 	<string tag="progress_bar_completion" value="complétés"/>
+	<string tag="skip" value="Cliquez pour passer"/>
 	
 	<!-- Action buttons-->
 	<string tag="action_symmetry_two_sides" value="SYM 2 SIDES"/>

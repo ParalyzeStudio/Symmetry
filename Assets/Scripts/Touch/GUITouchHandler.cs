@@ -146,11 +146,13 @@ public class GUITouchHandler : TouchHandler
         //clickLocation += new Vector2(0.5f * screenSize.x, 0.5f * screenSize.y);
         //clickLocation.y = -clickLocation.y + screenSize.y;
 
-        GameObject playButtonObject = mainMenu.m_playButton; 
-        Vector2 playButtonPosition = playButtonObject.transform.localPosition;
-        float playButtonOuterRadius = playButtonObject.GetComponent<CircleMeshAnimator>().m_outerRadius;
+        GameObject playButtonObject = mainMenu.m_playButtonObject; 
+        Vector2 playButtonPosition = playButtonObject.transform.position;
+        float playButtonTouchArea = playButtonObject.GetComponent<PulsatingButton>().Size;
 
-        if ((clickLocation - playButtonPosition).magnitude <= playButtonOuterRadius)
+        if (clickLocation.x >= playButtonPosition.x - 0.5f * playButtonTouchArea && clickLocation.x <= playButtonPosition.x + 0.5f * playButtonTouchArea
+            &&
+            clickLocation.y <= playButtonPosition.y + 0.5f * playButtonTouchArea && clickLocation.y >= playButtonPosition.y - 0.5f * playButtonTouchArea)
         {
             mainMenu.DismissPlayButton();
             OnClickPlay();
@@ -206,13 +208,14 @@ public class GUITouchHandler : TouchHandler
      * **/
     public void HandleClickOnLevelIntro(Vector2 clickLocation)
     {
-        float skipAreaWidth = 800;
-        float skipAreaHeight = 200;
-        Vector2 skipAreaPosition = new Vector2(0, -130.0f); //position of the center of the skip text
+        LevelIntro levelintro = (LevelIntro)GetSceneManager().m_currentScene;
+        GameObject skipButtonObject = levelintro.m_skipButtonObject;
+        Vector2 skipButtonPosition = skipButtonObject.transform.position;
+        float skipButtonTouchArea = skipButtonObject.GetComponent<PulsatingButton>().Size;
 
-        if (clickLocation.x >= skipAreaPosition.x - 0.5f * skipAreaWidth && clickLocation.x <= skipAreaPosition.x + 0.5f * skipAreaWidth
+        if (clickLocation.x >= skipButtonPosition.x - 0.5f * skipButtonTouchArea && clickLocation.x <= skipButtonPosition.x + 0.5f * skipButtonTouchArea
             &&
-            clickLocation.y <= skipAreaPosition.y + 0.5f * skipAreaHeight && clickLocation.y >= skipAreaPosition.y - 0.5f * skipAreaHeight)
+            clickLocation.y <= skipButtonPosition.y + 0.5f * skipButtonTouchArea && clickLocation.y >= skipButtonPosition.y - 0.5f * skipButtonTouchArea)
         {
             OnClickSkipIntro();
         }         

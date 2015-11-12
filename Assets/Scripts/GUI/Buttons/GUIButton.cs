@@ -212,7 +212,12 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
             SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
-            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.5f);
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false);
+
+            //the Show() method will be called in the next frame due to the way CallFuncHandler works.
+            //Thus we can set the boolean in this frame and be sure it will be set before Show() is actually called
+            LevelIntro levelIntroPendingScene = (LevelIntro)sceneManager.m_pendingScene;
+            levelIntroPendingScene.m_loadingLevelIntroFromRetry = true;
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {
