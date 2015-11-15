@@ -369,24 +369,259 @@ public class UnitTests
         intersectionExpectedContour2.Add(new Vector2(5, -5));
         intersectionExpectedContour2.Add(new Vector2(5, 5));
         intersectionExpectedContour2.Add(new Vector2(-5, 5));
-        bool b1 = result[1].m_contour.EqualsContour(intersectionExpectedContour1);
-        bool b2 = result[1].m_holes[0].EqualsContour(intersectionExpectedHole1, false);
-        bool b3 = result[0].m_contour.EqualsContour(intersectionExpectedContour2);
         if (result.Count == 2 &&
             (
-            result[1].m_contour.EqualsContour(intersectionExpectedContour1)
-            && result[1].m_holes.Count == 1
-            && result[1].m_holes[0].EqualsContour(intersectionExpectedHole1, false)
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1)
+            && result[0].m_holes.Count == 1
+            && result[0].m_holes[0].EqualsContour(intersectionExpectedHole1, false)
             && 
-            result[0].m_contour.EqualsContour(intersectionExpectedContour2)
+            result[1].m_contour.EqualsContour(intersectionExpectedContour2)
             )
             )
             Debug.Log("TEST 3 DIFFERENCE SUCCESS");
         else
             Debug.Log("TEST 3 DIFFERENCE FAILURE");
+
+        //-----TEST 4-----//
+        subjShape = new Shape(false);
+        subjContour = new Contour(4);
+        subjContour.Add(new Vector2(50, 100));
+        subjContour.Add(new Vector2(50, 50));
+        subjContour.Add(new Vector2(130, 50));
+        subjContour.Add(new Vector2(130, 100));
+        subjShape.m_contour = subjContour;
+
+        clipShape = new Shape(false);
+        clipContour = new Contour(4);
+        clipContour.Add(new Vector2(80, 40));
+        clipContour.Add(new Vector2(120, 40));
+        clipContour.Add(new Vector2(120, 110));
+        clipContour.Add(new Vector2(80, 110));
+        clipShape.m_contour = clipContour;
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion, true);
+        intersectionExpectedContour1 = new Contour(13);
+        intersectionExpectedContour1.Add(new Vector2(50, 100));
+        intersectionExpectedContour1.Add(new Vector2(50, 50));
+        intersectionExpectedContour1.Add(new Vector2(80, 50));
+        intersectionExpectedContour1.Add(new Vector2(80, 40));
+        intersectionExpectedContour1.Add(new Vector2(120, 40));
+        intersectionExpectedContour1.Add(new Vector2(120, 50));
+        intersectionExpectedContour1.Add(new Vector2(130, 50));
+        intersectionExpectedContour1.Add(new Vector2(130, 100));
+        intersectionExpectedContour1.Add(new Vector2(120, 100));
+        intersectionExpectedContour1.Add(new Vector2(120, 110));
+        intersectionExpectedContour1.Add(new Vector2(80, 110));
+        intersectionExpectedContour1.Add(new Vector2(80, 100));
+
+        if (result.Count == 1 &&
+                (
+                    result[0].m_contour.EqualsContour(intersectionExpectedContour1)
+                )
+            )
+            Debug.Log("TEST 4 UNION SUCCESS");
+        else
+            Debug.Log("TEST 4 UNION FAILURE");
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference, true);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(50, 100));
+        intersectionExpectedContour1.Add(new Vector2(50, 50));
+        intersectionExpectedContour1.Add(new Vector2(80, 50));
+        intersectionExpectedContour1.Add(new Vector2(80, 100));
+        intersectionExpectedContour2 = new Contour(4);
+        intersectionExpectedContour2.Add(new Vector2(120, 100));
+        intersectionExpectedContour2.Add(new Vector2(120, 50));
+        intersectionExpectedContour2.Add(new Vector2(130, 50));
+        intersectionExpectedContour2.Add(new Vector2(130, 100));
+
+        if (result.Count == 2 &&
+            (
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1) &&
+            result[1].m_contour.EqualsContour(intersectionExpectedContour2)
+            )
+            )
+            Debug.Log("TEST 4 DIFFERENCE SUCCESS");
+        else
+            Debug.Log("TEST 4 DIFFERENCE FAILURE");
+
+        //-----TEST 5-----//
+        subjShape = new Shape(false);
+        subjContour = new Contour(4);
+        subjContour.Add(new Vector2(40, 110));
+        subjContour.Add(new Vector2(40, 20));
+        subjContour.Add(new Vector2(140, 20));
+        subjContour.Add(new Vector2(140, 110));
+        Contour subjHole = new Contour(4);
+        subjHole.Add(new Vector2(70, 80));
+        subjHole.Add(new Vector2(70, 40));
+        subjHole.Add(new Vector2(120, 40));
+        subjHole.Add(new Vector2(120, 80));
+        subjShape.m_contour = subjContour;
+        subjShape.m_holes.Add(subjHole);
+
+        clipShape = new Shape(false);
+        clipContour = new Contour(4);
+        clipContour.Add(new Vector2(70, 80));
+        clipContour.Add(new Vector2(120, 80));
+        clipContour.Add(new Vector2(90, 110));
+        clipShape.m_contour = clipContour;
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion, true);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(40, 110));
+        intersectionExpectedContour1.Add(new Vector2(40, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 110));
+        intersectionExpectedHole1 = new Contour(4);
+        intersectionExpectedHole1.Add(new Vector2(70, 80));
+        intersectionExpectedHole1.Add(new Vector2(70, 40));
+        intersectionExpectedHole1.Add(new Vector2(120, 40));
+        intersectionExpectedHole1.Add(new Vector2(120, 80));
+
+        if (result.Count == 1 &&
+                (
+                    result[0].m_contour.EqualsContour(intersectionExpectedContour1)
+                    && result[0].m_holes.Count == 1
+                    && result[0].m_holes[0].EqualsContour(intersectionExpectedHole1, false)
+                )
+            )
+            Debug.Log("TEST 5 UNION SUCCESS");
+        else
+            Debug.Log("TEST 5 UNION FAILURE");
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctIntersection, false);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(70, 80));
+        intersectionExpectedContour1.Add(new Vector2(120, 80));
+        intersectionExpectedContour1.Add(new Vector2(90, 110));
+
+        if (result.Count == 1 &&
+                (
+                    result[0].m_contour.EqualsContour(intersectionExpectedContour1)
+                )
+            )
+            Debug.Log("TEST 5 INTERSECTION SUCCESS");
+        else
+            Debug.Log("TEST 5 INTERSECTION FAILURE");
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference, false);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(40, 110));
+        intersectionExpectedContour1.Add(new Vector2(40, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 110));
+        intersectionExpectedHole1 = new Contour(5);
+        intersectionExpectedHole1.Add(new Vector2(70, 80));
+        intersectionExpectedHole1.Add(new Vector2(90, 110));
+        intersectionExpectedHole1.Add(new Vector2(120, 80));
+        intersectionExpectedHole1.Add(new Vector2(120, 40));
+        intersectionExpectedHole1.Add(new Vector2(70, 40));
+
+        if (result.Count == 1 &&
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1) &&
+            result[0].m_holes.Count == 1 &&
+            result[0].m_holes[0].EqualsContour(intersectionExpectedHole1)
+            )
+            Debug.Log("TEST 5 DIFFERENCE SUCCESS");
+        else
+            Debug.Log("TEST 5 DIFFERENCE FAILURE");
+
+        //-----TEST 6-----//
+        subjShape = new Shape(false);
+        subjContour = new Contour(4);
+        subjContour.Add(new Vector2(40, 110));
+        subjContour.Add(new Vector2(40, 20));
+        subjContour.Add(new Vector2(140, 20));
+        subjContour.Add(new Vector2(140, 110));
+        subjHole = new Contour(5);
+        subjHole.Add(new Vector2(70, 80));
+        subjHole.Add(new Vector2(70, 30));
+        subjHole.Add(new Vector2(100, 40));
+        subjHole.Add(new Vector2(120, 40));
+        subjHole.Add(new Vector2(120, 80));
+        subjShape.m_contour = subjContour;
+        subjShape.m_holes.Add(subjHole);
+
+        clipShape = new Shape(false);
+        clipContour = new Contour(4);
+        clipContour.Add(new Vector2(80, 80));
+        clipContour.Add(new Vector2(100, 40));
+        clipContour.Add(new Vector2(120, 80));
+        clipShape.m_contour = clipContour;
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion, true);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(40, 110));
+        intersectionExpectedContour1.Add(new Vector2(40, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 110));
+        intersectionExpectedHole1 = new Contour(4);
+        intersectionExpectedHole1.Add(new Vector2(70, 80));
+        intersectionExpectedHole1.Add(new Vector2(70, 30));
+        intersectionExpectedHole1.Add(new Vector2(100, 40));
+        intersectionExpectedHole1.Add(new Vector2(80, 80));
+        Contour intersectionExpectedHole2 = new Contour(4);
+        intersectionExpectedHole2.Add(new Vector2(120, 80));
+        intersectionExpectedHole2.Add(new Vector2(100, 40));
+        intersectionExpectedHole2.Add(new Vector2(120, 40));
+
+        if (result.Count == 1 &&
+                (
+                    result[0].m_contour.EqualsContour(intersectionExpectedContour1)
+                    && result[0].m_holes.Count == 2
+                    && 
+                    (
+                        result[0].m_holes[0].EqualsContour(intersectionExpectedHole1, false) &&
+                        result[0].m_holes[1].EqualsContour(intersectionExpectedHole2, false)
+                        ||
+                        result[0].m_holes[0].EqualsContour(intersectionExpectedHole2, false) &&
+                        result[0].m_holes[1].EqualsContour(intersectionExpectedHole1, false)
+                    )
+                )
+            )
+            Debug.Log("TEST 6 UNION SUCCESS");
+        else
+            Debug.Log("TEST 6 UNION FAILURE");
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctIntersection, false);
+
+        if (result.Count == 0)
+            Debug.Log("TEST 6 INTERSECTION SUCCESS");
+        else
+            Debug.Log("TEST 6 INTERSECTION FAILURE");
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference, false);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new Vector2(40, 110));
+        intersectionExpectedContour1.Add(new Vector2(40, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 20));
+        intersectionExpectedContour1.Add(new Vector2(140, 110));
+        intersectionExpectedHole1 = new Contour(5);
+        intersectionExpectedHole1.Add(new Vector2(70, 80));
+        intersectionExpectedHole1.Add(new Vector2(70, 30));
+        intersectionExpectedHole1.Add(new Vector2(100, 40));
+        intersectionExpectedHole1.Add(new Vector2(120, 40));
+        intersectionExpectedHole1.Add(new Vector2(120, 80));
+
+        if (result.Count == 1 &&
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1) &&
+            result[0].m_holes.Count == 1 &&
+            result[0].m_holes[0].EqualsContour(intersectionExpectedHole1, false)
+            )
+            Debug.Log("TEST 6 DIFFERENCE SUCCESS");
+        else
+            Debug.Log("TEST 6 DIFFERENCE FAILURE");
     }
 
-        /**
+
+
+
+
+
+
+
+     /**
      * Test intersections between 2 triangles with the possibility to test if this intersection is non-empty
      * **/
     public static void TestTrianglesIntersections()
