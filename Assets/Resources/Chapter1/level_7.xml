@@ -1,21 +1,30 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 7" number="7">
 	<counter maxActions="3"/>
-	<grid exactNumColumns="8" exactNumLines="5" maxGridSpacing="150"/>
+	<grid exactNumColumns="7" exactNumLines="7" maxGridSpacing="150"/>
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
+				<point column="2" line="3" />
+				<point column="2" line="2" />
+				<point column="3" line="2" />
 				<point column="3" line="3" />
-				<point column="4" line="2" />
-				<point column="5" line="3" />
-				<point column="4" line="4" />
 			</contour>
 		</dottedOutline>
 		<dottedOutline>
 			<contour>
+				<point column="3" line="3" />
 				<point column="5" line="3" />
-				<point column="6" line="2" />
-				<point column="6" line="4" />
+				<point column="5" line="5" />
+				<point column="3" line="5" />
+			</contour>
+		</dottedOutline>
+		<dottedOutline>
+			<contour>
+				<point column="5" line="6" />
+				<point column="5" line="5" />
+				<point column="6" line="5" />
+				<point column="6" line="6" />
 			</contour>
 		</dottedOutline>
 	</dottedOutlines>
@@ -28,7 +37,7 @@
 			</contour>
 		</shape>
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXIS_VERTICAL"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+	</constraints>
 </level>

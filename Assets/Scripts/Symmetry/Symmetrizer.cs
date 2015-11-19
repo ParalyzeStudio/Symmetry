@@ -53,6 +53,10 @@ public class Symmetrizer : MonoBehaviour
 
         //Clip all shapes
         List<Shape> shapes = shapesHolder.m_shapes;
+        m_leftClippedInterShapes = new List<Shape>(10);
+        m_leftClippedDiffShapes = new List<Shape>(10);
+        m_rightClippedInterShapes = new List<Shape>(10);
+        m_rightClippedDiffShapes = new List<Shape>(10);
 
         for (int i = 0; i != shapes.Count; i++)
         {
@@ -71,7 +75,10 @@ public class Symmetrizer : MonoBehaviour
                     lSymmetricShape.Triangulate();
                     lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
 
-                    m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out m_leftClippedInterShapes, out m_leftClippedDiffShapes);
+                    List<Shape> leftClippedInterShapes, leftClippedDiffShapes;
+                    m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out leftClippedInterShapes, out leftClippedDiffShapes);
+                    m_leftClippedInterShapes.AddRange(leftClippedInterShapes);
+                    m_leftClippedDiffShapes.AddRange(leftClippedDiffShapes);
                 }
             }
 
@@ -84,7 +91,10 @@ public class Symmetrizer : MonoBehaviour
                     rSymmetricShape.Triangulate();
                     rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
 
-                    m_clippingManager.ClipAgainstStaticShapes(rSymmetricShape, out m_rightClippedInterShapes, out m_rightClippedDiffShapes);
+                    List<Shape> rightClippedInterShapes, rightClippedDiffShapes;
+                    m_clippingManager.ClipAgainstStaticShapes(rSymmetricShape, out rightClippedInterShapes, out rightClippedDiffShapes);
+                    m_rightClippedInterShapes.AddRange(rightClippedInterShapes);
+                    m_rightClippedDiffShapes.AddRange(rightClippedDiffShapes);
                 }
             }            
         }        
@@ -95,7 +105,6 @@ public class Symmetrizer : MonoBehaviour
      * **/
     public void OnSymmetryDone()
     {
-        Debug.Log("OnSymmetryDone");
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
         //build the difference shape objects
@@ -138,103 +147,10 @@ public class Symmetrizer : MonoBehaviour
             }
         }
 
-
         //Callback on the AxisRenderer
         AxisRenderer axis = this.GetComponent<AxisRenderer>(); 
         axis.OnPerformSymmetry(m_symmetryType);
     }
-
-    private void BuildSymmetrizedObjects()
-    {
-
-    }
-
-    //public void SymmetrizeByAxis()
-    //{
-    //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-
-    //    //Find axis ribbon 4 vertices
-    //    AxisRenderer axisRenderer = this.gameObject.GetComponent<AxisRenderer>();
-    //    Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
-    //    List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
-    //    List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
-    //    //ribbon vertices = bottom-left, bottom-right, top-left, top-right
-    //    Vector2[] ribbonVertices = new Vector2[4] {line1GridBoxIntersections[0], line1GridBoxIntersections[1], line2GridBoxIntersections[0], line2GridBoxIntersections[1]};
-
-    //    //Extract triangles
-    //    List<List<ShapeTriangle>> leftTriangles = null;
-    //    List<List<ShapeTriangle>> rightTriangles = null;
-
-    //    if (m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
-    //        ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles);
-    //    else if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
-    //        ExtractTrianglesSeparatedByAxis(ribbonVertices, out leftTriangles, out rightTriangles, true , false);
-
-    //    //Rebuild shapes from those lists of triangles
-    //    Vector3 axisCenter = axisRenderer.GetAxisCenterInWorldCoordinates();
-    //    Vector3 axisDirection = axisRenderer.GetAxisDirection();
-
-    //    Shape shapeData = null;
-    //    if (leftTriangles != null && leftTriangles.Count > 0)
-    //    {
-    //        for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != leftTriangles.Count; iTrianglesVecIdx++)
-    //        {
-    //            List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, leftTriangles[iTrianglesVecIdx], true);
-
-    //            if (reflectedTriangles != null)
-    //            {
-    //                shapeData = new Shape(false);
-    //                shapeData.SetShapeTriangles(reflectedTriangles);
-    //                shapeData.CalculateContour();
-    //                shapeData.CalculateArea();
-    //                shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
-    //                GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-    //                gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
-    //                gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
-    //                gameScene.m_shapes.FinalizeClippingOperations();
-    //                //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-    //                //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-    //                //shapeObjectAnimator.SetRotationAxis(axisDirection);
-    //                //shapeObjectAnimator.SetRotationAngle(90);
-    //                //shapeObjectAnimator.RotateTo(0, 5.0f);
-    //            }
-    //        }
-    //    }
-
-    //    if (rightTriangles != null && rightTriangles.Count > 0)
-    //    {
-    //        for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != rightTriangles.Count; iTrianglesVecIdx++)
-    //        {
-    //            List<ShapeTriangle> reflectedTriangles = CalculateTrianglesReflectionsByAxis(ribbonVertices, rightTriangles[iTrianglesVecIdx], false);
-
-    //            if (reflectedTriangles != null)
-    //            {
-    //                shapeData = new Shape(false);
-    //                shapeData.SetShapeTriangles(reflectedTriangles);
-    //                shapeData.CalculateContour();
-    //                shapeData.CalculateArea();
-    //                shapeData.ObtainColorFromTriangles(); //invalidate the shape color and update it from the new set of triangles
-    //                GameObject newShapeObject = gameScene.m_shapes.CreateShapeObjectFromData(shapeData);
-    //                gameScene.m_shapes.InitClippingOperationsOnShapeObject(newShapeObject);
-    //                gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
-    //                gameScene.m_shapes.FinalizeClippingOperations();
-    //                //ShapeAnimator shapeObjectAnimator = newShapeObject.GetComponent<ShapeAnimator>();
-    //                //shapeObjectAnimator.UpdatePivotPointPosition(axisCenter);
-    //                //shapeObjectAnimator.SetRotationAxis(axisDirection);
-    //                //shapeObjectAnimator.SetRotationAngle(-90);
-    //                //shapeObjectAnimator.RotateTo(0, 5.0f);
-    //            }
-    //        }
-    //    }
-
-    //    if (shapeData != null)
-    //    {
-    //        ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
-    //        Shapes.PerformFusionOnShape(shapeData);
-
-    //        gameScene.m_counter.IncrementCounter();
-    //    }
-    //}
 
     public void SymmetrizeByPoint()
     {

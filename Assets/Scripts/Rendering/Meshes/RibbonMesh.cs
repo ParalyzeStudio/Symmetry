@@ -216,44 +216,44 @@ public class RibbonMesh : ColorMesh
         }
 
         //Create the two sub contours
-        Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
-        rightSubContour.Add(m_ribbonPointA);
-        for (int i = indexOfNextVertexToAxisPointA; i != indexOfNextVertexToAxisPointB; i++)
+        Contour leftSubContour = new Contour(); //the contour associated with the 'left' sub shape
+        leftSubContour.Add(m_ribbonPointB);
+        for (int i = indexOfNextVertexToAxisPointB; i != indexOfNextVertexToAxisPointA; i++)
         {
-            if (i == ribbonContour.Count)
+            if (i == ribbonContour.Count) //reset to the beginning of the list
             {
-                if (indexOfNextVertexToAxisPointB == 0) //we added all points between A and B, break the loop so we can add B
+                if (indexOfNextVertexToAxisPointA == 0) //we added all points between A and B, break the loop so we can add B
                     break;
                 else //more points need to be added, reset to the beginning of the list
                     i = 0;
             }
-            rightSubContour.Add(ribbonContour[i]);
+            leftSubContour.Add(ribbonContour[i]);
         }
-        rightSubContour.Add(m_ribbonPointB);
+        leftSubContour.Add(m_ribbonPointA);
 
-        m_ribbonRightSubShape = new Shape(false, rightSubContour);
+        m_ribbonLeftSubShape = new Shape(false, leftSubContour);       
 
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
-            Contour leftSubContour = new Contour(); //the contour associated with the 'left' sub shape
-            leftSubContour.Add(m_ribbonPointB);
-            for (int i = indexOfNextVertexToAxisPointB; i != indexOfNextVertexToAxisPointA; i++)
+            Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
+            rightSubContour.Add(m_ribbonPointA);
+            for (int i = indexOfNextVertexToAxisPointA; i != indexOfNextVertexToAxisPointB; i++)
             {
-                if (i == ribbonContour.Count) //reset to the beginning of the list
+                if (i == ribbonContour.Count)
                 {
-                    if (indexOfNextVertexToAxisPointA == 0) //we added all points between A and B, break the loop so we can add B
+                    if (indexOfNextVertexToAxisPointB == 0) //we added all points between A and B, break the loop so we can add B
                         break;
                     else //more points need to be added, reset to the beginning of the list
                         i = 0;
                 }
-                leftSubContour.Add(ribbonContour[i]);
+                rightSubContour.Add(ribbonContour[i]);
             }
-            leftSubContour.Add(m_ribbonPointA);
+            rightSubContour.Add(m_ribbonPointB);
 
-            m_ribbonLeftSubShape = new Shape(false, leftSubContour);
+            m_ribbonRightSubShape = new Shape(false, rightSubContour);
         }
         else
-            m_ribbonLeftSubShape = null;
+            m_ribbonRightSubShape = null;
     }
 
     /**

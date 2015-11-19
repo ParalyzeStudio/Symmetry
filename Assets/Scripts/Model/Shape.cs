@@ -126,6 +126,9 @@ public class Shape : GridTriangulable
         {
             Shape shapeData = shapes[iShapeIndex];
 
+            if (shapeData == this) //do not fusion with itself
+                continue;
+
             if (shapeData.m_state != ShapeState.STATIC) //check only static shapes
                 continue;
 
@@ -385,8 +388,9 @@ public class Shape : GridTriangulable
 
         //Destroy the old overlapped static shape
         m_overlappedStaticShape.m_parentMesh.GetComponent<ShapeAnimator>().SetOpacity(0);//Set zero opacity on this shape during the time it is waiting for its destruction
-        m_parentMesh.GetShapesHolder().DestroyShapeObjectForShape(m_overlappedStaticShape, 0.5f); //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch
-        m_parentMesh.GetShapesHolder().m_shapes.Remove(m_overlappedStaticShape);
+        //m_parentMesh.GetShapesHolder().DestroyShapeObjectForShape(m_overlappedStaticShape, 0.1f); //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch
+        m_overlappedStaticShape.m_state = ShapeState.MARKED_TO_BE_DESTROYED; //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch
+        //m_parentMesh.GetShapesHolder().m_shapes.Remove(m_overlappedStaticShape);
         m_overlappedStaticShape = null;
     }
 }

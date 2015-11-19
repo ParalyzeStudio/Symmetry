@@ -38,8 +38,8 @@
 			</contour>
 		</shape>
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXIS_VERTICAL"/>
-		<action tag="SYMMETRY_AXIS_HORIZONTAL"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>
+	</constraints>
 </level>

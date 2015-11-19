@@ -46,7 +46,7 @@
 			</contour>
 		</shape>
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXES_STRAIGHT"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
+	</constraints>
 </level>

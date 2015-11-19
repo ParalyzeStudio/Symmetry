@@ -418,8 +418,8 @@ public class AxisRenderer : MonoBehaviour
 
             GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
             debugRightSweepLineAnimator.SetParentTransform(this.transform);
-            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
             debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
             debugRightSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
 
             m_leftSweepingLine = null;

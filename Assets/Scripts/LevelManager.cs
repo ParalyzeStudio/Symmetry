@@ -203,11 +203,11 @@ public class LevelManager : MonoBehaviour
         }
 
         //Parse axis constraints
-        XMLNodeList actionsNodeList = levelNode.GetNodeList("actions>0>action");
-        if (actionsNodeList != null)
+        XMLNodeList constraintsNodeList = levelNode.GetNodeList("constraints>0>constraint");
+        if (constraintsNodeList != null)
         {
-            level.m_axisConstraints.Capacity = actionsNodeList.Count;
-            foreach (XMLNode actionNode in actionsNodeList)
+            level.m_axisConstraints.Capacity = constraintsNodeList.Count;
+            foreach (XMLNode actionNode in constraintsNodeList)
             {
                 string actionTag = actionNode.GetValue("@tag");
                 level.m_axisConstraints.Add(actionTag);

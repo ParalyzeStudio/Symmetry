@@ -85,7 +85,7 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(UnitTests.TestShapesClipping)));
+        //GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(UnitTests.TestShapesClipping)));
 
         /**
          * TEST TRIANGLES INTERSECTIONS
@@ -556,8 +556,8 @@ public class GameScene : GUIScene
 
         //Show top button
         GUIButton.GUIButtonID[] childIDs = new GUIButton.GUIButtonID[4];
-        childIDs[0] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
-        childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
+        childIDs[0] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
+        childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
         childIDs[2] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
         childIDs[3] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
 
@@ -873,8 +873,18 @@ public class GameScene : GUIScene
      * **/
     public bool IsVictory()
     {
-        //First we check if every shape is static and is fully inside one of the dotted outlines
         List<Shape> allShapes = m_shapesHolder.m_shapes;
+
+        //First we check if every shape is static
+        for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
+        {
+            Shape shape = allShapes[iShapeIdx];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                return false;
+        }
+
+        //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
 
         for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
@@ -884,6 +894,7 @@ public class GameScene : GUIScene
             if (shape.m_state != Shape.ShapeState.STATIC)
                 return false;
 
+            bool bInsideOneOutline = false; //check if the shape is inside one of the outlines or outside all outlines
             for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
             {
                 DottedOutline outline = outlines[iOutlineIdx];
@@ -891,21 +902,27 @@ public class GameScene : GUIScene
                     return false;
 
                 //Check if every point of every triangle in shape and its center is inside the outline
-                for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
+                if (!bInsideOneOutline)
                 {
-                    BaseTriangle triangle = shape.m_triangles[iTriangleIdx];
-                    if (!outline.ContainsPoint(triangle.m_points[0]) ||
-                        !outline.ContainsPoint(triangle.m_points[1]) ||
-                        !outline.ContainsPoint(triangle.m_points[2]) ||
-                        !outline.ContainsPoint(triangle.GetCenter()))
+                    for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
                     {
-                        return false;
+                        BaseTriangle triangle = shape.m_triangles[iTriangleIdx];
+                        if (outline.ContainsPoint(triangle.m_points[0]) &&
+                            outline.ContainsPoint(triangle.m_points[1]) &&
+                            outline.ContainsPoint(triangle.m_points[2]) &&
+                            outline.ContainsPoint(triangle.GetCenter()))
+                        {
+                            bInsideOneOutline = true;
+                        }
                     }
                 }
             }
-        }        
 
-        //check if the sum of shapes areas is equal to the sum of outlines areas
+            if (!bInsideOneOutline)
+                return false;
+        }
+
+        //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
         float outlinesArea = 0;
         for (int i = 0; i != allShapes.Count; i++)
@@ -920,64 +937,7 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        if (shapesArea == outlinesArea)
-            Debug.Log("STOP");
-
         return (shapesArea == outlinesArea);
-
-        ////First we check if one of the shapes intersects a contour
-        //GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
-
-        //if (!gameScene.m_isShown)
-        //    return false;
-
-        //List<GameObject> allShapeObjects = gameScene.m_shapes.m_shapesObjects;
-        //List<DottedOutline> allContours = gameScene.m_outlines.m_outlinesList;
-        //float shapesArea = 0;
-        //for (int iShapeIndex = 0; iShapeIndex != allShapeObjects.Count; iShapeIndex++)
-        //{
-        //    Shape shape = allShapeObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
-        //    bool shapeInsideOutline = false;
-        //    for (int iOutlineIndex = 0; iOutlineIndex != allContours.Count; iOutlineIndex++)
-        //    {
-        //        DottedOutline outline = allContours[iOutlineIndex];
-        //        if (shape.IntersectsOutline(outline)) //we check if this shape intersects an outline
-        //        {
-        //            return false;
-        //        }
-        //        else //if not we check if this shape is inside an outline
-        //        {
-        //            if (outline.ContainsPoint(shape.m_triangles[0].GetCenter()))
-        //            {
-        //                shapeInsideOutline = true;
-        //                break;
-        //            }
-        //        }
-        //    }
-
-        //    if (!shapeInsideOutline)
-        //        return false;
-
-        //    shapesArea += shape.m_area;
-        //}
-
-        ////Debug.Log("1: NO SHAPE/OUTLINE INTERSECTION");
-
-        ////finally we check if the sum of the areas of all shapes is equal to the sum of the areas of all contours
-        //float contoursArea = 0;
-        //for (int iContourIndex = 0; iContourIndex != allContours.Count; iContourIndex++)
-        //{
-        //    DottedOutline contour = allContours[iContourIndex];
-        //    contoursArea += contour.m_area;
-        //}
-
-        ////Debug.Log("contoursArea:" + contoursArea);
-        ////Debug.Log("shapesArea:" + shapesArea);
-
-        ////if (contoursArea == shapesArea)
-        ////    Debug.Log("3: SAME AREA");
-
-        //return (contoursArea == shapesArea);
     }
 
     /**

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 4" number="4">
 	<counter maxActions="2"/>
-	<grid exactNumColumns="7" exactNumLines="5" maxGridSpacing="150"/>
+	<grid exactNumColumns="7" exactNumLines="5" maxGridSpacing="300"/>
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
@@ -30,7 +30,8 @@
 			</contour>
 		</shape>
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXIS_VERTICAL"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>
+	</constraints>
 </level>

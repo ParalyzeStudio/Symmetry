@@ -52,8 +52,8 @@ public class GameController : MonoBehaviour
         
         //ShowMainMenu();
         //DebugShowChapters();
-        //DebugShowLevels(1);
-        DebugShowSpecificLevel(1, 8, false);
+        DebugShowLevels(1);
+        //DebugShowSpecificLevel(1, 8, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;

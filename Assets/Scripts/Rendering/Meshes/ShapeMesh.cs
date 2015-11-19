@@ -227,7 +227,6 @@ public class ShapeMesh : TexturedMesh
      * **/
     private void MakeSweptShapeStatic()
     {
-        Debug.Log("MakeSweptShapeStatic");
         DestroyCells();
         Render(false);
         m_shapeData.m_state = Shape.ShapeState.STATIC;

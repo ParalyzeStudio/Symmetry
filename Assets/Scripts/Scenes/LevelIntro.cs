@@ -23,7 +23,6 @@ public class LevelIntro : GUIScene
 
     public override void Show()
     {
-        Debug.Log("Show:" + m_loadingLevelIntroFromRetry);
         base.Show();
         GameObjectAnimator sceneAnimator = this.GetComponent<GameObjectAnimator>();
         ShowOpaqueBackground();
