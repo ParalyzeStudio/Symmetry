@@ -26,7 +26,7 @@ public class QueuedThreadedJobsManager : MonoBehaviour
     public void AddJob(ThreadedJob job)
     {
 #if DEBUG_ENABLED
-        Debug.Log("AddJob");
+        Debug.Log(">>>>AddJob");
 #endif
         if (m_pendingJobs.Count == 0)
         {
@@ -36,14 +36,14 @@ public class QueuedThreadedJobsManager : MonoBehaviour
             if (m_currentJob != null) //a job is currently running
             {
 #if DEBUG_ENABLED
-                Debug.Log("AddJob--A job is running");
+                Debug.Log("AddJob--A job is running, Enqueue this job to run it later");
 #endif
                 m_pendingJobs.Enqueue(job);
             }
             else
             {
 #if DEBUG_ENABLED
-                Debug.Log("AddJob--No job is running");
+                Debug.Log("AddJob--No job is running, this job can start immediately");
 #endif
                 m_currentJob = job;
                 job.Start();
@@ -62,10 +62,14 @@ public class QueuedThreadedJobsManager : MonoBehaviour
     {
         if (m_currentJob != null && m_currentJob.Update()) //a job just finished executing
         {
+#if DEBUG_ENABLED
+            Debug.Log("Update--Job just finished executing");
+#endif
+
             if (m_pendingJobs.Count > 0) //execute the next one in the queue
             {
 #if DEBUG_ENABLED
-                Debug.Log("Update--Dequeue next job");
+                Debug.Log("Update--Dequeue next job and run it");
 #endif
                 m_currentJob = m_pendingJobs.Dequeue();
                 m_currentJob.Start();
@@ -73,7 +77,7 @@ public class QueuedThreadedJobsManager : MonoBehaviour
             else
             {
 #if DEBUG_ENABLED
-                Debug.Log("Update--no job pending ==> resetting currentJob to null");
+                Debug.Log("Update--no more job pending ==> resetting currentJob to null");
 #endif
                 m_currentJob = null;
             }

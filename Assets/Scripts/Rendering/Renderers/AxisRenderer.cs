@@ -257,6 +257,9 @@ public class AxisRenderer : MonoBehaviour
         //render ribbon if axis is not too small
         if ((m_endpoint1Position - m_endpoint2Position).sqrMagnitude > 10.0f)
             RenderRibbon();
+        else
+            m_ribbonMesh.Hide();
+
     }
 
     /**
@@ -309,14 +312,16 @@ public class AxisRenderer : MonoBehaviour
         GameObject closestAnchor = gridAnchors[minDistanceAnchorIndex];
         if (closestAnchor != m_snappedAnchor)
         {
-            if (MathUtils.AreVec3PointsEqual(closestAnchor.transform.position, m_endpoint1Position))
+            m_snappedAnchor = closestAnchor;            
+            m_endpoint2Position = m_snappedAnchor.transform.position;
+            if (MathUtils.AreVec2PointsEqual(m_endpoint1Position, m_endpoint2Position))
+            {
                 m_type = AxisType.DYNAMIC_UNSNAPPED;
+            }
             else
             {
-                m_snappedAnchor = closestAnchor;
                 m_type = AxisType.DYNAMIC_SNAPPED;
             }
-            m_endpoint2Position = m_snappedAnchor.transform.position;
             Render(m_endpoint1Position, m_endpoint2Position, false);
             return true;
         }
@@ -390,19 +395,18 @@ public class AxisRenderer : MonoBehaviour
             
             float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
             
-            //m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
+            m_leftSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, -clockwiseAxisNormal);
             m_rightSweepingLine = new SweepingLine(m_endpoint1Position, m_endpoint2Position, clockwiseAxisNormal);
 
             //debug objects
-            //Quaternion sweepLineRotation = Quaternion.AngleAxis(axisAngle, Vector3.forward);
-            //m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
             m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
 
-            //GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
-            //debugLeftSweepLineAnimator.SetParentTransform(this.transform);
-            //debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
-            //debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
-            //debugLeftSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
+            GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
+            debugLeftSweepLineAnimator.SetParentTransform(this.transform);
+            debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
+            debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
+            debugLeftSweepLineAnimator.SetPosition(GetAxisCenterInWorldCoordinates());
             GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
             debugRightSweepLineAnimator.SetParentTransform(this.transform);
             debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);

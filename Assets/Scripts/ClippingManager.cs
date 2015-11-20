@@ -127,20 +127,12 @@ public class ClippingManager : MonoBehaviour
             Shape shape = new Shape(false, shapeContour);
             resultingShapes.Add(shape); //Add this extracted shape to the list of all resulting shapes
 
-            //Get all child holes
-            //List<Contour> holesContours = ExtractHolesForPolynode(polynode);
-
             //child of an outer is always a hole, no need to call IsHole on the child
             List<PolyNode> childHoles = polynode.Childs;
             for (int iHoleIdx = 0; iHoleIdx != childHoles.Count; iHoleIdx++)
             {
                 shape.m_holes.Add(CreateContourFromPath(childHoles[iHoleIdx].Contour));
             }
-            //for (int iHoleContourIdx = 0; iHoleContourIdx != holesContours.Count; iHoleContourIdx++)
-            //{
-            //    Contour holeContour = holesContours[iHoleContourIdx];
-            //    shapes[0].m_holes.Add(holeContour);
-            //}
 
             //Triangulate each shape
             for (int iShapeIdx = 0; iShapeIdx != resultingShapes.Count; iShapeIdx++)

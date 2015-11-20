@@ -66,6 +66,9 @@ public class Shapes : MonoBehaviour
     public void DestroyShapeObjectForShape(Shape shape, float delay = 0.0f)
     {
         GameObject shapeObject = shape.m_parentMesh.gameObject;
+        //there could be a delay before the shape object is actually detroyed so 
+        //in the meantime set the shape object opacity to zero so it is no longer visible for the player
+        shapeObject.GetComponent<ShapeAnimator>().SetOpacity(0);
         Destroy(shapeObject, delay);
     }
 
@@ -317,7 +320,10 @@ public class Shapes : MonoBehaviour
             {
                 shape.m_state = Shape.ShapeState.NONE;
                 if (bDestroyRelatedObject)
-                    DestroyShapeObjectForShape(shape);
+                {
+                    //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch                   
+                    DestroyShapeObjectForShape(shape, 0.2f);
+                }
 
                 m_shapes.Remove(shape);
                 i--;

@@ -107,7 +107,7 @@ public class GridTouchHandler : TouchHandler
             }
             else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {
-                //remove the axis from the axes list and destroy the object
+                //remove the axis from the axes list and destroy the object                
                 gameScene.m_axes.RemoveAxis(currentAxis.gameObject);
                 Destroy(currentAxis.gameObject);
             }

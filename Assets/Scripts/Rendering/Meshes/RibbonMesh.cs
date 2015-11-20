@@ -30,17 +30,22 @@ public class RibbonMesh : ColorMesh
     }
 
     /**
+     * Calls this to hide this ribbon mesh, for instance when axis has zero length
+     * Basically clear all mesh arrays and thats it
+     * **/
+    public void Hide()
+    {
+        ClearMesh();
+        m_mesh.Clear();
+    }
+
+    /**
      * Find the contour of this ribbon and triangulate it
      * **/
     public virtual void CalculateRibbonForAxis(AxisRenderer axis)
     {
         m_ribbonPointA = axis.m_endpoint1Position;
         m_ribbonPointB = axis.m_endpoint2Position;
-
-        if (((axis.m_endpoint2GridPosition - new Vector2(5.041469f, 3.041469f)).sqrMagnitude) < 1.0E-12)            
-        {
-            Debug.Log("STOP");
-        }
 
         //clear the mesh
         ClearMesh();
