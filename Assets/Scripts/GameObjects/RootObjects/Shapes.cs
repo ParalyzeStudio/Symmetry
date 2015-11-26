@@ -298,34 +298,26 @@ public class Shapes : MonoBehaviour
     {
         for (int i = 0; i != m_shapes.Count; i++)
         {
-            if (m_shapes[i].m_state == Shape.ShapeState.DYNAMIC_INTERSECTION || m_shapes[i].m_state == Shape.ShapeState.DYNAMIC_DIFFERENCE)
+            Shape shape = m_shapes[i];
+            if (shape.IsDynamic() && shape.m_parentMesh.m_sweepingLine == line) //only sweep shapes that reference the same line
             {
-                m_shapes[i].m_parentMesh.SweepCellsWithLine(line, bLeftSide);
+                shape.m_parentMesh.SweepCellsWithLine(line, bLeftSide);
             }
         }
-
-        //Once we swept all shapes, destroy all shapes that we marked as dead
-        DeleteDeadShapes();
     }
 
     /**
-     * Destroy shapes we marked as dead
+     * Delete and remove from shapes list all shapes in the shapes set parameter
      * **/
-    private void DeleteDeadShapes(bool bDestroyRelatedObject = true)
-    {
+    public void DeleteShapesSet(HashSet<Shape> shapesToDelete)
+    {        
         for (int i = 0; i != m_shapes.Count; i++)
-        {
+        {      
             Shape shape = m_shapes[i];
-            if (shape.m_state == Shape.ShapeState.MARKED_TO_BE_DESTROYED)
+            if (shapesToDelete.Contains(shape))
             {
-                shape.m_state = Shape.ShapeState.NONE;
-                if (bDestroyRelatedObject)
-                {
-                    //add a delay because Destroy occurs before rendering so the mesh can be destroyed before the new one is actually rendered which leads to a graphical glitch                   
-                    DestroyShapeObjectForShape(shape, 0.2f);
-                }
-
                 m_shapes.Remove(shape);
+                DestroyShapeObjectForShape(shape);
                 i--;
             }
         }

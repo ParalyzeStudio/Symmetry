@@ -20,9 +20,9 @@ public class GridTouchHandler : TouchHandler
             Vector2 gridSize = grid.m_gridSize;
             Vector2 gridPosition = this.gameObject.transform.position;
 
-            float borderThickness = 0.5f * grid.m_gridSpacing;
-            Vector2 gridMax = gridPosition + 0.5f * gridSize + new Vector2(borderThickness, borderThickness);
-            Vector2 gridMin = gridPosition - 0.5f * gridSize - new Vector2(borderThickness, borderThickness);
+            Vector2 border = 0.5f * new Vector2(grid.m_horizontalGridSpacing, grid.m_verticalGridSpacing);
+            Vector2 gridMax = gridPosition + 0.5f * gridSize + border;
+            Vector2 gridMin = gridPosition - 0.5f * gridSize - border;
 
             return pointerLocation.x <= gridMax.x && pointerLocation.x >= gridMin.x
                    &&

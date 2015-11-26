@@ -21,7 +21,8 @@ public class Outlines : MonoBehaviour
         foreach (DottedOutline outline in outlines)
         {            
             DottedOutline clonedOutline = new DottedOutline(outline);
-            clonedOutline.TogglePointMode(); //swtich from grid coordinates to world position            
+            clonedOutline.TogglePointMode(); //switch from grid coordinates to world position
+            clonedOutline.ApproximateVertices(1);
             m_outlinesList.Add(clonedOutline);            
             
             //First triangulate the outline

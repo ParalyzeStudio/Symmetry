@@ -4,6 +4,8 @@ using System.Threading;
 
 public class ThreadedJob
 {
+    public string m_name { get; set; }
+
     public delegate void ThreadFunction();
     private ThreadFunction functionToCallOnPreRun;
     private ThreadFunction functionToRun;

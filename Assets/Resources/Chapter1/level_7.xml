@@ -32,12 +32,14 @@
 		<shape color="1,0,0,1">
 			<contour>
 				<point column="3" line="3" />
-				<point column="4" line="2" />
+				<point column="4" line="3" />
 				<point column="4" line="4" />
+				<point column="3" line="4" />
 			</contour>
 		</shape>
 	</shapes>
 	<constraints>
 		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>
 	</constraints>
 </level>

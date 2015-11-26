@@ -46,7 +46,7 @@ public class ShapeVoxelGrid : MonoBehaviour
         m_yVoxelsCount = (parentGrid.m_numLines - 1) * (density - 1) + 1;
         m_size = m_xVoxelsCount * m_yVoxelsCount;
         m_voxels = new ShapeVoxel[m_size];
-        m_voxelSize = parentGrid.m_gridSpacing / (density - 1);
+        m_voxelSize = parentGrid.m_horizontalGridSpacing / (density - 1);
 
         for (int i = 0, y = 0; y < m_yVoxelsCount; y++)
         {

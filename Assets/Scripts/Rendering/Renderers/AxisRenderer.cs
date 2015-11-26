@@ -25,7 +25,7 @@ public class AxisRenderer : MonoBehaviour
     public Vector2 m_endpoint1GridPosition { get; set; } //the grid position of the first endpoint
     public Vector2 m_endpoint2GridPosition { get; set; } //the grid position of the second endpoint
 
-    private GameObject m_snappedAnchor; //the current anchor the second axis endpoint has been snapped on
+    private Grid.GridAnchor m_snappedAnchor; //the current anchor the second axis endpoint has been snapped on
     public float m_snapDistance;
 
     private GameScene m_gameScene;
@@ -289,19 +289,16 @@ public class AxisRenderer : MonoBehaviour
         //    return false;
 
         GameScene gameScene = GetGameScene();
-        GameObject[] gridAnchors = gameScene.m_grid.m_anchors;
+        Grid.GridAnchor[] gridAnchors = gameScene.m_grid.m_anchors;
 
         float minDistance = float.MaxValue;
         int minDistanceAnchorIndex = 0;
 
         for (int anchorIndex = 0; anchorIndex != gridAnchors.Length; anchorIndex++)
         {
-            GameObject snapAnchor = gridAnchors[anchorIndex];
+            Grid.GridAnchor snapAnchor = gridAnchors[anchorIndex];
 
-            Vector2 snapAnchorGridPosition = gameScene.m_grid.GetAnchorGridCoordinatesForAnchorIndex(anchorIndex);
-            Vector2 snapAnchorWorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(snapAnchorGridPosition);
-
-            float fSqrDistanceToAnchor = (pointerLocation - snapAnchorWorldPosition).sqrMagnitude;
+            float fSqrDistanceToAnchor = (pointerLocation - snapAnchor.m_worldPosition).sqrMagnitude;
             if (fSqrDistanceToAnchor < minDistance)
             {
                 minDistance = fSqrDistanceToAnchor;
@@ -309,11 +306,11 @@ public class AxisRenderer : MonoBehaviour
             }           
         }
 
-        GameObject closestAnchor = gridAnchors[minDistanceAnchorIndex];
+        Grid.GridAnchor closestAnchor = gridAnchors[minDistanceAnchorIndex];
         if (closestAnchor != m_snappedAnchor)
         {
             m_snappedAnchor = closestAnchor;            
-            m_endpoint2Position = m_snappedAnchor.transform.position;
+            m_endpoint2Position = m_snappedAnchor.m_worldPosition;
             if (MathUtils.AreVec2PointsEqual(m_endpoint1Position, m_endpoint2Position))
             {
                 m_type = AxisType.DYNAMIC_UNSNAPPED;
@@ -434,11 +431,17 @@ public class AxisRenderer : MonoBehaviour
         for (int i = 0; i != allShapes.Count; i++)
         {
             Shape shape = allShapes[i];
-            ShapeMesh shapeMesh = shape.m_parentMesh;
-            if (MathUtils.Determinant(m_endpoint1Position, m_endpoint2Position, shape.GetBarycentre()) >= 0) //on the 'left' of the axis
-                shapeMesh.m_sweepingLine = m_leftSweepingLine;
-            else //on the 'right' of the axis
-                shapeMesh.m_sweepingLine = m_rightSweepingLine;
+            if (shape.IsDynamic()) 
+            {
+                ShapeMesh shapeMesh = shape.m_parentMesh;
+                if (shapeMesh.m_sweepingLine == null) //check if shape is not already swept by another line
+                {
+                    if (MathUtils.Determinant(m_endpoint1Position, m_endpoint2Position, shape.GetBarycentre()) >= 0) //on the 'left' of the axis
+                        shapeMesh.m_sweepingLine = m_leftSweepingLine;
+                    else //on the 'right' of the axis
+                        shapeMesh.m_sweepingLine = m_rightSweepingLine;
+                }
+            }
         }
 
         //Destroy ribbon

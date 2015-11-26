@@ -233,6 +233,23 @@ public class Triangulable
 
         return barycentre;
     }
+
+    /**
+     * Approximate vertices coordinates (contour and holes) by rounding values to 'significantFiguresCount' after the decimal point
+     * For instance passing 0 will round all values to the closest integer
+     * passing 1 will maintain 1 digit after the after the decimal point
+     * **/
+    public void ApproximateVertices(int significantFiguresCount)
+    {
+        //contour
+        m_contour.ApproximateVertices(significantFiguresCount);
+
+        //holes
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            m_holes[i].ApproximateVertices(significantFiguresCount);
+        }
+    }
 }
 
 

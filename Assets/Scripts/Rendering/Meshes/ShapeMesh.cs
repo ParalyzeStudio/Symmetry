@@ -141,13 +141,11 @@ public class ShapeMesh : TexturedMesh
     }
 
     /**
-     * Sweep mesh cells and reveal them if they have just crossed the sweeping line and are now on the 'side' specified by the associated paramater
+     * Sweep mesh cells and reveal them if they have just crossed the sweeping line and are now on the 'side' specified by the associated paramater.
+     * return true if all cells have been swept, false otherwise
      * **/
-    public void SweepCellsWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
+    public bool SweepCellsWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
     {
-        if (line != m_sweepingLine)
-            return;
-
         bool allCellsSwept = true;
         for (int i = 0; i != m_cells.Length; i++)
         {
@@ -168,7 +166,10 @@ public class ShapeMesh : TexturedMesh
         if (allCellsSwept && m_renderedWithCells) //we just swept all cells, we can now render this whole mesh with simple triangles
         {
             OnMeshSwept();
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -194,11 +195,26 @@ public class ShapeMesh : TexturedMesh
      * Callback called when all cells of this mesh have been swept
      * **/
     private void OnMeshSwept()
-    {
+    {        
+        Debug.Log("OnMeshSwept");
+        List<Shape> shapes = GetShapesHolder().m_shapes;
         //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
         EnsureUnityInstancesAreSetBeforeThreading();
 
+        /*** DEBUG WITHOUT THREADING ***/
+        //m_shapeData.InitTemporaryStoredShapes();
+        //if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
+        //{
+        //    m_shapeData.PerformDifferenceOnOverlappedStaticShape();
+        //    OnFinishPerformingDifferenceWithOverlappedStaticShape();
+        //}
+        //m_shapeData.m_state = Shape.ShapeState.STATIC;
+        //PerformFusionWithStaticShapes();
+        //OnFinishPerformingFusionWithStaticShapes();
+        /*** DEBUG WITHOUT THREADING ***/
+
         //Perform the difference clipping operation
+        m_shapeData.InitTemporaryStoredShapes();
         if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
         {
             GetGameScene().GetQueuedThreadedJobsManager().AddJob
@@ -211,6 +227,9 @@ public class ShapeMesh : TexturedMesh
                     )
                 );
         }
+        
+        //make the shape static before the fusion occurs
+        m_shapeData.m_state = Shape.ShapeState.BUSY_CLIPPING;
 
         //Perform the fusion
         GetGameScene().GetQueuedThreadedJobsManager().AddJob
@@ -241,7 +260,7 @@ public class ShapeMesh : TexturedMesh
     private void OnFinishPerformingDifferenceWithOverlappedStaticShape()
     {
         //build the shape objects from the 'difference' operation
-        List<Shape> diffShapesToBuild = m_shapeData.m_overlappedStaticShapeDiffShapes;
+        List<Shape> diffShapesToBuild = m_shapeData.m_shapesToCreate;
         
         for (int i = 0; i != diffShapesToBuild.Count; i++)
         {
@@ -261,7 +280,10 @@ public class ShapeMesh : TexturedMesh
         Render(false);
         m_shapeData.m_state = Shape.ShapeState.STATIC;
 
-        List<Shape> shapes = GetShapesHolder().m_shapes;
+        //delete the shapes that we store in the fusion process
+        HashSet<Shape> shapesToDelete = m_shapeData.m_shapesToDelete;
+        Debug.Log("about to delete " + shapesToDelete.Count + " shapes");
+        GetShapesHolder().DeleteShapesSet(shapesToDelete);
     }
 
     public void AddFullQuadCell(ShapeCell cell)

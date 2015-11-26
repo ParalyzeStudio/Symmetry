@@ -27,6 +27,7 @@
 		</shape>
 	</shapes>
 	<constraints>
-		<constraint tag="SYMMETRY_AXES_VERTICAL"/>
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>
 	</constraints>
 </level>

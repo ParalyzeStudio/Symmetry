@@ -64,7 +64,7 @@ public class BaseTriangle
     {
         bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) ||
                                IntersectsEdge(triangle.m_points[1], triangle.m_points[2]) ||
-                               IntersectsEdge(triangle.m_points[2], triangle.m_points[1]);
+                               IntersectsEdge(triangle.m_points[2], triangle.m_points[0]);
 
         //Test if the triangle is contained inside the other
         if (!bIntersectEdges)
@@ -313,7 +313,7 @@ public class BaseTriangle
     /**
     * Tells if one of the edges of this triangle intersects the contour passed as parameter
     **/
-    public bool IntersectsContour(DottedOutline outline, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_OVERLAP)
+    public bool IntersectsOutline(DottedOutline outline, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
     {
         //check if triangle intersect outline main contour
         Contour contourPoints = outline.m_contour;

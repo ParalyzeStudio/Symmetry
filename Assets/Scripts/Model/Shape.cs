@@ -11,15 +11,17 @@ public class Shape : GridTriangulable
     public enum ShapeState
     {
         NONE = 0,
-        MARKED_TO_BE_DESTROYED,
         DYNAMIC_INTERSECTION, //this dynamic shape is the result of the intersection of two shapes
         DYNAMIC_DIFFERENCE, //this dynamic shape is the result of the difference between two shapes
-        STATIC
+        STATIC,
+        BUSY_CLIPPING, //the shape is being clipped (using threads) and must not be considered as dynamic anymore and it is not static yet
+        DESTROYED
     }
     public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
 
     public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
-    public List<Shape> m_overlappedStaticShapeDiffShapes { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
+    public List<Shape> m_shapesToCreate { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
+    public HashSet<Shape> m_shapesToDelete { get; set; } //Set of shapes to delete once the difference/fusion occured
 
     public Shape(bool gridPointMode)
         : base(gridPointMode)
@@ -151,7 +153,8 @@ public class Shape : GridTriangulable
             this.m_contour = fusionedShape.m_contour;
             this.m_holes = fusionedShape.m_holes;
 
-            clipShape.m_state = ShapeState.MARKED_TO_BE_DESTROYED;
+            m_shapesToDelete.Add(clipShape); //add the clip shape to the set of shapes to be deleted
+            clipShape.m_state = ShapeState.DESTROYED;
 
             return true;
         }
@@ -167,7 +170,7 @@ public class Shape : GridTriangulable
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             BaseTriangle triangle = m_triangles[iTriangleIndex];
-            if (triangle.IntersectsContour(outline, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
+            if (triangle.IntersectsOutline(outline, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
                 return true;
         }
 
@@ -350,6 +353,15 @@ public class Shape : GridTriangulable
     }
 
     /**
+     * Create the data structures that will hold temporary created/deleted shapes
+     * **/
+    public void InitTemporaryStoredShapes()
+    {
+        m_shapesToDelete = new HashSet<Shape>();
+        m_shapesToCreate = new List<Shape>();
+    }
+
+    /**
      * Calls recursively Shape.Fusion() on this shape and then on the shape resulting from previous fusion
      * This way we are sure that the initial shape is fusionned to every shape that overlapped it at the beginning
      * **/
@@ -373,10 +385,19 @@ public class Shape : GridTriangulable
      * **/
     public void PerformDifferenceOnOverlappedStaticShape()
     {
-        m_overlappedStaticShapeDiffShapes = m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference);
+        m_shapesToCreate.AddRange(m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference));
 
         //Destroy the old overlapped static shape
-        m_overlappedStaticShape.m_state = ShapeState.MARKED_TO_BE_DESTROYED;
+        m_shapesToDelete.Add(m_overlappedStaticShape);
+        m_overlappedStaticShape.m_state = ShapeState.DESTROYED;
         m_overlappedStaticShape = null;
+    }
+
+    /**
+     * Simply tells if this shape is dynamic 
+     * **/
+    public bool IsDynamic()
+    {
+        return m_state == ShapeState.DYNAMIC_DIFFERENCE || m_state == ShapeState.DYNAMIC_INTERSECTION;
     }
 }

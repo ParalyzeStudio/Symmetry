@@ -18,7 +18,7 @@ using ClipperLib;
 
 public class GeometryUtils
 {
-    public const double CONVERSION_FLOAT_PRECISION = 1.0E7;
+    public const double CONVERSION_FLOAT_PRECISION = 1.0E1;
 
     static public Vector3 BuildVector3FromVector2(Vector2 vector, float zValue)
     {
@@ -32,7 +32,7 @@ public class GeometryUtils
 
     public static IntPoint ConvertVector2ToIntPoint(Vector2 point)
     {
-        return new IntPoint((long)(point.x * CONVERSION_FLOAT_PRECISION), (long)(point.y * CONVERSION_FLOAT_PRECISION));
+        return new IntPoint((long)Math.Round(point.x * CONVERSION_FLOAT_PRECISION), (long)Math.Round(point.y * CONVERSION_FLOAT_PRECISION));
     }
 
     public static Vector2 ConvertIntPointToVector2(IntPoint point)

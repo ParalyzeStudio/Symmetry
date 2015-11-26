@@ -613,15 +613,8 @@ public class UnitTests
         else
             Debug.Log("TEST 6 DIFFERENCE FAILURE");
     }
-
-
-
-
-
-
-
-
-     /**
+    
+    /**
      * Test intersections between 2 triangles with the possibility to test if this intersection is non-empty
      * **/
     public static void TestTrianglesIntersections()
@@ -950,5 +943,82 @@ public class UnitTests
             Debug.Log("TEST 18 SUCCESS:" + bResult1 + "-" + bResult2);
         else
             Debug.Log("TEST 18 FAILURE:" + bResult1 + "-" + bResult2);
+    }
+
+    /**
+     * Test shapes overlapping
+     * **/
+    public static void TestShapesOverlapping()
+    {
+        //-----TEST 1-----//
+        Contour subjContour = new Contour(8);
+        subjContour.Add(new Vector2(0, 153.6f));
+        subjContour.Add(new Vector2(0, 28.8f));
+        subjContour.Add(new Vector2(-124.8f, 28.8f));
+        subjContour.Add(new Vector2(-124.8f, -96.0f));
+        subjContour.Add(new Vector2(249.6f, -96.0f));
+        subjContour.Add(new Vector2(249.6f, 28.8f));
+        subjContour.Add(new Vector2(124.8f, 28.8f));
+        subjContour.Add(new Vector2(124.8f, 153.6f));
+        Shape subjShape = new Shape(false, subjContour);
+        subjShape.Triangulate();
+
+        Contour clipContour = new Contour(4);
+        clipContour.Add(new Vector2(124.8f, -96.0f));
+        clipContour.Add(new Vector2(0, -96.0f));
+        clipContour.Add(new Vector2(0, -220.8f));
+        clipContour.Add(new Vector2(124.8f, -220.8f));
+        Shape clipShape = new Shape(false, clipContour);
+        clipShape.Triangulate();
+
+        bool result = subjShape.OverlapsShape(clipShape, false);
+        if (result)
+            Debug.Log("TEST 1 SUCCESS");
+        else
+            Debug.Log("TEST 1 FAILURE");
+    }
+
+    /**
+     * TestContourApproximation
+     * **/
+    public static void TestContourApproximation()
+    {
+         //-----TEST 0-----//
+        Contour contour = new Contour();
+        contour.Add(new Vector2(153.54686f, 131531.021f));
+        contour.Add(new Vector2(0.012354f, 0.2f));
+        contour.Add(new Vector2(1.16516f, 12156.9875615f));
+        contour.Add(new Vector2(130546.165f, 10));
+
+        contour.ApproximateVertices(1);
+
+        Contour expectedApproximatedContour1 = new Contour();
+        expectedApproximatedContour1.Add(new Vector2(153.5f, 131531));
+        expectedApproximatedContour1.Add(new Vector2(0, 0.2f));
+        expectedApproximatedContour1.Add(new Vector2(1.2f, 12157));
+        expectedApproximatedContour1.Add(new Vector2(130546.2f, 10));
+        if (contour.EqualsContour(expectedApproximatedContour1))
+            Debug.Log("TEST 0 1SF SUCCESS");
+        else
+            Debug.Log("TEST 0 1SF FAILURE");
+
+
+        contour = new Contour();
+        contour.Add(new Vector2(153.54686f, 131531.021f));
+        contour.Add(new Vector2(0.012354f, 0.2f));
+        contour.Add(new Vector2(1.16516f, 12156.9875615f));
+        contour.Add(new Vector2(130546.165f, 10));
+
+        contour.ApproximateVertices(2);
+
+        Contour expectedApproximatedContour2 = new Contour();
+        expectedApproximatedContour2.Add(new Vector2(153.55f, 131531.02f));
+        expectedApproximatedContour2.Add(new Vector2(0.01f, 0.2f));
+        expectedApproximatedContour2.Add(new Vector2(1.17f, 12156.98f));
+        expectedApproximatedContour2.Add(new Vector2(130546.17f, 10));
+        if (contour.EqualsContour(expectedApproximatedContour2))
+            Debug.Log("TEST 0 2SF SUCCESS");
+        else
+            Debug.Log("TEST 0 2SF FAILURE");
     }
 }

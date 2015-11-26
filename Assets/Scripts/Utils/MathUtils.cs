@@ -71,4 +71,27 @@ public class MathUtils
 
         return (iValue != fValue);
     }
+
+    /**
+     * Approximates a float so that it has the 'significantFiguresCount' number of digits after decimal point
+     * **/
+    static public float ApproximateNumber(float number, int significantFiguresCountAfterDecimalPoint)
+    {
+        //do not use Mathf.Pow as it leads to epsilon errors with expected result
+        for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
+        {
+            number *= 10.0f;
+        }
+
+        //round the number so it looks like an int
+        number = Mathf.Round(number);
+
+        //do not use Mathf.Pow as it leads to epsilon errors with expected result
+        for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
+        {
+            number /= 10.0f;
+        }
+
+        return number;
+    }
 }

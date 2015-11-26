@@ -85,8 +85,6 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        //GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(UnitTests.TestShapesClipping)));
-
         /**
          * TEST TRIANGLES INTERSECTIONS
          * **/
@@ -649,6 +647,7 @@ public class GameScene : GUIScene
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
             shape.TogglePointMode();
+            shape.ApproximateVertices(1);
 
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
@@ -884,6 +883,8 @@ public class GameScene : GUIScene
                 return false;
         }
 
+        Debug.Log("STEP1 CHECK");
+
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
 
@@ -898,8 +899,14 @@ public class GameScene : GUIScene
             for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
             {
                 DottedOutline outline = outlines[iOutlineIdx];
+
+                if (shape.IntersectsOutline(outline))
+                    Debug.Log("IntersectsOutline");
+
                 if (shape.IntersectsOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
+                {
                     return false;
+                }
 
                 //Check if every point of every triangle in shape and its center is inside the outline
                 if (!bInsideOneOutline)
@@ -922,6 +929,8 @@ public class GameScene : GUIScene
                 return false;
         }
 
+        Debug.Log("STEP2 CHECK");
+
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
         float outlinesArea = 0;
@@ -937,7 +946,10 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        return (shapesArea == outlinesArea);
+        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+            Debug.Log("STEP3 CHECK");
+
+        return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }
 
     /**
