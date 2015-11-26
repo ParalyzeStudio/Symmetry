@@ -137,8 +137,8 @@ public class Grid : MonoBehaviour
         }
 
         //recalculate the grid size after making the approximations on grid anchors positions
-        float gridWidth = Mathf.Abs(m_anchors[0].m_worldPosition.x - m_anchors[anchorsCount - 1].m_worldPosition.x);
-        float gridHeight = Mathf.Abs(m_anchors[0].m_worldPosition.y - m_anchors[m_numLines - 1].m_worldPosition.y);
+        float gridWidth = Mathf.Abs(m_anchors[0].m_worldPosition.x - m_anchors[m_numColumns - 1].m_worldPosition.x);
+        float gridHeight = Mathf.Abs(m_anchors[0].m_worldPosition.y - m_anchors[anchorsCount - 1].m_worldPosition.y);
         m_gridSize = new Vector2(gridWidth, gridHeight);
 
         //and also the grid spacing
@@ -160,6 +160,9 @@ public class Grid : MonoBehaviour
      * **/
     public Vector2 GetPointWorldCoordinatesFromGridCoordinates(Vector2 gridPoint)
     {
+        Debug.Log("m_horizontalGridSpacing:" + m_horizontalGridSpacing);
+        Debug.Log("m_verticalGridSpacing:" + m_verticalGridSpacing);
+
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
         {
