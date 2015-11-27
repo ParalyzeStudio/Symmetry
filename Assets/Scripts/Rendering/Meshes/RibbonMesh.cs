@@ -55,8 +55,8 @@ public class RibbonMesh : ColorMesh
         Grid grid = GetGrid();
         Vector2 axisNormal = axis.GetAxisNormal();
         GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x), 
-                                                 Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y),
-                                                 GridPoint.DEFAULT_SCALE_PRECISION);
+                                                 Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y));
+
         Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint1GridPosition, gridAxisNormal);
         Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint2GridPosition, gridAxisNormal);
 
@@ -99,10 +99,14 @@ public class RibbonMesh : ColorMesh
         //Build the contour by adding grid vertices if 2 consecutive intersection points are on 2 adjacent grid edges
         Contour ribbonContour = new Contour(4); //at least 4 points
         int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-        GridPoint gridTopLeftCorner = scaleValue * new GridPoint(1, grid.m_numLines, scaleValue);
-        GridPoint gridBottomLeftCorner = scaleValue * new GridPoint(1, 1, scaleValue);
-        GridPoint gridBottomRightCorner = scaleValue * new GridPoint(grid.m_numColumns, 1, scaleValue);
-        GridPoint gridTopRightCorner = scaleValue * new GridPoint(grid.m_numColumns, grid.m_numLines, scaleValue);
+        GridPoint gridTopLeftCorner = new GridPoint(1, grid.m_numLines);
+        GridPoint gridBottomLeftCorner = new GridPoint(1, 1);
+        GridPoint gridBottomRightCorner = new GridPoint(grid.m_numColumns, 1);
+        GridPoint gridTopRightCorner = new GridPoint(grid.m_numColumns, grid.m_numLines);
+        gridTopLeftCorner.Scale(scaleValue);
+        gridBottomLeftCorner.Scale(scaleValue);
+        gridBottomRightCorner.Scale(scaleValue);
+        gridTopRightCorner.Scale(scaleValue);
         
         //add left edge points
         for (int i = 0; i != leftEdgePoints.Count; i++)
@@ -154,7 +158,7 @@ public class RibbonMesh : ColorMesh
             Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[0]);
             Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[1]);
             Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[2]);
-            AddTriangle(pt1, pt2, pt3);
+            AddTriangle(pt1, pt3, pt2);
         }
 
         SetColor(m_color); //reset the color

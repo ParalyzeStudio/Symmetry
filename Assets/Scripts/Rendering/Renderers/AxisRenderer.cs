@@ -266,6 +266,9 @@ public class AxisRenderer : MonoBehaviour
         GameScene gameScene = GetGameScene();
 
         Grid.GridAnchor closestAnchor = gameScene.m_grid.GetClosestGridAnchorForWorldPosition(pointerLocation);
+        if (closestAnchor == null) //we got out of grid bounds and could not find an anchor
+            return false;
+
         if (closestAnchor != m_snappedAnchor)
         {
             m_snappedAnchor = closestAnchor;

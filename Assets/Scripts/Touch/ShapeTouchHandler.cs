@@ -9,8 +9,8 @@ public class ShapeTouchHandler : TouchHandler
 
         Vector2 pointerGridLocation = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
         int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
-        pointerGridLocation *= scalePrecision;
-        GridPoint pointerGridPosition = new GridPoint(Mathf.RoundToInt(pointerGridLocation.x), Mathf.RoundToInt(pointerGridLocation.y), scalePrecision);
+        GridPoint pointerGridPosition = new GridPoint(Mathf.RoundToInt(pointerGridLocation.x), Mathf.RoundToInt(pointerGridLocation.y));
+        pointerGridPosition.Scale(scalePrecision);
 
         GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
         if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)

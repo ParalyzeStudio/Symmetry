@@ -72,12 +72,12 @@ public class Grid : MonoBehaviour
         else
             columnGridSpacing = m_gridSize.x / (float)(minNumColumns - 1);
 
-        float gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
+        m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
 
-        m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / gridSpacing) + 1;
-        m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / gridSpacing) + 1;
+        m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
+        m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
-        m_gridSize = new Vector2((m_numColumns - 1) * gridSpacing, (m_numLines - 1) * gridSpacing);
+        m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
 
         Vector3 gridPosition = this.transform.position;
 
@@ -93,25 +93,26 @@ public class Grid : MonoBehaviour
                 //find the x position of the anchor
                 if (m_numColumns % 2 == 0) //even number of columns
                 {
-                    anchorPositionX = ((iColumnNumber - m_numColumns / 2 - 0.5f) * gridSpacing);
+                    anchorPositionX = ((iColumnNumber - m_numColumns / 2 - 0.5f) * m_gridSpacing);
                 }
                 else //odd number of columns
                 {
-                    anchorPositionX = ((iColumnNumber - 1 - m_numColumns / 2) * gridSpacing);
+                    anchorPositionX = ((iColumnNumber - 1 - m_numColumns / 2) * m_gridSpacing);
                 }
 
                 //find the y position of the anchor
                 if (m_numLines % 2 == 0) //even number of lines
                 {
-                    anchorPositionY = ((iLineNumber - m_numLines / 2 - 0.5f) * gridSpacing);
+                    anchorPositionY = ((iLineNumber - m_numLines / 2 - 0.5f) * m_gridSpacing);
                 }
                 else //odd number of lines
                 {
-                    anchorPositionY = ((iLineNumber - 1 - m_numLines / 2) * gridSpacing);
+                    anchorPositionY = ((iLineNumber - 1 - m_numLines / 2) * m_gridSpacing);
                 }
 
                 int gridPositionScale = GridPoint.DEFAULT_SCALE_PRECISION;
-                GridPoint anchorGridPosition = gridPositionScale * new GridPoint(iColumnNumber, iLineNumber, gridPositionScale);
+                GridPoint anchorGridPosition = new GridPoint(iColumnNumber, iLineNumber);
+                anchorGridPosition.Scale(gridPositionScale);
                 Vector3 anchorPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
 
@@ -146,23 +147,25 @@ public class Grid : MonoBehaviour
      * **/
     public Vector2 GetPointWorldCoordinatesFromGridCoordinates(GridPoint gridPoint)
     {
+        Vector2 columnLinePoint = gridPoint.GetAsColumnLineVector();
+
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
         {
-            anchorPositionX = ((gridPoint.X - m_numColumns / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionX = ((columnLinePoint.x - m_numColumns / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of columns
         {
-            anchorPositionX = ((gridPoint.X - 1 - m_numColumns / 2) * m_gridSpacing);
+            anchorPositionX = ((columnLinePoint.x - 1 - m_numColumns / 2) * m_gridSpacing);
         }
         float anchorPositionY;
         if (m_numLines % 2 == 0) //even number of lines
         {
-            anchorPositionY = ((gridPoint.Y - m_numLines / 2 - 0.5f) * m_gridSpacing);
+            anchorPositionY = ((columnLinePoint.y - m_numLines / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of lines
         {
-            anchorPositionY = ((gridPoint.Y - 1 - m_numLines / 2) * m_gridSpacing);
+            anchorPositionY = ((columnLinePoint.y - 1 - m_numLines / 2) * m_gridSpacing);
         }
 
         Vector2 anchorLocalPosition = new Vector2(anchorPositionX, anchorPositionY);
@@ -272,7 +275,7 @@ public class Grid : MonoBehaviour
 
         //Check intersection with top grid border
         intersectionPoint = CheckLineIntersectionOnGridEdge(GridBoxEdgeLocation.TOP, linePoint, lineDirection);
-        if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+        if (intersectionPoint.m_position != intersections[0].m_position)
             if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
                 intersectionCount++;
 
@@ -280,7 +283,7 @@ public class Grid : MonoBehaviour
         if (intersectionIndex < 2)
         {
             intersectionPoint = CheckLineIntersectionOnGridEdge(GridBoxEdgeLocation.RIGHT, linePoint, lineDirection);
-            if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+            if (intersectionPoint.m_position != intersections[0].m_position)
                 if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
                     intersectionCount++;
         }
@@ -289,7 +292,7 @@ public class Grid : MonoBehaviour
         if (intersectionIndex < 2)
         {
             intersectionPoint = CheckLineIntersectionOnGridEdge(GridBoxEdgeLocation.BOTTOM, linePoint, lineDirection);
-            if (!MathUtils.AreVec2PointsEqual(intersectionPoint.m_position, intersections[0].m_position))
+            if (intersectionPoint.m_position != intersections[0].m_position)
                 if (AddIntersectionGridBoxPointAtIndex(ref intersections, ref intersectionIndex, intersectionPoint))
                     intersectionCount++;
         }
@@ -307,23 +310,31 @@ public class Grid : MonoBehaviour
         int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
         if (edgeLocation == GridBoxEdgeLocation.LEFT)
         {
-            edgePointA = scalePrecision * new GridPoint(1, m_numLines, scalePrecision);
-            edgePointB = scalePrecision * new GridPoint(1, 1, scalePrecision);
+            edgePointA = new GridPoint(1, m_numLines);
+            edgePointB = new GridPoint(1, 1);
+            edgePointA.Scale(scalePrecision);
+            edgePointB.Scale(scalePrecision);
         }
         else if (edgeLocation == GridBoxEdgeLocation.BOTTOM)
         {
-            edgePointA = scalePrecision * new GridPoint(1, 1, scalePrecision);
-            edgePointB = scalePrecision * new GridPoint(m_numColumns, 1, scalePrecision);
+            edgePointA = new GridPoint(1, 1);
+            edgePointB = new GridPoint(m_numColumns, 1);
+            edgePointA.Scale(scalePrecision);
+            edgePointB.Scale(scalePrecision);
         }
         else if (edgeLocation == GridBoxEdgeLocation.RIGHT)
         {
-            edgePointA = scalePrecision * new GridPoint(m_numColumns, 1, scalePrecision);
-            edgePointB = scalePrecision * new GridPoint(m_numColumns, m_numLines, scalePrecision);
+            edgePointA = new GridPoint(m_numColumns, 1);
+            edgePointB = new GridPoint(m_numColumns, m_numLines);
+            edgePointA.Scale(scalePrecision);
+            edgePointB.Scale(scalePrecision);
         }
         else //GridBoxEdgeLocation.TOP
         {
-            edgePointA = scalePrecision * new GridPoint(m_numColumns, m_numLines, scalePrecision);
-            edgePointB = scalePrecision * new GridPoint(1, m_numLines, scalePrecision);
+            edgePointA = new GridPoint(m_numColumns, m_numLines);
+            edgePointB = new GridPoint(1, m_numLines);
+            edgePointA.Scale(scalePrecision);
+            edgePointB.Scale(scalePrecision);
         }
 
         GridPoint intersection;

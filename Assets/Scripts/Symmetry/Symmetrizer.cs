@@ -309,10 +309,14 @@ public class Symmetrizer : MonoBehaviour
 
         int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
 
-        GridPoint gridTopLeft = scalePrecision * new GridPoint(1, m_gameScene.m_grid.m_numLines, scalePrecision);
-        GridPoint gridTopRight = scalePrecision * new GridPoint(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines, scalePrecision);
-        GridPoint gridBottomLeft = scalePrecision * new GridPoint(1, 1, scalePrecision);
-        GridPoint gridBottomRight = scalePrecision * new GridPoint(m_gameScene.m_grid.m_numColumns, 1, scalePrecision);
+        GridPoint gridTopLeft = new GridPoint(1, m_gameScene.m_grid.m_numLines);
+        GridPoint gridTopRight = new GridPoint(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines);
+        GridPoint gridBottomLeft = new GridPoint(1, 1);
+        GridPoint gridBottomRight = new GridPoint(m_gameScene.m_grid.m_numColumns, 1);
+        gridTopLeft.Scale(scalePrecision);
+        gridTopRight.Scale(scalePrecision);
+        gridBottomLeft.Scale(scalePrecision);
+        gridBottomRight.Scale(scalePrecision);
 
         GridEdge leftEdge = new GridEdge(gridBottomLeft, gridTopLeft);
         GridEdge topEdge = new GridEdge(gridTopLeft, gridTopRight);

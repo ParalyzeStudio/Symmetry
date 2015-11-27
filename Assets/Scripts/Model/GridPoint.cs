@@ -4,7 +4,7 @@
  * A data structure to manage points held by data (outlines, shapes, axes...) inside the grid
  * It approximates decimal values to int values (we do not need long value type as we won't use more than 1 or 2 significant figures for precision) 
  * **/
-public class GridPoint
+public struct GridPoint
 {
     public const int DEFAULT_SCALE_PRECISION = 1000; //set the default scale value which is usually a power of 10 (a bigger value means bigger precision on data)
 
@@ -89,11 +89,10 @@ public class GridPoint
     //We can scale this vector (by an integer value) for more precision when performing math operations on it
     public int m_scale { get; set; }
 
-    public GridPoint(int x, int y, int scale = 1)
+    public GridPoint(int x, int y) : this()
     {
         m_x = x;
         m_y = y;
-        m_scale = 1;
     }
 
     /**
@@ -134,13 +133,10 @@ public class GridPoint
      * **/
     public void Scale(int scale = DEFAULT_SCALE_PRECISION)
     {
-        //if values have been scaled previously we need to downscale them first
-        Vector2 columnLineVector = GetAsColumnLineVector();
-
         //Apply the new scale to the (column, line) GridPoint
         m_scale = scale;
-        X = (int) columnLineVector.x * scale;
-        Y = (int) columnLineVector.y * scale;
+        X *= scale;
+        Y *= scale;
     }
 
     /**
@@ -150,5 +146,10 @@ public class GridPoint
     public Vector2 GetAsColumnLineVector()
     {
         return new Vector2(X / (float)m_scale, Y / (float)m_scale);
+    }
+
+    public override string ToString()
+    {
+        return "(" + X + "," + Y + ")";
     }
 }

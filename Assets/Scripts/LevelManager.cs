@@ -110,10 +110,13 @@ public class LevelManager : MonoBehaviour
                 float contourPointColumn = float.Parse(strContourPointColumn);
 
                 int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                int scaledContourPointLine = (int)contourPointLine * scaleValue;
-                int scaledContourPointColumn = (int)contourPointColumn * scaleValue;
+                int scaledContourPointLine = (int)(contourPointLine * scaleValue);
+                int scaledContourPointColumn = (int)(contourPointColumn * scaleValue);
 
-                outline.m_contour.Add(new GridPoint(scaledContourPointColumn, scaledContourPointLine, scaleValue));
+                GridPoint outlineContourPoint = new GridPoint(scaledContourPointColumn, scaledContourPointLine);
+                outlineContourPoint.m_scale = scaleValue;
+
+                outline.m_contour.Add(outlineContourPoint);
             }
 
             //Holes
@@ -135,10 +138,13 @@ public class LevelManager : MonoBehaviour
                         float holePointColumn = float.Parse(strHolePointColumn);
 
                         int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                        int scaledHolePointLine = (int)holePointLine * scaleValue;
-                        int scaledHolePointColumn = (int)holePointColumn * scaleValue;
+                        int scaledHolePointLine = (int)(holePointLine * scaleValue);
+                        int scaledHolePointColumn = (int)(holePointColumn * scaleValue);
 
-                        holePoints.Add(new GridPoint(scaledHolePointColumn, scaledHolePointLine, scaleValue));
+                        GridPoint outlineHolePoint = new GridPoint(scaledHolePointColumn, scaledHolePointLine);
+                        outlineHolePoint.m_scale = scaleValue;
+
+                        holePoints.Add(outlineHolePoint);
                     }
 
                     outline.m_holes.Add(holePoints);
@@ -182,7 +188,10 @@ public class LevelManager : MonoBehaviour
                     int scaledContourPointLine = (int)contourPointLine * scaleValue;
                     int scaledContourPointColumn = (int)contourPointColumn * scaleValue;
 
-                    shape.m_contour.Add(new GridPoint(scaledContourPointColumn, scaledContourPointLine));
+                    GridPoint shapeContourPoint = new GridPoint(scaledContourPointColumn, scaledContourPointLine);
+                    shapeContourPoint.m_scale = scaleValue;
+
+                    shape.m_contour.Add(shapeContourPoint);
                 }
 
                 //Holes
@@ -207,7 +216,10 @@ public class LevelManager : MonoBehaviour
                             int scaledHolePointLine = (int)holePointLine * scaleValue;
                             int scaledHolePointColumn = (int)holePointColumn * scaleValue;
 
-                            holePoints.Add(new GridPoint(scaledHolePointColumn, scaledHolePointLine, scaleValue));
+                            GridPoint shapeHolePoint = new GridPoint(scaledHolePointColumn, scaledHolePointLine);
+                            shapeHolePoint.m_scale = scaleValue;
+
+                            holePoints.Add(shapeHolePoint);
                         }
 
                         shape.m_holes.Add(holePoints);

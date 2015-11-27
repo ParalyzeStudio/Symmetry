@@ -87,7 +87,8 @@ public class GridTriangulable
             for (int i = 0; i != triangles.Length; i++)
             {
                 Vector2 triangleVertex = triangles[i];
-                gridTriangles[i] = new GridPoint((int) triangleVertex.x, (int) triangleVertex.y, GridPoint.DEFAULT_SCALE_PRECISION);
+                gridTriangles[i] = new GridPoint((int) triangleVertex.x, (int) triangleVertex.y);
+                gridTriangles[i].m_scale = GridPoint.DEFAULT_SCALE_PRECISION;
             }
 
             for (int iVertexIndex = 0; iVertexIndex != gridTriangles.Length; iVertexIndex += 3)

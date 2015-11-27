@@ -67,7 +67,7 @@ public class ShapeMesh : TexturedMesh
                 Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[0]);
                 Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[1]);
                 Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[2]);
-                AddTriangle(pt1, pt2, pt3);
+                AddTriangle(pt1, pt3, pt2);
             }
 
             SetTintColor(m_shapeData.m_color);
@@ -364,11 +364,11 @@ public class ShapeMesh : TexturedMesh
     {
         Grid grid = GetGrid();
         ShapeVoxelGrid voxelGrid = GetVoxelGrid();
-        Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
+        //Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
 
-        Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
-        localVertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
-        Vector2 uv = localVertex / voxelGrid.m_voxelSize; //normalize coordinates of the vertex so it is in UV mode
+        //Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
+        vertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
+        Vector2 uv = vertex / (voxelGrid.m_voxelSize * grid.m_gridSpacing); //normalize coordinates of the vertex so it is in UV mode
         uv /= SHAPE_TEXTURES_TILING; //divide uvs by the number of tiles along each dimension inside the texture
 
         return uv;

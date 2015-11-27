@@ -460,14 +460,15 @@ public class GameScene : GUIScene
     private void ShowOutlines(float fDelay = 0.0f)
     {
         GameObject outlinesObject = (GameObject)Instantiate(m_outlinesPfb);
-        outlinesObject.name = "Outlines";
-        m_outlines = outlinesObject.GetComponent<Outlines>();
-        m_outlines.Build();
+        outlinesObject.name = "Outlines";        
 
         GameObjectAnimator outlinesAnimator = outlinesObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetParentTransform(this.transform);
         outlinesAnimator.SetOpacity(0);
         outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
+
+        m_outlines = outlinesObject.GetComponent<Outlines>();
+        m_outlines.Build();
         m_outlines.Show(true, 1.5f, fDelay);
     }
 
@@ -1041,6 +1042,7 @@ public class GameScene : GUIScene
 
     public void Update()
     {
+        return;
         if (m_gameStatus == GameStatus.RUNNING)
         {
             GameStatus gameStatus = GetGameStatus();

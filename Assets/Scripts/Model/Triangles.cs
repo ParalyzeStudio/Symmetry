@@ -114,31 +114,35 @@ public class GridEdge
      * **/
     public void IntersectionWithLine(GridPoint linePoint, GridPoint lineDirection, out bool intersects, out GridPoint intersection)
     {
+        //Store global values in temporary values for the purpose of this calculation
+        GridPoint pointA = m_pointA;
+        GridPoint pointB = m_pointB;
+
         //order points by ascending x for the segment only
-        if (m_pointA.X > m_pointB.X)
+        if (pointA.X > pointB.X)
         {
-            GridPoint tmpPoint = m_pointB;
-            m_pointB = m_pointA;
-            m_pointA = tmpPoint;
+            GridPoint tmpPoint = pointB;
+            pointB = pointA;
+            pointA = tmpPoint;
         }
-        else if (m_pointA.X == m_pointB.X) // if x-coordinate is the same for both points, order them by ascending y
+        else if (pointA.X == pointB.X) // if x-coordinate is the same for both points, order them by ascending y
         {
-            if (m_pointA.Y > m_pointB.Y)
+            if (pointA.Y > pointB.Y)
             {
-                GridPoint tmpPoint = m_pointB;
-                m_pointB = m_pointA;
-                m_pointA = tmpPoint;
+                GridPoint tmpPoint = pointB;
+                pointB = pointA;
+                pointA = tmpPoint;
             }
         }
 
         //Both lines equation
         float x, y;
-        if (lineDirection.X != 0 && m_pointA.X != m_pointB.X) //y = a1x + b1 && y = a2x + b2
+        if (lineDirection.X != 0 && pointA.X != pointB.X) //y = a1x + b1 && y = a2x + b2
         {
             float a1 = lineDirection.Y / (float) lineDirection.X;
             float b1 = linePoint.Y - a1 * linePoint.X;
-            float a2 = (m_pointB.Y - m_pointA.Y) / (m_pointB.X - m_pointA.X);
-            float b2 = m_pointA.Y - a2 * m_pointA.X;
+            float a2 = (pointB.Y - pointA.Y) / (pointB.X - pointA.X);
+            float b2 = pointA.Y - a2 * pointA.X;
 
             if (a1 == a2) //parallel lines
             {
@@ -152,20 +156,20 @@ public class GridEdge
                 y = a1 * x + b1;
             }
         }
-        else if (lineDirection.X != 0 && m_pointA.X == m_pointB.X) //y = a1x + b1 && x = a2
+        else if (lineDirection.X != 0 && pointA.X == pointB.X) //y = a1x + b1 && x = a2
         {
             float a1 = lineDirection.Y / (float) lineDirection.X;
             float b1 = linePoint.Y - a1 * linePoint.X;
-            float a2 = m_pointA.X;
+            float a2 = pointA.X;
 
             x = a2;
             y = a1 * a2 + b1;
         }
-        else if (lineDirection.X == 0 && m_pointA.X != m_pointB.X) //x = a1 && y = a2x + b2
+        else if (lineDirection.X == 0 && pointA.X != pointB.X) //x = a1 && y = a2x + b2
         {
             float a1 = linePoint.X;
-            float a2 = (m_pointB.Y - m_pointA.Y) / (m_pointB.X - m_pointA.X);
-            float b2 = m_pointA.Y - a2 * m_pointA.X;
+            float a2 = (pointB.Y - pointA.Y) / (pointB.X - pointA.X);
+            float b2 = pointA.Y - a2 * pointA.X;
 
             x = a1;
             y = a2 * a1 + b2;
@@ -179,12 +183,12 @@ public class GridEdge
 
         //Round (x,y)
         int X = Mathf.RoundToInt(x);
-        int Y = Mathf.RoundToInt(x);
+        int Y = Mathf.RoundToInt(y);
 
         //Check if ((x, y) point is contained in the segment
-        if (m_pointA.X == m_pointB.X)
+        if (pointA.X == pointB.X)
         {
-            if (Y >= m_pointA.Y && Y <= m_pointA.Y)
+            if (Y >= pointA.Y && Y <= pointB.Y)
             {
                 intersects = true;
                 intersection = new GridPoint(X, Y);
@@ -199,7 +203,7 @@ public class GridEdge
         }
         else
         {
-            if (MathUtils.isValueInInterval(X, m_pointA.X, m_pointB.X, 0))
+            if (X >= pointA.X && X <= pointB.X)
             {
                 intersects = true;
                 intersection = new GridPoint(X, Y);

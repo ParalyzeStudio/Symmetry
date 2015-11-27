@@ -15,6 +15,7 @@ public class Outlines : MonoBehaviour
     {       
         GameObject levelManagerObject = GameObject.FindGameObjectWithTag("GameController");
         LevelManager levelManager = levelManagerObject.GetComponent<LevelManager>();
+        Grid grid = this.transform.parent.GetComponent<GameScene>().m_grid;
                 
         List<DottedOutline> outlines = levelManager.m_currentLevel.m_outlines;
        
@@ -35,12 +36,14 @@ public class Outlines : MonoBehaviour
             Contour contourPoints = clonedOutline.m_contour;
             for (int iPointIndex = 0; iPointIndex != contourPoints.Count; iPointIndex++)
             {
-                Vector2 gridPointA = contourPoints[iPointIndex];
-                Vector2 gridPointB = (iPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iPointIndex + 1];
+                GridPoint gridPointA = contourPoints[iPointIndex];
+                GridPoint gridPointB = (iPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iPointIndex + 1];
+                Vector2 worldPointA = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPointA);
+                Vector2 worldPointB = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPointB);
 
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                outlineSegment.Build(gridPointA, gridPointB, Color.white); //TODO replace white color by contour segment color
+                outlineSegment.Build(worldPointA, worldPointB, Color.white); //TODO replace white color by contour segment color
 
                 TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
                 outlineSegmentAnimator.SetParentTransform(outlineObject.transform);
@@ -53,12 +56,14 @@ public class Outlines : MonoBehaviour
                 Contour holePoints = holes[iHoleIdx];
                 for (int iHolePointIdx = 0; iHolePointIdx != holePoints.Count; iHolePointIdx++)
                 {
-                    Vector2 holeGridPointA = holePoints[iHolePointIdx];
-                    Vector2 holeGridPointB = (iHolePointIdx == holePoints.Count - 1) ? holePoints[0] : holePoints[iHolePointIdx + 1];
+                    GridPoint holeGridPointA = holePoints[iHolePointIdx];
+                    GridPoint holeGridPointB = (iHolePointIdx == holePoints.Count - 1) ? holePoints[0] : holePoints[iHolePointIdx + 1];
+                    Vector2 worldPointA = grid.GetPointWorldCoordinatesFromGridCoordinates(holeGridPointA);
+                    Vector2 worldPointB = grid.GetPointWorldCoordinatesFromGridCoordinates(holeGridPointB);
 
                     GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                     OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                    outlineSegment.Build(holeGridPointA, holeGridPointB, Color.white);
+                    outlineSegment.Build(worldPointA, worldPointB, Color.white);
 
                     TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
                     outlineSegmentAnimator.SetParentTransform(outlineObject.transform);

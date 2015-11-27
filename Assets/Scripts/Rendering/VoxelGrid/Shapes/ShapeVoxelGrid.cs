@@ -17,6 +17,7 @@ public class ShapeVoxelGrid : MonoBehaviour
         }
     }
 
+    public int m_density { get; set; }
     private int m_size;
     private int m_xVoxelsCount; //the number of voxels along the x-dimension of the grid
     public int XVoxelsCount
@@ -40,13 +41,15 @@ public class ShapeVoxelGrid : MonoBehaviour
      * ***/
     public void Init(int density)
     {
+        m_density = density;
+
         Grid parentGrid = this.GetComponent<Grid>();
 
         m_xVoxelsCount = (parentGrid.m_numColumns - 1) * (density - 1) + 1; 
         m_yVoxelsCount = (parentGrid.m_numLines - 1) * (density - 1) + 1;
         m_size = m_xVoxelsCount * m_yVoxelsCount;
         m_voxels = new ShapeVoxel[m_size];
-        m_voxelSize = 1 / (density - 1);
+        m_voxelSize = 1 / (float) (density - 1);
 
         for (int i = 0, y = 0; y < m_yVoxelsCount; y++)
         {
@@ -66,7 +69,8 @@ public class ShapeVoxelGrid : MonoBehaviour
         Vector2 gridSize = parentGrid.m_gridSize;
 
         int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
-        GridPoint voxelGridPosition = new GridPoint((int) (scalePrecision * (x - 1) * m_voxelSize), (int) (scalePrecision * (y - 1) * m_voxelSize), scalePrecision);
+        GridPoint voxelGridPosition = new GridPoint((int) (scalePrecision * x * m_voxelSize), (int) (scalePrecision * y * m_voxelSize));
+        voxelGridPosition.m_scale = scalePrecision;
 
         ShapeVoxel voxel = new ShapeVoxel(voxelGridPosition);
 
