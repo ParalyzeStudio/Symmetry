@@ -21,7 +21,7 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public GameObject BuildAxis(Vector2 gridStartPosition)
+    public GameObject BuildAxis(GridPoint startPosition)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
@@ -36,7 +36,7 @@ public class Axes : MonoBehaviour
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
-        axisRenderer.BuildElements(gridStartPosition);
+        axisRenderer.BuildElements(startPosition);
 
         AddAxis(newAxis);
         return newAxis;

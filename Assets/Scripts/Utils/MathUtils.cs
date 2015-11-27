@@ -45,6 +45,14 @@ public class MathUtils
         return Determinant(vec1, vec2);
     }
 
+    static public int Determinant(GridPoint u, GridPoint v, GridPoint w)
+    {
+        GridPoint vec1 = u - w;
+        GridPoint vec2 = v - w;
+
+        return Determinant(vec1, vec2);
+    }
+
     /**
      * Calculates the determinant of 2 vectors
      * **/
@@ -53,12 +61,22 @@ public class MathUtils
         return u.x * v.y - u.y * v.x;
     }
 
+    static public int Determinant(GridPoint u, GridPoint v)
+    {
+        return u.X * v.Y - u.Y * v.X;
+    }
+
     /**
      * Calculates the dot product of 2 vectors
      * **/
     static public float DotProduct(Vector2 u, Vector2 v)
     {
         return u.x * v.x + u.y * v.y;
+    }
+
+    static public int DotProduct(GridPoint u, GridPoint v)
+    {
+        return u.X * v.X + u.Y * v.Y;
     }
 
 
@@ -75,23 +93,23 @@ public class MathUtils
     /**
      * Approximates a float so that it has the 'significantFiguresCount' number of digits after decimal point
      * **/
-    static public float ApproximateNumber(float number, int significantFiguresCountAfterDecimalPoint)
-    {
-        //do not use Mathf.Pow as it leads to epsilon errors with expected result
-        for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
-        {
-            number *= 10.0f;
-        }
+    //static public float ApproximateNumber(float number, int significantFiguresCountAfterDecimalPoint)
+    //{
+    //    //do not use Mathf.Pow as it leads to epsilon errors with expected result
+    //    for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
+    //    {
+    //        number *= 10.0f;
+    //    }
 
-        //round the number so it looks like an int
-        number = Mathf.Round(number);
+    //    //round the number so it looks like an int
+    //    number = Mathf.Round(number);
 
-        //do not use Mathf.Pow as it leads to epsilon errors with expected result
-        for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
-        {
-            number /= 10.0f;
-        }
+    //    //do not use Mathf.Pow as it leads to epsilon errors with expected result
+    //    for (int i = 0; i != significantFiguresCountAfterDecimalPoint; i++)
+    //    {
+    //        number /= 10.0f;
+    //    }
 
-        return number;
-    }
+    //    return number;
+    //}
 }

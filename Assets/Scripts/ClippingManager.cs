@@ -19,25 +19,22 @@ public class ClippingManager : MonoBehaviour
         path.Capacity = contour.Count;
         for (int iContourPointIndex = 0; iContourPointIndex != contour.Count; iContourPointIndex++)
         {
-            IntPoint pathPoint = GeometryUtils.ConvertVector2ToIntPoint(contour[iContourPointIndex]);
+            IntPoint pathPoint = contour[iContourPointIndex];
             path.Add(pathPoint);
         }
 
         return path;
     }
 
-    private Contour CreateContourFromPath(List<IntPoint> path, bool bScalePoints = true)
+    private Contour CreateContourFromPath(List<IntPoint> path)
     {
         Contour contour = new Contour();
         contour.Capacity = path.Count;
         for (int iPathPointIndex = 0; iPathPointIndex != path.Count; iPathPointIndex++)
         {
             IntPoint pathPoint = path[iPathPointIndex];
-            Vector2 contourPoint;
-            if (bScalePoints)
-                contourPoint = GeometryUtils.ConvertIntPointToVector2(pathPoint);
-            else
-                contourPoint = new Vector2(pathPoint.X, pathPoint.Y);
+            GridPoint contourPoint;
+            contourPoint = new GridPoint((int)pathPoint.X, (int)pathPoint.Y);
             contour.Add(contourPoint);
         }
 
@@ -124,7 +121,7 @@ public class ClippingManager : MonoBehaviour
 
             //we specify the polygons to be strictly simple so no need to split them manually
             Contour shapeContour = CreateContourFromPath(polynode.Contour);
-            Shape shape = new Shape(false, shapeContour);
+            Shape shape = new Shape(shapeContour);
             resultingShapes.Add(shape); //Add this extracted shape to the list of all resulting shapes
 
             //child of an outer is always a hole, no need to call IsHole on the child

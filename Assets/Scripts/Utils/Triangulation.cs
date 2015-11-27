@@ -134,39 +134,23 @@ public class Triangulation
     /**
      * Converts a TriangulationPoint from Poly2Tri library to Unity Vector2
      * **/
-    public static Vector2 ConvertTriangulationPointToVector2(TriangulationPoint triangulationPoint)
+    public static GridPoint ConvertTriangulationPointToGridPoint(TriangulationPoint triangulationPoint)
     {
-        return new Vector2(triangulationPoint.Xf, triangulationPoint.Yf);
+        return new GridPoint((int) triangulationPoint.Xf, (int) triangulationPoint.Yf);
     }
 
     /**
-     * Converts a Unity Vector2 from Poly2Tri library to TriangulationPoint from Poly2Tri library
+     * Converts a Unity Vector2 from Poly2Tri library to PolygonPoint from Poly2Tri library
      * **/
-    public static TriangulationPoint ConvertVector2ToTriangulationPoint(Vector2 vec2Point)
+    public static PolygonPoint ConvertGridPointToPolygonPoint(GridPoint vec2Point)
     {
-        return new TriangulationPoint((double)vec2Point.x, (double)vec2Point.y); 
-    }
-
-    /**
-     * Converts a PolygonPoint from Poly2Tri library to Unity Vector2
-     * **/
-    public static Vector2 ConvertPolygonPointToVector2(PolygonPoint polygonPoint)
-    {
-        return new Vector2(polygonPoint.Xf, polygonPoint.Yf);
-    }
-
-    /**
-     * Converts a Unity Vector2 from Poly2Tri library to TriangulationPoint from Poly2Tri library
-     * **/
-    public static PolygonPoint ConvertVector2ToPolygonPoint(Vector2 vec2Point)
-    {
-        return new PolygonPoint((double)vec2Point.x, (double)vec2Point.y);
+        return new PolygonPoint((double)vec2Point.X, (double)vec2Point.Y);
     }
 
     /**
      * Converts a Triangulable object to a Poly2Tri Polygon object
      * **/
-    public static Polygon ConvertTriangulableToPolygon(Triangulable triangulable)
+    public static Polygon ConvertTriangulableToPolygon(GridTriangulable triangulable)
     {
         Contour contour = triangulable.m_contour;
         List<Contour> holes = triangulable.m_holes;
@@ -175,7 +159,7 @@ public class Triangulation
         PolygonPoint[] contourPoints = new PolygonPoint[contour.Count];
         for (int iContourPointIdx = 0; iContourPointIdx != contour.Count; iContourPointIdx++)
         {
-            contourPoints[iContourPointIdx] = ConvertVector2ToPolygonPoint(contour[iContourPointIdx]);
+            contourPoints[iContourPointIdx] = ConvertGridPointToPolygonPoint(contour[iContourPointIdx]);
         }
 
         Polygon polygon = new Polygon(contourPoints);
@@ -188,7 +172,7 @@ public class Triangulation
             PolygonPoint[] holePoints = new PolygonPoint[hole.Count];
             for (int iHolePointIdx = 0; iHolePointIdx != hole.Count; iHolePointIdx++)
             {
-                holePoints[iHolePointIdx] = ConvertVector2ToPolygonPoint(hole[iHolePointIdx]);
+                holePoints[iHolePointIdx] = ConvertGridPointToPolygonPoint(hole[iHolePointIdx]);
             }
 
             Polygon polyHole = new Polygon(holePoints);
@@ -201,7 +185,7 @@ public class Triangulation
     /**
      * Converts a Poly2Tri Polygon object to a Triangulable object
      * **/
-    public static Triangulable ConvertPolygonToTriangulable(Polygon polygon)
+    public static GridTriangulable ConvertPolygonToTriangulable(Polygon polygon)
     {
         //Convert holes
         IList<Polygon> polyHoles = polygon.Holes;
@@ -215,7 +199,7 @@ public class Triangulation
             for (int iHolePointIdx = 0; iHolePointIdx != polyHolePoints.Count; iHolePointIdx++)
             {
                 TriangulationPoint polyHolePoint = polyHolePoints[iHolePointIdx];
-                holePoints.Add(ConvertTriangulationPointToVector2(polyHolePoint));
+                holePoints.Add(ConvertTriangulationPointToGridPoint(polyHolePoint));
             }
 
             holes.Add(holePoints);
@@ -227,13 +211,13 @@ public class Triangulation
         contour.Capacity = polyContour.Count;
         for (int iContourPointIdx = 0; iContourPointIdx != polyContour.Count; iContourPointIdx++)
         {
-            contour.Add(ConvertTriangulationPointToVector2(polyContour[iContourPointIdx]));
+            contour.Add(ConvertTriangulationPointToGridPoint(polyContour[iContourPointIdx]));
         }
 
-        return new Triangulable(contour, holes);
+        return new GridTriangulable(contour, holes);
     }
 
-    public static Vector2[] P2tTriangulate(Triangulable t)
+    public static Vector2[] P2tTriangulate(GridTriangulable t)
     {
         //Convert the Triangulable object to a Polygon object
         Polygon p = Triangulation.ConvertTriangulableToPolygon(t);
@@ -250,7 +234,7 @@ public class Triangulation
             FixedArray3<TriangulationPoint> trianglePoints = triangle.Points;
             for (int i = 0; i != 3; i++)
             {
-                triangles[iTriangleIndex * 3 + i] = ConvertTriangulationPointToVector2(trianglePoints[i]);
+                triangles[iTriangleIndex * 3 + i] = ConvertTriangulationPointToGridPoint(trianglePoints[i]);
             }
         }
 

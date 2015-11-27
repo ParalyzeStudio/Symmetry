@@ -97,7 +97,7 @@ public class LevelManager : MonoBehaviour
         level.m_outlines.Capacity = dottedOutlinesNodeList.Count;
         foreach (XMLNode outlineNode in dottedOutlinesNodeList)
         {
-            DottedOutline outline = new DottedOutline(true);
+            DottedOutline outline = new DottedOutline();
 
             //Contour
             XMLNodeList contourPointsNodeList = outlineNode.GetNodeList("contour>0>point");
@@ -109,7 +109,11 @@ public class LevelManager : MonoBehaviour
                 float contourPointLine = float.Parse(strContourPointLine);
                 float contourPointColumn = float.Parse(strContourPointColumn);
 
-                outline.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
+                int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                int scaledContourPointLine = (int)contourPointLine * scaleValue;
+                int scaledContourPointColumn = (int)contourPointColumn * scaleValue;
+
+                outline.m_contour.Add(new GridPoint(scaledContourPointColumn, scaledContourPointLine, scaleValue));
             }
 
             //Holes
@@ -130,7 +134,11 @@ public class LevelManager : MonoBehaviour
                         float holePointLine = float.Parse(strHolePointLine);
                         float holePointColumn = float.Parse(strHolePointColumn);
 
-                        holePoints.Add(new Vector2(holePointColumn, holePointLine));
+                        int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                        int scaledHolePointLine = (int)holePointLine * scaleValue;
+                        int scaledHolePointColumn = (int)holePointColumn * scaleValue;
+
+                        holePoints.Add(new GridPoint(scaledHolePointColumn, scaledHolePointLine, scaleValue));
                     }
 
                     outline.m_holes.Add(holePoints);
@@ -149,7 +157,7 @@ public class LevelManager : MonoBehaviour
             level.m_initialShapes.Capacity = shapesNodeList.Count;
             foreach (XMLNode shapeNode in shapesNodeList)
             {
-                Shape shape = new Shape(true);
+                Shape shape = new Shape();
                 //Get the color of the shape
                 string strShapeColor = shapeNode.GetValue("@color");
                 string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
@@ -169,8 +177,12 @@ public class LevelManager : MonoBehaviour
 
                     float contourPointLine = float.Parse(strContourPointLine);
                     float contourPointColumn = float.Parse(strContourPointColumn);
+                    
+                    int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                    int scaledContourPointLine = (int)contourPointLine * scaleValue;
+                    int scaledContourPointColumn = (int)contourPointColumn * scaleValue;
 
-                    shape.m_contour.Add(new Vector2(contourPointColumn, contourPointLine));
+                    shape.m_contour.Add(new GridPoint(scaledContourPointColumn, scaledContourPointLine));
                 }
 
                 //Holes
@@ -191,7 +203,11 @@ public class LevelManager : MonoBehaviour
                             float holePointLine = float.Parse(strHolePointLine);
                             float holePointColumn = float.Parse(strHolePointColumn);
 
-                            holePoints.Add(new Vector2(holePointColumn, holePointLine));
+                            int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                            int scaledHolePointLine = (int)holePointLine * scaleValue;
+                            int scaledHolePointColumn = (int)holePointColumn * scaleValue;
+
+                            holePoints.Add(new GridPoint(scaledHolePointColumn, scaledHolePointLine, scaleValue));
                         }
 
                         shape.m_holes.Add(holePoints);

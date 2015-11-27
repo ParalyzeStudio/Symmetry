@@ -6,8 +6,8 @@ public class RibbonMesh : ColorMesh
     private GridTriangulable m_ribbonData; //the points defining the contour of this ribbon
 
     //Axis endpoints that define the ribbon
-    private Vector2 m_ribbonPointA;
-    private Vector2 m_ribbonPointB;
+    private GridPoint m_ribbonPointA;
+    private GridPoint m_ribbonPointB;
 
     //parts of the ribbon that are on the left and on the right of the axis
     public Shape m_ribbonLeftSubShape { get; set; }
@@ -44,8 +44,8 @@ public class RibbonMesh : ColorMesh
      * **/
     public virtual void CalculateRibbonForAxis(AxisRenderer axis)
     {
-        m_ribbonPointA = axis.m_endpoint1Position;
-        m_ribbonPointB = axis.m_endpoint2Position;
+        m_ribbonPointA = axis.m_endpoint1GridPosition;
+        m_ribbonPointB = axis.m_endpoint2GridPosition;
 
         //clear the mesh
         ClearMesh();
@@ -95,10 +95,11 @@ public class RibbonMesh : ColorMesh
 
         //Build the contour by adding grid vertices if 2 consecutive intersection points are on 2 adjacent grid edges
         Contour ribbonContour = new Contour(4); //at least 4 points
-        Vector2 gridTopLeftCorner = new Vector2(1, grid.m_numLines);
-        Vector2 gridBottomLeftCorner = new Vector2(1, 1);
-        Vector2 gridBottomRightCorner = new Vector2(grid.m_numColumns, 1);
-        Vector2 gridTopRightCorner = new Vector2(grid.m_numColumns, grid.m_numLines);
+        int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+        GridPoint gridTopLeftCorner = scaleValue * new GridPoint(1, grid.m_numLines, scaleValue);
+        GridPoint gridBottomLeftCorner = scaleValue * new GridPoint(1, 1, scaleValue);
+        GridPoint gridBottomRightCorner = scaleValue * new GridPoint(grid.m_numColumns, 1, scaleValue);
+        GridPoint gridTopRightCorner = scaleValue * new GridPoint(grid.m_numColumns, grid.m_numLines, scaleValue);
         
         //add left edge points
         for (int i = 0; i != leftEdgePoints.Count; i++)
@@ -140,15 +141,17 @@ public class RibbonMesh : ColorMesh
             ribbonContour.Add(gridTopLeftCorner);
 
         //build the ribbon data object
-        m_ribbonData = new GridTriangulable(true, ribbonContour);
+        m_ribbonData = new GridTriangulable(ribbonContour);
         m_ribbonData.Triangulate();
-        m_ribbonData.TogglePointMode(); //switch to world coordinates
 
         //Add the triangles to the mesh
         for (int iTriangleIdx = 0; iTriangleIdx != m_ribbonData.m_triangles.Count; iTriangleIdx++)
         {
-            BaseTriangle triangle = m_ribbonData.m_triangles[iTriangleIdx];
-            AddTriangle(triangle.m_points[0], triangle.m_points[2], triangle.m_points[1]);
+            GridTriangle triangle = m_ribbonData.m_triangles[iTriangleIdx];
+            Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[0]);
+            Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[1]);
+            Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[2]);
+            AddTriangle(pt1, pt2, pt3);
         }
 
         SetColor(m_color); //reset the color
@@ -169,10 +172,10 @@ public class RibbonMesh : ColorMesh
             for (int j = 0; j != length - 1; j++)
             {                
                 //swap points in either of the following cases
-                if (sorting == PointSorting.ASCENDING_X && points[j].m_position.x > points[j + 1].m_position.x ||
-                    sorting == PointSorting.ASCENDING_Y && points[j].m_position.y > points[j + 1].m_position.y ||
-                    sorting == PointSorting.DESCENDING_X && points[j].m_position.x < points[j + 1].m_position.x ||
-                    sorting == PointSorting.DESCENDING_Y && points[j].m_position.y < points[j + 1].m_position.y)
+                if (sorting == PointSorting.ASCENDING_X && points[j].m_position.X > points[j + 1].m_position.X ||
+                    sorting == PointSorting.ASCENDING_Y && points[j].m_position.Y > points[j + 1].m_position.Y ||
+                    sorting == PointSorting.DESCENDING_X && points[j].m_position.X < points[j + 1].m_position.X ||
+                    sorting == PointSorting.DESCENDING_Y && points[j].m_position.Y < points[j + 1].m_position.Y)
                 {
                     Grid.GridBoxPoint tmpPoint = points[j];
                     points[j] = points[j + 1];
@@ -198,15 +201,16 @@ public class RibbonMesh : ColorMesh
 
         for (int i = 0; i != ribbonContour.Count; i++)
         {
-            Vector2 ribbonVertex1 = ribbonContour[i];
-            Vector2 ribbonVertex2 = (i == ribbonContour.Count - 1) ? ribbonContour[0] : ribbonContour[i + 1];
+            GridPoint ribbonVertex1 = ribbonContour[i];
+            GridPoint ribbonVertex2 = (i == ribbonContour.Count - 1) ? ribbonContour[0] : ribbonContour[i + 1];
+            GridTriangleEdge edge = new GridTriangleEdge(ribbonVertex1, ribbonVertex2);
 
-            if (indexOfNextVertexToAxisPointA < 0 && GeometryUtils.IsPointContainedInSegment(m_ribbonPointA, ribbonVertex1, ribbonVertex2))
+            if (indexOfNextVertexToAxisPointA < 0 && edge.ContainsPoint(m_ribbonPointA))
             {
                 indexOfNextVertexToAxisPointA = (i == ribbonContour.Count - 1) ? 0 : i + 1;
             }
 
-            if (indexOfNextVertexToAxisPointB < 0 && GeometryUtils.IsPointContainedInSegment(m_ribbonPointB, ribbonVertex1, ribbonVertex2))
+            if (indexOfNextVertexToAxisPointB < 0 && edge.ContainsPoint(m_ribbonPointB))
             {
                 indexOfNextVertexToAxisPointB = (i == ribbonContour.Count - 1) ? 0 : i + 1;
             }
@@ -236,7 +240,7 @@ public class RibbonMesh : ColorMesh
         }
         leftSubContour.Add(m_ribbonPointA);
 
-        m_ribbonLeftSubShape = new Shape(false, leftSubContour);       
+        m_ribbonLeftSubShape = new Shape(leftSubContour);       
 
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
@@ -255,7 +259,7 @@ public class RibbonMesh : ColorMesh
             }
             rightSubContour.Add(m_ribbonPointB);
 
-            m_ribbonRightSubShape = new Shape(false, rightSubContour);
+            m_ribbonRightSubShape = new Shape(rightSubContour);
         }
         else
             m_ribbonRightSubShape = null;

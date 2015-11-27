@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class Contour : List<Vector2>
+/**
+ * A structure that represents a closed path of GridPoint data types
+ * **/
+public class Contour : List<GridPoint>
 {
     public Contour()
         : base()
@@ -9,7 +12,7 @@ public class Contour : List<Vector2>
 
     }
 
-    public Contour(IEnumerable<Vector2> collection)
+    public Contour(IEnumerable<GridPoint> collection)
         : base(collection)
     {
 
@@ -39,7 +42,7 @@ public class Contour : List<Vector2>
 
         for (int p = n - 1, q = 0; q < n; p = q++)
         {
-            A += this[p].x * this[q].y - this[q].x * this[p].y;
+            A += this[p].X * this[q].Y - this[q].X * this[p].Y;
         }
         return A * 0.5f;
     }
@@ -47,9 +50,9 @@ public class Contour : List<Vector2>
     /**
      * Calculate the position of the barycentre of this contour
      * **/
-    public Vector2 GetBarycentre()
+    public GridPoint GetBarycentre()
     {
-        Vector2 barycentre = Vector2.zero;
+        GridPoint barycentre = GridPoint.zero;
         for (int i = 0; i != this.Count; i++)
         {
             barycentre += this[i];
@@ -76,12 +79,12 @@ public class Contour : List<Vector2>
             {
                 bRepeatedVertices = false;
 
-                Vector2 contourVertex = contour[i];
+                GridPoint contourVertex = contour[i];
 
                 int farthestEqualVertexIndex = -1;
                 for (int j = i + 1; j != contour.Count; j++)
                 {
-                    Vector2 contourTestVertex = contour[j]; //the vertex to be test against contourVertex for equality
+                    GridPoint contourTestVertex = contour[j]; //the vertex to be test against contourVertex for equality
 
                     if (contourTestVertex.Equals(contourVertex))
                         farthestEqualVertexIndex = j;
@@ -148,28 +151,28 @@ public class Contour : List<Vector2>
     /**
      * If 3 points (or more) belong to the same segment remove the inner points
      * **/
-    public void RemoveAlignedVertices()
-    {
-        for (int i = 0; i != this.Count; i++)
-        {
-            Vector2 point1 = this[i];
-            Vector2 point2 = (i == this.Count - 1) ? this[0] : this[i + 1];
-            Vector2 point3;
-            if (i == this.Count - 2)
-                point3 = this[0];
-            else if (i == this.Count - 1)
-                point3 = this[1];
-            else
-                point3 = this[i + 2];
+    //public void RemoveAlignedVertices()
+    //{
+    //    for (int i = 0; i != this.Count; i++)
+    //    {
+    //        Vector2 point1 = this[i];
+    //        Vector2 point2 = (i == this.Count - 1) ? this[0] : this[i + 1];
+    //        Vector2 point3;
+    //        if (i == this.Count - 2)
+    //            point3 = this[0];
+    //        else if (i == this.Count - 1)
+    //            point3 = this[1];
+    //        else
+    //            point3 = this[i + 2];
 
-            float determinant = MathUtils.Determinant(point1, point2, point3);
-            if (Mathf.Abs(determinant) < MathUtils.DEFAULT_EPSILON)
-            {
-                this.Remove(point2);
-                i--;
-            }
-        }
-    }
+    //        float determinant = MathUtils.Determinant(point1, point2, point3);
+    //        if (Mathf.Abs(determinant) < MathUtils.DEFAULT_EPSILON)
+    //        {
+    //            this.Remove(point2);
+    //            i--;
+    //        }
+    //    }
+    //}
 
     /**
      * Multiply every point in that contour by a constant
@@ -185,37 +188,38 @@ public class Contour : List<Vector2>
     /**
      * Returns the contour vertex with the minimal x-coordinate along the parameter 'axis'
      * **/
-    public Vector2 GetLeftMostPointAlongAxis(Vector2 axisDirection)
-    {
-        Quaternion rotation = Quaternion.FromToRotation(GeometryUtils.BuildVector3FromVector2(axisDirection, 0), new Vector3(1,0,0));
+    //public Vector2 GetLeftMostPointAlongAxis(Vector2 axisDirection)
+    //{
+    //    Quaternion rotation = Quaternion.FromToRotation(GeometryUtils.BuildVector3FromVector2(axisDirection, 0), new Vector3(1,0,0));
 
-        //create a rotated copy of the contour
-        int leftMostVertexIndex = 0; //the index of the last left most vertex found
-        float minX = float.MaxValue; //the current min x-coordinate found
-        for (int i = 0; i != this.Count; i++)
-        {
-            Vector2 rotatedVertex = rotation * this[i];
-            if (rotatedVertex.x < minX)
-            {
-                minX = rotatedVertex.x;
-                leftMostVertexIndex = i;
-            }
-        }
+    //    //create a rotated copy of the contour
+    //    int leftMostVertexIndex = 0; //the index of the last left most vertex found
+    //    float minX = float.MaxValue; //the current min x-coordinate found
+    //    for (int i = 0; i != this.Count; i++)
+    //    {
+    //        Vector2 rotatedVertex = rotation * this[i];
+    //        if (rotatedVertex.x < minX)
+    //        {
+    //            minX = rotatedVertex.x;
+    //            leftMostVertexIndex = i;
+    //        }
+    //    }
 
-        return this[leftMostVertexIndex];
-    }
+    //    return this[leftMostVertexIndex];
+    //}
 
     /**
      * Test if the contour has the 'point' parameter in it
      * **/
-    public bool ContainsPoint(Vector2 point)
+    public bool ContainsPoint(GridPoint point)
     {
         for (int i = 0; i != Count; i++)
         {
-            Vector2 contourPoint1 = this[i];
-            Vector2 contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
+            GridPoint contourPoint1 = this[i];
+            GridPoint contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
+            GridTriangleEdge edge = new GridTriangleEdge(contourPoint1, contourPoint2);
 
-            if (GeometryUtils.IsPointContainedInSegment(point, contourPoint1, contourPoint2))
+            if (edge.ContainsPoint(point))
                 return true;
         }
 
@@ -225,11 +229,11 @@ public class Contour : List<Vector2>
     /**
      * Test if one this contour vertices is equal to the 'point' parameter
      * **/
-    public bool HasPoint(Vector2 point)
+    public bool HasPoint(GridPoint point)
     {
         for (int i = 0; i != Count; i++)
         {
-            if (MathUtils.AreVec2PointsEqual(this[i], point))
+            if (this[i] == point)
                 return true;
         }
 
@@ -259,12 +263,12 @@ public class Contour : List<Vector2>
         //now check if other points are equal
         for (int i = 0; i != this.Count; i++)
         {
-            Vector2 contour1Point = this[i];
-            Vector2 contour2Point;
+            GridPoint contour1Point = this[i];
+            GridPoint contour2Point;
             if (bSameWindingOrder)
             {
                 contour2Point = contour[(i + offset) > contour.Count - 1 ? offset - (contour.Count - i) : i + offset];
-                if (!MathUtils.AreVec2PointsEqual(contour1Point, contour2Point))
+                if (contour1Point != contour2Point)
                     return false;
             }
             else
@@ -281,16 +285,16 @@ public class Contour : List<Vector2>
      * For instance passing 0 will round all values to the closest integer
      * passing 1 will maintain 1 digit after the after the decimal point, passing 2 will maintain 2 digits and so on
      * **/
-    public void ApproximateVertices(int significantFiguresCount)
-    {
-        for (int i = 0; i != this.Count; i++)
-        {
-            Vector2 vertex = this[i];
-            vertex.x = MathUtils.ApproximateNumber(vertex.x, 1);
-            vertex.y = MathUtils.ApproximateNumber(vertex.y, 1);
-            this[i] = vertex;
-        }
-    }
+    //public void ApproximateVertices(int significantFiguresCount)
+    //{
+    //    for (int i = 0; i != this.Count; i++)
+    //    {
+    //        Vector2 vertex = this[i];
+    //        vertex.x = MathUtils.ApproximateNumber(vertex.x, 1);
+    //        vertex.y = MathUtils.ApproximateNumber(vertex.y, 1);
+    //        this[i] = vertex;
+    //    }
+    //}
 }
 
 /**

@@ -20,7 +20,7 @@ public class GridTouchHandler : TouchHandler
             Vector2 gridSize = grid.m_gridSize;
             Vector2 gridPosition = this.gameObject.transform.position;
 
-            Vector2 border = 0.5f * new Vector2(grid.m_horizontalGridSpacing, grid.m_verticalGridSpacing);
+            Vector2 border = new Vector2(0.5f * grid.m_gridSpacing, 0.5f * grid.m_gridSpacing);
             Vector2 gridMax = gridPosition + 0.5f * gridSize + border;
             Vector2 gridMin = gridPosition - 0.5f * gridSize - border;
 
@@ -38,9 +38,9 @@ public class GridTouchHandler : TouchHandler
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
-        Vector2 closestAnchorGridCoords = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorCoordinatesForPosition(pointerLocation);
+        Grid.GridAnchor closestAnchor = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorForWorldPosition(pointerLocation);
 
-        gameScene.m_axes.BuildAxis(closestAnchorGridCoords);
+        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -61,7 +61,8 @@ public class GridTouchHandler : TouchHandler
         Vector2 constrainedDirection;
         float projectionLength;
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
-        pointerLocation = axisRenderer.m_endpoint1Position + constrainedDirection * projectionLength;
+        Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_endpoint1GridPosition);
+        pointerLocation = axisEndpoint1WorldPosition + constrainedDirection * projectionLength;
 
         axisRenderer.SnapAxisEndpointToClosestAnchor(pointerLocation);
 

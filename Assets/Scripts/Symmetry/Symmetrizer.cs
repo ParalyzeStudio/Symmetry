@@ -425,11 +425,11 @@ public class Symmetrizer : MonoBehaviour
     /**
      * Return the point symmetric about the 'axis' parameter
      * **/
-    public static Vector2 GetSymmetricPointAboutAxis(Vector2 point, AxisRenderer axis, bool bGridPoint = false)
+    public static GridPoint GetSymmetricPointAboutAxis(GridPoint point, AxisRenderer axis)
     {
         Vector2 axisNormal = axis.GetAxisNormal();
-        Vector2 axisPoint1 = bGridPoint ? axis.m_endpoint1GridPosition : axis.m_endpoint1Position;
-        Vector2 axisPoint2 = bGridPoint ? axis.m_endpoint2GridPosition : axis.m_endpoint2Position;      
+        GridPoint axisPoint1 = axis.m_endpoint1GridPosition;
+        GridPoint axisPoint2 = axis.m_endpoint2GridPosition;      
 
         //Determine if the point is on the 'left' or on the 'right' of the axis
         float det = MathUtils.Determinant(axisPoint1, axisPoint2, point);
@@ -437,11 +437,15 @@ public class Symmetrizer : MonoBehaviour
             return point;
         else
         {
-            float distanceToAxis = GeometryUtils.DistanceToLine(point, bGridPoint ? axis.m_endpoint1GridPosition : axis.m_endpoint1Position, axis.GetAxisDirection());
+            float distanceToAxis = GeometryUtils.DistanceToLine(point, axisPoint1, axis.GetAxisDirection());
+            Vector2 v = 2 * distanceToAxis * axisNormal;
+            GridPoint gridV = new GridPoint(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
             if (det > 0) // 'left'
-                return point + 2 * distanceToAxis * axisNormal;
+            {
+                return point + gridV;
+            }
             else // 'right'
-                return point - 2 * distanceToAxis * axisNormal;
+                return point - gridV;
         }
     }
 

@@ -646,8 +646,6 @@ public class GameScene : GUIScene
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
-            shape.TogglePointMode();
-            shape.ApproximateVertices(1);
 
             //First triangulate the shape and set the color of each triangle
             shape.Triangulate();
@@ -681,11 +679,11 @@ public class GameScene : GUIScene
     private void MakeFirstDummyClippingOperation()
     {
         Contour dummyContour = new Contour(4);
-        dummyContour.Add(new Vector2(0, 0));
-        dummyContour.Add(new Vector2(10, 0));
-        dummyContour.Add(new Vector2(0, 5));
-        Shape dummySubjShape = new Shape(false, dummyContour);
-        Shape dummyClipShape = new Shape(false, dummyContour);
+        dummyContour.Add(new GridPoint(0, 0));
+        dummyContour.Add(new GridPoint(10, 0));
+        dummyContour.Add(new GridPoint(0, 5));
+        Shape dummySubjShape = new Shape(dummyContour);
+        Shape dummyClipShape = new Shape(dummyContour);
 
         List<Shape> result = m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
     }
@@ -913,7 +911,7 @@ public class GameScene : GUIScene
                 {
                     for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
                     {
-                        BaseTriangle triangle = shape.m_triangles[iTriangleIdx];
+                        GridTriangle triangle = shape.m_triangles[iTriangleIdx];
                         if (outline.ContainsPoint(triangle.m_points[0]) &&
                             outline.ContainsPoint(triangle.m_points[1]) &&
                             outline.ContainsPoint(triangle.m_points[2]) &&

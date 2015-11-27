@@ -11,14 +11,14 @@ public class Grid : MonoBehaviour
     private Material m_gridAnchorMaterial;
 
     public class GridAnchor
-    {        
-        public Vector2 m_localPosition { get; set; } //the position of the anchor in local grid coordinates (column, line)
+    {
+        public GridPoint m_gridPosition { get; set; } //the position of the anchor in local grid coordinates (column, line)
         public Vector2 m_worldPosition { get; set; } //the position of the anchor in world coordinates
 
-        public GridAnchor(Vector2 localPosition, Vector2 worldPosition)
+        public GridAnchor(GridPoint gridPosition, Vector2 worldPosition)
         {
             m_worldPosition = worldPosition;
-            m_localPosition = localPosition;
+            m_gridPosition = gridPosition;
         }
     }
 
@@ -26,9 +26,7 @@ public class Grid : MonoBehaviour
     public Vector2 m_gridSize { get; set; }
     public int m_numLines { get; set; }
     public int m_numColumns { get; set; }
-    //public float m_gridSpacing { get; set; }
-    public float m_horizontalGridSpacing { get; set; }
-    public float m_verticalGridSpacing { get; set; }
+    public float m_gridSpacing { get; set; }
     //public GameObject m_gridConstraintAnchorPfb;
 
     public enum GridEdge
@@ -112,11 +110,8 @@ public class Grid : MonoBehaviour
                     anchorPositionY = ((iLineNumber - 1 - m_numLines / 2) * gridSpacing);
                 }
 
-                //round anchorPositionX and anchorPositionY so that they have 1 significant figure after the decimal point
-                int significantFiguresCount = 1;
-                anchorPositionX = MathUtils.ApproximateNumber(anchorPositionX, significantFiguresCount);
-                anchorPositionY = MathUtils.ApproximateNumber(anchorPositionY, significantFiguresCount);
-
+                int gridPositionScale = GridPoint.DEFAULT_SCALE_PRECISION;
+                GridPoint anchorGridPosition = gridPositionScale * new GridPoint(iColumnNumber, iLineNumber, gridPositionScale);
                 Vector3 anchorPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
 
@@ -132,18 +127,9 @@ public class Grid : MonoBehaviour
                 anchorAnimator.SetPosition(anchorPosition);
                 anchorAnimator.SetColor(Color.white);
 
-                m_anchors[iAnchorIndex] = new GridAnchor(new Vector2(iColumnNumber, iLineNumber), anchorPosition + gridPosition);
+                m_anchors[iAnchorIndex] = new GridAnchor(anchorGridPosition, anchorPosition + gridPosition);
             }
         }
-
-        //recalculate the grid size after making the approximations on grid anchors positions
-        float gridWidth = Mathf.Abs(m_anchors[0].m_worldPosition.x - m_anchors[m_numColumns - 1].m_worldPosition.x);
-        float gridHeight = Mathf.Abs(m_anchors[0].m_worldPosition.y - m_anchors[anchorsCount - 1].m_worldPosition.y);
-        m_gridSize = new Vector2(gridWidth, gridHeight);
-
-        //and also the grid spacing
-        m_horizontalGridSpacing = gridWidth / (m_numColumns - 1);
-        m_verticalGridSpacing = gridHeight / (m_numLines - 1);
     }
 
     /**
@@ -158,28 +144,25 @@ public class Grid : MonoBehaviour
     /**
      * Calculates the world coordinates of a point knowing its grid coordinates (column, line) 
      * **/
-    public Vector2 GetPointWorldCoordinatesFromGridCoordinates(Vector2 gridPoint)
+    public Vector2 GetPointWorldCoordinatesFromGridCoordinates(GridPoint gridPoint)
     {
-        Debug.Log("m_horizontalGridSpacing:" + m_horizontalGridSpacing);
-        Debug.Log("m_verticalGridSpacing:" + m_verticalGridSpacing);
-
         float anchorPositionX;
         if (m_numColumns % 2 == 0) //even number of columns
         {
-            anchorPositionX = ((gridPoint.x - m_numColumns / 2 - 0.5f) * m_horizontalGridSpacing);
+            anchorPositionX = ((gridPoint.X - m_numColumns / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of columns
         {
-            anchorPositionX = ((gridPoint.x - 1 - m_numColumns / 2) * m_horizontalGridSpacing);
+            anchorPositionX = ((gridPoint.X - 1 - m_numColumns / 2) * m_gridSpacing);
         }
         float anchorPositionY;
         if (m_numLines % 2 == 0) //even number of lines
         {
-            anchorPositionY = ((gridPoint.y - m_numLines / 2 - 0.5f) * m_verticalGridSpacing);
+            anchorPositionY = ((gridPoint.Y - m_numLines / 2 - 0.5f) * m_gridSpacing);
         }
         else //odd number of lines
         {
-            anchorPositionY = ((gridPoint.y - 1 - m_numLines / 2) * m_verticalGridSpacing);
+            anchorPositionY = ((gridPoint.Y - 1 - m_numLines / 2) * m_gridSpacing);
         }
 
         Vector2 anchorLocalPosition = new Vector2(anchorPositionX, anchorPositionY);
@@ -197,64 +180,25 @@ public class Grid : MonoBehaviour
         float iLineNumber;
         if (m_numLines % 2 == 0) //even number of lines
         {
-            iLineNumber = worldCoordinates.y / m_verticalGridSpacing + m_numLines / 2 + 0.5f;
+            iLineNumber = worldCoordinates.y / m_gridSpacing + m_numLines / 2 + 0.5f;
         }
         else //odd number of lines
         {
-            iLineNumber = worldCoordinates.y / m_verticalGridSpacing + m_numLines / 2 + 1;
+            iLineNumber = worldCoordinates.y / m_gridSpacing + m_numLines / 2 + 1;
         }
 
         float iColNumber = 0;
         if (m_numColumns % 2 == 0) //even number of columns
         {
-            iColNumber = worldCoordinates.x / m_horizontalGridSpacing + m_numColumns / 2 + 0.5f;
+            iColNumber = worldCoordinates.x / m_gridSpacing + m_numColumns / 2 + 0.5f;
         }
         else //odd number of columns
         {
-            iColNumber = worldCoordinates.x / m_horizontalGridSpacing + m_numColumns / 2 + 1;
+            iColNumber = worldCoordinates.x / m_gridSpacing + m_numColumns / 2 + 1;
         }
 
         return new Vector2(iColNumber, iLineNumber);
     }
-
-    //public Vector2 TransformGridVectorToWorldVector(Vector2 gridVector)
-    //{
-    //    return gridVector / GetGridWorldRatio();
-    //}
-
-    //public Vector2 TransformWorldVectorToGridVector(Vector2 worldVector)
-    //{
-    //    return worldVector * GetGridWorldRatio();
-    //}
-
-    /**
-     * Returns the anchor game object at grid position passed as parameter
-     * **/
-    //public GameObject GetAnchorAtGridPosition(Vector2 gridPosition)
-    //{
-    //    int iColumnNumber = Mathf.RoundToInt(gridPosition.x);
-    //    int iLineNumber = Mathf.RoundToInt(gridPosition.y);
-
-    //    return m_anchors[(iLineNumber - 1) * m_numColumns + (iColumnNumber - 1)];
-    //}
-
-    /**
-     * Returns the grid coordinates of the anchor passed as parameter
-     * **/
-    //public Vector2 GetAnchorGridCoordinates(GameObject anchor)
-    //{
-    //    int iAnchorIndex = -1;
-    //    for (int i = 0; i != m_anchors.Length; i++)
-    //    {
-    //        if (m_anchors[i] == anchor)
-    //        {
-    //            iAnchorIndex = i;
-    //            break;
-    //        }
-    //    }
-
-    //    return GetAnchorGridCoordinatesForAnchorIndex(iAnchorIndex);
-    //}
 
     /**
      * Returns the grid coordinates of the anchor whose index is passed as parameter
@@ -270,7 +214,7 @@ public class Grid : MonoBehaviour
     /**
      * Returns the grid anchor coordinates that is the closest to the position vector passed as parameter
      * **/
-    public Vector2 GetClosestGridAnchorCoordinatesForPosition(Vector2 worldPosition)
+    public GridAnchor GetClosestGridAnchorForWorldPosition(Vector2 worldPosition)
     {
         float sqrMinDistance = float.MaxValue;
         int iMinDistanceAnchorIndex = -1;
@@ -279,10 +223,10 @@ public class Grid : MonoBehaviour
         {
             Vector2 gridAnchorWorldPosition = m_anchors[iAnchorIndex].m_worldPosition;
             float dx = worldPosition.x - gridAnchorWorldPosition.x;
-            if (dx <= m_horizontalGridSpacing)
+            if (dx <= m_gridSpacing)
             {
                 float dy = worldPosition.y - gridAnchorWorldPosition.y;
-                if (dy <= m_verticalGridSpacing)
+                if (dy <= m_gridSpacing)
                 {
                     //this anchor is one of the 4 anchors surrounding the position
                     float sqrDistance = (worldPosition - gridAnchorWorldPosition).sqrMagnitude;
@@ -296,16 +240,16 @@ public class Grid : MonoBehaviour
         }
 
         if (iMinDistanceAnchorIndex >= 0)
-            return m_anchors[iMinDistanceAnchorIndex].m_worldPosition;
+            return m_anchors[iMinDistanceAnchorIndex];
         else
-            return new Vector2(0, 0);
+            return null;
     }
 
     public struct GridBoxPoint
     {
-        public GridBoxPoint(Vector2 position, GridEdge edge) { m_position = position; m_edge = edge; }
+        public GridBoxPoint(GridPoint position, GridEdge edge) { m_position = position; m_edge = edge; }
 
-        public Vector2 m_position;
+        public GridPoint m_position;
         public GridEdge m_edge;
     }
 

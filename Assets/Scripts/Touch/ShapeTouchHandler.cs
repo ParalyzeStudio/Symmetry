@@ -7,25 +7,25 @@ public class ShapeTouchHandler : TouchHandler
     {
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
+        Vector2 pointerGridLocation = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
+        int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
+        pointerGridLocation *= scalePrecision;
+        GridPoint pointerGridPosition = new GridPoint(Mathf.RoundToInt(pointerGridLocation.x), Mathf.RoundToInt(pointerGridLocation.y), scalePrecision);
+
         GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
         if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
         {
             //Get the triangles of this shape from the MeshFilter
-            return GetComponent<ShapeMesh>().m_shapeData.ContainsPoint(pointerLocation);
+            return GetComponent<ShapeMesh>().m_shapeData.ContainsPoint(pointerGridPosition);
         }
         return false;
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        this.GetComponent<ShapeMesh>().m_shapeData.m_gridOffsetOnVertices = Vector2.zero;
+        this.GetComponent<ShapeMesh>().m_shapeData.m_gridOffsetOnVertices = GridPoint.zero;
 
         base.OnPointerDown(pointerLocation);
-
-        GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
-        gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
-
-        //gameScene.m_shapes.InitClippingOperationsOnShapeObject(this.gameObject);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)

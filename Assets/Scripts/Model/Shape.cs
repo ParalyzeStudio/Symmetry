@@ -5,7 +5,7 @@ public class Shape : GridTriangulable
 {
     public Color m_color { get; set; }
     public Vector2 m_offsetOnVertices { get; set; }
-    public Vector2 m_gridOffsetOnVertices { get; set; }
+    public GridPoint m_gridOffsetOnVertices { get; set; }
     public ShapeMesh m_parentMesh { get; set; }
 
     public enum ShapeState
@@ -23,29 +23,28 @@ public class Shape : GridTriangulable
     public List<Shape> m_shapesToCreate { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
     public HashSet<Shape> m_shapesToDelete { get; set; } //Set of shapes to delete once the difference/fusion occured
 
-    public Shape(bool gridPointMode)
-        : base(gridPointMode)
+    public Shape()
     {
         m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
 
-    public Shape(bool gridPointMode, Contour contour)
-        : base(gridPointMode, contour)
+    public Shape(Contour contour)
+        : base(contour)
     {
         m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
 
-    public Shape(bool gridPointMode, Contour contour, List<Contour> holes)
-        : base(gridPointMode, contour, holes)
+    public Shape(Contour contour, List<Contour> holes)
+        : base(contour, holes)
     {
         m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = Vector2.zero;
+        m_gridOffsetOnVertices = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
@@ -85,7 +84,7 @@ public class Shape : GridTriangulable
             symmetricHoles.Add(symmetricHole);
         }
 
-        Shape symmetricShape = new Shape(m_gridPointMode, symmetricContour, symmetricHoles);
+        Shape symmetricShape = new Shape(symmetricContour, symmetricHoles);
         symmetricShape.m_color = this.m_color;
         return symmetricShape;
     }
@@ -169,7 +168,7 @@ public class Shape : GridTriangulable
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
-            BaseTriangle triangle = m_triangles[iTriangleIndex];
+            GridTriangle triangle = m_triangles[iTriangleIndex];
             if (triangle.IntersectsOutline(outline, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
                 return true;
         }
@@ -300,7 +299,7 @@ public class Shape : GridTriangulable
     * Does 'this' shape overlaps the triangle passed as parameter
      * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
     * **/
-    public bool OverlapsTriangle(BaseTriangle triangle, bool bEnsureNonNullIntersection)
+    public bool OverlapsTriangle(GridTriangle triangle, bool bEnsureNonNullIntersection)
     {
         for (int i = 0; i != m_triangles.Count; i++)
         {
@@ -335,7 +334,7 @@ public class Shape : GridTriangulable
 
     public List<Contour> GetHolesWithOffset()
     {
-        if (m_gridOffsetOnVertices == Vector2.zero)
+        if (m_gridOffsetOnVertices == GridPoint.zero)
             return m_holes;
 
         List<Contour> holesWithOffset = new List<Contour>(m_holes);

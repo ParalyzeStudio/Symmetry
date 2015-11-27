@@ -45,10 +45,12 @@ public class ShapeMesh : TexturedMesh
      * or triangulate the contour and add triangles to the mesh
      * **/
     public void Render(bool bCellRendering = false)
-    {
+    {        
         m_renderedWithCells = bCellRendering;
         ClearMesh();
         m_mesh.Clear();
+
+        Grid grid = GetGrid();
 
         if (bCellRendering) //render shape using cells
         {
@@ -61,8 +63,11 @@ public class ShapeMesh : TexturedMesh
             //Simply add the shape triangles to the mesh
             for (int i = 0; i != m_shapeData.m_triangles.Count; i++)
             {
-                BaseTriangle shapeTriangle = m_shapeData.m_triangles[i];
-                AddTriangle(shapeTriangle.m_points[0], shapeTriangle.m_points[2], shapeTriangle.m_points[1]);
+                GridTriangle shapeTriangle = m_shapeData.m_triangles[i];
+                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[0]);
+                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[1]);
+                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[2]);
+                AddTriangle(pt1, pt2, pt3);
             }
 
             SetTintColor(m_shapeData.m_color);
@@ -296,14 +301,18 @@ public class ShapeMesh : TexturedMesh
     public void AddClippedCell(ShapeCell cell, List<Shape> clipResult)
     {
         cell.m_startIndex = m_vertices.Count;
+        Grid grid = GetGrid();
 
         for (int i = 0; i != clipResult.Count; i++)
         {
             Shape resultShape = clipResult[i];
             for (int j = 0; j != resultShape.m_triangles.Count; j++)
             {
-                BaseTriangle triangle = resultShape.m_triangles[j];
-                AddTriangle(triangle.m_points[0], triangle.m_points[2], triangle.m_points[1]);
+                GridTriangle triangle = resultShape.m_triangles[j];
+                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[0]);
+                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[1]);
+                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(triangle.m_points[2]);
+                AddTriangle(pt1, pt2, pt3);
             }
         }
         cell.m_endIndex = m_vertices.Count - 1;
@@ -375,28 +384,28 @@ public class ShapeMesh : TexturedMesh
     /**
      * Tells if a point is contained inside the visible parts of this mesh (i.e with full opacity)
      * **/
-    public bool ContainsPointInsideVisibleMesh(Vector2 point)
-    {
-        if (m_renderedWithCells)
-        {
-            for (int i = 0; i != m_cells.Length; i++)
-            {
-                ShapeCell cell = m_cells[i];
-                if (cell != null)
-                {
-                    float cellOpacity = cell.GetColor().a;
-                    if (cellOpacity > 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        else
-            return m_shapeData.ContainsPoint(point);
+    //public bool ContainsPointInsideVisibleMesh(Vector2 point)
+    //{
+    //    if (m_renderedWithCells)
+    //    {
+    //        for (int i = 0; i != m_cells.Length; i++)
+    //        {
+    //            ShapeCell cell = m_cells[i];
+    //            if (cell != null)
+    //            {
+    //                float cellOpacity = cell.GetColor().a;
+    //                if (cellOpacity > 0)
+    //                {
+    //                    return true;
+    //                }
+    //            }
+    //        }
+    //    }
+    //    else
+    //        return m_shapeData.ContainsPoint(point);
 
-        return false;
-    }
+    //    return false;
+    //}
 
     private void EnsureUnityInstancesAreSetBeforeThreading()
     {

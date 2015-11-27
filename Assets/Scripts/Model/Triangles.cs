@@ -1,36 +1,653 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class TriangleEdge
-{
-    public Vector2 m_pointA { get; set; }
-    public Vector2 m_pointB { get; set; }
+//public class TriangleEdge
+//{
+//    public Vector2 m_pointA { get; set; }
+//    public Vector2 m_pointB { get; set; }
 
-    public TriangleEdge(Vector2 pointA, Vector2 pointB)
+//    public TriangleEdge(Vector2 pointA, Vector2 pointB)
+//    {
+//        m_pointA = pointA;
+//        m_pointB = pointB;
+//    }
+
+//    public bool Equals(TriangleEdge other)
+//    {
+//        return GeometryUtils.AreSegmentsEqual(this.m_pointA, this.m_pointB, other.m_pointA, other.m_pointB);
+//    }
+//}
+
+/**
+ * Class to hold data for a triangle edge (2 GridPoints)
+ * **/
+public class GridTriangleEdge
+{
+    public GridPoint m_pointA { get; set; }
+    public GridPoint m_pointB { get; set; }
+
+    public const int EDGES_OVERLAP = 1;
+    public const int EDGES_INTERSECTION_IS_ENDPOINT = 2;
+    public const int EDGES_STRICT_INTERSECTION = 4;
+
+    public GridTriangleEdge(GridPoint pointA, GridPoint pointB)
     {
         m_pointA = pointA;
         m_pointB = pointB;
     }
 
-    public bool Equals(TriangleEdge other)
+    public bool Equals(GridTriangleEdge other)
     {
         return GeometryUtils.AreSegmentsEqual(this.m_pointA, this.m_pointB, other.m_pointA, other.m_pointB);
+    }
+
+    /**
+     * Tells if this edge intersects the edge passed as parameter without giving the intersection
+     * **/
+    public bool IntersectsEdge(GridTriangleEdge edge, int bFilters = EDGES_OVERLAP | EDGES_INTERSECTION_IS_ENDPOINT | EDGES_STRICT_INTERSECTION)
+    {
+        GridTriangleEdge edge1 = this;
+        GridTriangleEdge edge2 = edge;
+
+        bool bSeg1Pt1InSeg2 = edge2.ContainsPoint(edge1.m_pointA);
+        bool bSeg1Pt2InSeg2 = edge2.ContainsPoint(edge1.m_pointB);
+        bool bSeg2Pt1InSeg1 = edge1.ContainsPoint(edge2.m_pointA);
+        bool bSeg2Pt2InSeg1 = edge1.ContainsPoint(edge2.m_pointB);
+
+        int det1 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointA);
+        int det2 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointB);
+        if (det1 == 0 && det2 == 0) //4 endpoints are aligned, segments are collinear and on the same line
+        {
+            //one segment is contained in the other
+            if (bSeg1Pt1InSeg2 && bSeg1Pt2InSeg2 || bSeg2Pt1InSeg1 && bSeg2Pt2InSeg1)
+                if ((bFilters & EDGES_OVERLAP) > 0)
+                    return true;
+
+            //check if segments share at least 1 endpoint
+            int dotProduct = 0;
+            if (MathUtils.AreVec2PointsEqual(edge1.m_pointB, edge2.m_pointA))
+                dotProduct = MathUtils.DotProduct(edge1.m_pointA - edge1.m_pointB, edge2.m_pointB - edge2.m_pointA);
+            else if (MathUtils.AreVec2PointsEqual(edge1.m_pointB, edge2.m_pointB))
+                dotProduct = MathUtils.DotProduct(edge1.m_pointA - edge1.m_pointB, edge2.m_pointA - edge2.m_pointB);
+            else if (MathUtils.AreVec2PointsEqual(edge1.m_pointA, edge2.m_pointA))
+                dotProduct = MathUtils.DotProduct(edge1.m_pointB - edge1.m_pointA, edge2.m_pointB - edge2.m_pointA);
+            else if (MathUtils.AreVec2PointsEqual(edge1.m_pointA, edge2.m_pointB))
+                dotProduct = MathUtils.DotProduct(edge1.m_pointB - edge1.m_pointA, edge2.m_pointA - edge2.m_pointB);
+
+            if (dotProduct != 0)
+            {
+                if (dotProduct > 0)
+                {
+                    if ((bFilters & EDGES_OVERLAP) > 0)
+                        return true;
+                }
+                else
+                {
+                    if ((bFilters & EDGES_INTERSECTION_IS_ENDPOINT) > 0)
+                        return true;
+                }
+            }
+
+            //check if one segment endpoint is strictly contained in the other segment
+            if (bSeg1Pt1InSeg2 || bSeg1Pt2InSeg2)
+                if ((bFilters & EDGES_OVERLAP) > 0)
+                    return true;
+
+            //all other cases = no intersection
+            return false;
+        }
+        else if (det1 == 0 || det2 == 0) //3 points are aligned
+        {
+            if (bSeg1Pt1InSeg2 || bSeg1Pt2InSeg2 || bSeg2Pt1InSeg1 || bSeg2Pt2InSeg1)
+                if ((bFilters & EDGES_INTERSECTION_IS_ENDPOINT) > 0)
+                    return true;
+
+            return false;
+        }
+        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
+        {
+            float det3 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointA);
+            float det4 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointB);
+
+            if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
+            {
+                return (bFilters & EDGES_STRICT_INTERSECTION) > 0; //we only check the strict intersection here
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else /** (det1 * det2) > 0 **/
+        {
+            return false;
+        }
+    }
+
+    /**
+     * Tells if this edge contains the point passed as parameter
+     * **/
+    public bool ContainsPoint(GridPoint point, bool bIncludeEndpoints = true)
+    {
+        if (point == m_pointA || point == m_pointB)
+            return bIncludeEndpoints;
+
+        int det = MathUtils.Determinant(m_pointA, m_pointB, point);
+        if (det != 0) //points are not aligned, thus point can never be on the segment AB
+            return false;
+
+        //points are aligned, just test if points is inside the strip defined by A and B
+        GridPoint u = point - m_pointA; //AM vector
+        GridPoint v = m_pointB - m_pointA; //AB vector
+
+        int dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
+        if (dotProduct > 0)
+            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
+        else //AM and AB are of opposite sign
+            return false;
     }
 }
 
 /**
  * Class that holds data to represent a triangle where points are in ccw order
  * **/
-public class BaseTriangle
-{
-    public Vector2[] m_points { get; set; }
+//public class BaseTriangle
+//{
+//    public Vector2[] m_points { get; set; }
 
-    public BaseTriangle()
+//    public BaseTriangle()
+//    {
+//        m_points = new Vector2[3];
+//    }
+
+//    public BaseTriangle(BaseTriangle other) : this()
+//    {
+//        for (int i = 0; i != 3; i++)
+//        {
+//            m_points[i] = other.m_points[i];
+//        }
+//    }
+
+//    public Vector2 GetCenter()
+//    {
+//        return (m_points[0] + m_points[1] + m_points[2]) / 3.0f;
+//    }
+
+//    public bool HasVertex(Vector2 vertex)
+//    {
+//        return MathUtils.AreVec2PointsEqual(m_points[0], vertex) || 
+//               MathUtils.AreVec2PointsEqual(m_points[1], vertex) || 
+//               MathUtils.AreVec2PointsEqual(m_points[2], vertex);
+//    }
+
+//    public bool ContainsPoint(Vector2 point)
+//    {
+//        return GeometryUtils.IsInsideTriangle(point, m_points[0], m_points[1], m_points[2]);
+//    }
+
+//    /**
+//     * Return true if this triangle intersects the parameter 'triangle'
+//     * This intersection can have a null area (triangles just share points or portions of edges for instance)
+//     * To test if this intersection is effectively null, use the method IntersectTriangleWithNonNullIntersection()
+//     * **/
+//    public bool IntersectsTriangle(BaseTriangle triangle)
+//    {
+//        bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) ||
+//                               IntersectsEdge(triangle.m_points[1], triangle.m_points[2]) ||
+//                               IntersectsEdge(triangle.m_points[2], triangle.m_points[0]);
+
+//        //Test if the triangle is contained inside the other
+//        if (!bIntersectEdges)
+//            return this.ContainsPoint(triangle.GetCenter());
+//        else 
+//            return true;
+//    }
+
+//    public bool IntersectsTriangleWithNonNullIntersection(BaseTriangle triangle)
+//    {
+//        if (!IntersectsTriangle(triangle)) //no intersection at all, return false
+//            return false;
+
+//        return IsIntersectionWithTriangleNull(triangle);
+//    }
+
+//    private bool IsIntersectionWithTriangleNull(BaseTriangle triangle)
+//    {
+//        int[] point1OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[0]);
+//        int[] point2OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[1]);
+//        int[] point3OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[2]);
+
+//        int pointsOnContourCount = 0;
+//        if (point1OnContourEdgeIndices != null) pointsOnContourCount++;
+//        if (point2OnContourEdgeIndices != null) pointsOnContourCount++;
+//        if (point3OnContourEdgeIndices != null) pointsOnContourCount++;            
+
+//        if (pointsOnContourCount == 0) 
+//        {
+//            //if the second triangle does not contain any of the first triangle vertices on its contour then there is a non-null intersection
+//            return (triangle.ContourContainsPoint(m_points[0]) == null &&
+//                    triangle.ContourContainsPoint(m_points[1]) == null &&
+//                    triangle.ContourContainsPoint(m_points[2]) == null);
+
+//        }
+//        else if (pointsOnContourCount == 3) //all points are on the contour of the other triangle so the first triangle is contained in the second triangle
+//            return true;
+//        else if (pointsOnContourCount == 2)
+//        {
+//            //test if points are equal to one of the triangle vertices
+//            bool bOnVertex1 = false;
+//            bool bOnVertex2 = false;
+//            bool bOnVertex3 = false;
+//            if (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 2)
+//            {
+//                if (point1OnContourEdgeIndices[0] == 2 && point1OnContourEdgeIndices[1] == 0)
+//                    bOnVertex1 = true;
+//                else if (point1OnContourEdgeIndices[0] == 0 && point1OnContourEdgeIndices[1] == 1)
+//                    bOnVertex2 = true;
+//                else if (point1OnContourEdgeIndices[0] == 1 && point1OnContourEdgeIndices[1] == 2)
+//                    bOnVertex3 = true;
+//            }
+//            if (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 2)
+//            {
+//                if (point2OnContourEdgeIndices[0] == 2 && point2OnContourEdgeIndices[1] == 0)
+//                    bOnVertex1 = true;
+//                else if (point2OnContourEdgeIndices[0] == 0 && point2OnContourEdgeIndices[1] == 1)
+//                    bOnVertex2 = true;
+//                else if (point2OnContourEdgeIndices[0] == 1 && point2OnContourEdgeIndices[1] == 2)
+//                    bOnVertex3 = true;
+//            }
+//            if (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 2)
+//            {
+//                if (point3OnContourEdgeIndices[0] == 2 && point3OnContourEdgeIndices[1] == 0)
+//                    bOnVertex1 = true;
+//                else if (point3OnContourEdgeIndices[0] == 0 && point3OnContourEdgeIndices[1] == 1)
+//                    bOnVertex2 = true;
+//                else if (point3OnContourEdgeIndices[0] == 1 && point3OnContourEdgeIndices[1] == 2)
+//                    bOnVertex3 = true;
+//            }
+//            //bool bOnVertex1 = (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 2);
+//            //bool bOnVertex2 = (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 2);
+//            //bool bOnVertex3 = (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 2);
+
+//            //Count points that are strictly on an edge
+//            int bOnEdge1Count = 0;
+//            int bOnEdge2Count = 0;
+//            int bOnEdge3Count = 0;
+//            if (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 1)
+//            {
+//                if (point1OnContourEdgeIndices[0] == 0)
+//                    bOnEdge1Count++;
+//                else if (point1OnContourEdgeIndices[0] == 1)
+//                    bOnEdge2Count++;
+//                else if (point1OnContourEdgeIndices[0] == 2)
+//                    bOnEdge3Count++;
+//            }
+//            if (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 1)
+//            {
+//                if (point2OnContourEdgeIndices[0] == 0)
+//                    bOnEdge1Count++;
+//                else if (point2OnContourEdgeIndices[0] == 1)
+//                    bOnEdge2Count++;
+//                else if (point2OnContourEdgeIndices[0] == 2)
+//                    bOnEdge3Count++;
+//            }
+//            if (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 1)
+//            {
+//                if (point3OnContourEdgeIndices[0] == 0)
+//                    bOnEdge1Count++;
+//                else if (point3OnContourEdgeIndices[0] == 1)
+//                    bOnEdge2Count++;
+//                else if (point3OnContourEdgeIndices[0] == 2)
+//                    bOnEdge3Count++;
+//            }
+
+//            //Find the index of the edge the two points share. If they are on different edges there is a non-null intersection
+//            int sharedEdgeIndex;
+//            if (bOnVertex1 && bOnVertex2)
+//                sharedEdgeIndex = 0;
+//            else if (bOnVertex2 && bOnVertex3)
+//                sharedEdgeIndex = 1;
+//            else if (bOnVertex1 && bOnVertex3)
+//                sharedEdgeIndex = 2;
+//            else if ((bOnVertex1 || bOnVertex2) && bOnEdge1Count == 1)
+//                sharedEdgeIndex = 0;
+//            else if ((bOnVertex2 || bOnVertex3) && bOnEdge2Count == 1)
+//                sharedEdgeIndex = 1;
+//            else if ((bOnVertex3 || bOnVertex1) && bOnEdge3Count == 1)
+//                sharedEdgeIndex = 2;
+//            else if (bOnEdge1Count == 2)
+//                sharedEdgeIndex = 0;
+//            else if (bOnEdge2Count == 2)
+//                sharedEdgeIndex = 1;
+//            else if (bOnEdge3Count == 2)
+//                sharedEdgeIndex = 2;
+//            else //one point on a different edge each time ==> non-null intersection
+//                return true;
+
+//            //Find the point that is not on the contour
+//            Vector2 offContourPoint;
+//            if (point1OnContourEdgeIndices == null)
+//                offContourPoint = triangle.m_points[0];
+//            else if (point2OnContourEdgeIndices == null)
+//                offContourPoint = triangle.m_points[1];
+//            else
+//                offContourPoint = triangle.m_points[2];
+
+//            //Determine the position (left or right) of the off contour point about the edge set previously
+//            Vector2 edgePoint1 = m_points[sharedEdgeIndex];
+//            Vector2 edgePoint2 = m_points[(sharedEdgeIndex == 2) ? 0 : sharedEdgeIndex + 1];
+//            float det = MathUtils.Determinant(edgePoint1, edgePoint2, offContourPoint);
+//            return (det > 0); //'left'
+//        }
+//        else //(pointsOnContourCount == 1)
+//        {
+//            //Find the index of the point that is on this triangle contour
+//            Vector2 pointOnContour;
+//            Vector2[] pointsOffContour = new Vector2[2];
+//            int[] edgeIndices;
+//            if (point1OnContourEdgeIndices != null)
+//            {
+//                pointOnContour = triangle.m_points[0];
+//                pointsOffContour[0] = triangle.m_points[1];
+//                pointsOffContour[1] = triangle.m_points[2];
+//                edgeIndices = point1OnContourEdgeIndices;
+//            }
+//            else if (point2OnContourEdgeIndices != null)
+//            {
+//                pointOnContour = triangle.m_points[1];
+//                pointsOffContour[0] = triangle.m_points[0];
+//                pointsOffContour[1] = triangle.m_points[2];
+//                edgeIndices = point2OnContourEdgeIndices;
+//            }
+//            else
+//            {
+//                pointOnContour = triangle.m_points[2];
+//                pointsOffContour[0] = triangle.m_points[0];
+//                pointsOffContour[1] = triangle.m_points[1];
+//                edgeIndices = point3OnContourEdgeIndices;
+//            }
+
+//            //test if the point is equal to one of the triangle vertices
+//            if (edgeIndices.Length == 1)
+//            {
+//                int edgeIndex = edgeIndices[0];
+//                Vector2 edgePoint1 = m_points[edgeIndex];
+//                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+
+//                //Check if at least one of the two points off contour is on the 'left' of the edge
+//                float det = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+//                if (det > 0) return true; //'left'
+//                det = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+//                return (det > 0); //'left'
+//            }
+//            else // edgeIndices.Length == 2 (point is equal to one of the triangle vertices)
+//            {
+//                //check if both off contour points are on the left or the right of the first edge
+//                int edgeIndex = edgeIndices[0];
+//                Vector2 edgePoint1 = m_points[edgeIndex];
+//                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+//                float det1 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+//                float det2 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+
+//                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the edge, no intersection
+//                    return false;
+
+//                //check if both off contour points are on the left or the right of the second edge
+//                edgeIndex = edgeIndices[1];
+//                edgePoint1 = m_points[edgeIndex];
+//                edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+//                det1 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
+//                det2 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
+
+//                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the edge, no intersection
+//                    return false;
+
+//                //check if both off contour points are on the left or the right of line directed by the sum of first and second edges
+//                Vector2 firstEdgePoint1 = m_points[edgeIndices[0]];
+//                Vector2 firstEdgePoint2 = m_points[edgeIndices[0] == 2 ? 0 : edgeIndices[0] + 1];
+//                Vector2 secondEdgePoint1 = m_points[edgeIndices[1]];
+//                Vector2 secondEdgePoint2 = m_points[edgeIndices[1] == 2 ? 0 : edgeIndices[1] + 1];
+//                Vector2 firstEdge = firstEdgePoint2 - firstEdgePoint1;
+//                Vector2 secondEdge = secondEdgePoint2 - secondEdgePoint1;
+
+//                Vector2 sumResultingEdge = firstEdge + secondEdge;
+
+//                det1 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[0]);
+//                det2 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[1]);
+
+//                if (det1 < 0 && det2 < 0) //both points are on the 'right' of the resulting edge, no intersection
+//                    return false;
+
+//                return true; //all other cases lead to a non-null intersection
+//            }           
+//        }
+//    }
+
+//    /**
+//     * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
+//     * **/
+//    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
+//    {
+//        for (int i = 0; i != 3; i++)
+//        {
+//            Vector2 point1 = m_points[i];
+//            Vector2 point2 = m_points[(i == 2) ? 0 : i + 1];
+
+//            if (GeometryUtils.TwoSegmentsIntersect(point1, point2, edgePoint1, edgePoint2, bFilters))
+//                return true;
+//        }
+
+//        return false;
+//    }
+
+//    /**
+//    * Tells if one of the edges of this triangle intersects the contour passed as parameter
+//    **/
+//    public bool IntersectsOutline(DottedOutline outline, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
+//    {
+//        //check if triangle intersect outline main contour
+//        Contour contourPoints = outline.m_contour;
+//        for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
+//        {
+//            Vector2 contourSegmentPoint1 = contourPoints[iContourPointIndex];
+//            Vector2 contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
+
+//            if (IntersectsEdge(contourSegmentPoint1, contourSegmentPoint2, bFilters))
+//                return true;
+
+//            //for (int iTriangleEdgeIndex = 0; iTriangleEdgeIndex != 3; iTriangleEdgeIndex++)
+//            //{
+//            //    Vector2 triangleEdgePoint1 = m_points[iTriangleEdgeIndex];
+//            //    Vector2 triangleEdgePoint2 = (iTriangleEdgeIndex == 2) ? m_points[0] : m_points[iTriangleEdgeIndex + 1];
+
+//            //    if (GeometryUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
+//            //        return true;
+//            //}
+//        }
+
+//        //check if triangle intersect outline holes
+//        List<Contour> outlineHoles = outline.m_holes;
+//        for (int i = 0; i != outlineHoles.Count; i++)
+//        {
+//            Contour hole = outlineHoles[i];
+//            Vector2 holeSegmentPoint1 = hole[i];
+//            Vector2 holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
+
+//            if (IntersectsEdge(holeSegmentPoint1, holeSegmentPoint2, bFilters))
+//                return true;
+//        }
+
+//        return false;
+//    }
+
+//    /**
+//    * Tells if one of the edges of this triangle intersects the segment defined by segmentPoint1 and segmentPoint2
+//    * **/
+//    public bool IntersectsSegment(Vector2 segmentPoint1, Vector2 segmentPoint2)
+//    {
+//        return GeometryUtils.TwoSegmentsIntersect(m_points[0], m_points[1], segmentPoint1, segmentPoint2) ||
+//               GeometryUtils.TwoSegmentsIntersect(m_points[1], m_points[2], segmentPoint1, segmentPoint2) ||
+//               GeometryUtils.TwoSegmentsIntersect(m_points[2], m_points[0], segmentPoint1, segmentPoint2);
+//    }
+
+//    /**
+//    * Tells if one of the edges of this triangle intersects the line defined by linePoint1 and linePoint2
+//    * **/
+//    public bool IntersectsLine(Vector2 linePoint1, Vector2 linePoint2)
+//    {
+//        return GeometryUtils.SegmentIntersectsLine(m_points[0], m_points[1], linePoint1, linePoint2) ||
+//               GeometryUtils.SegmentIntersectsLine(m_points[1], m_points[2], linePoint1, linePoint2) ||
+//               GeometryUtils.SegmentIntersectsLine(m_points[2], m_points[0], linePoint1, linePoint2);
+//    }
+
+//    /**
+//     * Tells if this triangle contains the triangle passed as parameter
+//     * **/
+//    public bool ContainsTriangle(BaseTriangle triangle)
+//    {
+//        return this.ContainsPoint(triangle.m_points[0]) &&
+//               this.ContainsPoint(triangle.m_points[1]) &&
+//               this.ContainsPoint(triangle.m_points[2]);
+//    }
+
+//    /**
+//     * Tells if this triangle contains a whole shape
+//     * **/
+//    public bool ContainsShape(Shape shape)
+//    {
+//        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
+//        {
+//            BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
+//            if (!this.ContainsTriangle(triangle)) //this triangle does not contains at least one of the shape triangles
+//                return false;
+//        }
+
+//        return true;
+//    }
+
+//    /**
+//     * Tells if the parameter point is on this triangle contour.
+//     * Return the indices of edges the point is on (max 2 if point is equal to one of the triangle vertices)
+//     * **/
+//    public int[] ContourContainsPoint(Vector2 point)
+//    {
+//        int[] edgeIndices;
+
+//        //First check if point equals to one of the triangle vertices
+//        if (MathUtils.AreVec2PointsEqual(point, m_points[0]))
+//        {
+//            edgeIndices = new int[2];
+//            edgeIndices[0] = 2;
+//            edgeIndices[1] = 0;
+//            return edgeIndices;
+//        }
+//        else if (MathUtils.AreVec2PointsEqual(point, m_points[1]))
+//        {
+//            edgeIndices = new int[2];
+//            edgeIndices[0] = 0;
+//            edgeIndices[1] = 1;
+//            return edgeIndices;
+//        }
+//        else if (MathUtils.AreVec2PointsEqual(point, m_points[2]))
+//        {
+//            edgeIndices = new int[2];
+//            edgeIndices[0] = 1;
+//            edgeIndices[1] = 2;
+//            return edgeIndices;
+//        }
+        
+//        for (int i = 0; i != 3; i++)
+//        {
+//            Vector2 edgePoint1 = m_points[i];
+//            Vector2 edgePoint2 = m_points[(i == 2) ? 0 : i + 1];
+
+//            if (GeometryUtils.IsPointContainedInSegment(point, edgePoint1, edgePoint2))
+//            {
+//                edgeIndices = new int[1];
+//                edgeIndices[0] = i;
+//                return edgeIndices;
+//            }
+//        }
+
+//        return null;
+//    }
+
+//    /**
+//     * Returns the index of one of the three triangle vertex if the point passed as parameter is equal to it 
+//     * Otherwise returns -1
+//     * **/
+//    public int PointEqualsVertex(Vector2 point)
+//    {
+//        if (MathUtils.AreVec2PointsEqual(point, m_points[0]))
+//            return 0;
+//        else if (MathUtils.AreVec2PointsEqual(point, m_points[1]))
+//            return 1;
+//        else if (MathUtils.AreVec2PointsEqual(point, m_points[2]))
+//            return 2;
+
+//        return -1;
+//    }
+
+//    /**
+//     * Calculates the area of the triangle
+//     * **/
+//    public float GetArea()
+//    {
+//        return 0.5f * Mathf.Abs(MathUtils.Determinant(m_points[0], m_points[1], m_points[2]));
+//    }
+
+//    /**
+//     * Finds intersections between a line and the edges of this triangle
+//     * **/
+//    public List<Vector2> FindIntersectionsWithLine(Vector2 linePoint1, Vector2 linePoint2)
+//    {
+//        List<Vector2> intersections = new List<Vector2>();
+//        intersections.Capacity = 2;
+
+//        Vector2 lineDirection = linePoint2 - linePoint1;
+
+//        Vector2 intersection;
+//        bool intersects;
+//        GeometryUtils.SegmentLineIntersection(m_points[0], m_points[1], linePoint1, lineDirection, out intersection, out intersects);
+//        if (intersects)
+//            intersections.Add(intersection);
+
+//        GeometryUtils.SegmentLineIntersection(m_points[1], m_points[2], linePoint1, lineDirection, out intersection, out intersects);
+//        if (intersects)
+//        {
+//            if (intersections.Count == 0
+//                ||
+//                intersections.Count == 1 && !MathUtils.AreVec2PointsEqual(intersection, intersections[0]))
+//                intersections.Add(intersection);
+//        }
+
+
+//        if (intersections.Count < 2)
+//        {
+//            GeometryUtils.SegmentLineIntersection(m_points[2], m_points[0], linePoint1, lineDirection, out intersection, out intersects);
+//            if (intersects)
+//                intersections.Add(intersection);
+//        }
+
+//        return intersections;
+//    }
+//}
+
+
+/**
+ * A triangle with GridPoint vertices
+ * **/
+public class GridTriangle
+{
+    public GridPoint[] m_points {get;set;}
+
+    public GridTriangle()
     {
-        m_points = new Vector2[3];
+        m_points = new GridPoint[3];
     }
 
-    public BaseTriangle(BaseTriangle other) : this()
+    public GridTriangle(GridTriangle other)
+        : this()
     {
         for (int i = 0; i != 3; i++)
         {
@@ -38,21 +655,32 @@ public class BaseTriangle
         }
     }
 
-    public Vector2 GetCenter()
+    public GridPoint GetCenter()
     {
         return (m_points[0] + m_points[1] + m_points[2]) / 3.0f;
     }
 
-    public bool HasVertex(Vector2 vertex)
+    public bool HasVertex(GridPoint vertex)
     {
-        return MathUtils.AreVec2PointsEqual(m_points[0], vertex) || 
-               MathUtils.AreVec2PointsEqual(m_points[1], vertex) || 
-               MathUtils.AreVec2PointsEqual(m_points[2], vertex);
+        return m_points[0] == vertex || m_points[1] == vertex || m_points[2] == vertex;
     }
 
-    public bool ContainsPoint(Vector2 point)
+    /**
+     * Determines if a point is inside this triangle
+     * Depending on the vertices order (clockwise or counter-clockwise) the signs of det1, det2 and det3 can be positive or negative
+     * so we just check if they are of the same sign
+     * **/
+    public bool ContainsPoint(GridPoint point)
     {
-        return GeometryUtils.IsInsideTriangle(point, m_points[0], m_points[1], m_points[2]);
+        //test if point is one of the 3 triangle vertices
+        if (HasVertex(point))
+            return true;
+
+        int det1 = MathUtils.Determinant(m_points[0], m_points[1], point);
+        int det2 = MathUtils.Determinant(m_points[1], m_points[2], point);
+        int det3 = MathUtils.Determinant(m_points[2], m_points[0], point);
+
+        return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }
 
     /**
@@ -60,11 +688,13 @@ public class BaseTriangle
      * This intersection can have a null area (triangles just share points or portions of edges for instance)
      * To test if this intersection is effectively null, use the method IntersectTriangleWithNonNullIntersection()
      * **/
-    public bool IntersectsTriangle(BaseTriangle triangle)
+    public bool IntersectsTriangle(GridTriangle triangle)
     {
-        bool bIntersectEdges = IntersectsEdge(triangle.m_points[0], triangle.m_points[1]) ||
-                               IntersectsEdge(triangle.m_points[1], triangle.m_points[2]) ||
-                               IntersectsEdge(triangle.m_points[2], triangle.m_points[0]);
+        GridTriangleEdge edge1 = new GridTriangleEdge(triangle.m_points[0], triangle.m_points[1]);
+        GridTriangleEdge edge2 = new GridTriangleEdge(triangle.m_points[1], triangle.m_points[2]);
+        GridTriangleEdge edge3 = new GridTriangleEdge(triangle.m_points[2], triangle.m_points[0]);
+
+        bool bIntersectEdges = IntersectsEdge(edge1) || IntersectsEdge(edge2) || IntersectsEdge(edge3);
 
         //Test if the triangle is contained inside the other
         if (!bIntersectEdges)
@@ -73,7 +703,7 @@ public class BaseTriangle
             return true;
     }
 
-    public bool IntersectsTriangleWithNonNullIntersection(BaseTriangle triangle)
+    public bool IntersectsTriangleWithNonNullIntersection(GridTriangle triangle)
     {
         if (!IntersectsTriangle(triangle)) //no intersection at all, return false
             return false;
@@ -81,7 +711,7 @@ public class BaseTriangle
         return IsIntersectionWithTriangleNull(triangle);
     }
 
-    private bool IsIntersectionWithTriangleNull(BaseTriangle triangle)
+    private bool IsIntersectionWithTriangleNull(GridTriangle triangle)
     {
         int[] point1OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[0]);
         int[] point2OnContourEdgeIndices = ContourContainsPoint(triangle.m_points[1]);
@@ -135,9 +765,6 @@ public class BaseTriangle
                 else if (point3OnContourEdgeIndices[0] == 1 && point3OnContourEdgeIndices[1] == 2)
                     bOnVertex3 = true;
             }
-            //bool bOnVertex1 = (point1OnContourEdgeIndices != null && point1OnContourEdgeIndices.Length == 2);
-            //bool bOnVertex2 = (point2OnContourEdgeIndices != null && point2OnContourEdgeIndices.Length == 2);
-            //bool bOnVertex3 = (point3OnContourEdgeIndices != null && point3OnContourEdgeIndices.Length == 2);
 
             //Count points that are strictly on an edge
             int bOnEdge1Count = 0;
@@ -195,7 +822,7 @@ public class BaseTriangle
                 return true;
 
             //Find the point that is not on the contour
-            Vector2 offContourPoint;
+            GridPoint offContourPoint;
             if (point1OnContourEdgeIndices == null)
                 offContourPoint = triangle.m_points[0];
             else if (point2OnContourEdgeIndices == null)
@@ -204,16 +831,16 @@ public class BaseTriangle
                 offContourPoint = triangle.m_points[2];
 
             //Determine the position (left or right) of the off contour point about the edge set previously
-            Vector2 edgePoint1 = m_points[sharedEdgeIndex];
-            Vector2 edgePoint2 = m_points[(sharedEdgeIndex == 2) ? 0 : sharedEdgeIndex + 1];
+            GridPoint edgePoint1 = m_points[sharedEdgeIndex];
+            GridPoint edgePoint2 = m_points[(sharedEdgeIndex == 2) ? 0 : sharedEdgeIndex + 1];
             float det = MathUtils.Determinant(edgePoint1, edgePoint2, offContourPoint);
             return (det > 0); //'left'
         }
         else //(pointsOnContourCount == 1)
         {
             //Find the index of the point that is on this triangle contour
-            Vector2 pointOnContour;
-            Vector2[] pointsOffContour = new Vector2[2];
+            GridPoint pointOnContour;
+            GridPoint[] pointsOffContour = new GridPoint[2];
             int[] edgeIndices;
             if (point1OnContourEdgeIndices != null)
             {
@@ -241,8 +868,8 @@ public class BaseTriangle
             if (edgeIndices.Length == 1)
             {
                 int edgeIndex = edgeIndices[0];
-                Vector2 edgePoint1 = m_points[edgeIndex];
-                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+                GridPoint edgePoint1 = m_points[edgeIndex];
+                GridPoint edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
 
                 //Check if at least one of the two points off contour is on the 'left' of the edge
                 float det = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
@@ -254,8 +881,8 @@ public class BaseTriangle
             {
                 //check if both off contour points are on the left or the right of the first edge
                 int edgeIndex = edgeIndices[0];
-                Vector2 edgePoint1 = m_points[edgeIndex];
-                Vector2 edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
+                GridPoint edgePoint1 = m_points[edgeIndex];
+                GridPoint edgePoint2 = m_points[edgeIndex == 2 ? 0 : edgeIndex + 1];
                 float det1 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[0]);
                 float det2 = MathUtils.Determinant(edgePoint1, edgePoint2, pointsOffContour[1]);
 
@@ -273,14 +900,14 @@ public class BaseTriangle
                     return false;
 
                 //check if both off contour points are on the left or the right of line directed by the sum of first and second edges
-                Vector2 firstEdgePoint1 = m_points[edgeIndices[0]];
-                Vector2 firstEdgePoint2 = m_points[edgeIndices[0] == 2 ? 0 : edgeIndices[0] + 1];
-                Vector2 secondEdgePoint1 = m_points[edgeIndices[1]];
-                Vector2 secondEdgePoint2 = m_points[edgeIndices[1] == 2 ? 0 : edgeIndices[1] + 1];
-                Vector2 firstEdge = firstEdgePoint2 - firstEdgePoint1;
-                Vector2 secondEdge = secondEdgePoint2 - secondEdgePoint1;
+                GridPoint firstEdgePoint1 = m_points[edgeIndices[0]];
+                GridPoint firstEdgePoint2 = m_points[edgeIndices[0] == 2 ? 0 : edgeIndices[0] + 1];
+                GridPoint secondEdgePoint1 = m_points[edgeIndices[1]];
+                GridPoint secondEdgePoint2 = m_points[edgeIndices[1] == 2 ? 0 : edgeIndices[1] + 1];
+                GridPoint firstEdge = firstEdgePoint2 - firstEdgePoint1;
+                GridPoint secondEdge = secondEdgePoint2 - secondEdgePoint1;
 
-                Vector2 sumResultingEdge = firstEdge + secondEdge;
+                GridPoint sumResultingEdge = firstEdge + secondEdge;
 
                 det1 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[0]);
                 det2 = MathUtils.Determinant(pointOnContour, pointOnContour + sumResultingEdge, pointsOffContour[1]);
@@ -296,14 +923,15 @@ public class BaseTriangle
     /**
      * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
      * **/
-    public bool IntersectsEdge(Vector2 edgePoint1, Vector2 edgePoint2, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
+    public bool IntersectsEdge(GridTriangleEdge edge, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
     {
         for (int i = 0; i != 3; i++)
         {
-            Vector2 point1 = m_points[i];
-            Vector2 point2 = m_points[(i == 2) ? 0 : i + 1];
+            GridPoint point1 = m_points[i];
+            GridPoint point2 = m_points[(i == 2) ? 0 : i + 1];
+            GridTriangleEdge triangleEdge = new GridTriangleEdge(point1, point2);
 
-            if (GeometryUtils.TwoSegmentsIntersect(point1, point2, edgePoint1, edgePoint2, bFilters))
+            if (edge.IntersectsEdge(triangleEdge, bFilters))
                 return true;
         }
 
@@ -319,20 +947,11 @@ public class BaseTriangle
         Contour contourPoints = outline.m_contour;
         for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
         {
-            Vector2 contourSegmentPoint1 = contourPoints[iContourPointIndex];
-            Vector2 contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
+            GridPoint contourSegmentPoint1 = contourPoints[iContourPointIndex];
+            GridPoint contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
 
-            if (IntersectsEdge(contourSegmentPoint1, contourSegmentPoint2, bFilters))
+            if (IntersectsEdge(new GridTriangleEdge(contourSegmentPoint1, contourSegmentPoint2), bFilters))
                 return true;
-
-            //for (int iTriangleEdgeIndex = 0; iTriangleEdgeIndex != 3; iTriangleEdgeIndex++)
-            //{
-            //    Vector2 triangleEdgePoint1 = m_points[iTriangleEdgeIndex];
-            //    Vector2 triangleEdgePoint2 = (iTriangleEdgeIndex == 2) ? m_points[0] : m_points[iTriangleEdgeIndex + 1];
-
-            //    if (GeometryUtils.TwoSegmentsIntersect(contourSegmentPoint1, contourSegmentPoint2, triangleEdgePoint1, triangleEdgePoint2, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
-            //        return true;
-            //}
         }
 
         //check if triangle intersect outline holes
@@ -340,10 +959,10 @@ public class BaseTriangle
         for (int i = 0; i != outlineHoles.Count; i++)
         {
             Contour hole = outlineHoles[i];
-            Vector2 holeSegmentPoint1 = hole[i];
-            Vector2 holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
+            GridPoint holeSegmentPoint1 = hole[i];
+            GridPoint holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
 
-            if (IntersectsEdge(holeSegmentPoint1, holeSegmentPoint2, bFilters))
+            if (IntersectsEdge(new GridTriangleEdge(holeSegmentPoint1, holeSegmentPoint2), bFilters))
                 return true;
         }
 
@@ -351,55 +970,35 @@ public class BaseTriangle
     }
 
     /**
-    * Tells if one of the edges of this triangle intersects the segment defined by segmentPoint1 and segmentPoint2
-    * **/
-    public bool IntersectsSegment(Vector2 segmentPoint1, Vector2 segmentPoint2)
-    {
-        return GeometryUtils.TwoSegmentsIntersect(m_points[0], m_points[1], segmentPoint1, segmentPoint2) ||
-               GeometryUtils.TwoSegmentsIntersect(m_points[1], m_points[2], segmentPoint1, segmentPoint2) ||
-               GeometryUtils.TwoSegmentsIntersect(m_points[2], m_points[0], segmentPoint1, segmentPoint2);
-    }
-
-    /**
-    * Tells if one of the edges of this triangle intersects the line defined by linePoint1 and linePoint2
-    * **/
-    public bool IntersectsLine(Vector2 linePoint1, Vector2 linePoint2)
-    {
-        return GeometryUtils.SegmentIntersectsLine(m_points[0], m_points[1], linePoint1, linePoint2) ||
-               GeometryUtils.SegmentIntersectsLine(m_points[1], m_points[2], linePoint1, linePoint2) ||
-               GeometryUtils.SegmentIntersectsLine(m_points[2], m_points[0], linePoint1, linePoint2);
-    }
-
-    /**
      * Tells if this triangle contains the triangle passed as parameter
      * **/
-    public bool ContainsTriangle(BaseTriangle triangle)
-    {
-        return this.ContainsPoint(triangle.m_points[0]) &&
-               this.ContainsPoint(triangle.m_points[1]) &&
-               this.ContainsPoint(triangle.m_points[2]);
-    }
+    //public bool ContainsTriangle(GridTriangle triangle)
+    //{
+    //    return this.ContainsPoint(triangle.m_points[0]) &&
+    //           this.ContainsPoint(triangle.m_points[1]) &&
+    //           this.ContainsPoint(triangle.m_points[2]);
+    //}
 
     /**
      * Tells if this triangle contains a whole shape
      * **/
-    public bool ContainsShape(Shape shape)
-    {
-        for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
-        {
-            BaseTriangle triangle = shape.m_triangles[iTriangleIndex];
-            if (!this.ContainsTriangle(triangle)) //this triangle does not contains at least one of the shape triangles
-                return false;
-        }
+    //public bool ContainsShape(Shape shape)
+    //{
+    //    for (int iTriangleIndex = 0; iTriangleIndex != shape.m_triangles.Count; iTriangleIndex++)
+    //    {
+    //        GridTriangle triangle = shape.m_triangles[iTriangleIndex];
+    //        if (!this.ContainsTriangle(triangle)) //this triangle does not contains at least one of the shape triangles
+    //            return false;
+    //    }
 
-        return true;
-    }
+    //    return true;
+    //}
 
     /**
      * Tells if the parameter point is on this triangle contour.
      * Return the indices of edges the point is on (max 2 if point is equal to one of the triangle vertices)
      * **/
-    public int[] ContourContainsPoint(Vector2 point)
+    public int[] ContourContainsPoint(GridPoint point)
     {
         int[] edgeIndices;
 
@@ -428,10 +1027,11 @@ public class BaseTriangle
         
         for (int i = 0; i != 3; i++)
         {
-            Vector2 edgePoint1 = m_points[i];
-            Vector2 edgePoint2 = m_points[(i == 2) ? 0 : i + 1];
+            GridPoint edgePoint1 = m_points[i];
+            GridPoint edgePoint2 = m_points[(i == 2) ? 0 : i + 1];
+            GridTriangleEdge edge = new GridTriangleEdge(edgePoint1, edgePoint2);
 
-            if (GeometryUtils.IsPointContainedInSegment(point, edgePoint1, edgePoint2))
+            if (edge.ContainsPoint(point))
             {
                 edgeIndices = new int[1];
                 edgeIndices[0] = i;
@@ -440,22 +1040,6 @@ public class BaseTriangle
         }
 
         return null;
-    }
-
-    /**
-     * Returns the index of one of the three triangle vertex if the point passed as parameter is equal to it 
-     * Otherwise returns -1
-     * **/
-    public int PointEqualsVertex(Vector2 point)
-    {
-        if (MathUtils.AreVec2PointsEqual(point, m_points[0]))
-            return 0;
-        else if (MathUtils.AreVec2PointsEqual(point, m_points[1]))
-            return 1;
-        else if (MathUtils.AreVec2PointsEqual(point, m_points[2]))
-            return 2;
-
-        return -1;
     }
 
     /**
@@ -469,38 +1053,38 @@ public class BaseTriangle
     /**
      * Finds intersections between a line and the edges of this triangle
      * **/
-    public List<Vector2> FindIntersectionsWithLine(Vector2 linePoint1, Vector2 linePoint2)
-    {
-        List<Vector2> intersections = new List<Vector2>();
-        intersections.Capacity = 2;
+    //public List<Vector2> FindIntersectionsWithLine(Vector2 linePoint1, Vector2 linePoint2)
+    //{
+    //    List<Vector2> intersections = new List<Vector2>();
+    //    intersections.Capacity = 2;
 
-        Vector2 lineDirection = linePoint2 - linePoint1;
+    //    Vector2 lineDirection = linePoint2 - linePoint1;
 
-        Vector2 intersection;
-        bool intersects;
-        GeometryUtils.SegmentLineIntersection(m_points[0], m_points[1], linePoint1, lineDirection, out intersection, out intersects);
-        if (intersects)
-            intersections.Add(intersection);
+    //    Vector2 intersection;
+    //    bool intersects;
+    //    GeometryUtils.SegmentLineIntersection(m_points[0], m_points[1], linePoint1, lineDirection, out intersection, out intersects);
+    //    if (intersects)
+    //        intersections.Add(intersection);
 
-        GeometryUtils.SegmentLineIntersection(m_points[1], m_points[2], linePoint1, lineDirection, out intersection, out intersects);
-        if (intersects)
-        {
-            if (intersections.Count == 0
-                ||
-                intersections.Count == 1 && !MathUtils.AreVec2PointsEqual(intersection, intersections[0]))
-                intersections.Add(intersection);
-        }
+    //    GeometryUtils.SegmentLineIntersection(m_points[1], m_points[2], linePoint1, lineDirection, out intersection, out intersects);
+    //    if (intersects)
+    //    {
+    //        if (intersections.Count == 0
+    //            ||
+    //            intersections.Count == 1 && !MathUtils.AreVec2PointsEqual(intersection, intersections[0]))
+    //            intersections.Add(intersection);
+    //    }
 
 
-        if (intersections.Count < 2)
-        {
-            GeometryUtils.SegmentLineIntersection(m_points[2], m_points[0], linePoint1, lineDirection, out intersection, out intersects);
-            if (intersects)
-                intersections.Add(intersection);
-        }
+    //    if (intersections.Count < 2)
+    //    {
+    //        GeometryUtils.SegmentLineIntersection(m_points[2], m_points[0], linePoint1, lineDirection, out intersection, out intersects);
+    //        if (intersects)
+    //            intersections.Add(intersection);
+    //    }
 
-        return intersections;
-    }
+    //    return intersections;
+    //}
 }
 
 /**
@@ -720,8 +1304,10 @@ public class BaseTriangle
  * Triangle used for drawing fancy backgrounds
  * It has a front and a back face with 2 different colors
  * **/
-public class BackgroundTriangle : BaseTriangle
+public class BackgroundTriangle
 {
+    public Vector2[] m_points;
+
     public Color m_color { get; set; } //the color of the front face of this triangle (the 3 vertices share the same color)
     public Color m_originalColor { get; set; } //the color that this triangle face should have before being offset to m_frontColor
     //private Vector3 m_flipAxis; //the axis the triangle is rotating around
@@ -745,21 +1331,16 @@ public class BackgroundTriangle : BaseTriangle
     private float m_colorAnimationDuration;
     private float m_colorAnimationDelay;
 
-    //Variables to handle flip animation of this triangle
-    //private bool m_flipping;
-    //private float m_flipToAngle;
-    //private float m_flipAnimationElapsedTime;
-    //private float m_flipAnimationDuration;
-    //private float m_flipAnimationDelay;
-
     public const float EDGE_COLOR_INTENSIFY_FACTOR = 20.0f;
 
     /**
      * Build an equilateral triangle with the given orientation passed through the angle variable
      * The triangle can have an inner contour, in this case set the contourThickness to a strictly positive value
      * **/
-    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color, float contourThickness = 0) : base()
+    public BackgroundTriangle(Vector2 position, float edgeLength, float angle, Color color, float contourThickness = 0)
     {
+        m_points = new Vector2[3];
+
         m_edgeLength = edgeLength;
         m_angle = angle;
         m_contourThickness = contourThickness;
@@ -815,6 +1396,14 @@ public class BackgroundTriangle : BaseTriangle
 
         m_originalColor = color;
         m_color = color;
+    }
+
+    /**
+     * Return the center of this triangle
+     * **/
+    public Vector2 GetCenter()
+    {
+        return (m_points[0] + m_points[1] + m_points[2]) / 3.0f;
     }
 
     /**
@@ -1071,43 +1660,6 @@ public class BackgroundTriangle : BaseTriangle
             }
         }       
     }
-
-    /**
-     * Start the flipping animation process
-     * **/
-    //public void StartFlipAnimation(Vector2 axis, float fDuration, float fDelay = 0.0f)
-    //{
-    //    m_flipping = true;
-    //    m_flipAxis = axis;
-    //    m_flipToAngle = (m_flipAngle == 0) ? 180 : 360;
-    //    m_flipAnimationElapsedTime = 0;
-    //    m_flipAnimationDuration = fDuration;
-    //    m_flipAnimationDelay = fDelay;
-    //}
-
-    //public void FlipAnimate(float dt)
-    //{
-    //    if (!m_flipping)
-    //        return;
-
-    //    m_flipAnimationElapsedTime += dt;
-
-    //    if (m_flipAnimationElapsedTime < m_flipAnimationDelay)
-    //        return;
-
-    //    if (m_flipAnimationElapsedTime >= m_flipAnimationDuration + m_flipAnimationDelay)
-    //    {
-    //        m_flipping = false;
-    //        m_flipAngle = (m_flipToAngle == 360) ? 0 : m_flipToAngle;
-    //    }
-    //    else
-    //    {
-    //        float deltaAngle = (dt / m_flipAnimationDuration) * 180.0f;
-    //        m_flipAngle += deltaAngle;
-    //    }
-
-    //    UpdateParentRendererMeshVerticesArray();
-    //}
 
     public void Offset(float dy)
     {
