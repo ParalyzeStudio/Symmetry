@@ -217,7 +217,7 @@ public class Contour : List<GridPoint>
         {
             GridPoint contourPoint1 = this[i];
             GridPoint contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
-            GridTriangleEdge edge = new GridTriangleEdge(contourPoint1, contourPoint2);
+            GridEdge edge = new GridEdge(contourPoint1, contourPoint2);
 
             if (edge.ContainsPoint(point))
                 return true;

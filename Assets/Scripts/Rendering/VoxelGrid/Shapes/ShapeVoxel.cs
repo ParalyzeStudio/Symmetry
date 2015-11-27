@@ -4,11 +4,11 @@ using System.Collections.Generic;
 public class ShapeVoxel
 {
     private List<Shape> m_overlappingShapes; //the list of shapes that overlap this voxel
-    public Vector3 m_position { get; set; }
+    public GridPoint m_gridPosition { get; set; }
 
-    public ShapeVoxel(Vector3 position)
+    public ShapeVoxel(GridPoint gridPosition)
     {
-        m_position = position;
+        m_gridPosition = gridPosition;
         m_overlappingShapes = new List<Shape>();
     }
 

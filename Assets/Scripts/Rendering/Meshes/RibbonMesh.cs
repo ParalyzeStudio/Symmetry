@@ -54,8 +54,11 @@ public class RibbonMesh : ColorMesh
         //Calculate intersection points
         Grid grid = GetGrid();
         Vector2 axisNormal = axis.GetAxisNormal();
-        Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint1GridPosition, axisNormal);
-        Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint2GridPosition, axisNormal);
+        GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x), 
+                                                 Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y),
+                                                 GridPoint.DEFAULT_SCALE_PRECISION);
+        Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint1GridPosition, gridAxisNormal);
+        Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint2GridPosition, gridAxisNormal);
 
         //extract edge points and sort them
         List<Grid.GridBoxPoint> leftEdgePoints = new List<Grid.GridBoxPoint>();
@@ -65,25 +68,25 @@ public class RibbonMesh : ColorMesh
 
         for (int i = 0; i != endpoint1LineIntersections.Length; i++)
         {
-            if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.LEFT)
+            if (endpoint1LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.LEFT)
                 leftEdgePoints.Add(endpoint1LineIntersections[i]);
-            else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.BOTTOM)
+            else if (endpoint1LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.BOTTOM)
                 bottomEdgePoints.Add(endpoint1LineIntersections[i]);
-            else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.RIGHT)
+            else if (endpoint1LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.RIGHT)
                 rightEdgePoints.Add(endpoint1LineIntersections[i]);
-            else if (endpoint1LineIntersections[i].m_edge == Grid.GridEdge.TOP)
+            else if (endpoint1LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.TOP)
                 topEdgePoints.Add(endpoint1LineIntersections[i]);
         }
 
         for (int i = 0; i != endpoint2LineIntersections.Length; i++)
         {
-            if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.LEFT)
+            if (endpoint2LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.LEFT)
                 leftEdgePoints.Add(endpoint2LineIntersections[i]);
-            else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.BOTTOM)
+            else if (endpoint2LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.BOTTOM)
                 bottomEdgePoints.Add(endpoint2LineIntersections[i]);
-            else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.RIGHT)
+            else if (endpoint2LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.RIGHT)
                 rightEdgePoints.Add(endpoint2LineIntersections[i]);
-            else if (endpoint2LineIntersections[i].m_edge == Grid.GridEdge.TOP)
+            else if (endpoint2LineIntersections[i].m_edgeLocation == Grid.GridBoxEdgeLocation.TOP)
                 topEdgePoints.Add(endpoint2LineIntersections[i]);
         }
         
@@ -203,7 +206,7 @@ public class RibbonMesh : ColorMesh
         {
             GridPoint ribbonVertex1 = ribbonContour[i];
             GridPoint ribbonVertex2 = (i == ribbonContour.Count - 1) ? ribbonContour[0] : ribbonContour[i + 1];
-            GridTriangleEdge edge = new GridTriangleEdge(ribbonVertex1, ribbonVertex2);
+            GridEdge edge = new GridEdge(ribbonVertex1, ribbonVertex2);
 
             if (indexOfNextVertexToAxisPointA < 0 && edge.ContainsPoint(m_ribbonPointA))
             {

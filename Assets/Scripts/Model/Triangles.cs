@@ -1,27 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-//public class TriangleEdge
-//{
-//    public Vector2 m_pointA { get; set; }
-//    public Vector2 m_pointB { get; set; }
-
-//    public TriangleEdge(Vector2 pointA, Vector2 pointB)
-//    {
-//        m_pointA = pointA;
-//        m_pointB = pointB;
-//    }
-
-//    public bool Equals(TriangleEdge other)
-//    {
-//        return GeometryUtils.AreSegmentsEqual(this.m_pointA, this.m_pointB, other.m_pointA, other.m_pointB);
-//    }
-//}
-
 /**
  * Class to hold data for a triangle edge (2 GridPoints)
  * **/
-public class GridTriangleEdge
+public class GridEdge
 {
     public GridPoint m_pointA { get; set; }
     public GridPoint m_pointB { get; set; }
@@ -30,24 +13,26 @@ public class GridTriangleEdge
     public const int EDGES_INTERSECTION_IS_ENDPOINT = 2;
     public const int EDGES_STRICT_INTERSECTION = 4;
 
-    public GridTriangleEdge(GridPoint pointA, GridPoint pointB)
+    public GridEdge(GridPoint pointA, GridPoint pointB)
     {
         m_pointA = pointA;
         m_pointB = pointB;
     }
 
-    public bool Equals(GridTriangleEdge other)
+    public bool Equals(GridEdge other)
     {
-        return GeometryUtils.AreSegmentsEqual(this.m_pointA, this.m_pointB, other.m_pointA, other.m_pointB);
+        return (this.m_pointA == other.m_pointA && this.m_pointB == other.m_pointB)
+               ||
+               (this.m_pointA == other.m_pointB && this.m_pointA == other.m_pointB);
     }
 
     /**
      * Tells if this edge intersects the edge passed as parameter without giving the intersection
      * **/
-    public bool IntersectsEdge(GridTriangleEdge edge, int bFilters = EDGES_OVERLAP | EDGES_INTERSECTION_IS_ENDPOINT | EDGES_STRICT_INTERSECTION)
+    public bool IntersectsEdge(GridEdge edge, int bFilters = EDGES_OVERLAP | EDGES_INTERSECTION_IS_ENDPOINT | EDGES_STRICT_INTERSECTION)
     {
-        GridTriangleEdge edge1 = this;
-        GridTriangleEdge edge2 = edge;
+        GridEdge edge1 = this;
+        GridEdge edge2 = edge;
 
         bool bSeg1Pt1InSeg2 = edge2.ContainsPoint(edge1.m_pointA);
         bool bSeg1Pt2InSeg2 = edge2.ContainsPoint(edge1.m_pointB);
@@ -121,6 +106,111 @@ public class GridTriangleEdge
         else /** (det1 * det2) > 0 **/
         {
             return false;
+        }
+    }
+
+    /**
+     * Return the intersection (if it exists) between this edge and the line defined by linePoint and lineDirection
+     * **/
+    public void IntersectionWithLine(GridPoint linePoint, GridPoint lineDirection, out bool intersects, out GridPoint intersection)
+    {
+        //order points by ascending x for the segment only
+        if (m_pointA.X > m_pointB.X)
+        {
+            GridPoint tmpPoint = m_pointB;
+            m_pointB = m_pointA;
+            m_pointA = tmpPoint;
+        }
+        else if (m_pointA.X == m_pointB.X) // if x-coordinate is the same for both points, order them by ascending y
+        {
+            if (m_pointA.Y > m_pointB.Y)
+            {
+                GridPoint tmpPoint = m_pointB;
+                m_pointB = m_pointA;
+                m_pointA = tmpPoint;
+            }
+        }
+
+        //Both lines equation
+        float x, y;
+        if (lineDirection.X != 0 && m_pointA.X != m_pointB.X) //y = a1x + b1 && y = a2x + b2
+        {
+            float a1 = lineDirection.Y / (float) lineDirection.X;
+            float b1 = linePoint.Y - a1 * linePoint.X;
+            float a2 = (m_pointB.Y - m_pointA.Y) / (m_pointB.X - m_pointA.X);
+            float b2 = m_pointA.Y - a2 * m_pointA.X;
+
+            if (a1 == a2) //parallel lines
+            {
+                intersects = false;
+                intersection = GridPoint.zero;
+                return;
+            }
+            else
+            {
+                x = (b2 - b1) / (a1 - a2);
+                y = a1 * x + b1;
+            }
+        }
+        else if (lineDirection.X != 0 && m_pointA.X == m_pointB.X) //y = a1x + b1 && x = a2
+        {
+            float a1 = lineDirection.Y / (float) lineDirection.X;
+            float b1 = linePoint.Y - a1 * linePoint.X;
+            float a2 = m_pointA.X;
+
+            x = a2;
+            y = a1 * a2 + b1;
+        }
+        else if (lineDirection.X == 0 && m_pointA.X != m_pointB.X) //x = a1 && y = a2x + b2
+        {
+            float a1 = linePoint.X;
+            float a2 = (m_pointB.Y - m_pointA.Y) / (m_pointB.X - m_pointA.X);
+            float b2 = m_pointA.Y - a2 * m_pointA.X;
+
+            x = a1;
+            y = a2 * a1 + b2;
+        }
+        else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
+        {
+            intersects = false;
+            intersection = GridPoint.zero;
+            return;
+        }
+
+        //Round (x,y)
+        int X = Mathf.RoundToInt(x);
+        int Y = Mathf.RoundToInt(x);
+
+        //Check if ((x, y) point is contained in the segment
+        if (m_pointA.X == m_pointB.X)
+        {
+            if (Y >= m_pointA.Y && Y <= m_pointA.Y)
+            {
+                intersects = true;
+                intersection = new GridPoint(X, Y);
+                return;
+            }
+            else
+            {
+                intersects = false;
+                intersection = GridPoint.zero;
+                return;
+            }
+        }
+        else
+        {
+            if (MathUtils.isValueInInterval(X, m_pointA.X, m_pointB.X, 0))
+            {
+                intersects = true;
+                intersection = new GridPoint(X, Y);
+                return;
+            }
+            else
+            {
+                intersects = false;
+                intersection = GridPoint.zero;
+                return;
+            }
         }
     }
 
@@ -690,9 +780,9 @@ public class GridTriangle
      * **/
     public bool IntersectsTriangle(GridTriangle triangle)
     {
-        GridTriangleEdge edge1 = new GridTriangleEdge(triangle.m_points[0], triangle.m_points[1]);
-        GridTriangleEdge edge2 = new GridTriangleEdge(triangle.m_points[1], triangle.m_points[2]);
-        GridTriangleEdge edge3 = new GridTriangleEdge(triangle.m_points[2], triangle.m_points[0]);
+        GridEdge edge1 = new GridEdge(triangle.m_points[0], triangle.m_points[1]);
+        GridEdge edge2 = new GridEdge(triangle.m_points[1], triangle.m_points[2]);
+        GridEdge edge3 = new GridEdge(triangle.m_points[2], triangle.m_points[0]);
 
         bool bIntersectEdges = IntersectsEdge(edge1) || IntersectsEdge(edge2) || IntersectsEdge(edge3);
 
@@ -923,13 +1013,13 @@ public class GridTriangle
     /**
      * Does this triangle intersects the edge defined by edgePoint1 and and edgePoint2
      * **/
-    public bool IntersectsEdge(GridTriangleEdge edge, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
+    public bool IntersectsEdge(GridEdge edge, int bFilters = GeometryUtils.SEGMENTS_OVERLAP | GeometryUtils.SEGMENTS_INTERSECTION_IS_ENDPOINT | GeometryUtils.SEGMENTS_STRICT_INTERSECTION)
     {
         for (int i = 0; i != 3; i++)
         {
             GridPoint point1 = m_points[i];
             GridPoint point2 = m_points[(i == 2) ? 0 : i + 1];
-            GridTriangleEdge triangleEdge = new GridTriangleEdge(point1, point2);
+            GridEdge triangleEdge = new GridEdge(point1, point2);
 
             if (edge.IntersectsEdge(triangleEdge, bFilters))
                 return true;
@@ -950,7 +1040,7 @@ public class GridTriangle
             GridPoint contourSegmentPoint1 = contourPoints[iContourPointIndex];
             GridPoint contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
 
-            if (IntersectsEdge(new GridTriangleEdge(contourSegmentPoint1, contourSegmentPoint2), bFilters))
+            if (IntersectsEdge(new GridEdge(contourSegmentPoint1, contourSegmentPoint2), bFilters))
                 return true;
         }
 
@@ -962,7 +1052,7 @@ public class GridTriangle
             GridPoint holeSegmentPoint1 = hole[i];
             GridPoint holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
 
-            if (IntersectsEdge(new GridTriangleEdge(holeSegmentPoint1, holeSegmentPoint2), bFilters))
+            if (IntersectsEdge(new GridEdge(holeSegmentPoint1, holeSegmentPoint2), bFilters))
                 return true;
         }
 
@@ -1029,7 +1119,7 @@ public class GridTriangle
         {
             GridPoint edgePoint1 = m_points[i];
             GridPoint edgePoint2 = m_points[(i == 2) ? 0 : i + 1];
-            GridTriangleEdge edge = new GridTriangleEdge(edgePoint1, edgePoint2);
+            GridEdge edge = new GridEdge(edgePoint1, edgePoint2);
 
             if (edge.ContainsPoint(point))
             {

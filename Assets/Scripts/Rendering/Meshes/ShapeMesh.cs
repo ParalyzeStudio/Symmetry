@@ -161,7 +161,7 @@ public class ShapeMesh : TexturedMesh
                 allCellsSwept = false;
 
             //Test the position of this cell about the axis
-            float det = MathUtils.Determinant(m_sweepingLine.PointA, m_sweepingLine.PointB, cell.m_position);
+            float det = MathUtils.Determinant(m_sweepingLine.PointA, m_sweepingLine.PointB, cell.m_gridPosition);
             if ((bLeftSide && det >= 0) || (!bLeftSide && det <= 0))
             {
                 cell.TriangulateAndShow();
@@ -293,8 +293,14 @@ public class ShapeMesh : TexturedMesh
 
     public void AddFullQuadCell(ShapeCell cell)
     {
+        Grid grid = GetGrid();
+
         cell.m_startIndex = m_vertices.Count;
-        AddQuad(cell.m_voxelA.m_position, cell.m_voxelC.m_position, cell.m_voxelB.m_position, cell.m_voxelD.m_position);
+        Vector2 ptA = grid.GetPointWorldCoordinatesFromGridCoordinates(cell.m_voxelA.m_gridPosition);
+        Vector2 ptB = grid.GetPointWorldCoordinatesFromGridCoordinates(cell.m_voxelB.m_gridPosition);
+        Vector2 ptC = grid.GetPointWorldCoordinatesFromGridCoordinates(cell.m_voxelC.m_gridPosition);
+        Vector2 ptD = grid.GetPointWorldCoordinatesFromGridCoordinates(cell.m_voxelD.m_gridPosition);
+        AddQuad(ptA, ptC, ptB, ptD);
         cell.m_endIndex = m_vertices.Count - 1;
     }
 

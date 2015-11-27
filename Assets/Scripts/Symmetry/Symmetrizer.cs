@@ -302,28 +302,35 @@ public class Symmetrizer : MonoBehaviour
      * Find all intersections between a line and the box determined by grid boundaries
      * linePoint has to be specified in grid coordinates
      * **/
-    private List<Vector2> FindLineGridBoxIntersections(Vector2 linePoint, Vector2 lineDirection)
+    private List<GridPoint> FindLineGridBoxIntersections(GridPoint linePoint, GridPoint lineDirection)
     {
-        List<Vector2> intersections = new List<Vector2>();
+        List<GridPoint> intersections = new List<GridPoint>();
         intersections.Capacity = 2;
 
-        Vector2 gridTopLeft = new Vector2(1, m_gameScene.m_grid.m_numLines);
-        Vector2 gridTopRight = new Vector2(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines);
-        Vector2 gridBottomLeft = new Vector2(1, 1);
-        Vector2 gridBottomRight = new Vector2(m_gameScene.m_grid.m_numColumns, 1);
+        int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
+
+        GridPoint gridTopLeft = scalePrecision * new GridPoint(1, m_gameScene.m_grid.m_numLines, scalePrecision);
+        GridPoint gridTopRight = scalePrecision * new GridPoint(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines, scalePrecision);
+        GridPoint gridBottomLeft = scalePrecision * new GridPoint(1, 1, scalePrecision);
+        GridPoint gridBottomRight = scalePrecision * new GridPoint(m_gameScene.m_grid.m_numColumns, 1, scalePrecision);
+
+        GridEdge leftEdge = new GridEdge(gridBottomLeft, gridTopLeft);
+        GridEdge topEdge = new GridEdge(gridTopLeft, gridTopRight);
+        GridEdge rightEdge = new GridEdge(gridTopRight, gridBottomRight);
+        GridEdge bottomEdge = new GridEdge(gridBottomRight, gridBottomLeft);
 
         bool intersects;
-        Vector2 intersection;
-        GeometryUtils.SegmentLineIntersection(gridBottomLeft, gridTopLeft, linePoint, lineDirection, out intersection, out intersects);
+        GridPoint intersection;
+        leftEdge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
         if (intersects)
             intersections.Add(intersection);
-        GeometryUtils.SegmentLineIntersection(gridTopLeft, gridTopRight, linePoint, lineDirection, out intersection, out intersects);
+        topEdge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
         if (intersects)
             intersections.Add(intersection);
-        GeometryUtils.SegmentLineIntersection(gridTopRight, gridBottomRight, linePoint, lineDirection, out intersection, out intersects);
+        rightEdge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
         if (intersects)
             intersections.Add(intersection);
-        GeometryUtils.SegmentLineIntersection(gridBottomRight, gridBottomLeft, linePoint, lineDirection, out intersection, out intersects);
+        bottomEdge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
         if (intersects)
             intersections.Add(intersection);
 
@@ -348,19 +355,11 @@ public class Symmetrizer : MonoBehaviour
             }
         }
 
-        if (intersections.Count != 2) //this case should never happen
-        {
-            intersections.Clear();
-            intersections.Capacity = 2;
-            intersections.Add(new Vector2(0, 0));
-            intersections.Add(new Vector2(0, 0));
-        }
-
         //reorder points so the vector between them is collinear to lineDirection
         Vector2 diff = intersections[1] - intersections[0];
         if (MathUtils.DotProduct(diff, lineDirection) < 0) //diff and lineDirection are of opposite directions, swap the two elements
         {
-            Vector2 tmpIntersection = intersections[1];
+            GridPoint tmpIntersection = intersections[1];
             intersections[1] = intersections[0];
             intersections[0] = tmpIntersection;
         }

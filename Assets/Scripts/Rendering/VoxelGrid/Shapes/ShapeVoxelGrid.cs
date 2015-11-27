@@ -46,7 +46,7 @@ public class ShapeVoxelGrid : MonoBehaviour
         m_yVoxelsCount = (parentGrid.m_numLines - 1) * (density - 1) + 1;
         m_size = m_xVoxelsCount * m_yVoxelsCount;
         m_voxels = new ShapeVoxel[m_size];
-        m_voxelSize = parentGrid.m_gridSpacing / (density - 1);
+        m_voxelSize = 1 / (density - 1);
 
         for (int i = 0, y = 0; y < m_yVoxelsCount; y++)
         {
@@ -58,18 +58,17 @@ public class ShapeVoxelGrid : MonoBehaviour
     }
 
     /**
-     * Creates a voxel at index i and position (x, y) = (column, line)
+     * Creates a voxel at index i and position (x, y) = (column, line) inside the voxel grid
      * **/
     private void CreateVoxel(int i, int x, int y)
     {
         Grid parentGrid = this.GetComponent<Grid>();
         Vector2 gridSize = parentGrid.m_gridSize;
-        
-        Vector3 voxelLocalPosition = new Vector3(x * m_voxelSize - 0.5f * gridSize.x, y * m_voxelSize - 0.5f * gridSize.y, 0);
-        Vector3 voxelWorldPosition = voxelLocalPosition /*+ this.transform.position*/; //add the position of the grid
-        voxelWorldPosition.z = 0;
 
-        ShapeVoxel voxel = new ShapeVoxel(voxelWorldPosition);
+        int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
+        GridPoint voxelGridPosition = new GridPoint((int) (scalePrecision * (x - 1) * m_voxelSize), (int) (scalePrecision * (y - 1) * m_voxelSize), scalePrecision);
+
+        ShapeVoxel voxel = new ShapeVoxel(voxelGridPosition);
 
         m_voxels[i] = voxel;
     }
@@ -82,7 +81,7 @@ public class ShapeVoxelGrid : MonoBehaviour
         for (int iVoxelIdx = 0; iVoxelIdx != m_voxels.Length; iVoxelIdx++)
         {
             ShapeVoxel voxel = m_voxels[iVoxelIdx];
-            if (shape.ContainsPoint(voxel.m_position))
+            if (shape.ContainsPoint(voxel.m_gridPosition))
             {               
                 voxel.AddOverlappingShape(shape);
             }

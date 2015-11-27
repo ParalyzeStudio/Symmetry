@@ -5,7 +5,7 @@ public class ShapeCell
 {
     private int m_index; //the index of the cell in the parent mesh cell array
 
-    public Vector3 m_position { get; set; }
+    public GridPoint m_gridPosition { get; set; }
 
     /**
      * C -- D
@@ -61,7 +61,7 @@ public class ShapeCell
         m_bottomCell = null;
         m_rightCell = null;
 
-        m_position = 0.25f * (m_voxelA.m_position + m_voxelB.m_position + m_voxelC.m_position + m_voxelD.m_position);
+        m_gridPosition = 0.25f * (m_voxelA.m_gridPosition + m_voxelB.m_gridPosition + m_voxelC.m_gridPosition + m_voxelD.m_gridPosition);
     }
 
     /**
@@ -160,11 +160,11 @@ public class ShapeCell
             return false;
 
         Contour cellContour = new Contour(4);
-        cellContour.Add(m_voxelA.m_position);
-        cellContour.Add(m_voxelB.m_position);
-        cellContour.Add(m_voxelD.m_position);
-        cellContour.Add(m_voxelC.m_position);
-        Shape cellShape = new Shape(false, cellContour);
+        cellContour.Add(m_voxelA.m_gridPosition);
+        cellContour.Add(m_voxelB.m_gridPosition);
+        cellContour.Add(m_voxelD.m_gridPosition);
+        cellContour.Add(m_voxelC.m_gridPosition);
+        Shape cellShape = new Shape(cellContour);
         List<Shape> clipResult = m_parentMesh.GetClippingManager().ShapesOperation(parentShape, cellShape, ClipperLib.ClipType.ctIntersection);
 
         if (clipResult.Count == 0) //no intersection
@@ -177,15 +177,15 @@ public class ShapeCell
     private bool OverlapsShapeWithNonNullIntersection(Shape shape)
     {
         //Split the cell in two triangles
-        BaseTriangle cellTriangle1 = new BaseTriangle();
-        cellTriangle1.m_points[0] = m_voxelA.m_position;
-        cellTriangle1.m_points[1] = m_voxelB.m_position;
-        cellTriangle1.m_points[2] = m_voxelC.m_position;
+        GridTriangle cellTriangle1 = new GridTriangle();
+        cellTriangle1.m_points[0] = m_voxelA.m_gridPosition;
+        cellTriangle1.m_points[1] = m_voxelB.m_gridPosition;
+        cellTriangle1.m_points[2] = m_voxelC.m_gridPosition;
 
-        BaseTriangle cellTriangle2 = new BaseTriangle();
-        cellTriangle2.m_points[0] = m_voxelB.m_position;
-        cellTriangle2.m_points[1] = m_voxelD.m_position;
-        cellTriangle2.m_points[2] = m_voxelC.m_position;
+        GridTriangle cellTriangle2 = new GridTriangle();
+        cellTriangle2.m_points[0] = m_voxelB.m_gridPosition;
+        cellTriangle2.m_points[1] = m_voxelD.m_gridPosition;
+        cellTriangle2.m_points[2] = m_voxelC.m_gridPosition;
 
         return shape.OverlapsTriangle(cellTriangle1, true) || shape.OverlapsTriangle(cellTriangle2, true);
     }
@@ -228,15 +228,15 @@ public class ShapeCell
     {
         Contour shapeContour = shape.m_contour;
         Contour cellContour = new Contour(4);
-        cellContour.Add(m_voxelA.m_position);
-        cellContour.Add(m_voxelB.m_position);
-        cellContour.Add(m_voxelD.m_position);
-        cellContour.Add(m_voxelC.m_position);
+        cellContour.Add(m_voxelA.m_gridPosition);
+        cellContour.Add(m_voxelB.m_gridPosition);
+        cellContour.Add(m_voxelD.m_gridPosition);
+        cellContour.Add(m_voxelC.m_gridPosition);
 
         //locate shape contour vertices about cell contour
         for (int i = 0; i != shapeContour.Count; i++)
         {
-            Vector2 shapeContourVertex = shapeContour[i];
+            GridPoint shapeContourVertex = shapeContour[i];
             if (!this.ContainsPointOnContour(shapeContourVertex)) //the point is either inside or outside the shape contour, but not on it
             {
                 if (this.ContainsPoint(shapeContourVertex)) //we have a shape contour vertex inside the cell contour, there is an intersection
@@ -247,7 +247,7 @@ public class ShapeCell
         //locate cell contour vertices about shape contour
         for (int i = 0; i != 4; i++)
         {
-            Vector2 cellContourVertex = cellContour[i];
+            GridPoint cellContourVertex = cellContour[i];
             if (!shapeContour.ContainsPoint(cellContourVertex)) //the point is either inside or outside the cell contour, but not on it
             {
                 if (shape.ContainsPoint(cellContourVertex)) //we have a cell contour vertex inside the shape contour, there is an intersection
@@ -261,9 +261,9 @@ public class ShapeCell
     /**
      * Check if this cell contains the parameter 'point'
      * **/
-    private bool ContainsPoint(Vector2 point)
+    private bool ContainsPoint(GridPoint point)
     {
-        return (point.x >= m_voxelA.m_position.x && point.x <= m_voxelB.m_position.x) && (point.y >= m_voxelA.m_position.y && point.y <= m_voxelC.m_position.y);
+        return (point.X >= m_voxelA.m_gridPosition.X && point.X <= m_voxelB.m_gridPosition.X) && (point.Y >= m_voxelA.m_gridPosition.Y && point.Y <= m_voxelC.m_gridPosition.Y);
     }
 
     /**
@@ -271,10 +271,10 @@ public class ShapeCell
      * **/
     private bool ContainsPointOnContour(Vector2 point)
     {
-        return ((point.x >= m_voxelA.m_position.x  && point.x <= m_voxelB.m_position.x && point.y == m_voxelA.m_position.y) ||
-                (point.x >= m_voxelA.m_position.x  && point.x <= m_voxelB.m_position.x && point.y == m_voxelC.m_position.y) ||
-                (point.y >= m_voxelA.m_position.y  && point.y <= m_voxelC.m_position.x && point.x == m_voxelA.m_position.x) ||
-                (point.y >= m_voxelA.m_position.y  && point.y <= m_voxelC.m_position.x && point.x == m_voxelB.m_position.x));
+        return ((point.x >= m_voxelA.m_gridPosition.X && point.x <= m_voxelB.m_gridPosition.X && point.y == m_voxelA.m_gridPosition.Y) ||
+                (point.x >= m_voxelA.m_gridPosition.X && point.x <= m_voxelB.m_gridPosition.X && point.y == m_voxelC.m_gridPosition.Y) ||
+                (point.y >= m_voxelA.m_gridPosition.Y && point.y <= m_voxelC.m_gridPosition.X && point.x == m_voxelA.m_gridPosition.X) ||
+                (point.y >= m_voxelA.m_gridPosition.Y && point.y <= m_voxelC.m_gridPosition.X && point.x == m_voxelB.m_gridPosition.X));
     }
 
     /**

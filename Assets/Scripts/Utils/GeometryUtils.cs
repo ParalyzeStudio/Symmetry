@@ -43,23 +43,24 @@ public class GeometryUtils
     /**
      * Find the intersection of a segment and a line if it exists
      * **/
-    //static public void SegmentLineIntersection(IntPoint segmentPoint1, IntPoint segmentPoint2, IntPoint linePoint, Vector2 lineDirection, out IntPoint intersection, out bool intersects)
+
+    //static public void SegmentLineIntersection(Vector2 segmentPoint1, Vector2 segmentPoint2, Vector2 linePoint, Vector2 lineDirection, out Vector2 intersection, out bool intersects)
     //{
     //    //normalize the line direction if not
     //    lineDirection.Normalize();
 
     //    //order points by ascending x for the segment only
-    //    if (segmentPoint1.X > segmentPoint2.X)
+    //    if (segmentPoint1.x > segmentPoint2.x)
     //    {
-    //        IntPoint tmpPoint = segmentPoint2;
+    //        Vector2 tmpPoint = segmentPoint2;
     //        segmentPoint2 = segmentPoint1;
     //        segmentPoint1 = tmpPoint;
     //    }
-    //    else if (segmentPoint1.X == segmentPoint2.X) // if x-coordinate is the same for both points, order them by ascending y
+    //    else if (segmentPoint1.x == segmentPoint2.x) // if x-coordinate is the same for both points, order them by ascending y
     //    {
-    //        if (segmentPoint1.Y > segmentPoint2.Y)
+    //        if (segmentPoint1.y > segmentPoint2.y)
     //        {
-    //            IntPoint tmpPoint = segmentPoint2;
+    //            Vector2 tmpPoint = segmentPoint2;
     //            segmentPoint2 = segmentPoint1;
     //            segmentPoint1 = tmpPoint;
     //        }
@@ -67,17 +68,17 @@ public class GeometryUtils
 
     //    //Both lines equation
     //    float x, y;
-    //    if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //y = a1x + b1 && y = a2x + b2
+    //    if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && y = a2x + b2
     //    {
     //        float a1 = lineDirection.y / lineDirection.x;
-    //        float b1 = linePoint.Y - a1 * linePoint.X;
-    //        float a2 = (segmentPoint2.Y - segmentPoint1.Y) / (segmentPoint2.X - segmentPoint1.X);
-    //        float b2 = segmentPoint1.Y - a2 * segmentPoint1.X;
+    //        float b1 = linePoint.y - a1 * linePoint.x;
+    //        float a2 = (segmentPoint2.y - segmentPoint1.y) / (segmentPoint2.x - segmentPoint1.x);
+    //        float b2 = segmentPoint1.y - a2 * segmentPoint1.x;
 
     //        if (a1 == a2) //parallel lines
     //        {
     //            intersects = false;
-    //            intersection = new IntPoint(0, 0);
+    //            intersection = Vector2.zero;
     //            return;
     //        }
     //        else
@@ -86,20 +87,20 @@ public class GeometryUtils
     //            y = a1 * x + b1;
     //        }
     //    }
-    //    else if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //y = a1x + b1 && x = a2
+    //    else if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && x = a2
     //    {
     //        float a1 = lineDirection.y / lineDirection.x;
-    //        float b1 = linePoint.Y - a1 * linePoint.X;
-    //        float a2 = segmentPoint1.X;
+    //        float b1 = linePoint.y - a1 * linePoint.x;
+    //        float a2 = segmentPoint1.x;
 
     //        x = a2;
     //        y = a1 * a2 + b1;
     //    }
-    //    else if (MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.X)) //x = a1 && y = a2x + b2
+    //    else if (MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //x = a1 && y = a2x + b2
     //    {
-    //        float a1 = linePoint.X;
-    //        float a2 = (segmentPoint2.Y - segmentPoint1.Y) / (segmentPoint2.X - segmentPoint1.X);
-    //        float b2 = segmentPoint1.Y - a2 * segmentPoint1.X;
+    //        float a1 = linePoint.x;
+    //        float a2 = (segmentPoint2.y - segmentPoint1.y) / (segmentPoint2.x - segmentPoint1.x);
+    //        float b2 = segmentPoint1.y - a2 * segmentPoint1.x;
 
     //        x = a1;
     //        y = a2 * a1 + b2;
@@ -107,145 +108,43 @@ public class GeometryUtils
     //    else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
     //    {
     //        intersects = false;
-    //        intersection = new IntPoint(0, 0);
+    //        intersection = Vector2.zero;
     //        return;
     //    }
 
 
     //    //Check if ((x, y) point is contained in the segment
-    //    if (MathUtils.AreFloatsEqual(segmentPoint1.X, segmentPoint2.Y))
+    //    if (MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x))
     //    {
-    //        if (MathUtils.isValueInInterval(y, segmentPoint1.Y, segmentPoint2.Y))
+    //        if (MathUtils.isValueInInterval(y, segmentPoint1.y, segmentPoint2.y, 0))
     //        {
     //            intersects = true;
-    //            intersection = new IntPoint(x, y);
+    //            intersection = new Vector2(x, y);
     //            return;
     //        }
     //        else
     //        {
     //            intersects = false;
-    //            intersection = new IntPoint(0, 0);
+    //            intersection = Vector2.zero;
     //            return;
     //        }
     //    }
     //    else
     //    {
-    //        if (MathUtils.isValueInInterval(x, segmentPoint1.X, segmentPoint2.X))
+    //        if (MathUtils.isValueInInterval(x, segmentPoint1.x, segmentPoint2.x, 0))
     //        {
     //            intersects = true;
-    //            intersection = new IntPoint(x, y);
+    //            intersection = new Vector2(x, y);
     //            return;
     //        }
     //        else
     //        {
     //            intersects = false;
-    //            intersection = new IntPoint(0, 0);
+    //            intersection = Vector2.zero;
     //            return;
     //        }
     //    }
     //}
-
-    static public void SegmentLineIntersection(Vector2 segmentPoint1, Vector2 segmentPoint2, Vector2 linePoint, Vector2 lineDirection, out Vector2 intersection, out bool intersects)
-    {
-        //normalize the line direction if not
-        lineDirection.Normalize();
-
-        //order points by ascending x for the segment only
-        if (segmentPoint1.x > segmentPoint2.x)
-        {
-            Vector2 tmpPoint = segmentPoint2;
-            segmentPoint2 = segmentPoint1;
-            segmentPoint1 = tmpPoint;
-        }
-        else if (segmentPoint1.x == segmentPoint2.x) // if x-coordinate is the same for both points, order them by ascending y
-        {
-            if (segmentPoint1.y > segmentPoint2.y)
-            {
-                Vector2 tmpPoint = segmentPoint2;
-                segmentPoint2 = segmentPoint1;
-                segmentPoint1 = tmpPoint;
-            }
-        }
-
-        //Both lines equation
-        float x, y;
-        if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && y = a2x + b2
-        {
-            float a1 = lineDirection.y / lineDirection.x;
-            float b1 = linePoint.y - a1 * linePoint.x;
-            float a2 = (segmentPoint2.y - segmentPoint1.y) / (segmentPoint2.x - segmentPoint1.x);
-            float b2 = segmentPoint1.y - a2 * segmentPoint1.x;
-
-            if (a1 == a2) //parallel lines
-            {
-                intersects = false;
-                intersection = Vector2.zero;
-                return;
-            }
-            else
-            {
-                x = (b2 - b1) / (a1 - a2);
-                y = a1 * x + b1;
-            }
-        }
-        else if (!MathUtils.AreFloatsEqual(lineDirection.x, 0) && MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //y = a1x + b1 && x = a2
-        {
-            float a1 = lineDirection.y / lineDirection.x;
-            float b1 = linePoint.y - a1 * linePoint.x;
-            float a2 = segmentPoint1.x;
-
-            x = a2;
-            y = a1 * a2 + b1;
-        }
-        else if (MathUtils.AreFloatsEqual(lineDirection.x, 0) && !MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x)) //x = a1 && y = a2x + b2
-        {
-            float a1 = linePoint.x;
-            float a2 = (segmentPoint2.y - segmentPoint1.y) / (segmentPoint2.x - segmentPoint1.x);
-            float b2 = segmentPoint1.y - a2 * segmentPoint1.x;
-
-            x = a1;
-            y = a2 * a1 + b2;
-        }
-        else //parallel vertical lines, no intersection or infinite intersections. In both cases return no intersection
-        {
-            intersects = false;
-            intersection = Vector2.zero;
-            return;
-        }
-
-
-        //Check if ((x, y) point is contained in the segment
-        if (MathUtils.AreFloatsEqual(segmentPoint1.x, segmentPoint2.x))
-        {
-            if (MathUtils.isValueInInterval(y, segmentPoint1.y, segmentPoint2.y, 0))
-            {
-                intersects = true;
-                intersection = new Vector2(x, y);
-                return;
-            }
-            else
-            {
-                intersects = false;
-                intersection = Vector2.zero;
-                return;
-            }
-        }
-        else
-        {
-            if (MathUtils.isValueInInterval(x, segmentPoint1.x, segmentPoint2.x, 0))
-            {
-                intersects = true;
-                intersection = new Vector2(x, y);
-                return;
-            }
-            else
-            {
-                intersects = false;
-                intersection = Vector2.zero;
-                return;
-            }
-        }
-    }
 
     public const int SEGMENTS_OVERLAP = 1; //segments share more than 1 vertex (i.e intersection is a segment)
     public const int SEGMENTS_INTERSECTION_IS_ENDPOINT = 2; //segments share one vertex and this vertex is a segment endpoint
