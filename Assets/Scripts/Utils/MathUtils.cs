@@ -45,7 +45,7 @@ public class MathUtils
         return Determinant(vec1, vec2);
     }
 
-    static public int Determinant(GridPoint u, GridPoint v, GridPoint w)
+    static public long Determinant(GridPoint u, GridPoint v, GridPoint w)
     {
         GridPoint vec1 = u - w;
         GridPoint vec2 = v - w;
@@ -74,7 +74,7 @@ public class MathUtils
         return u.x * v.x + u.y * v.y;
     }
 
-    static public int DotProduct(GridPoint u, GridPoint v)
+    static public long DotProduct(GridPoint u, GridPoint v)
     {
         return u.X * v.X + u.Y * v.Y;
     }

@@ -5,9 +5,9 @@
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
-				<point column="4" line="8" />
+				<point column="5" line="8" />
+				<point column="5" line="7" />
 				<point column="4" line="7" />
-				<point column="3" line="7" />
 				<point column="4" line="6" />			
 				<point column="3" line="6" />			
 				<point column="3" line="4" />			

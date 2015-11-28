@@ -403,7 +403,7 @@ public class AxisRenderer : MonoBehaviour
                 ShapeMesh shapeMesh = shape.m_parentMesh;
                 if (shapeMesh.m_sweepingLine == null) //check if shape is not already swept by another line
                 {
-                    if (MathUtils.Determinant(m_endpoint1GridPosition, m_endpoint1GridPosition, shape.GetBarycentre()) >= 0) //on the 'left' of the axis
+                    if (MathUtils.Determinant(m_endpoint1GridPosition, m_endpoint2GridPosition, shape.GetBarycentre()) >= 0) //shape is on the 'left' of the axis
                         shapeMesh.m_sweepingLine = m_leftSweepingLine;
                     else //on the 'right' of the axis
                         shapeMesh.m_sweepingLine = m_rightSweepingLine;

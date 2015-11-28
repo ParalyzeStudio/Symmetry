@@ -39,8 +39,8 @@ public class GridEdge
         bool bSeg2Pt1InSeg1 = edge1.ContainsPoint(edge2.m_pointA);
         bool bSeg2Pt2InSeg1 = edge1.ContainsPoint(edge2.m_pointB);
 
-        int det1 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointA);
-        int det2 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointB);
+        long det1 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointA);
+        long det2 = MathUtils.Determinant(edge1.m_pointA, edge1.m_pointB, edge2.m_pointB);
         if (det1 == 0 && det2 == 0) //4 endpoints are aligned, segments are collinear and on the same line
         {
             //one segment is contained in the other
@@ -49,7 +49,7 @@ public class GridEdge
                     return true;
 
             //check if segments share at least 1 endpoint
-            int dotProduct = 0;
+            long dotProduct = 0;
             if (MathUtils.AreVec2PointsEqual(edge1.m_pointB, edge2.m_pointA))
                 dotProduct = MathUtils.DotProduct(edge1.m_pointA - edge1.m_pointB, edge2.m_pointB - edge2.m_pointA);
             else if (MathUtils.AreVec2PointsEqual(edge1.m_pointB, edge2.m_pointB))
@@ -89,12 +89,12 @@ public class GridEdge
 
             return false;
         }
-        else if ((det1 * det2) < 0) //check if det1 and det2 are of opposite signs
+        else if ((det1 < 0 && det2 > 0) || (det1 > 0 && det2 < 0)) //check if det1 and det2 are of opposite signs
         {
-            float det3 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointA);
-            float det4 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointB);
+            long det3 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointA);
+            long det4 = MathUtils.Determinant(edge2.m_pointA, edge2.m_pointB, edge1.m_pointB);
 
-            if ((det3 * det4) < 0) //check if det3 and det4 are of opposite signs
+            if ((det3 < 0 && det4 > 0) || (det3 > 0 && det4 < 0)) //check if det3 and det4 are of opposite signs
             {
                 return (bFilters & EDGES_STRICT_INTERSECTION) > 0; //we only check the strict intersection here
             }
@@ -226,7 +226,7 @@ public class GridEdge
         if (point == m_pointA || point == m_pointB)
             return bIncludeEndpoints;
 
-        int det = MathUtils.Determinant(m_pointA, m_pointB, point);
+        long det = MathUtils.Determinant(m_pointA, m_pointB, point);
         if (det != 0) //points are not aligned, thus point can never be on the segment AB
             return false;
 
@@ -234,7 +234,7 @@ public class GridEdge
         GridPoint u = point - m_pointA; //AM vector
         GridPoint v = m_pointB - m_pointA; //AB vector
 
-        int dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
+        long dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
         if (dotProduct > 0)
             return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
         else //AM and AB are of opposite sign
@@ -770,9 +770,9 @@ public class GridTriangle
         if (HasVertex(point))
             return true;
 
-        int det1 = MathUtils.Determinant(m_points[0], m_points[1], point);
-        int det2 = MathUtils.Determinant(m_points[1], m_points[2], point);
-        int det3 = MathUtils.Determinant(m_points[2], m_points[0], point);
+        long det1 = MathUtils.Determinant(m_points[0], m_points[1], point);
+        long det2 = MathUtils.Determinant(m_points[1], m_points[2], point);
+        long det3 = MathUtils.Determinant(m_points[2], m_points[0], point);
 
         return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }

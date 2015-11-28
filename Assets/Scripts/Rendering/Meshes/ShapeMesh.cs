@@ -161,7 +161,8 @@ public class ShapeMesh : TexturedMesh
                 allCellsSwept = false;
 
             //Test the position of this cell about the axis
-            float det = MathUtils.Determinant(m_sweepingLine.PointA, m_sweepingLine.PointB, cell.m_gridPosition);
+            Vector2 cellWorldPosition = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(cell.m_gridPosition);
+            float det = MathUtils.Determinant(m_sweepingLine.PointA, m_sweepingLine.PointB, cellWorldPosition);
             if ((bLeftSide && det >= 0) || (!bLeftSide && det <= 0))
             {
                 cell.TriangulateAndShow();

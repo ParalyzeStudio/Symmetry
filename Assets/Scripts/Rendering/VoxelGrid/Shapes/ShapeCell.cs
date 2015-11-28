@@ -61,7 +61,9 @@ public class ShapeCell
         m_bottomCell = null;
         m_rightCell = null;
 
-        m_gridPosition = 0.25f * (m_voxelA.m_gridPosition + m_voxelB.m_gridPosition + m_voxelC.m_gridPosition + m_voxelD.m_gridPosition);
+        GridPoint cellGridPosition = 0.25f * (m_voxelA.m_gridPosition + m_voxelB.m_gridPosition + m_voxelC.m_gridPosition + m_voxelD.m_gridPosition);
+        cellGridPosition.m_scale = m_voxelA.m_gridPosition.m_scale; //set the scale of this cell position the same as one of thex voxels inside this cell
+        m_gridPosition = cellGridPosition;
     }
 
     /**

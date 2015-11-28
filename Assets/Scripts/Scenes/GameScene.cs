@@ -882,7 +882,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP1 CHECK");
+        //Debug.Log("STEP1 CHECK");
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
@@ -898,9 +898,6 @@ public class GameScene : GUIScene
             for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
             {
                 DottedOutline outline = outlines[iOutlineIdx];
-
-                if (shape.IntersectsOutline(outline))
-                    Debug.Log("IntersectsOutline");
 
                 if (shape.IntersectsOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
                 {
@@ -928,7 +925,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP2 CHECK");
+        //Debug.Log("STEP2 CHECK");
 
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -945,8 +942,8 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-            Debug.Log("STEP3 CHECK");
+        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+        //    Debug.Log("STEP3 CHECK");
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }
@@ -1042,7 +1039,6 @@ public class GameScene : GUIScene
 
     public void Update()
     {
-        return;
         if (m_gameStatus == GameStatus.RUNNING)
         {
             GameStatus gameStatus = GetGameStatus();

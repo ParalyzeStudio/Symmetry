@@ -78,7 +78,7 @@ public struct GridPoint
         }
     }
 
-    public float sqrMagnitude
+    public long sqrMagnitude
     {
         get
         {
@@ -94,39 +94,6 @@ public struct GridPoint
         m_x = x;
         m_y = y;
     }
-
-    /**
-     * Converts a Unity Vector2 worldposition to a GridPoint
-     * **/
-    //public static GridPoint BuildFromWorldPosition(Vector2 worldPosition)
-    //{
-    //    for (int i = 0; i != SIGNIFICANT_FIGURES_COUNT; i++)
-    //    {
-    //        worldPosition.x *= 10.0f;
-    //        worldPosition.y *= 10.0f;
-    //    }
-
-    //    int x = Mathf.RoundToInt(worldPosition.x);
-    //    int y = Mathf.RoundToInt(worldPosition.y);
-
-    //    return new GridPoint(x, y);
-    //}
-
-    /**
-     * Converts a GridPoint worldposition to a Unity Vector2
-     * **/
-    //public static Vector2 ConvertToWorldPosition(GridPoint point)
-    //{
-    //    float x = point.X;
-    //    float y = point.Y;
-    //    for (int i = 0; i != SIGNIFICANT_FIGURES_COUNT; i++)
-    //    {
-    //        x /= 10.0f;
-    //        y /= 10.0f;
-    //    }
-
-    //    return new Vector2(x, y);
-    //}
 
     /**
      * Scales the point
