@@ -40,7 +40,7 @@ public class Symmetrizer : MonoBehaviour
     /**
      * Apply symmetry on all shapes located inside the axis ribbon
      * **/
-    public void SymmetrizeByAxis()
+    public void SymmetrizeShapes()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
@@ -71,7 +71,7 @@ public class Symmetrizer : MonoBehaviour
                 
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
-                    Shape lSymmetricShape = lResultShapes[lShapeIdx].CalculateSymmetricShape(m_axis);
+                    Shape lSymmetricShape = CalculateSymmetricShape(lResultShapes[lShapeIdx]);
                     lSymmetricShape.Triangulate();
                     lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
 
@@ -87,7 +87,7 @@ public class Symmetrizer : MonoBehaviour
                 List<Shape> rResultShapes = m_clippingManager.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
                 for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
                 {
-                    Shape rSymmetricShape = rResultShapes[rShapeIdx].CalculateSymmetricShape(m_axis);
+                    Shape rSymmetricShape = CalculateSymmetricShape(rResultShapes[rShapeIdx]);
                     rSymmetricShape.Triangulate();
                     rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
 
@@ -101,9 +101,141 @@ public class Symmetrizer : MonoBehaviour
     }
 
     /**
+     * Calculate the symmetrical axis of each axis in the grid by the parameter 'axis'
+     * **/
+    public void SymmetrizeAxes()
+    {
+        Axes axesHolder = m_gameScene.m_axes;
+
+        List<AxisRenderer> axes = axesHolder.m_childrenAxes;
+        for (int i = 0; i != axes.Count; i++)
+        {
+            AxisRenderer axis = axes[i];
+            if (axis.m_type == AxisRenderer.AxisType.STATIC_PENDING)
+            {
+                //AxisRenderer symmetricAxis = axis.CalculateSymmetricAxis(this);
+            }
+        }
+    }
+
+    /**
+     * Return a Shape that is symmetric of the parameter 'shapeToSymmetrize' about this axis
+     * **/
+    public Shape CalculateSymmetricShape(Shape shapeToSymmetrize)
+    {
+        //Symmetrize contour
+        Contour contourToSymmetrize = shapeToSymmetrize.m_contour;
+        Contour symmetricContour = new Contour(contourToSymmetrize.Count);
+
+        for (int i = contourToSymmetrize.Count - 1; i != -1; i--)
+        {
+            symmetricContour.Add(CalculateSymmetricPoint(contourToSymmetrize[i]));
+        }
+
+        //Symmetrize holes
+        List<Contour> holesToSymmetrize = shapeToSymmetrize.m_holes;
+        List<Contour> symmetricHoles = new List<Contour>(holesToSymmetrize.Count);
+        for (int i = 0; i != holesToSymmetrize.Count; i++)
+        {
+            Contour hole = holesToSymmetrize[i];
+            Contour symmetricHole = new Contour(hole.Count);
+            for (int j = hole.Count - 1; j != -1; j--)
+            {
+                symmetricHole.Add(CalculateSymmetricPoint(hole[j]));
+            }
+            symmetricHoles.Add(symmetricHole);
+        }
+
+        Shape symmetricShape = new Shape(symmetricContour, symmetricHoles);
+        symmetricShape.m_color = shapeToSymmetrize.m_color;
+        return symmetricShape;
+    }
+
+    /**
+     * Calculate the symmetric axis of this axis by the parameter 'axis'
+     * **/
+    public AxisRenderer CalculateSymmetricAxis(AxisRenderer axisToSymmetrize)
+    {
+        Axes axesHolder = m_gameScene.m_axes;
+
+        GridPoint axisEndpoint1Position = m_axis.m_pointA;
+        GridPoint axisEndpoint2Position = m_axis.m_pointB;
+        GridPoint axisToSymmetrizeEndpoint1Position = axisToSymmetrize.m_pointA;
+        GridPoint axisToSymmetrizeEndpoint2Position = axisToSymmetrize.m_pointB;
+
+        //Axis to symmetrize has to be fully contained in this axis strip in order to be actually symmetrized
+        GridEdge axisEdge = new GridEdge(axisEndpoint1Position, axisEndpoint2Position);
+        bool bSymmetrizeEndpoint1 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint1Position);
+        bool bSymmetrizeEndpoint2 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint2Position);
+
+        if (!bSymmetrizeEndpoint1 || !bSymmetrizeEndpoint2) //axis to symmetrize is not fully contained in this axis strip
+            return null;        
+
+        if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+        {
+            long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
+            long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
+
+            if (det1 >= 0 && det2 >= 0) //axis to symmetrize is on the 'left' of this axis
+            {
+                GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
+                GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
+
+                //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
+                GridPoint axisMiddle = axisToSymmetrize.GetCenter();
+                GridPoint axisClockwiseNormal = axisToSymmetrize.GetNormal();
+                GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
+                GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
+
+                //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
+                long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);              
+                if (det >= 0) //on the 'left', so swap points
+                {
+                    return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1);
+                }
+                else
+                {
+                    return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2);
+                }
+            }
+            else if (det1 >= 0 && det2 < 0 || det1 < 0 && det2 >= 0)
+            {
+                return null; //TODO Build the axis, do not return null
+            }
+        }
+        else if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        {
+            long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
+            long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
+
+            GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
+            GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
+
+            //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
+            GridPoint axisMiddle = m_axis.GetCenter();
+            GridPoint axisClockwiseNormal = m_axis.GetNormal();
+            GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
+            GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
+
+            //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
+            long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);
+            if (det >= 0) //on the 'left', so swap points
+            {
+                return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1);
+            }
+            else
+            {
+                return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
      * **/
-    public void OnSymmetryDone()
+    public void OnSymmetrizingShapesDone()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
@@ -148,155 +280,64 @@ public class Symmetrizer : MonoBehaviour
         }
 
         //Callback on the AxisRenderer
-        AxisRenderer axis = this.GetComponent<AxisRenderer>(); 
-        axis.OnPerformSymmetry(m_symmetryType);
+        m_axis.OnPerformSymmetry(m_symmetryType);
+    }
+
+    /**
+     * Return the symmetric edge of the parameter 'edge' about this axis
+     * **/
+    public GridEdge CalculateSymmetricEdge(GridEdge edge)
+    {
+        GridPoint symmetricPointA = CalculateSymmetricPoint(edge.m_pointA);
+        GridPoint symmetricPointB = CalculateSymmetricPoint(edge.m_pointB);
+
+        return new GridEdge(symmetricPointA, symmetricPointB);
+    }
+
+    /**
+     * Return the point symmetric of the parameter 'point' about this axis
+     * **/
+    public GridPoint CalculateSymmetricPoint(GridPoint point)
+    {
+        GridPoint axisNormal = m_axis.GetNormal();
+        GridPoint axisPoint1 = m_axis.m_pointA;
+        GridPoint axisPoint2 = m_axis.m_pointB;
+
+        //Determine if the point is on the 'left' or on the 'right' of the axis
+        long det = MathUtils.Determinant(axisPoint1, axisPoint2, point);
+        GridPoint symmetricPoint;
+        if (det == 0) //point is on the axis
+            symmetricPoint = point;
+        else
+        {
+            float distanceToAxis = GeometryUtils.DistanceToLine(point, axisPoint1, m_axis.GetDirection());
+            Vector2 v = 2 * distanceToAxis * axisNormal / axisNormal.magnitude;
+            GridPoint gridV = new GridPoint(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
+            
+            if (det > 0) // 'left'
+            {
+                symmetricPoint = point + gridV;
+            }
+            else // 'right'
+                symmetricPoint = point - gridV;
+        }
+
+        symmetricPoint.m_scale = point.m_scale;
+        return symmetricPoint;
+    }
+
+    /**
+     * Called when SymmetrizeAxesByAxis() job is done
+     * **/
+    public void OnSymmetrizingAxesDone()
+    {
+
     }
 
     public void SymmetrizeByPoint()
     {
 
     }
-
-    /**
-     * Creates a copy of triangles that are on a specific side (or both sides) of this axis
-     * **/
-    //private void ExtractTrianglesSeparatedByAxis(Vector2[] ribbonVertices, out List<List<ShapeTriangle>> leftTriangles, out List<List<ShapeTriangle>> rightTriangles, bool bExtractLeftTriangles = true, bool bExtractRightTriangles = true)
-    //{
-    //    AxisRenderer axisRenderer = this.gameObject.GetComponentInChildren<AxisRenderer>();
-    //    Vector2 axisNormal = axisRenderer.GetAxisNormal(); //take the normal in clockwise order compared to the axisDirection
-
-    //    ////First get all triangles
-    //    GameScene gameScene = (GameScene)GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>().m_currentScene;
-    //    List<List<ShapeTriangle>> allShapeTriangles = new List<List<ShapeTriangle>>(); //the vector containing all triangles in the scene per shape
-    //    allShapeTriangles.Capacity = gameScene.m_shapes.m_shapesObjects.Count;
-
-    //    for (int iShapeIndex = 0; iShapeIndex != gameScene.m_shapes.m_shapesObjects.Count; iShapeIndex++)
-    //    {
-    //        Shape shape = gameScene.m_shapes.m_shapesObjects[iShapeIndex].GetComponent<ShapeMesh>().m_shapeData;
-    //        allShapeTriangles.Add(shape.GetShapeTriangles());
-    //    }
-
-    //    //Find intersections of lines starting from axis endpoint directed by axisNormal with the grid box
-    //    //List<Vector2> line1GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint1GridPosition, axisNormal);
-    //    //List<Vector2> line2GridBoxIntersections = FindLineGridBoxIntersections(axisRenderer.m_endpoint2GridPosition, axisNormal);
-
-    //    ////Extract triangles that are in the ribbon of the axis...
-    //    //... on the left side of the line that passes by the axisStartPoint
-    //    List<List<ShapeTriangle>> extractedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[0],
-    //                                                                              ribbonVertices[1],
-    //                                                                              allShapeTriangles,
-    //                                                                              true);
-
-    //    //... on the right side of the line that passes by the axisEndPoint
-    //    extractedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[2],
-    //                                                    ribbonVertices[3],
-    //                                                    extractedTriangles,
-    //                                                    false);
-
-    //    //... finally on the left and right side of the axis itself
-    //    if (bExtractLeftTriangles)
-    //    {
-    //        leftTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
-    //                                                   axisRenderer.m_endpoint2GridPosition,
-    //                                                   extractedTriangles,
-    //                                                   true);
-    //    }
-    //    else
-    //        leftTriangles = null;
-
-    //    if (bExtractRightTriangles)
-    //    {
-    //        rightTriangles = ExtractTrianglesOnLineSide(axisRenderer.m_endpoint1GridPosition,
-    //                                                    axisRenderer.m_endpoint2GridPosition,
-    //                                                    extractedTriangles,
-    //                                                    false);
-    //    }
-    //    else
-    //        rightTriangles = null;
-    //}
-
-    /**
-     * Extract all triangles from the list of triangles passed as parameters that are on one side of a line
-     * The side of the line is determined when looking from the line start point to axis endpoint
-     * If a triangle intersects the line, split it into smaller triangles
-     * **/
-    //private List<List<ShapeTriangle>> ExtractTrianglesOnLineSide(Vector2 lineStartPoint, Vector2 lineEndPoint, List<List<ShapeTriangle>> triangles, bool bLeftSide)
-    //{
-    //    List<List<ShapeTriangle>> extractedTriangles = new List<List<ShapeTriangle>>();
-
-    //    for (int iTrianglesVecIdx = 0; iTrianglesVecIdx != triangles.Count; iTrianglesVecIdx++)
-    //    {
-    //        List<ShapeTriangle> trianglesVec = triangles[iTrianglesVecIdx];
-    //        List<ShapeTriangle> extractedTrianglesVec = null;
-    //        for (int iTriangleIndex = 0; iTriangleIndex != trianglesVec.Count; iTriangleIndex++)
-    //        {
-    //            ShapeTriangle triangle = trianglesVec[iTriangleIndex];
-    //            if (triangle.IntersectsLine(lineStartPoint, lineEndPoint)) //find the intersection points and split the triangle accordingly
-    //            {
-    //                ShapeTriangle[] splitTriangles;
-    //                int splitTrianglesCount;
-    //                triangle.Split(lineStartPoint, lineEndPoint, out splitTriangles, out splitTrianglesCount);
-
-    //                for (int i = 0; i != splitTrianglesCount; i++)
-    //                {
-    //                    ShapeTriangle splitTriangle = splitTriangles[i];
-    //                    splitTriangle.m_color = triangle.m_color;
-
-    //                    Vector2 triangleBarycentre = splitTriangle.GetCenter();
-    //                    float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre);
-
-    //                    //the triangle barycentre is on the side of the line we want
-    //                    if (barycentreDet > 0 && bLeftSide
-    //                        ||
-    //                        barycentreDet < 0 && !bLeftSide)
-    //                    {
-    //                        if (extractedTrianglesVec == null)
-    //                        {
-    //                            extractedTrianglesVec = new List<ShapeTriangle>();
-    //                            extractedTriangles.Add(extractedTrianglesVec);
-    //                        }
-    //                        extractedTrianglesVec.Add(splitTriangle);
-    //                    }
-    //                }
-    //            }
-    //            else
-    //            {
-    //                Vector2 triangleBarycentre = triangle.GetCenter();
-    //                float barycentreDet = MathUtils.Determinant(lineStartPoint, lineEndPoint, triangleBarycentre);
-
-    //                //the triangle barycentre is on the side of the line we want
-    //                if (barycentreDet > 0 && bLeftSide
-    //                    ||
-    //                    barycentreDet < 0 && !bLeftSide)
-    //                {
-    //                    if (extractedTrianglesVec == null)
-    //                    {
-    //                        extractedTrianglesVec = new List<ShapeTriangle>();
-    //                        extractedTriangles.Add(extractedTrianglesVec);
-    //                    }
-    //                    extractedTrianglesVec.Add(triangle);
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    return extractedTriangles;
-    //}
-
-
-    //private List<ShapeTriangle> ExtractTrianglesOnLineSide(Vector2 lineStartPoint, Vector2 lineEndPoint, List<ShapeTriangle> triangles, bool bLeftSide)
-    //{
-    //    if (triangles == null)
-    //        return null;
-
-    //    List<List<ShapeTriangle>> wrappedTriangles = new List<List<ShapeTriangle>>();
-    //    wrappedTriangles.Add(triangles);
-    //    List<List<ShapeTriangle>> extractedTriangles = ExtractTrianglesOnLineSide(lineStartPoint, lineEndPoint, wrappedTriangles, bLeftSide);
-    //    if (extractedTriangles.Count == 1)
-    //        return extractedTriangles[0];
-    //    else //extractedTriangles is empty, return null
-    //        return null;
-    //}
 
     /**
      * Find all intersections between a line and the box determined by grid boundaries
@@ -424,33 +465,6 @@ public class Symmetrizer : MonoBehaviour
 
     //    return reflectedTriangles;
     //}
-
-    /**
-     * Return the point symmetric about the 'axis' parameter
-     * **/
-    public static GridPoint GetSymmetricPointAboutAxis(GridPoint point, AxisRenderer axis)
-    {
-        Vector2 axisNormal = axis.GetAxisNormal();
-        GridPoint axisPoint1 = axis.m_endpoint1GridPosition;
-        GridPoint axisPoint2 = axis.m_endpoint2GridPosition;      
-
-        //Determine if the point is on the 'left' or on the 'right' of the axis
-        float det = MathUtils.Determinant(axisPoint1, axisPoint2, point);
-        if (det == 0) //point is on the axis
-            return point;
-        else
-        {
-            float distanceToAxis = GeometryUtils.DistanceToLine(point, axisPoint1, axis.GetAxisDirection());
-            Vector2 v = 2 * distanceToAxis * axisNormal;
-            GridPoint gridV = new GridPoint(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
-            if (det > 0) // 'left'
-            {
-                return point + gridV;
-            }
-            else // 'right'
-                return point - gridV;
-        }
-    }
 
     /**
      * Set the symmetry type for this axis based on the currently selected action button ID

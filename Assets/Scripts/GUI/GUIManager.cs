@@ -87,8 +87,8 @@ public class GUIManager : MonoBehaviour
      * Create a GUI Button object with the specified 
      * -ID
      * -size
-     * -in case a material could not be determined for the ID,
-     *  force eventually a material for the skin (if the button has several materials for instance force one of them)
+     * -in case a material could not be determined for the ID, force eventually a material 
+     * for the skin (if the button has several materials for instance force one of them)
      * **/
     public GameObject CreateGUIButtonForID(GUIButton.GUIButtonID iID, Vector2 size, Material forcedSkinMaterial = null)
     {

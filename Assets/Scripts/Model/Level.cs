@@ -11,6 +11,8 @@ public class Level
     public List<Shape> m_initialShapes { get; set; }
     public List<string> m_axisConstraints { get; set; }
     public int m_maxActions { get; set; }
+    public bool m_symmetriesStackable { get; set; }
+    public int m_symmetryStackSize { get; set; }
     public int m_gridMinNumLines { get; set; }
     public int m_gridMinNumColumns { get; set; }
     public int m_gridExactNumLines { get; set; }

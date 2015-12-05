@@ -44,8 +44,8 @@ public class RibbonMesh : ColorMesh
      * **/
     public virtual void CalculateRibbonForAxis(AxisRenderer axis)
     {
-        m_ribbonPointA = axis.m_endpoint1GridPosition;
-        m_ribbonPointB = axis.m_endpoint2GridPosition;
+        m_ribbonPointA = axis.m_pointA;
+        m_ribbonPointB = axis.m_pointB;
 
         //clear the mesh
         ClearMesh();
@@ -53,12 +53,12 @@ public class RibbonMesh : ColorMesh
 
         //Calculate intersection points
         Grid grid = GetGrid();
-        Vector2 axisNormal = axis.GetAxisNormal();
+        Vector2 axisNormal = axis.GetNormal();
         GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x), 
                                                  Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y));
 
-        Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint1GridPosition, gridAxisNormal);
-        Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_endpoint2GridPosition, gridAxisNormal);
+        Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(axis.m_pointA, gridAxisNormal);
+        Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(axis.m_pointB, gridAxisNormal);
 
         //extract edge points and sort them
         List<Grid.GridBoxPoint> leftEdgePoints = new List<Grid.GridBoxPoint>();
@@ -107,14 +107,16 @@ public class RibbonMesh : ColorMesh
         gridBottomLeftCorner.Scale(scaleValue);
         gridBottomRightCorner.Scale(scaleValue);
         gridTopRightCorner.Scale(scaleValue);
-        
+
+        GridEdge axisEdge = new GridEdge(axis.m_pointA, axis.m_pointB);
+
         //add left edge points
         for (int i = 0; i != leftEdgePoints.Count; i++)
         {
             ribbonContour.Add(leftEdgePoints[i].m_position);
         }
         //add bottom left hand corner of the grid if necessary
-        if (GeometryUtils.IsPointContainedInStrip(gridBottomLeftCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+        if (axisEdge.ContainsPointInStrip(gridBottomLeftCorner))
             ribbonContour.Add(gridBottomLeftCorner);        
 
         //add bottom edge points
@@ -124,7 +126,7 @@ public class RibbonMesh : ColorMesh
         }
 
         //add bottom right hand corner of the grid if necessary
-        if (GeometryUtils.IsPointContainedInStrip(gridBottomRightCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+        if (axisEdge.ContainsPointInStrip(gridBottomRightCorner))
             ribbonContour.Add(gridBottomRightCorner);
 
         //add right edge points
@@ -134,7 +136,7 @@ public class RibbonMesh : ColorMesh
         }
 
         //add top right hand corner of the grid if necessary
-        if (GeometryUtils.IsPointContainedInStrip(gridTopRightCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+        if (axisEdge.ContainsPointInStrip(gridTopRightCorner))
             ribbonContour.Add(gridTopRightCorner);
 
         //add top edge points
@@ -144,7 +146,7 @@ public class RibbonMesh : ColorMesh
         }
 
         //add top left hand corner of the grid if necessary
-        if (GeometryUtils.IsPointContainedInStrip(gridTopLeftCorner, axis.m_endpoint1GridPosition, axis.m_endpoint2GridPosition))
+        if (axisEdge.ContainsPointInStrip(gridTopLeftCorner))
             ribbonContour.Add(gridTopLeftCorner);
 
         //build the ribbon data object

@@ -342,17 +342,17 @@ public class GeometryUtils
     /**
      * Test if a point is contained in a strip whose width is defined by segment AB
      * **/
-    static public bool IsPointContainedInStrip(Vector2 point, Vector2 ribbonPointA, Vector2 ribbonPointB, bool bIncludeEndpoints = true)
-    {
-        Vector2 u = point - ribbonPointA; //AM vector
-        Vector2 v = ribbonPointB - ribbonPointA; //AB vector
+    //static public bool IsPointContainedInStrip(Vector2 point, Vector2 ribbonPointA, Vector2 ribbonPointB, bool bIncludeEndpoints = true)
+    //{
+    //    Vector2 u = point - ribbonPointA; //AM vector
+    //    Vector2 v = ribbonPointB - ribbonPointA; //AB vector
 
-        float dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
-        if (dotProduct > 0)
-            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
-        else //AM and AB are of opposite sign
-            return false;
-    }
+    //    float dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
+    //    if (dotProduct > 0)
+    //        return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
+    //    else //AM and AB are of opposite sign
+    //        return false;
+    //}
 
     /**
      * Checks if a point that we know is on a line holding pointA and pointB is also contained in the segment [pointA ; pointB]

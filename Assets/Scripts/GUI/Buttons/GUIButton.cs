@@ -40,7 +40,8 @@ public class GUIButton : MonoBehaviour
         ID_HINTS_BUTTON,
         ID_BACK_TO_LEVELS_BUTTON,
         ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
-        ID_CHAPTER_SELECTION_ARROW_NEXT,
+        ID_CHAPTER_SELECTION_ARROW_NEXT,        
+        ID_UNSTACK_SYMMETRY,
 
         //Action buttons
         ID_AXIS_SYMMETRY_TWO_SIDES,
@@ -236,6 +237,12 @@ public class GUIButton : MonoBehaviour
             Debug.Log("ID_DEBUG_SKIP_LEVEL");
             GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
             gameScene.EndLevel(GameScene.GameStatus.VICTORY);
+        }
+        else if (m_ID == GUIButtonID.ID_UNSTACK_SYMMETRY)
+        {
+            Debug.Log("ID_UNSTACK_SYMMETRY");
+            GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+            gameScene.m_gameStack.Pop();
         }
     }
 

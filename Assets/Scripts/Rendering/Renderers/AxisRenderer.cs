@@ -20,8 +20,8 @@ public class AxisRenderer : MonoBehaviour
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
     public GameObject m_endpoint1Circle { get; set; }
     public GameObject m_endpoint2Circle { get; set; }
-    public GridPoint m_endpoint1GridPosition { get; set; } //the world position of the first endpoint
-    public GridPoint m_endpoint2GridPosition { get; set; } //the world position of the second endpoint
+    public GridPoint m_pointA { get; set; } //the position of the first endpoint
+    public GridPoint m_pointB { get; set; } //the position of the second endpoint
 
     private Grid.GridAnchor m_snappedAnchor; //the current anchor the second axis endpoint has been snapped on
     public float m_snapDistance;
@@ -31,7 +31,8 @@ public class AxisRenderer : MonoBehaviour
     //Type of the axis
     public enum AxisType
     {
-        STATIC, //player has finished drawing the axis and symmetry has been done
+        STATIC_PENDING, //axis is waiting for the player to unstack this symmetry
+        STATIC_DONE, //player has finished drawing the axis and symmetry has been done
         DYNAMIC_UNSNAPPED, //player is currently drawing the axis but it is not snapped to a grid anchor
         DYNAMIC_SNAPPED,  //same but this time axis is snapped
         HINT //axis is displayed when the player has requested some help
@@ -127,16 +128,16 @@ public class AxisRenderer : MonoBehaviour
     /**
      * Build both endpoints and segment
      * **/
-    public void BuildElements(GridPoint startPosition)
+    public void BuildElements(GridPoint pointA, GridPoint pointB)
     {
         GameScene gameScene = GetGameScene();
         Color axisTintColor = gameScene.GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
-        m_endpoint1GridPosition = startPosition;
-        m_endpoint2GridPosition = startPosition;
+        m_pointA = pointA;
+        m_pointB = pointB;
 
-        Vector3 endpoint1WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint1GridPosition);
-        Vector3 endpoint2WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint2GridPosition);
+        Vector3 endpoint1WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
+        Vector3 endpoint2WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
 
         //One material per axis
         Material axisMaterial = Instantiate(m_plainWhiteMaterial);
@@ -212,8 +213,8 @@ public class AxisRenderer : MonoBehaviour
     {
         GameScene gameScene = GetGameScene();
 
-        m_endpoint1GridPosition = pointA;
-        m_endpoint2GridPosition = pointB;
+        m_pointA = pointA;
+        m_pointB = pointB;
 
         Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointA);
         Vector2 endpoint2WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(pointB);        
@@ -237,7 +238,6 @@ public class AxisRenderer : MonoBehaviour
             RenderRibbon();
         else
             m_ribbonMesh.Hide();
-
     }
 
     /**
@@ -272,7 +272,7 @@ public class AxisRenderer : MonoBehaviour
         if (closestAnchor != m_snappedAnchor)
         {
             m_snappedAnchor = closestAnchor;
-            if (m_endpoint1GridPosition == m_snappedAnchor.m_gridPosition)
+            if (m_pointA == m_snappedAnchor.m_gridPosition)
             {
                 m_type = AxisType.DYNAMIC_UNSNAPPED;
             }
@@ -280,7 +280,7 @@ public class AxisRenderer : MonoBehaviour
             {
                 m_type = AxisType.DYNAMIC_SNAPPED;
             }
-            Render(m_endpoint1GridPosition, closestAnchor.m_gridPosition);
+            Render(m_pointA, closestAnchor.m_gridPosition);
             return true;
         }
 
@@ -296,7 +296,7 @@ public class AxisRenderer : MonoBehaviour
         float maxDotProduct = float.MinValue;
         constrainedDirection = Vector2.zero;
         projectionLength = 0;
-        Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint1GridPosition);
+        Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
         for (int iDirectionIndex = 0; iDirectionIndex != constrainedDirections.Count; iDirectionIndex++)
         {
             Vector2 axisEndpoint1ToPointer = pointerLocation - endpoint1WorldPosition;
@@ -345,22 +345,22 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void OnPerformSymmetry(Symmetrizer.SymmetryType symmetryType)
     {
-        Vector2 axisDirection = GetAxisDirection();
+        GridPoint axisDirection = GetDirection();
         Grid grid = GetGameScene().m_grid;
 
-        Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint1GridPosition);
-        Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint2GridPosition);
-        Vector2 worldAxisCenter = GetWorldAxisCenter();
+        Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
+        Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
+        Vector2 worldAxisCenter = GetWorldCenter();
 
         //Create and animate sweeping lines
+        GridPoint clockwiseAxisNormal = GetNormal();
+        Vector2 normalizedClockwiseAxisNormal = clockwiseAxisNormal / clockwiseAxisNormal.magnitude;
         if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
-            Vector2 clockwiseAxisNormal = GetAxisNormal();
-            
-            float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
+            float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
-            m_leftSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, -clockwiseAxisNormal);
-            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, clockwiseAxisNormal);
+            m_leftSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, -normalizedClockwiseAxisNormal);
+            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
 
             //debug objects
             m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
@@ -379,10 +379,11 @@ public class AxisRenderer : MonoBehaviour
         }
         else if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ONE_SIDE)
         {
-            float axisAngle = Mathf.Atan2(axisDirection.y, axisDirection.x) * Mathf.Rad2Deg;
+            float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
-            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, GetAxisNormal());
+            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
             m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+            m_debugRightSweepLineObject.name = "RightSweepLine";
 
             GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
             debugRightSweepLineAnimator.SetParentTransform(this.transform);
@@ -403,7 +404,7 @@ public class AxisRenderer : MonoBehaviour
                 ShapeMesh shapeMesh = shape.m_parentMesh;
                 if (shapeMesh.m_sweepingLine == null) //check if shape is not already swept by another line
                 {
-                    if (MathUtils.Determinant(m_endpoint1GridPosition, m_endpoint2GridPosition, shape.GetBarycentre()) >= 0) //shape is on the 'left' of the axis
+                    if (MathUtils.Determinant(m_pointA, m_pointB, shape.GetBarycentre()) >= 0) //shape is on the 'left' of the axis
                         shapeMesh.m_sweepingLine = m_leftSweepingLine;
                     else //on the 'right' of the axis
                         shapeMesh.m_sweepingLine = m_rightSweepingLine;
@@ -427,29 +428,46 @@ public class AxisRenderer : MonoBehaviour
         LaunchSweepingLines();
     }
 
-    public Vector2 GetWorldAxisCenter()
+    /**
+     * Return the coordinates of the middle of the axis
+     * **/
+    public GridPoint GetCenter()
+    {
+        return 0.5f * (m_pointA + m_pointB);
+    }
+
+    /**
+    * Return the world coordinates of the middle of this axis
+    * **/
+    public Vector2 GetWorldCenter()
     {
         Grid grid = GetGameScene().m_grid;
-        Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint1GridPosition);
-        Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_endpoint2GridPosition);
+        Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
+        Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
         Vector2 axisWorldCenter = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
         return axisWorldCenter;
     }
 
-    public Vector2 GetAxisDirection()
+    /**
+    * Return the direction of this axis without normalizing it
+    * **/
+    public GridPoint GetDirection()
     {
-        Vector2 axisDirection = m_endpoint2GridPosition - m_endpoint1GridPosition;
-        axisDirection.Normalize();
+        GridPoint axisDirection = m_pointB - m_pointA;
         return axisDirection;
     }
 
-    public Vector2 GetAxisNormal(bool bClockwiseOrder = true)
+    /**
+     * Return the normal of this axis without normalizing it
+     * Can choose between cw or ccw order
+     * **/
+    public GridPoint GetNormal(bool bClockwiseOrder = true)
     {
-        Vector2 axisDirection = GetAxisDirection();
+        GridPoint axisDirection = GetDirection();
         if (bClockwiseOrder)
-            return new Vector2(axisDirection.y, -axisDirection.x);
+            return new GridPoint(axisDirection.Y, -axisDirection.X);
         else
-            return new Vector2(-axisDirection.y, axisDirection.x);
+            return new GridPoint(-axisDirection.Y, axisDirection.X);
     }
 
     public GameScene GetGameScene()
@@ -476,7 +494,7 @@ public class AxisRenderer : MonoBehaviour
             m_leftSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
 
             Vector2 sweepingLinePosition = 0.5f * (m_leftSweepingLine.PointA + m_leftSweepingLine.PointB);
-            float sqrDistanceFromAxis = (sweepingLinePosition - GetWorldAxisCenter()).sqrMagnitude;
+            float sqrDistanceFromAxis = (sweepingLinePosition - GetWorldCenter()).sqrMagnitude;
 
             if (sqrDistanceFromAxis < 1000000) //TMP delete sweeping line when far enough (out of screen)
             {
@@ -498,7 +516,7 @@ public class AxisRenderer : MonoBehaviour
             m_rightSweepingLine.Translate(dt * SWEEP_LINE_SPEED);
 
             Vector2 sweepingLinePosition = 0.5f * (m_rightSweepingLine.PointA + m_rightSweepingLine.PointB);
-            float sqrDistanceFromAxis = (sweepingLinePosition - GetWorldAxisCenter()).sqrMagnitude;
+            float sqrDistanceFromAxis = (sweepingLinePosition - GetWorldCenter()).sqrMagnitude;
 
             if (sqrDistanceFromAxis < 1000000) //TMP delete sweeping line when far enough (out of screen)
             {

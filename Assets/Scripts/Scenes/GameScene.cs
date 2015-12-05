@@ -11,6 +11,7 @@ public class GameScene : GUIScene
     public const float CONTOURS_Z_VALUE = -200.0f;
     public const float SHAPES_Z_VALUE = -10.0f;
     public const float AXES_Z_VALUE = -210.0f;
+    public const float SYMMETRY_STACK_Z_VALUE = -210.0f;
 
     //shared prefabs
     public GameObject m_radialGradientPfb;
@@ -56,6 +57,10 @@ public class GameScene : GUIScene
     public const string CONSTRAINT_SYMMETRY_AXES_DIAGONALS = "SYMMETRY_AXES_DIAGONALS";
 
     public List<Vector2> m_constrainedDirections { get; set; }
+
+    //stack for symmetries
+    public GameObject m_gameStackPfb;
+    public GameStack m_gameStack { get; set; }
 
     public Material m_horizontalAxisMaterial;
     public Material m_verticalAxisMaterial;
@@ -234,13 +239,16 @@ public class GameScene : GUIScene
         //Build Axes holder
         BuildAxesHolder();
 
+        //Show stack
+        ShowSymmetryStack();
+
         //add small debug button to skip the level
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         GameObject skipLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL, new Vector2(128, 128));
         skipLevelButtonObject.name = "DebugSkipLevel";
         GameObjectAnimator skipLevelButtonAnimator = skipLevelButtonObject.GetComponent<GameObjectAnimator>();
         skipLevelButtonAnimator.SetParentTransform(this.transform);
-        skipLevelButtonAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 64.0f, 0, -10));
+        skipLevelButtonAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 64.0f, -0.5f * screenSize.y + 64.0f, -10));
 
         m_gameStatus = GameStatus.RUNNING;
 
@@ -663,6 +671,29 @@ public class GameScene : GUIScene
         GameObjectAnimator axesAnimator = axesHolderObject.GetComponent<GameObjectAnimator>();
         axesAnimator.SetParentTransform(this.transform);
         axesAnimator.SetPosition(new Vector3(0, 0, AXES_Z_VALUE));
+    }
+
+    /**
+     * If symmetries are stackable in this level, show the stack on the right side of the screen
+     * **/
+    private void ShowSymmetryStack()
+    {
+        if (GetLevelManager().m_currentLevel.m_symmetriesStackable)
+        {
+            Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+            GameObject gameStackObject = (GameObject)Instantiate(m_gameStackPfb);
+            gameStackObject.name = "SymmetryStack";
+
+            GameObjectAnimator gameStackAnimator = gameStackObject.GetComponent<GameObjectAnimator>();
+            gameStackAnimator.SetParentTransform(this.transform);
+            gameStackAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 96.0f, 256.0f, SYMMETRY_STACK_Z_VALUE));
+            gameStackAnimator.SetOpacity(0);
+            gameStackAnimator.FadeTo(1.0f, 1.0f);
+
+            m_gameStack = gameStackObject.GetComponent<GameStack>();
+            m_gameStack.Build();
+        }
     }
 
     private void InitClippingManager()

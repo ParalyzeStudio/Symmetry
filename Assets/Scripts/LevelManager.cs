@@ -67,6 +67,16 @@ public class LevelManager : MonoBehaviour
         string strMaxActions = counterNode.GetValue("@maxActions");
         level.m_maxActions = int.Parse(strMaxActions);
 
+        //Parse stack information
+        XMLNode stackNode = levelNode.GetNode("stack>0");
+        if (stackNode != null)
+        {
+            level.m_symmetriesStackable = true;
+            level.m_symmetryStackSize = int.Parse(stackNode.GetValue("@size"));
+        }
+        else
+            level.m_symmetriesStackable = false;
+
         //Parse grid information
         XMLNode gridNode = levelNode.GetNode("grid>0");
 
@@ -150,8 +160,7 @@ public class LevelManager : MonoBehaviour
                     outline.m_holes.Add(holePoints);
                 }
             }
-
-
+            
             //Finally add the filled outline to the oulines list
             level.m_outlines.Add(outline);
         }
@@ -186,8 +195,8 @@ public class LevelManager : MonoBehaviour
                     float contourPointColumn = float.Parse(strContourPointColumn);
                     
                     int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                    int scaledContourPointLine = (int)contourPointLine * scaleValue;
-                    int scaledContourPointColumn = (int)contourPointColumn * scaleValue;
+                    int scaledContourPointLine = (int)(contourPointLine * scaleValue);
+                    int scaledContourPointColumn = (int)(contourPointColumn * scaleValue);
 
                     GridPoint shapeContourPoint = new GridPoint(scaledContourPointColumn, scaledContourPointLine);
                     shapeContourPoint.m_scale = scaleValue;
@@ -214,8 +223,8 @@ public class LevelManager : MonoBehaviour
                             float holePointColumn = float.Parse(strHolePointColumn);
 
                             int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                            int scaledHolePointLine = (int)holePointLine * scaleValue;
-                            int scaledHolePointColumn = (int)holePointColumn * scaleValue;
+                            int scaledHolePointLine = (int)(holePointLine * scaleValue);
+                            int scaledHolePointColumn = (int)(holePointColumn * scaleValue);
 
                             GridPoint shapeHolePoint = new GridPoint(scaledHolePointColumn, scaledHolePointLine);
                             shapeHolePoint.m_scale = scaleValue;

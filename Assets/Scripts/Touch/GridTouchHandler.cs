@@ -40,7 +40,7 @@ public class GridTouchHandler : TouchHandler
 
         Grid.GridAnchor closestAnchor = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorForWorldPosition(pointerLocation);
 
-        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition);
+        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -61,7 +61,7 @@ public class GridTouchHandler : TouchHandler
         Vector2 constrainedDirection;
         float projectionLength;
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
-        Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_endpoint1GridPosition);
+        Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_pointA);
         pointerLocation = axisEndpoint1WorldPosition + constrainedDirection * projectionLength;
 
         axisRenderer.SnapAxisEndpointToClosestAnchor(pointerLocation);
@@ -94,22 +94,35 @@ public class GridTouchHandler : TouchHandler
         {
             if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED)
             {
-                currentAxis.m_type = AxisRenderer.AxisType.STATIC; //make the axis static
-                Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+                Level currentLevel = GetLevelManager().m_currentLevel;
+                if (currentLevel.m_symmetriesStackable)
+                {
+                    currentAxis.m_type = AxisRenderer.AxisType.STATIC_PENDING; //make the axis static
 
-                QueuedThreadedJobsManager threadedJobsManager = gameScene.GetQueuedThreadedJobsManager();
-                threadedJobsManager.AddJob(new ThreadedJob
-                                                (
-                                                    new ThreadedJob.ThreadFunction(symmetrizer.SymmetrizeByAxis),
-                                                    null,
-                                                    new ThreadedJob.ThreadFunction(symmetrizer.OnSymmetryDone)
-                                                )
-                                          );
+                    //stack the symmetry
+                    gameScene.m_gameStack.PushAxis(currentAxis);
+                }
+                else
+                {
+                    currentAxis.m_type = AxisRenderer.AxisType.STATIC_DONE; //make the axis static
+
+                    //Launch the symmetry process
+                    Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
+
+                    QueuedThreadedJobsManager threadedJobsManager = gameScene.GetQueuedThreadedJobsManager();
+                    threadedJobsManager.AddJob(new ThreadedJob
+                                                    (
+                                                        new ThreadedJob.ThreadFunction(symmetrizer.SymmetrizeShapes),
+                                                        null,
+                                                        new ThreadedJob.ThreadFunction(symmetrizer.OnSymmetrizingShapesDone)
+                                                    )
+                                              );
+                }
             }
             else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {
                 //remove the axis from the axes list and destroy the object                
-                gameScene.m_axes.RemoveAxis(currentAxis.gameObject);
+                gameScene.m_axes.RemoveAxis(currentAxis);
                 Destroy(currentAxis.gameObject);
             }
         }

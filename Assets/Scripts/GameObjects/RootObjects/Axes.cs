@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Axes : MonoBehaviour
 {
-    public List<GameObject> m_childrenAxes { get; set; }
+    public List<AxisRenderer> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
 
     //snap animation
@@ -13,7 +13,7 @@ public class Axes : MonoBehaviour
 
     public void Awake()
     {
-        m_childrenAxes = new List<GameObject>();
+        m_childrenAxes = new List<AxisRenderer>();
     }
 
     public void Start()
@@ -21,8 +21,9 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public GameObject BuildAxis(GridPoint startPosition)
+    public AxisRenderer BuildAxis(GridPoint pointA, GridPoint pointB)
     {
+        Debug.Log("BuildAxis");
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
         axisAnimator.SetParentTransform(this.transform);
@@ -36,18 +37,18 @@ public class Axes : MonoBehaviour
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
-        axisRenderer.BuildElements(startPosition);
+        axisRenderer.BuildElements(pointA, pointB);
 
-        AddAxis(newAxis);
-        return newAxis;
+        AddAxis(axisRenderer);
+        return axisRenderer;
     }
 
-    public void AddAxis(GameObject axis)
+    public void AddAxis(AxisRenderer axis)
     {
         m_childrenAxes.Add(axis);
     }
 
-    public void RemoveAxis(GameObject axis)
+    public void RemoveAxis(AxisRenderer axis)
     {
         for (int axisIndex = 0; axisIndex != m_childrenAxes.Count; axisIndex++)
         {
