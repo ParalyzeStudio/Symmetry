@@ -21,9 +21,8 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public AxisRenderer BuildAxis(GridPoint pointA, GridPoint pointB)
+    public AxisRenderer BuildAxis(GridPoint pointA, GridPoint pointB, Symmetrizer.SymmetryType symmetryType, AxisRenderer.AxisType axisType)
     {
-        Debug.Log("BuildAxis");
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
         axisAnimator.SetParentTransform(this.transform);
@@ -33,11 +32,12 @@ public class Axes : MonoBehaviour
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
         symmetrizer.Init();
         GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
-        symmetrizer.SetSymmetryTypeFromActionButtonID(parentScene.GetActionButtonID(ActionButton.Location.TOP));
+        symmetrizer.m_symmetryType = symmetryType;
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
         axisRenderer.BuildElements(pointA, pointB);
+        axisRenderer.m_type = axisType;
 
         AddAxis(axisRenderer);
         return axisRenderer;

@@ -904,6 +904,9 @@ public class GameScene : GUIScene
     {
         List<Shape> allShapes = m_shapesHolder.m_shapes;
 
+        if (allShapes.Count == 0) //if a level contains no shape (i.e in debug mode for instance)
+            return false;
+
         //First we check if every shape is static
         for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
         {
@@ -917,6 +920,9 @@ public class GameScene : GUIScene
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
+
+        if (outlines.Count == 0) //if a level contains no outline (i.e in debug mode for instance)
+            return false;
 
         for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
         {
@@ -1017,20 +1023,25 @@ public class GameScene : GUIScene
             GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(DismissSceneElementsOnVictory), 2.0f);
 
             LevelManager levelManager = GetLevelManager();
-            int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
-            if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
+            if (levelManager.IsCurrentLevelDebugLevel())
             {
-                levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
                 GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
             }
             else
             {
-                //TODO go to next chapter by showing chapter menu for instance
+                int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
+                if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
+                {
+                    levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
+                    GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
+                }
+                else
+                {
+                    //TODO go to next chapter by showing chapter menu for instance
+                }
+                //Save the status of this level to preferences
+                GetPersistentDataManager().SetLevelDone(currentLevelNumber);
             }
-
-            //Save the status of this level to preferences
-            GetPersistentDataManager().SetLevelDone(currentLevelNumber);
-
         }
         else if (gameStatus == GameStatus.DEFEAT)
         {

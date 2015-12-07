@@ -288,7 +288,6 @@ public class ShapeMesh : TexturedMesh
 
         //delete the shapes that we store in the fusion process
         HashSet<Shape> shapesToDelete = m_shapeData.m_shapesToDelete;
-        Debug.Log("about to delete " + shapesToDelete.Count + " shapes");
         GetShapesHolder().DeleteShapesSet(shapesToDelete);
     }
 

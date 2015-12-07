@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
     public const int LEVELS_PER_CHAPTER = 15;
 
     public Chapter[] m_chapters { get; set; }
+    public Level m_debugLevel { get; set; }
 
     public Level m_currentLevel { get; set; }
     public Chapter m_currentChapter { get; set; }
@@ -25,6 +26,9 @@ public class LevelManager : MonoBehaviour
             Chapter builtChapter = BuildChapterFromXml(iChapterNumber);
             m_chapters[iChapterNumber - 1] = builtChapter;
         }
+
+        //parse debug level
+        m_debugLevel = ParseLevelFile(null, 0, true);
     }
 
     public Chapter BuildChapterFromXml(int iChapterNumber)
@@ -41,9 +45,13 @@ public class LevelManager : MonoBehaviour
         return chapter;
     }
 
-    public Level ParseLevelFile(Chapter chapter, int iLevelNumber)
+    public Level ParseLevelFile(Chapter chapter, int iLevelNumber, bool bDebugLevel = false)
     {
-        string levelFilename = "Chapter" + chapter.m_number + "/level_" + iLevelNumber;
+        string levelFilename;
+        if (bDebugLevel)
+            levelFilename = "Levels/debug_level";
+        else
+            levelFilename = "Levels/Chapter" + chapter.m_number + "/level_" + iLevelNumber;
         Object levelObjectFile = Resources.Load(levelFilename);
         if (levelObjectFile == null)
             return null;
@@ -98,71 +106,72 @@ public class LevelManager : MonoBehaviour
         }
 
         string strMaxGridSpacing = gridNode.GetValue("@maxGridSpacing");
-        level.m_maxGridSpacing = (strMaxGridSpacing == null) ? -1 : float.Parse(strMaxGridSpacing);
+        level.m_maxGridSpacing = (strMaxGridSpacing == null) ? 0 : float.Parse(strMaxGridSpacing);
 
         //Parse dotted outlines
         XMLNodeList dottedOutlinesNodeList = levelNode.GetNodeList("dottedOutlines>0>dottedOutline");
-        if (dottedOutlinesNodeList == null)
-            return null;
-        level.m_outlines.Capacity = dottedOutlinesNodeList.Count;
-        foreach (XMLNode outlineNode in dottedOutlinesNodeList)
+        if (dottedOutlinesNodeList != null)
         {
-            DottedOutline outline = new DottedOutline();
-
-            //Contour
-            XMLNodeList contourPointsNodeList = outlineNode.GetNodeList("contour>0>point");
-            foreach (XMLNode contourPointNode in contourPointsNodeList)
+            level.m_outlines.Capacity = dottedOutlinesNodeList.Count;
+            foreach (XMLNode outlineNode in dottedOutlinesNodeList)
             {
-                string strContourPointLine = contourPointNode.GetValue("@line");
-                string strContourPointColumn = contourPointNode.GetValue("@column");
+                DottedOutline outline = new DottedOutline();
 
-                float contourPointLine = float.Parse(strContourPointLine);
-                float contourPointColumn = float.Parse(strContourPointColumn);
-
-                int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                int scaledContourPointLine = (int)(contourPointLine * scaleValue);
-                int scaledContourPointColumn = (int)(contourPointColumn * scaleValue);
-
-                GridPoint outlineContourPoint = new GridPoint(scaledContourPointColumn, scaledContourPointLine);
-                outlineContourPoint.m_scale = scaleValue;
-
-                outline.m_contour.Add(outlineContourPoint);
-            }
-
-            //Holes
-            XMLNodeList holesNodeList = outlineNode.GetNodeList("holes>0>hole");
-            if (holesNodeList != null)
-            {
-                foreach (XMLNode holeNode in holesNodeList)
+                //Contour
+                XMLNodeList contourPointsNodeList = outlineNode.GetNodeList("contour>0>point");
+                foreach (XMLNode contourPointNode in contourPointsNodeList)
                 {
-                    Contour holePoints = new Contour();
-                    XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
-                    holePoints.Capacity = holePointsNodeList.Count;
+                    string strContourPointLine = contourPointNode.GetValue("@line");
+                    string strContourPointColumn = contourPointNode.GetValue("@column");
 
-                    foreach (XMLNode holePointNode in holePointsNodeList)
-                    {
-                        string strHolePointLine = holePointNode.GetValue("@line");
-                        string strHolePointColumn = holePointNode.GetValue("@column");
+                    float contourPointLine = float.Parse(strContourPointLine);
+                    float contourPointColumn = float.Parse(strContourPointColumn);
 
-                        float holePointLine = float.Parse(strHolePointLine);
-                        float holePointColumn = float.Parse(strHolePointColumn);
+                    int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                    int scaledContourPointLine = (int)(contourPointLine * scaleValue);
+                    int scaledContourPointColumn = (int)(contourPointColumn * scaleValue);
 
-                        int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-                        int scaledHolePointLine = (int)(holePointLine * scaleValue);
-                        int scaledHolePointColumn = (int)(holePointColumn * scaleValue);
+                    GridPoint outlineContourPoint = new GridPoint(scaledContourPointColumn, scaledContourPointLine);
+                    outlineContourPoint.m_scale = scaleValue;
 
-                        GridPoint outlineHolePoint = new GridPoint(scaledHolePointColumn, scaledHolePointLine);
-                        outlineHolePoint.m_scale = scaleValue;
-
-                        holePoints.Add(outlineHolePoint);
-                    }
-
-                    outline.m_holes.Add(holePoints);
+                    outline.m_contour.Add(outlineContourPoint);
                 }
+
+                //Holes
+                XMLNodeList holesNodeList = outlineNode.GetNodeList("holes>0>hole");
+                if (holesNodeList != null)
+                {
+                    foreach (XMLNode holeNode in holesNodeList)
+                    {
+                        Contour holePoints = new Contour();
+                        XMLNodeList holePointsNodeList = holeNode.GetNodeList("point");
+                        holePoints.Capacity = holePointsNodeList.Count;
+
+                        foreach (XMLNode holePointNode in holePointsNodeList)
+                        {
+                            string strHolePointLine = holePointNode.GetValue("@line");
+                            string strHolePointColumn = holePointNode.GetValue("@column");
+
+                            float holePointLine = float.Parse(strHolePointLine);
+                            float holePointColumn = float.Parse(strHolePointColumn);
+
+                            int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
+                            int scaledHolePointLine = (int)(holePointLine * scaleValue);
+                            int scaledHolePointColumn = (int)(holePointColumn * scaleValue);
+
+                            GridPoint outlineHolePoint = new GridPoint(scaledHolePointColumn, scaledHolePointLine);
+                            outlineHolePoint.m_scale = scaleValue;
+
+                            holePoints.Add(outlineHolePoint);
+                        }
+
+                        outline.m_holes.Add(holePoints);
+                    }
+                }
+
+                //Finally add the filled outline to the oulines list
+                level.m_outlines.Add(outline);
             }
-            
-            //Finally add the filled outline to the oulines list
-            level.m_outlines.Add(outline);
         }
 
         //Parse shapes
@@ -275,6 +284,22 @@ public class LevelManager : MonoBehaviour
         {
             m_currentLevel = m_currentChapter.m_levels[iLevelRelativeNumber - 1];
         }
+    }
+
+    /**
+     * For debug purposes use the debug level instead of a regular level
+     * **/
+    public void SetCurrentLevelAsDebugLevel()
+    {
+        m_currentLevel = m_debugLevel;
+    }
+
+    /**
+     * For debug purposes test if current loaded level is the debug level
+     * **/
+    public bool IsCurrentLevelDebugLevel()
+    {
+        return m_currentLevel == m_debugLevel;
     }
 
     /**

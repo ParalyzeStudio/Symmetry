@@ -72,7 +72,10 @@ public class Grid : MonoBehaviour
         else
             columnGridSpacing = m_gridSize.x / (float)(minNumColumns - 1);
 
-        m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
+        if (currentLevel.m_maxGridSpacing > 0)
+            m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
+        else
+            m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing);
 
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;

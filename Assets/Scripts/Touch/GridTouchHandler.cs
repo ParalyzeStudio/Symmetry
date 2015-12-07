@@ -40,7 +40,8 @@ public class GridTouchHandler : TouchHandler
 
         Grid.GridAnchor closestAnchor = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorForWorldPosition(pointerLocation);
 
-        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition);
+        Symmetrizer.SymmetryType symmetryType = Symmetrizer.GetSymmetryTypeFromActionButtonID(gameScene.GetActionButtonID(ActionButton.Location.TOP));
+        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition, symmetryType, AxisRenderer.AxisType.DYNAMIC_UNSNAPPED);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -121,7 +122,7 @@ public class GridTouchHandler : TouchHandler
             }
             else if (currentAxis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {
-                //remove the axis from the axes list and destroy the object                
+                //remove the axis from the axes list and destroy the object
                 gameScene.m_axes.RemoveAxis(currentAxis);
                 Destroy(currentAxis.gameObject);
             }

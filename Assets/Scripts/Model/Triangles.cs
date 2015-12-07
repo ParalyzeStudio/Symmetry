@@ -250,8 +250,9 @@ public class GridEdge
         GridPoint v = m_pointB - m_pointA; //AB vector
 
         long dotProduct = MathUtils.DotProduct(u, v); //calculate the dot product AM.AB
+
         if (dotProduct > 0)
-            return dotProduct < v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
+            return dotProduct <= v.sqrMagnitude; //AM length should be majored by AB length so dot product AM.AB should be majored by AB squared length
         else //AM and AB are of opposite sign
             return false;
     }

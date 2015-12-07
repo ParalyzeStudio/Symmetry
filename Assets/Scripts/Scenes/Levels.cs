@@ -30,7 +30,8 @@ public class Levels : GUIScene
 
         ApplyBackgroundGradient();
 
-        ShowLevelsSlots();  
+        ShowLevelsSlots();
+        ShowDebugLevelSlot();
     }
 
     private void ApplyBackgroundGradient()
@@ -152,6 +153,21 @@ public class Levels : GUIScene
         }
     }
 
+    /**
+     * Show a button to display a debug level
+     * **/
+    private void ShowDebugLevelSlot()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        GameObject debugLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_LEVEL, new Vector2(256, 128));
+        debugLevelButtonObject.name = "DebugLevelBtn";
+
+        GameObjectAnimator debugLevelButtonAnimator = debugLevelButtonObject.GetComponent<GameObjectAnimator>();
+        debugLevelButtonAnimator.SetParentTransform(this.transform);
+        debugLevelButtonAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 100, -200));
+    }
+
     public LevelSlot BuildLevelSlotForNumber(int iLevelNumber)
     {
         GameObject levelSlotObject = (GameObject)Instantiate(m_levelSlotPfb);
@@ -165,15 +181,26 @@ public class Levels : GUIScene
         return levelSlot;
     }
 
+    /**
+     * Call this method when a level slot is clicked.
+     * Passed -1 if we clicked on the debug level button
+     * **/
     public void OnClickLevelSlot(int iLevelSlotIndex)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Set the level in the LevelManager
-        GetLevelManager().SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
+        if (iLevelSlotIndex < 0) //debug level
+            GetLevelManager().SetCurrentLevelAsDebugLevel();
+        else
+            GetLevelManager().SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
 
         //Transition black screen
-        Vector2 slotPosition = m_levelSlots[iLevelSlotIndex].transform.position;
+        Vector2 slotPosition;
+        if (iLevelSlotIndex == -1) //debug level
+            slotPosition = new Vector3(0, -0.5f * screenSize.y + 100);
+        else
+            slotPosition = m_levelSlots[iLevelSlotIndex].transform.position;
 
         float[] distancesToScreenVertices = new float[4];
         distancesToScreenVertices[0] = (slotPosition - new Vector2(-0.5f * screenSize.x, 0.5f * screenSize.y)).magnitude; //distance to the top-left vertex

@@ -114,11 +114,19 @@ public class LevelIntro : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
-        int currentChapterNumber = levelManager.m_currentChapter.m_number;
-        int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
+
+        string titleText;
+        if (levelManager.IsCurrentLevelDebugLevel())
+            titleText = "Debug level";
+        else
+        {
+            int currentChapterNumber = levelManager.m_currentChapter.m_number;
+            int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
+            titleText = currentChapterNumber.ToString() + " - " + currentLevelNumber.ToString();
+        }
 
         GameObject titleObject = (GameObject) Instantiate(m_textMeshPfb);
-        titleObject.GetComponent<TextMesh>().text = currentChapterNumber.ToString() + " - " + currentLevelNumber.ToString();
+        titleObject.GetComponent<TextMesh>().text = titleText;
 
         TextMeshAnimator levelIntroTitleAnimator = titleObject.GetComponent<TextMeshAnimator>();
         levelIntroTitleAnimator.SetParentTransform(this.transform);

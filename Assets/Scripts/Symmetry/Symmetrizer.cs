@@ -12,7 +12,7 @@ public class Symmetrizer : MonoBehaviour
         SYMMETRY_POINT,
     };
 
-    private SymmetryType m_symmetryType;
+    public SymmetryType m_symmetryType { get; set; }
 
     private AxisRenderer m_axis;
     private GameScene m_gameScene;
@@ -38,18 +38,18 @@ public class Symmetrizer : MonoBehaviour
     }
 
     /**
-     * Apply symmetry on all shapes located inside the axis ribbon
+     * Apply symmetry on all shapes located inside the axis strip
      * **/
     public void SymmetrizeShapes()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
-        //Split the ribbon first
-        m_axis.SplitRibbon(m_symmetryType);
+        //Split the strip first
+        m_axis.m_stripData.Split();
 
-        //Get ribbon left and right clip shapes
-        Shape ribbonLeftClipShape = m_axis.Ribbon.m_ribbonLeftSubShape;
-        Shape ribbonRightClipShape = m_axis.Ribbon.m_ribbonRightSubShape;
+        //Get strip left and right clip shapes
+        Shape stripLeftClipShape = m_axis.m_stripData.m_stripLeftSubShape;
+        Shape stripRightClipShape = m_axis.m_stripData.m_stripRightSubShape;
 
         //Clip all shapes
         List<Shape> shapes = shapesHolder.m_shapes;
@@ -65,15 +65,15 @@ public class Symmetrizer : MonoBehaviour
             if (shape.m_state != Shape.ShapeState.STATIC)
                 continue;
 
-            if (ribbonLeftClipShape != null)
+            if (stripLeftClipShape != null)
             {
-                List<Shape> lResultShapes = m_clippingManager.ShapesOperation(shape, ribbonLeftClipShape, ClipperLib.ClipType.ctIntersection);
+                List<Shape> lResultShapes = m_clippingManager.ShapesOperation(shape, stripLeftClipShape, ClipperLib.ClipType.ctIntersection);
                 
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
                     Shape lSymmetricShape = CalculateSymmetricShape(lResultShapes[lShapeIdx]);
                     lSymmetricShape.Triangulate();
-                    lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
+                    lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the strip
 
                     List<Shape> leftClippedInterShapes, leftClippedDiffShapes;
                     m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out leftClippedInterShapes, out leftClippedDiffShapes);
@@ -82,14 +82,14 @@ public class Symmetrizer : MonoBehaviour
                 }
             }
 
-            if (ribbonRightClipShape != null)
+            if (stripRightClipShape != null)
             {
-                List<Shape> rResultShapes = m_clippingManager.ShapesOperation(shape, ribbonRightClipShape, ClipperLib.ClipType.ctIntersection);
+                List<Shape> rResultShapes = m_clippingManager.ShapesOperation(shape, stripRightClipShape, ClipperLib.ClipType.ctIntersection);
                 for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
                 {
                     Shape rSymmetricShape = CalculateSymmetricShape(rResultShapes[rShapeIdx]);
                     rSymmetricShape.Triangulate();
-                    rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the ribbon
+                    rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the strip
 
                     List<Shape> rightClippedInterShapes, rightClippedDiffShapes;
                     m_clippingManager.ClipAgainstStaticShapes(rSymmetricShape, out rightClippedInterShapes, out rightClippedDiffShapes);
@@ -168,6 +168,12 @@ public class Symmetrizer : MonoBehaviour
         bool bSymmetrizeEndpoint1 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint1Position);
         bool bSymmetrizeEndpoint2 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint2Position);
 
+        if (!bSymmetrizeEndpoint2)
+        {
+            Debug.Log("axisEdge A:" + axisEdge.m_pointA + " B:" + axisEdge.m_pointB);
+            Debug.Log("axisToSymmetrize A:" + axisToSymmetrizeEndpoint1Position + " B:" + axisToSymmetrizeEndpoint2Position);
+        }
+
         if (!bSymmetrizeEndpoint1 || !bSymmetrizeEndpoint2) //axis to symmetrize is not fully contained in this axis strip
             return null;        
 
@@ -191,11 +197,11 @@ public class Symmetrizer : MonoBehaviour
                 long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);              
                 if (det >= 0) //on the 'left', so swap points
                 {
-                    return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1);
+                    return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
                 }
                 else
                 {
-                    return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2);
+                    return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
                 }
             }
             else if (det1 >= 0 && det2 < 0 || det1 < 0 && det2 >= 0)
@@ -221,11 +227,11 @@ public class Symmetrizer : MonoBehaviour
             long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);
             if (det >= 0) //on the 'left', so swap points
             {
-                return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1);
+                return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
             }
             else
             {
-                return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2);
+                return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
             }
         }
 
@@ -416,7 +422,7 @@ public class Symmetrizer : MonoBehaviour
      * Calculate the coordinates of vertices reflected by the axis
      * Specify whether the original triangles are on the left or right side of the axis
      * **/
-    //public List<ShapeTriangle> CalculateTrianglesReflectionsByAxis(Vector2[] ribbonVertices, List<ShapeTriangle> originalTriangles, bool bLeftSide)
+    //public List<ShapeTriangle> CalculateTrianglesReflectionsByAxis(Vector2[] stripVertices, List<ShapeTriangle> originalTriangles, bool bLeftSide)
     //{
     //    List<ShapeTriangle> reflectedTriangles = new List<ShapeTriangle>();
     //    reflectedTriangles.Capacity = originalTriangles.Count;
@@ -449,14 +455,14 @@ public class Symmetrizer : MonoBehaviour
     //        reflectedTriangles.Add(reflectedTriangle);            
     //    }
 
-    //    //trim triangles that are outside of the ribbon
-    //    reflectedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[0],
-    //                                                    ribbonVertices[1],
+    //    //trim triangles that are outside of the strip
+    //    reflectedTriangles = ExtractTrianglesOnLineSide(stripVertices[0],
+    //                                                    stripVertices[1],
     //                                                    reflectedTriangles,
     //                                                    true);
 
-    //    reflectedTriangles = ExtractTrianglesOnLineSide(ribbonVertices[2],
-    //                                                    ribbonVertices[3],
+    //    reflectedTriangles = ExtractTrianglesOnLineSide(stripVertices[2],
+    //                                                    stripVertices[3],
     //                                                    reflectedTriangles,
     //                                                    false);
 
@@ -469,16 +475,16 @@ public class Symmetrizer : MonoBehaviour
     /**
      * Set the symmetry type for this axis based on the currently selected action button ID
      * **/
-    public void SetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)
+    public static SymmetryType GetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)
     {
         if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES)
-            m_symmetryType = SymmetryType.SYMMETRY_AXES_TWO_SIDES;
+            return SymmetryType.SYMMETRY_AXES_TWO_SIDES;
         else if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE)
-            m_symmetryType = SymmetryType.SYMMETRY_AXES_ONE_SIDE;
+            return SymmetryType.SYMMETRY_AXES_ONE_SIDE;
         else if (buttonID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
-            m_symmetryType = SymmetryType.SYMMETRY_POINT;
+            return SymmetryType.SYMMETRY_POINT;
         else
-            m_symmetryType = SymmetryType.NONE;
+            return SymmetryType.NONE;
     }
 
     /**

@@ -1,20 +1,20 @@
 ﻿using UnityEngine;
 
-public class RibbonAnimator : GameObjectAnimator
+public class StripAnimator : GameObjectAnimator
 {
     public override void SetOpacity(float fOpacity, bool bPassOnChildren = true)
     {
         base.SetOpacity(fOpacity, bPassOnChildren);
 
-        RibbonMesh ribbonMesh = this.GetComponent<RibbonMesh>();
-        ribbonMesh.SetColor(m_color);
+        StripMesh stripMesh = this.GetComponent<StripMesh>();
+        stripMesh.SetColor(m_color);
     }
 
     public override void SetColor(Color color)
     {
         base.SetColor(color);
 
-        RibbonMesh ribbonMesh = this.GetComponent<RibbonMesh>();
-        ribbonMesh.SetColor(color);
+        StripMesh stripMesh = this.GetComponent<StripMesh>();
+        stripMesh.SetColor(color);
     }
 }

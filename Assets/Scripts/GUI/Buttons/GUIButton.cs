@@ -23,6 +23,9 @@ public class GUIButton : MonoBehaviour
     private GUIManager m_guiManager;
     private SceneManager m_sceneManager;
     private CallFuncHandler m_callFuncHandler;
+    private SoundManager m_soundManager;
+    private LevelManager m_levelManager;
+    private PersistentDataManager m_persistentDataManager;
 
     public enum GUIButtonID
     {
@@ -53,7 +56,8 @@ public class GUIButton : MonoBehaviour
         ID_COLOR_FILTER,
 
         //temporary debug
-        ID_DEBUG_SKIP_LEVEL
+        ID_DEBUG_SKIP_LEVEL,
+        ID_DEBUG_LEVEL
     }
 
     public GUIButtonID m_ID;
@@ -161,7 +165,7 @@ public class GUIButton : MonoBehaviour
      * **/
     public virtual void OnClick()
     {
-        GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+        GUIManager guiManager = GetGUIManager();
         guiManager.m_selectedSideButtonID = m_ID;
 
         Debug.Log("OnClick");
@@ -186,18 +190,18 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_MUSIC_BUTTON)
         {
-            SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
+            SoundManager soundManager = GetSoundManager();
             soundManager.ToggleMusic();
 
-            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
+            PersistentDataManager persistentDataManager = GetPersistentDataManager();
             persistentDataManager.SetMusicStatus(soundManager.m_musicActive);
         }
         else if (m_ID == GUIButtonID.ID_SOUND_BUTTON)
         {
-            SoundManager soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
+            SoundManager soundManager = GetSoundManager();
             soundManager.ToggleSound();
 
-            PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
+            PersistentDataManager persistentDataManager = GetPersistentDataManager();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
@@ -207,12 +211,12 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_MENU_BUTTON)
         {
             Debug.Log("CLICK MENU");
-            //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            //GUIManager guiManager = GetGUIManager();
             //guiManager.ShowPauseWindow();
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
-            SceneManager sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+            SceneManager sceneManager = GetSceneManager();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false);
 
             //the Show() method will be called in the next frame due to the way CallFuncHandler works.
@@ -229,14 +233,8 @@ public class GUIButton : MonoBehaviour
             SceneManager sceneManager = GetSceneManager();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 1.0f);
 
-            //GUIManager guiManager = GameObject.FindGameObjectWithTag("GUIManager").GetComponent<GUIManager>();
+            //GUIManager guiManager = GetGUIManager();
             //guiManager.DismissPauseWindow();
-        }
-        else if (m_ID == GUIButtonID.ID_DEBUG_SKIP_LEVEL)
-        {
-            Debug.Log("ID_DEBUG_SKIP_LEVEL");
-            GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
-            gameScene.EndLevel(GameScene.GameStatus.VICTORY);
         }
         else if (m_ID == GUIButtonID.ID_UNSTACK_SYMMETRY)
         {
@@ -244,6 +242,20 @@ public class GUIButton : MonoBehaviour
             GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
             gameScene.m_gameStack.Pop();
         }
+        else if (m_ID == GUIButtonID.ID_DEBUG_SKIP_LEVEL)
+        {
+            Debug.Log("ID_DEBUG_SKIP_LEVEL");
+            GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+            gameScene.EndLevel(GameScene.GameStatus.VICTORY);
+        }
+        else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL)
+        {
+            Debug.Log("ID_DEBUG_LEVEL");
+            LevelManager levelManager = GetLevelManager();
+            levelManager.SetCurrentLevelAsDebugLevel();
+            Levels levels = (Levels)GetSceneManager().m_currentScene;
+            levels.OnClickLevelSlot(-1);
+        }        
     }
 
     protected GUIManager GetGUIManager()
@@ -262,11 +274,35 @@ public class GUIButton : MonoBehaviour
         return m_sceneManager;
     }
 
+    protected SoundManager GetSoundManager()
+    {
+        if (m_soundManager == null)
+            m_soundManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SoundManager>();
+
+        return m_soundManager;
+    }
+
+    protected LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+
+        return m_levelManager;
+    }
+
     protected CallFuncHandler GetCallFuncHandler()
     {
         if (m_callFuncHandler == null)
             m_callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
 
         return m_callFuncHandler;
+    }
+
+    protected PersistentDataManager GetPersistentDataManager()
+    {
+        if (m_persistentDataManager == null)
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
+
+        return m_persistentDataManager;
     }
 }

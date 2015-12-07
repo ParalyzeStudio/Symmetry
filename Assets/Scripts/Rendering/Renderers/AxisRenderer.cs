@@ -40,17 +40,11 @@ public class AxisRenderer : MonoBehaviour
 
     public AxisType m_type { get; set; }
 
-    //Ribbon
-    public GameObject m_ribbonPfb;
-    public Material m_ribbonMaterial;
-    private RibbonMesh m_ribbonMesh;
-    public RibbonMesh Ribbon
-    {
-        get
-        {
-            return m_ribbonMesh;
-        }
-    }
+    //Strip
+    public GameObject m_stripPfb;
+    public Material m_stripMaterial;
+    public Strip m_stripData { get; set; } //the points defining the contour of this strip
+    public StripMesh m_stripMesh { get; set; }
 
     //Sweeping lines that reveal shapes. Axis and sweeping line are parallel so define this line with two points 
     //that are the projections of both axis points A and B and a translation direction
@@ -200,10 +194,8 @@ public class AxisRenderer : MonoBehaviour
         endpoint2CircleAnimator.SetScale(endpointOuterContourSize);
         endpoint2CircleAnimator.SetColor(axisTintColor);
 
-        //ribbon
-        CreateRibbon();
-
-        m_type = AxisType.DYNAMIC_UNSNAPPED;
+        //strip
+        CreateStrip();
     }
 
     /**
@@ -233,29 +225,37 @@ public class AxisRenderer : MonoBehaviour
         endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
         endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
 
-        //render ribbon if axis is not too small
+        //render strip if axis is not too small
         if ((endpoint1WorldPosition - endpoint2WorldPosition).sqrMagnitude > 10.0f)
-            RenderRibbon();
+            RenderStrip();
         else
-            m_ribbonMesh.Hide();
+            m_stripMesh.Hide();
     }
 
     /**
-     * Create the ribbon object with related mesh
+     * Create the strip object with related mesh
      * **/
-    private void CreateRibbon()
+    public void CreateStrip(bool bCreateMesh = true)
     {
-        GameObject ribbonObject = (GameObject) Instantiate(m_ribbonPfb);
-        ribbonObject.name = "Ribbon";
+        //initialize the strip data
+        m_stripData = new Strip(this);
+        m_stripData.CalculateContour();
 
-        m_ribbonMesh = ribbonObject.GetComponent<RibbonMesh>();
-        m_ribbonMesh.Init(Instantiate(m_ribbonMaterial));
+        //build the strip mesh
+        if (bCreateMesh)
+        {
+            GameObject stripObject = (GameObject)Instantiate(m_stripPfb);
+            stripObject.name = "Strip";
 
-        //Set the color of the ribbon
-        RibbonAnimator ribbonAnimator = ribbonObject.GetComponent<RibbonAnimator>();
-        ribbonAnimator.SetParentTransform(this.transform);
-        ribbonAnimator.SetColor(new Color(1, 1, 1, 0.5f));
-        ribbonAnimator.SetPosition(Vector3.zero);
+            m_stripMesh = stripObject.GetComponent<StripMesh>();
+            m_stripMesh.Init(m_stripData, Instantiate(m_stripMaterial));
+
+            //Set the color of the strip
+            StripAnimator stripAnimator = stripObject.GetComponent<StripAnimator>();
+            stripAnimator.SetParentTransform(this.transform);
+            stripAnimator.SetColor(new Color(1, 1, 1, 0.5f));
+            stripAnimator.SetPosition(Vector3.zero);
+        }
     }
 
     /**
@@ -312,22 +312,15 @@ public class AxisRenderer : MonoBehaviour
             }
         }
     }
-
+    
     /**
-     * Renders the ribbon that indicates which parts of shapes will be symmetrized
+     * Renders the strip that indicates which parts of grid elements will be symmetrized
      * **/
-    public void RenderRibbon()
+    public void RenderStrip()
     {
-        m_ribbonMesh.CalculateRibbonForAxis(this);
-    }
-
-    /**
-     * Split ribbon in two sub-shapes for each side of the axis
-     * **/
-    public void SplitRibbon(Symmetrizer.SymmetryType symmetryType)
-    {
-        m_ribbonMesh.SplitByAxis(symmetryType);
-    }
+        m_stripData.CalculateContour();
+        m_stripMesh.Render();
+    }   
 
     /**
      * Launch sweeping lines from the current axis
@@ -412,8 +405,8 @@ public class AxisRenderer : MonoBehaviour
             }
         }
 
-        //Destroy ribbon
-        Destroy(m_ribbonMesh.gameObject);
+        //Destroy strip
+        Destroy(m_stripMesh.gameObject);
 
         //Fade out and scale up axis endpoint outer contours
         Vector3 scaleToValue = new Vector3(256, 256, 1);

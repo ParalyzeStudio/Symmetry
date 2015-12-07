@@ -62,6 +62,7 @@ public class GUIManager : MonoBehaviour
     public Material m_skinRetry;
     public Material m_skinPause;
     public Material m_skinDebugSkipLevel;
+    public Material m_skinDebugLevel;
 
     //Materials for action buttons
     public Material m_skinSymmetryTwoSides;
@@ -132,7 +133,7 @@ public class GUIManager : MonoBehaviour
         if (iID == GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
             skinMaterial = m_skinLevels;
         else if (iID == GUIButton.GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
-            skinMaterial = m_skinCloseOverlay;        
+            skinMaterial = m_skinCloseOverlay;
         else if (iID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
             skinMaterial = m_skinCredits;
         else if (iID == GUIButton.GUIButtonID.ID_HINTS_BUTTON)
@@ -167,6 +168,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinColorFilter;
         else if (iID == GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL)
             skinMaterial = m_skinDebugSkipLevel;
+        else if (iID == GUIButton.GUIButtonID.ID_DEBUG_LEVEL)
+            skinMaterial = m_skinDebugLevel;
         else
             skinMaterial = m_skinOptions;
 
