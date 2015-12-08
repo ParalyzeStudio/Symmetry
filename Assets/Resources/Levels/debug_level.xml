@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <level name="Debug level" number="0">
 	<counter maxActions="10"/>
-	<grid exactNumColumns="30" exactNumLines="20"/>
+	<stack size="4"/>
+	<grid exactNumColumns="20" exactNumLines="12"/>
 	<dottedOutlines>
 		
 	</dottedOutlines>
 	<shapes>
-		
+		 <shape color="1,0,0">
+			<contour>
+				<point column="9" line="6"/>
+				<point column="9" line="4"/>
+				<point column="11" line="4"/>
+				<point column="11" line="6"/>
+			</contour>
+		</shape>
 	</shapes>
 	<constraints>
 		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
-<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
 	</constraints>
 </level>

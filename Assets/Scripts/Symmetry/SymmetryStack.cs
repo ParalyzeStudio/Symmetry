@@ -15,10 +15,16 @@ public class SymmetryGroup : List<AxisRenderer>
         int elementsCount = this.Count; //store the count once so we do not loop over new elements that are added at the end of this list
         for (int i = 0; i != elementsCount; i++)
         {
+            //Debug.Log(">>>>Calculating symmetric axis of");
+            //Debug.Log(" A:" + this[i].m_pointA + " B:" + this[i].m_pointB);
+            //Debug.Log("about");
+            //Debug.Log(" A:" + symmetrizer.m_axis.m_pointA + " B:" + symmetrizer.m_axis.m_pointB);
             AxisRenderer symmetrizedAxis = symmetrizer.CalculateSymmetricAxis(this[i]);
-            symmetrizedAxis.CreateStrip(false);
             if (symmetrizedAxis != null)
+            {
+                symmetrizedAxis.CreateStrip(false);
                 Add(symmetrizedAxis);
+            }
         }
     }
 }
