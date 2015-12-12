@@ -136,7 +136,7 @@ public class Triangulation
      * **/
     public static GridPoint ConvertTriangulationPointToGridPoint(TriangulationPoint triangulationPoint)
     {
-        return new GridPoint((int) triangulationPoint.Xf, (int) triangulationPoint.Yf);
+        return new GridPoint((int) triangulationPoint.Xf, (int) triangulationPoint.Yf, false);
     }
 
     /**

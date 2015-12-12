@@ -191,7 +191,7 @@ public class GridEdge
             if (Y >= pointA.Y && Y <= pointB.Y)
             {
                 intersects = true;
-                intersection = new GridPoint(X, Y);
+                intersection = new GridPoint(X, Y, false);
                 return;
             }
             else
@@ -206,7 +206,7 @@ public class GridEdge
             if (X >= pointA.X && X <= pointB.X)
             {
                 intersects = true;
-                intersection = new GridPoint(X, Y);
+                intersection = new GridPoint(X, Y, false);
                 return;
             }
             else
@@ -749,7 +749,7 @@ public class GridEdge
  * **/
 public class GridTriangle
 {
-    public GridPoint[] m_points {get;set;}
+    public GridPoint[] m_points { get; set; }
 
     public GridTriangle()
     {
@@ -1158,6 +1158,16 @@ public class GridTriangle
     public float GetArea()
     {
         return 0.5f * Mathf.Abs(MathUtils.Determinant(m_points[0], m_points[1], m_points[2]));
+    }
+
+    /**
+     * Translate this triangle
+     * **/
+    public void Translate(GridPoint translation)
+    {
+        m_points[0] += translation;
+        m_points[1] += translation;
+        m_points[2] += translation;
     }
 
     /**

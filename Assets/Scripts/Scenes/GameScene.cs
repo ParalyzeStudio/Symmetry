@@ -711,9 +711,9 @@ public class GameScene : GUIScene
     private void MakeFirstDummyClippingOperation()
     {
         Contour dummyContour = new Contour(4);
-        dummyContour.Add(new GridPoint(0, 0));
-        dummyContour.Add(new GridPoint(10, 0));
-        dummyContour.Add(new GridPoint(0, 5));
+        dummyContour.Add(new GridPoint(0, 0, true));
+        dummyContour.Add(new GridPoint(10, 0, true));
+        dummyContour.Add(new GridPoint(0, 5, true));
         Shape dummySubjShape = new Shape(dummyContour);
         Shape dummyClipShape = new Shape(dummyContour);
 

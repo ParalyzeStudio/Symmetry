@@ -177,11 +177,22 @@ public class Contour : List<GridPoint>
     /**
      * Multiply every point in that contour by a constant
      * **/
-    public void ScalePoints(float scaleConstant)
+    public void Scale(float scaleConstant)
     {
         for (int i = 0; i != this.Count; i++)
         {
             this[i] *= scaleConstant;
+        }
+    }
+
+    /**
+     * Translate every point in that contour
+     * **/
+    public void Translate(GridPoint translation)
+    {
+        for (int i = 0; i != this.Count; i++)
+        {
+            this[i] += translation;
         }
     }
 

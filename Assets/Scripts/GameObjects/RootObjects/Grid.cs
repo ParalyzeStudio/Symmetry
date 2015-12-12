@@ -113,9 +113,7 @@ public class Grid : MonoBehaviour
                     anchorPositionY = ((iLineNumber - 1 - m_numLines / 2) * m_gridSpacing);
                 }
 
-                int gridPositionScale = GridPoint.DEFAULT_SCALE_PRECISION;
-                GridPoint anchorGridPosition = new GridPoint(iColumnNumber, iLineNumber);
-                anchorGridPosition.Scale(gridPositionScale);
+                GridPoint anchorGridPosition = new GridPoint(iColumnNumber, iLineNumber, true);
                 Vector3 anchorPosition = new Vector3(anchorPositionX, anchorPositionY, 0);
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
 
@@ -177,9 +175,9 @@ public class Grid : MonoBehaviour
     }
 
     /**
-     * Calculates the grid coordinates (column, line) of a point knowing its world coordinates
+     * Calculates the grid coordinates of a point knowing its world coordinates
      * **/
-    public Vector2 GetPointGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
+    public GridPoint GetPointGridCoordinatesFromWorldCoordinates(Vector2 worldCoordinates)
     {
         worldCoordinates -= GeometryUtils.BuildVector2FromVector3(gameObject.transform.position);
 
@@ -203,7 +201,21 @@ public class Grid : MonoBehaviour
             iColNumber = worldCoordinates.x / m_gridSpacing + m_numColumns / 2 + 1;
         }
 
-        return new Vector2(iColNumber, iLineNumber);
+        GridPoint gridCoords = new GridPoint(Mathf.RoundToInt(iColNumber * GridPoint.DEFAULT_SCALE_PRECISION), 
+                                             Mathf.RoundToInt(iLineNumber * GridPoint.DEFAULT_SCALE_PRECISION),
+                                             false);
+        return gridCoords;
+    }
+
+    /**
+     * Converts a world vector into a grid vector
+     * **/
+    public GridPoint TransformWorldVectorIntoGridVector(Vector2 worldVector)
+    {
+        int X = Mathf.RoundToInt(worldVector.x / m_gridSpacing * GridPoint.DEFAULT_SCALE_PRECISION);
+        int Y = Mathf.RoundToInt(worldVector.y / m_gridSpacing * GridPoint.DEFAULT_SCALE_PRECISION);
+
+        return new GridPoint(X, Y, false);
     }
 
     /**
@@ -249,6 +261,25 @@ public class Grid : MonoBehaviour
             return m_anchors[iMinDistanceAnchorIndex];
         else
             return null;
+    }
+
+    /**
+     * Returns the grid anchor coordinates that is the closest to the position vector passed as parameter
+     * **/
+    public GridAnchor GetClosestGridAnchorForGridPosition(GridPoint gridPosition)
+    {
+        for (int iAnchorIndex = 0; iAnchorIndex != m_anchors.Length; iAnchorIndex++)
+        {
+            GridPoint gridAnchorWorldPosition = m_anchors[iAnchorIndex].m_gridPosition;
+            int dx = Mathf.Abs(gridPosition.X - gridAnchorWorldPosition.X);
+            int dy = Mathf.Abs(gridPosition.Y - gridAnchorWorldPosition.Y);
+            if (dx <= 0.5f * GridPoint.DEFAULT_SCALE_PRECISION && dy <= 0.5f * GridPoint.DEFAULT_SCALE_PRECISION)
+            {
+                return m_anchors[iAnchorIndex];
+            }
+        }
+
+        return null;
     }
 
     public struct GridBoxPoint
@@ -310,34 +341,25 @@ public class Grid : MonoBehaviour
     {
         //Set the grid coordinates of edge endpoints
         GridPoint edgePointA, edgePointB;
-        int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
         if (edgeLocation == GridBoxEdgeLocation.LEFT)
         {
-            edgePointA = new GridPoint(1, m_numLines);
-            edgePointB = new GridPoint(1, 1);
-            edgePointA.Scale(scalePrecision);
-            edgePointB.Scale(scalePrecision);
+            edgePointA = new GridPoint(1, m_numLines, true);
+            edgePointB = new GridPoint(1, 1, true);
         }
         else if (edgeLocation == GridBoxEdgeLocation.BOTTOM)
         {
-            edgePointA = new GridPoint(1, 1);
-            edgePointB = new GridPoint(m_numColumns, 1);
-            edgePointA.Scale(scalePrecision);
-            edgePointB.Scale(scalePrecision);
+            edgePointA = new GridPoint(1, 1, true);
+            edgePointB = new GridPoint(m_numColumns, 1, true);
         }
         else if (edgeLocation == GridBoxEdgeLocation.RIGHT)
         {
-            edgePointA = new GridPoint(m_numColumns, 1);
-            edgePointB = new GridPoint(m_numColumns, m_numLines);
-            edgePointA.Scale(scalePrecision);
-            edgePointB.Scale(scalePrecision);
+            edgePointA = new GridPoint(m_numColumns, 1, true);
+            edgePointB = new GridPoint(m_numColumns, m_numLines, true);
         }
         else //GridBoxEdgeLocation.TOP
         {
-            edgePointA = new GridPoint(m_numColumns, m_numLines);
-            edgePointB = new GridPoint(1, m_numLines);
-            edgePointA.Scale(scalePrecision);
-            edgePointB.Scale(scalePrecision);
+            edgePointA = new GridPoint(m_numColumns, m_numLines, true);
+            edgePointB = new GridPoint(1, m_numLines, true);
         }
 
         GridPoint intersection;

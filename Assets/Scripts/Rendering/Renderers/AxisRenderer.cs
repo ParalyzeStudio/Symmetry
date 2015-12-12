@@ -458,9 +458,9 @@ public class AxisRenderer : MonoBehaviour
     {
         GridPoint axisDirection = GetDirection();
         if (bClockwiseOrder)
-            return new GridPoint(axisDirection.Y, -axisDirection.X);
+            return new GridPoint(axisDirection.Y, -axisDirection.X, false);
         else
-            return new GridPoint(-axisDirection.Y, axisDirection.X);
+            return new GridPoint(-axisDirection.Y, axisDirection.X, false);
     }
 
     public GameScene GetGameScene()

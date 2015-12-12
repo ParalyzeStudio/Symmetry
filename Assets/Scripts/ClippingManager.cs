@@ -34,7 +34,7 @@ public class ClippingManager : MonoBehaviour
         {
             IntPoint pathPoint = path[iPathPointIndex];
             GridPoint contourPoint;
-            contourPoint = new GridPoint((int)pathPoint.X, (int)pathPoint.Y);
+            contourPoint = new GridPoint((int)pathPoint.X, (int)pathPoint.Y, false);
             contour.Add(contourPoint);
         }
 

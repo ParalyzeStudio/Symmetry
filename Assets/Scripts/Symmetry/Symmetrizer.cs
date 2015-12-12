@@ -168,12 +168,6 @@ public class Symmetrizer : MonoBehaviour
         bool bSymmetrizeEndpoint1 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint1Position);
         bool bSymmetrizeEndpoint2 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint2Position);
 
-        if (!bSymmetrizeEndpoint2)
-        {
-            Debug.Log("axisEdge A:" + axisEdge.m_pointA + " B:" + axisEdge.m_pointB);
-            Debug.Log("axisToSymmetrize A:" + axisToSymmetrizeEndpoint1Position + " B:" + axisToSymmetrizeEndpoint2Position);
-        }
-
         if (!bSymmetrizeEndpoint1 || !bSymmetrizeEndpoint2) //axis to symmetrize is not fully contained in this axis strip
             return null;        
 
@@ -318,7 +312,7 @@ public class Symmetrizer : MonoBehaviour
         {
             float distanceToAxis = GeometryUtils.DistanceToLine(point, axisPoint1, m_axis.GetDirection());
             Vector2 v = 2 * distanceToAxis * axisNormal / axisNormal.magnitude;
-            GridPoint gridV = new GridPoint(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
+            GridPoint gridV = new GridPoint(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), false);
             
             if (det > 0) // 'left'
             {
@@ -328,7 +322,6 @@ public class Symmetrizer : MonoBehaviour
                 symmetricPoint = point - gridV;
         }
 
-        symmetricPoint.m_scale = point.m_scale;
         return symmetricPoint;
     }
 
@@ -354,16 +347,10 @@ public class Symmetrizer : MonoBehaviour
         List<GridPoint> intersections = new List<GridPoint>();
         intersections.Capacity = 2;
 
-        int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
-
-        GridPoint gridTopLeft = new GridPoint(1, m_gameScene.m_grid.m_numLines);
-        GridPoint gridTopRight = new GridPoint(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines);
-        GridPoint gridBottomLeft = new GridPoint(1, 1);
-        GridPoint gridBottomRight = new GridPoint(m_gameScene.m_grid.m_numColumns, 1);
-        gridTopLeft.Scale(scalePrecision);
-        gridTopRight.Scale(scalePrecision);
-        gridBottomLeft.Scale(scalePrecision);
-        gridBottomRight.Scale(scalePrecision);
+        GridPoint gridTopLeft = new GridPoint(1, m_gameScene.m_grid.m_numLines, true);
+        GridPoint gridTopRight = new GridPoint(m_gameScene.m_grid.m_numColumns, m_gameScene.m_grid.m_numLines, true);
+        GridPoint gridBottomLeft = new GridPoint(1, 1, true);
+        GridPoint gridBottomRight = new GridPoint(m_gameScene.m_grid.m_numColumns, 1, true);
 
         GridEdge leftEdge = new GridEdge(gridBottomLeft, gridTopLeft);
         GridEdge topEdge = new GridEdge(gridTopLeft, gridTopRight);

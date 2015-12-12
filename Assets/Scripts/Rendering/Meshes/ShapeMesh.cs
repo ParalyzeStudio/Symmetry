@@ -64,9 +64,18 @@ public class ShapeMesh : TexturedMesh
             for (int i = 0; i != m_shapeData.m_triangles.Count; i++)
             {
                 GridTriangle shapeTriangle = m_shapeData.m_triangles[i];
-                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[0]);
-                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[1]);
-                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[2]);
+
+                //Add shape offset to every triangle vertex before rendering
+                GridPoint trianglePt1 = shapeTriangle.m_points[0];
+                GridPoint trianglePt2 = shapeTriangle.m_points[1];
+                GridPoint trianglePt3 = shapeTriangle.m_points[2];
+                GridPoint gridPt1 = trianglePt1 + m_shapeData.m_gridOffset;
+                GridPoint gridPt2 = trianglePt2 + m_shapeData.m_gridOffset;
+                GridPoint gridPt3 = trianglePt3 + m_shapeData.m_gridOffset;
+                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt1);
+                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt2);
+                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt3);
+
                 AddTriangle(pt1, pt3, pt2);
             }
 
@@ -202,7 +211,6 @@ public class ShapeMesh : TexturedMesh
      * **/
     private void OnMeshSwept()
     {        
-        Debug.Log("OnMeshSwept");
         List<Shape> shapes = GetShapesHolder().m_shapes;
         //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
         EnsureUnityInstancesAreSetBeforeThreading();
@@ -584,26 +592,5 @@ public class ShapeMesh : TexturedMesh
     //    }
 
     //    mesh.colors = meshColors;
-    //}
-
-    /**
-     * Shift all m_gridTriangles value by a grid coordinates vector (deltaLine, deltaColumn) (i.e translate the shape)
-     * **/
-    //public void ShiftShapeVertices(Vector2 shift)
-    //{
-    //    for (int iTriangleIndex = 0; iTriangleIndex != m_shapeData.m_triangles.Count; iTriangleIndex++)
-    //    {
-    //        BaseTriangle triangle = m_shapeData.m_triangles[iTriangleIndex];
-    //        Vector2[] trianglePoints = triangle.m_points;
-    //        for (int iPointIndex = 0; iPointIndex != 3; iPointIndex++)
-    //        {
-    //            trianglePoints[iPointIndex] += shift;
-    //        }
-    //    }
-
-    //    for (int iContourPointIdx = 0; iContourPointIdx != m_shapeData.m_contour.Count; iContourPointIdx++)
-    //    {
-    //        m_shapeData.m_contour[iContourPointIdx] += shift;
-    //    }
     //}
 }

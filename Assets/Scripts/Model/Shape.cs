@@ -4,8 +4,8 @@ using System.Collections.Generic;
 public class Shape : GridTriangulable
 {
     public Color m_color { get; set; }
-    public Vector2 m_offsetOnVertices { get; set; }
-    public GridPoint m_gridOffsetOnVertices { get; set; }
+    public Vector2 m_offset { get; set; }
+    public GridPoint m_gridOffset { get; set; }
     public ShapeMesh m_parentMesh { get; set; }
 
     public enum ShapeState
@@ -25,8 +25,8 @@ public class Shape : GridTriangulable
 
     public Shape()
     {
-        m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = GridPoint.zero;
+        m_offset = Vector2.zero;
+        m_gridOffset = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
@@ -34,8 +34,8 @@ public class Shape : GridTriangulable
     public Shape(Contour contour)
         : base(contour)
     {
-        m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = GridPoint.zero;
+        m_offset = Vector2.zero;
+        m_gridOffset = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
@@ -43,8 +43,8 @@ public class Shape : GridTriangulable
     public Shape(Contour contour, List<Contour> holes)
         : base(contour, holes)
     {
-        m_offsetOnVertices = Vector2.zero;
-        m_gridOffsetOnVertices = GridPoint.zero;
+        m_offset = Vector2.zero;
+        m_gridOffset = GridPoint.zero;
         m_state = ShapeState.NONE;
         m_parentMesh = null;
     }
@@ -53,8 +53,8 @@ public class Shape : GridTriangulable
         : base(other)
     {
         m_color = other.m_color;
-        m_offsetOnVertices = other.m_offsetOnVertices;
-        m_gridOffsetOnVertices = other.m_gridOffsetOnVertices;
+        m_offset = other.m_offset;
+        m_gridOffset = other.m_gridOffset;
         m_state = other.m_state;
     }
 
@@ -287,23 +287,50 @@ public class Shape : GridTriangulable
         return false;
     }
 
+    /**
+     * Translate this shape (contour and holes) by a certain vector
+     * **/
+    public void Translate(GridPoint translation)
+    {
+        //Contour
+        m_contour.Translate(translation);
+
+        //holes
+        for (int iHolesIdx = 0; iHolesIdx != m_holes.Count; iHolesIdx++)
+        {
+            m_holes[iHolesIdx].Translate(translation);
+        }
+
+        //triangles
+        for (int iTriangleIdx = 0; iTriangleIdx != m_triangles.Count; iTriangleIdx++)
+        {
+            m_triangles[iTriangleIdx].Translate(translation);
+        }
+    }
+
+    /**
+     * Returns the contour of this shape translated by the m_gridOffset
+     * **/
     public Contour GetContourWithOffset()
     {
-        if (m_gridOffsetOnVertices == Vector2.zero)
+        if (m_gridOffset == Vector2.zero)
             return m_contour;
 
         Contour contourWithOffset = new Contour(m_contour);
         for (int i = 0; i != contourWithOffset.Count; i++)
         {
-            contourWithOffset[i] += m_gridOffsetOnVertices;
+            contourWithOffset[i] += m_gridOffset;
         }
 
         return contourWithOffset;
     }
 
+    /**
+     * Returns the holes of this shape translated by the m_gridOffset
+     * **/
     public List<Contour> GetHolesWithOffset()
     {
-        if (m_gridOffsetOnVertices == GridPoint.zero)
+        if (m_gridOffset == GridPoint.zero)
             return m_holes;
 
         List<Contour> holesWithOffset = new List<Contour>(m_holes);
@@ -313,7 +340,7 @@ public class Shape : GridTriangulable
             Contour holesVec = m_holes[i];
             for (int j = 0; j != holesVec.Count; j++)
             {
-                holesVec[j] += m_gridOffsetOnVertices;
+                holesVec[j] += m_gridOffset;
             }
         }
 

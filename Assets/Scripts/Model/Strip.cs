@@ -25,7 +25,8 @@ public class Strip : GridTriangulable
         Grid grid = m_parentAxis.GetGameScene().m_grid;
         Vector2 axisNormal = m_parentAxis.GetNormal();
         GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x),
-                                                 Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y));
+                                                 Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y),
+                                                 false);
 
         Grid.GridBoxPoint[] endpoint1LineIntersections = grid.FindLineGridBoxIntersections(m_parentAxis.m_pointA, gridAxisNormal);
         Grid.GridBoxPoint[] endpoint2LineIntersections = grid.FindLineGridBoxIntersections(m_parentAxis.m_pointB, gridAxisNormal);
@@ -68,15 +69,10 @@ public class Strip : GridTriangulable
 
         //Build the contour by adding grid vertices if 2 consecutive intersection points are on 2 adjacent grid edges
         Contour stripContour = new Contour(4); //at least 4 points
-        int scaleValue = GridPoint.DEFAULT_SCALE_PRECISION;
-        GridPoint gridTopLeftCorner = new GridPoint(1, grid.m_numLines);
-        GridPoint gridBottomLeftCorner = new GridPoint(1, 1);
-        GridPoint gridBottomRightCorner = new GridPoint(grid.m_numColumns, 1);
-        GridPoint gridTopRightCorner = new GridPoint(grid.m_numColumns, grid.m_numLines);
-        gridTopLeftCorner.Scale(scaleValue);
-        gridBottomLeftCorner.Scale(scaleValue);
-        gridBottomRightCorner.Scale(scaleValue);
-        gridTopRightCorner.Scale(scaleValue);
+        GridPoint gridTopLeftCorner = new GridPoint(1, grid.m_numLines, true);
+        GridPoint gridBottomLeftCorner = new GridPoint(1, 1, true);
+        GridPoint gridBottomRightCorner = new GridPoint(grid.m_numColumns, 1, true);
+        GridPoint gridTopRightCorner = new GridPoint(grid.m_numColumns, grid.m_numLines, true);
 
         GridEdge axisEdge = new GridEdge(m_parentAxis.m_pointA, m_parentAxis.m_pointB);
 

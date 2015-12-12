@@ -168,8 +168,6 @@ public class GUIButton : MonoBehaviour
         GUIManager guiManager = GetGUIManager();
         guiManager.m_selectedSideButtonID = m_ID;
 
-        Debug.Log("OnClick");
-
         if (m_ID == GUIButtonID.ID_OPTIONS_BUTTON)
         {
             if (!guiManager.m_sideButtonsOverlayDisplayed)
@@ -238,7 +236,6 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_UNSTACK_SYMMETRY)
         {
-            Debug.Log("ID_UNSTACK_SYMMETRY");
             GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
             gameScene.m_gameStack.Pop();
         }

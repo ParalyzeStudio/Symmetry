@@ -69,8 +69,9 @@ public class ShapeVoxelGrid : MonoBehaviour
         Vector2 gridSize = parentGrid.m_gridSize;
 
         int scalePrecision = GridPoint.DEFAULT_SCALE_PRECISION;
-        GridPoint voxelGridPosition = new GridPoint((int) (scalePrecision * x * m_voxelSize), (int) (scalePrecision * y * m_voxelSize));
-        voxelGridPosition.m_scale = scalePrecision;
+        GridPoint voxelGridPosition = new GridPoint(Mathf.RoundToInt(scalePrecision * x * m_voxelSize), 
+                                                    Mathf.RoundToInt(scalePrecision * y * m_voxelSize),
+                                                    false);
 
         ShapeVoxel voxel = new ShapeVoxel(voxelGridPosition);
 

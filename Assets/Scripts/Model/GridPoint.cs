@@ -37,17 +37,17 @@ public struct GridPoint
     {
         get
         {
-            return new GridPoint(0, 0);
+            return new GridPoint(0, 0, false);
         }
     }
 
-    public static GridPoint operator -(GridPoint a) { return new GridPoint(-a.X, -a.Y); }
-    public static GridPoint operator -(GridPoint a, GridPoint b) { return new GridPoint(a.X - b.X, a.Y - b.Y); }
+    public static GridPoint operator -(GridPoint a) { return new GridPoint(-a.X, -a.Y, false); }
+    public static GridPoint operator -(GridPoint a, GridPoint b) { return new GridPoint(a.X - b.X, a.Y - b.Y, false); }
     public static bool operator !=(GridPoint lhs, GridPoint rhs) { return !lhs.Equals(rhs); }
-    public static GridPoint operator *(float d, GridPoint a) { return new GridPoint(Mathf.RoundToInt(d * a.X), Mathf.RoundToInt(d * a.Y)); }
-    public static GridPoint operator *(GridPoint a, float d) { return new GridPoint(Mathf.RoundToInt(a.X * d), Mathf.RoundToInt(a.Y * d)); }
-    public static GridPoint operator /(GridPoint a, float d) { return new GridPoint(Mathf.RoundToInt(a.X / d), Mathf.RoundToInt(a.Y / d)); }
-    public static GridPoint operator +(GridPoint a, GridPoint b) { return new GridPoint(a.X + b.X, a.Y + b.Y); }
+    public static GridPoint operator *(float d, GridPoint a) { return new GridPoint(Mathf.RoundToInt(d * a.X), Mathf.RoundToInt(d * a.Y), false); }
+    public static GridPoint operator *(GridPoint a, float d) { return new GridPoint(Mathf.RoundToInt(a.X * d), Mathf.RoundToInt(a.Y * d), false); }
+    public static GridPoint operator /(GridPoint a, float d) { return new GridPoint(Mathf.RoundToInt(a.X / d), Mathf.RoundToInt(a.Y / d), false); }
+    public static GridPoint operator +(GridPoint a, GridPoint b) { return new GridPoint(a.X + b.X, a.Y + b.Y, false); }
     public static bool operator ==(GridPoint lhs, GridPoint rhs) { return lhs.Equals(rhs); }
     public static implicit operator Vector2(GridPoint a) { return new Vector2(a.X, a.Y); }
     public static implicit operator ClipperLib.IntPoint(GridPoint a) { return new ClipperLib.IntPoint(a.X, a.Y); }
@@ -87,23 +87,22 @@ public struct GridPoint
     }
 
     //We can scale this vector (by an integer value) for more precision when performing math operations on it
-    public int m_scale { get; set; }
+    //public int m_scale { get; set; }
 
-    public GridPoint(int x, int y) : this()
+
+    /***
+     * Build a new GridPoint with x and y coordinates
+     * **/
+    public GridPoint(int x, int y, bool bScaleValues = false) : this()
     {
         m_x = x;
         m_y = y;
-    }
 
-    /**
-     * Scales the point
-     * **/
-    public void Scale(int scale = DEFAULT_SCALE_PRECISION)
-    {
-        //Apply the new scale to the (column, line) GridPoint
-        m_scale = scale;
-        X *= scale;
-        Y *= scale;
+        if (bScaleValues)
+        {
+            m_x *= DEFAULT_SCALE_PRECISION;
+            m_y *= DEFAULT_SCALE_PRECISION;
+        }
     }
 
     /**
@@ -112,7 +111,11 @@ public struct GridPoint
      * **/
     public Vector2 GetAsColumnLineVector()
     {
-        return new Vector2(X / (float)m_scale, Y / (float)m_scale);
+        //if (m_scale <= 0)
+        //    throw new System.Exception("GridPoint.GetAsColumnLineVector() ---- m_scale value must be set to a strictly positive value");
+
+        //return new Vector2(X / (float)m_scale, Y / (float)m_scale);
+        return new Vector2(X / (float)DEFAULT_SCALE_PRECISION, Y / (float)DEFAULT_SCALE_PRECISION);
     }
 
     public override string ToString()
