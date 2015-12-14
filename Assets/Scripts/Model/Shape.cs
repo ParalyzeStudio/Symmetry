@@ -13,7 +13,10 @@ public class Shape : GridTriangulable
         NONE = 0,
         DYNAMIC_INTERSECTION, //this dynamic shape is the result of the intersection of two shapes
         DYNAMIC_DIFFERENCE, //this dynamic shape is the result of the difference between two shapes
-        STATIC,
+        STATIC, //this shape has been drawn
+        MOVING_ORIGINAL_SHAPE, //the original shape being dragged on the grid by the player
+        MOVING_SUBSTITUTION_INTERSECTION, //a shape that is the result of an intersection clipping operation between moving shape and static shapes
+        MOVING_SUBSTITUTION_DIFFERENCE, //a shape that is the result of a difference clipping operation between moving shape and static shapes
         BUSY_CLIPPING, //the shape is being clipped (using threads) and must not be considered as dynamic anymore and it is not static yet
         DESTROYED
     }
@@ -22,6 +25,7 @@ public class Shape : GridTriangulable
     public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
     public List<Shape> m_shapesToCreate { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
     public HashSet<Shape> m_shapesToDelete { get; set; } //Set of shapes to delete once the difference/fusion occured
+    private List<Shape> m_substitutionShapes; //List of shapes that are drawn over the shape that is being moved by the player when clipping occurs
 
     public Shape()
     {
@@ -309,45 +313,6 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * Returns the contour of this shape translated by the m_gridOffset
-     * **/
-    public Contour GetContourWithOffset()
-    {
-        if (m_gridOffset == Vector2.zero)
-            return m_contour;
-
-        Contour contourWithOffset = new Contour(m_contour);
-        for (int i = 0; i != contourWithOffset.Count; i++)
-        {
-            contourWithOffset[i] += m_gridOffset;
-        }
-
-        return contourWithOffset;
-    }
-
-    /**
-     * Returns the holes of this shape translated by the m_gridOffset
-     * **/
-    public List<Contour> GetHolesWithOffset()
-    {
-        if (m_gridOffset == GridPoint.zero)
-            return m_holes;
-
-        List<Contour> holesWithOffset = new List<Contour>(m_holes);
-
-        for (int i = 0; i != m_holes.Count; i++)
-        {
-            Contour holesVec = m_holes[i];
-            for (int j = 0; j != holesVec.Count; j++)
-            {
-                holesVec[j] += m_gridOffset;
-            }
-        }
-
-        return holesWithOffset;
-    }
-
-    /**
      * Create the data structures that will hold temporary created/deleted shapes
      * **/
     public void InitTemporaryStoredShapes()
@@ -386,6 +351,54 @@ public class Shape : GridTriangulable
         m_shapesToDelete.Add(m_overlappedStaticShape);
         m_overlappedStaticShape.m_state = ShapeState.DESTROYED;
         m_overlappedStaticShape = null;
+    }
+
+    /**
+     * This method is called when player moves a shape over the grid
+     * We recalculate here the intersection and difference shapes that are clipped against the static shapes
+     * **/
+    public void InvalidateSubstitutionShapesOnMove()
+    {
+        //Copy the shape before clipping it
+        Shape shapeCopy = new Shape(this);
+
+        if (m_substitutionShapes == null)
+            m_substitutionShapes = new List<Shape>();
+
+        //destroy and clear the old substitution shapes
+        Shapes shapesHolder = m_parentMesh.GetShapesHolder();
+        for (int i = 0; i != m_substitutionShapes.Count; i++)
+        {
+            shapesHolder.m_shapes.Remove(m_substitutionShapes[i]);
+            shapesHolder.DestroyShapeObjectForShape(m_substitutionShapes[i]);
+        }
+        m_substitutionShapes.Clear();
+
+        //build the new ones
+        ClippingManager clippingManager = m_parentMesh.GetClippingManager();
+        List<Shape> leftClippedInterShapes, leftClippedDiffShapes;
+        clippingManager.ClipAgainstStaticShapes(shapeCopy, out leftClippedInterShapes, out leftClippedDiffShapes, false);
+
+        for (int i = 0; i != leftClippedInterShapes.Count; i++)
+        {
+            Shape interShape = leftClippedInterShapes[i];
+            GameObject interShapeObject = shapesHolder.CreateShapeObjectFromData(interShape, false);
+            GameObjectAnimator interShapeObjectAnimator = interShapeObject.GetComponent<GameObjectAnimator>();
+            interShapeObjectAnimator.SetPosition(new Vector3(0, 0, -1));
+            m_substitutionShapes.Add(interShape);
+        }
+
+        for (int i = 0; i != leftClippedDiffShapes.Count; i++)
+        {
+            Shape diffShape = leftClippedDiffShapes[i];
+            GameObject diffShapeObject = shapesHolder.CreateShapeObjectFromData(diffShape, false);
+            GameObjectAnimator diffShapeObjectAnimator = diffShapeObject.GetComponent<GameObjectAnimator>();
+            diffShapeObjectAnimator.SetPosition(new Vector3(0, 0, -1));
+            m_substitutionShapes.Add(diffShape);
+        }
+
+        //Debug.Log("INTER ShapesCount:" + leftClippedInterShapes.Count);
+        //Debug.Log("DIFF ShapesCount:" + leftClippedDiffShapes.Count);
     }
 
     /**

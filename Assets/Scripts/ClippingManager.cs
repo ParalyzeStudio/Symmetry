@@ -49,11 +49,10 @@ public class ClippingManager : MonoBehaviour
             List<List<IntPoint>> subjsPaths = new List<List<IntPoint>>();
 
             //subj contour
-            Contour contourWithOffset = subjShape.GetContourWithOffset();
-            subjsPaths.Add(CreatePathFromContour(contourWithOffset));
+            subjsPaths.Add(CreatePathFromContour(subjShape.m_contour));
 
             //subj holes
-            List<Contour> holesWithOffset = subjShape.GetHolesWithOffset();
+            List<Contour> holesWithOffset = subjShape.m_holes;
             for (int iHoleIdx = 0; iHoleIdx != holesWithOffset.Count; iHoleIdx++)
             {
                 subjsPaths.Add(CreatePathFromContour(holesWithOffset[iHoleIdx]));
@@ -63,11 +62,10 @@ public class ClippingManager : MonoBehaviour
             List<List<IntPoint>> clipsPaths = new List<List<IntPoint>>();
 
             //clip contour
-            contourWithOffset = clipShape.GetContourWithOffset();
-            clipsPaths.Add(CreatePathFromContour(contourWithOffset));
+            clipsPaths.Add(CreatePathFromContour(clipShape.m_contour));
 
             //clip holes
-            holesWithOffset = clipShape.GetHolesWithOffset();
+            holesWithOffset = clipShape.m_holes;
             for (int iHoleIdx = 0; iHoleIdx != holesWithOffset.Count; iHoleIdx++)
             {
                 clipsPaths.Add(CreatePathFromContour(holesWithOffset[iHoleIdx]));
@@ -177,8 +175,10 @@ public class ClippingManager : MonoBehaviour
 
     /**
      * Clip a shape against all the static shapes
+     * Set bDynamicClipping to true if shapes will be swept by a line after symmetry is done
+     * if shapes are clipped when player drags a shape on the grid set it to false
      * **/
-    public void ClipAgainstStaticShapes(Shape subjShape, out List<Shape> clippedInterShapes, out List<Shape> clippedDiffShapes)
+    public void ClipAgainstStaticShapes(Shape subjShape, out List<Shape> clippedInterShapes, out List<Shape> clippedDiffShapes, bool bDynamicClipping = true)
     {
         List<Shape> allShapes = m_shapesHolder.m_shapes;
         clippedDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
@@ -202,7 +202,10 @@ public class ClippingManager : MonoBehaviour
                     List<Shape> differenceShapes = ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
                     for (int k = 0; k != differenceShapes.Count; k++)
                     {
-                        differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                        if (bDynamicClipping)
+                            differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                        else
+                            differenceShapes[k].m_state = Shape.ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
                         differenceShapes[k].m_color = clipShape.m_color; //same color as original
                     }
                     clippedDifferenceShapes.AddRange(differenceShapes);
@@ -221,14 +224,21 @@ public class ClippingManager : MonoBehaviour
 
                     for (int k = 0; k != intersectionShapes.Count; k++)
                     {
-                        intersectionShapes[k].m_state = Shape.ShapeState.DYNAMIC_INTERSECTION;
+                        if (bDynamicClipping)
+                            intersectionShapes[k].m_state = Shape.ShapeState.DYNAMIC_INTERSECTION;
+                        else
+                            intersectionShapes[k].m_state = Shape.ShapeState.MOVING_SUBSTITUTION_INTERSECTION;
+
                         intersectionShapes[k].m_overlappedStaticShape = shape;
                     }
                     clippedInterShapes.AddRange(intersectionShapes);
                 }
                 else //no intersection, add the full clipShape to clippedDifferenceShapes
                 {
-                    clipShape.m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                    if (bDynamicClipping)
+                        clipShape.m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
+                    else
+                        clipShape.m_state = Shape.ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
                     clippedDifferenceShapes.Add(clipShape);
                 }
             }

@@ -2,9 +2,9 @@
 <level name="Debug level" number="0">
 	<counter maxActions="10"/>
 	<stack size="4"/>
-	<grid exactNumColumns="19" exactNumLines="13"/>
+	<grid exactNumColumns="15" exactNumLines="10"/>
 	<dottedOutlines>
-		<dottedOutline>
+		<!-- <dottedOutline>
 			<contour>
 				<point column="5" line="9"/>
 				<point column="5" line="8"/>
@@ -51,7 +51,7 @@
 				<point column="14" line="6"/>
 				<point column="12" line="6"/>
 			</contour>
-		</dottedOutline>
+		</dottedOutline> -->
 	</dottedOutlines>
 	<shapes>
 		 <shape color="1,0,0">
@@ -60,6 +60,22 @@
 				<point column="6" line="7"/>
 				<point column="7" line="7"/>
 				<point column="7" line="8"/>
+			</contour>
+		</shape>
+		<shape color="1,1,0">
+			<contour>
+				<point column="10" line="4"/>
+				<point column="14" line="4"/>
+				<point column="14" line="8"/>
+				<point column="10" line="8"/>
+			</contour>
+		</shape>		
+		<shape color="0,0,1">
+			<contour>
+				<point column="2" line="5"/>
+				<point column="5" line="5"/>
+				<point column="5" line="8"/>
+				<point column="2" line="8"/>
 			</contour>
 		</shape>
 	</shapes>

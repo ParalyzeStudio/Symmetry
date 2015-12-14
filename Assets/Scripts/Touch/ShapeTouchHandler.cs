@@ -20,7 +20,9 @@ public class ShapeTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
-        this.GetComponent<ShapeMesh>().m_shapeData.m_offset = GridPoint.zero;
+        Shape pickedShape = this.GetComponent<ShapeMesh>().m_shapeData;
+        pickedShape.m_offset = GridPoint.zero;
+        pickedShape.m_state = Shape.ShapeState.MOVING_ORIGINAL_SHAPE;
 
         base.OnPointerDown(pointerLocation);
     }
@@ -29,22 +31,28 @@ public class ShapeTouchHandler : TouchHandler
     {
         if (!base.OnPointerMove(pointerLocation, delta))
             return false;
-
+        
         //convert the delta vector to grid coordinates and set it to the shape
         ShapeMesh shapeMesh = this.GetComponent<ShapeMesh>();
         Shape shape = shapeMesh.m_shapeData;
         shape.m_offset += delta;
+
+        GridPoint prevGridOffset = shape.m_gridOffset;
         Grid grid = ((GameScene) GetSceneManager().m_currentScene).m_grid;
         shape.m_gridOffset = grid.TransformWorldVectorIntoGridVector(shape.m_offset);
+        GridPoint deltaGridOffset = shape.m_gridOffset - prevGridOffset;
+        shape.Translate(deltaGridOffset);
 
         //Instead of transforming the delta (which can be very tiny) in grid coordinates that can lead to approximation errors,
         //we add the delta to the world offset of the shape. Then we transform the global offset once
         //(i.e instead of adding multiple big approximation errors we only make one when transforming the whole offset)
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
-        //gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
+        shape.InvalidateSubstitutionShapesOnMove();
 
         shapeMesh.Render(); //render again the shape
+
+        //Debug.Log("OnPointerMove v0:" + shape.m_contour[0]);
 
         return true;
     }
@@ -60,7 +68,7 @@ public class ShapeTouchHandler : TouchHandler
             ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
             Shape shape = shapeMesh.m_shapeData;
 
-            GridPoint firstShapeVertex = shape.m_contour[0] + shape.m_gridOffset;
+            GridPoint firstShapeVertex = shape.m_contour[0];
 
             //Find the closest anchor to one of this shape vertices
             Grid.GridAnchor closestGridAnchor = gameScene.m_grid.GetClosestGridAnchorForGridPosition(firstShapeVertex);
@@ -68,6 +76,8 @@ public class ShapeTouchHandler : TouchHandler
             GridPoint translation = closestGridAnchor.m_gridPosition - shape.m_contour[0];
 
             shape.Translate(translation); //translate all vertices
+            
+            shape.InvalidateSubstitutionShapesOnMove();
 
             shape.m_offset = Vector2.zero; //reset offset to zero
             shape.m_gridOffset = GridPoint.zero; //reset offset to zero

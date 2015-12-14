@@ -65,11 +65,7 @@ public class Shapes : MonoBehaviour
      * **/
     public void DestroyShapeObjectForShape(Shape shape, float delay = 0.0f)
     {
-        GameObject shapeObject = shape.m_parentMesh.gameObject;
-        //there could be a delay before the shape object is actually detroyed so 
-        //in the meantime set the shape object opacity to zero so it is no longer visible for the player
-        shapeObject.GetComponent<ShapeAnimator>().SetOpacity(0);
-        Destroy(shapeObject, delay);
+        Destroy(shape.m_parentMesh.gameObject, delay);
     }
 
     /**

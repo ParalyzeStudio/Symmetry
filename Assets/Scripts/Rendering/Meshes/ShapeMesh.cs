@@ -66,15 +66,19 @@ public class ShapeMesh : TexturedMesh
                 GridTriangle shapeTriangle = m_shapeData.m_triangles[i];
 
                 //Add shape offset to every triangle vertex before rendering
-                GridPoint trianglePt1 = shapeTriangle.m_points[0];
-                GridPoint trianglePt2 = shapeTriangle.m_points[1];
-                GridPoint trianglePt3 = shapeTriangle.m_points[2];
-                GridPoint gridPt1 = trianglePt1 + m_shapeData.m_gridOffset;
-                GridPoint gridPt2 = trianglePt2 + m_shapeData.m_gridOffset;
-                GridPoint gridPt3 = trianglePt3 + m_shapeData.m_gridOffset;
-                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt1);
-                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt2);
-                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt3);
+                //GridPoint trianglePt1 = shapeTriangle.m_points[0];
+                //GridPoint trianglePt2 = shapeTriangle.m_points[1];
+                //GridPoint trianglePt3 = shapeTriangle.m_points[2];
+                //GridPoint gridPt1 = trianglePt1 + m_shapeData.m_gridOffset;
+                //GridPoint gridPt2 = trianglePt2 + m_shapeData.m_gridOffset;
+                //GridPoint gridPt3 = trianglePt3 + m_shapeData.m_gridOffset;
+                //Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt1);
+                //Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt2);
+                //Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt3);
+
+                Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[0]);
+                Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[1]);
+                Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[2]);
 
                 AddTriangle(pt1, pt3, pt2);
             }
@@ -85,6 +89,8 @@ public class ShapeMesh : TexturedMesh
             m_meshIndicesDirty = true;
             m_meshColorsDirty = true;
         }
+
+        RefreshMesh(); //refresh mesh immediately, do not wait next frame Update call
     }
 
     /**
@@ -214,18 +220,6 @@ public class ShapeMesh : TexturedMesh
         List<Shape> shapes = GetShapesHolder().m_shapes;
         //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
         EnsureUnityInstancesAreSetBeforeThreading();
-
-        /*** DEBUG WITHOUT THREADING ***/
-        //m_shapeData.InitTemporaryStoredShapes();
-        //if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
-        //{
-        //    m_shapeData.PerformDifferenceOnOverlappedStaticShape();
-        //    OnFinishPerformingDifferenceWithOverlappedStaticShape();
-        //}
-        //m_shapeData.m_state = Shape.ShapeState.STATIC;
-        //PerformFusionWithStaticShapes();
-        //OnFinishPerformingFusionWithStaticShapes();
-        /*** DEBUG WITHOUT THREADING ***/
 
         //Perform the difference clipping operation
         m_shapeData.InitTemporaryStoredShapes();
