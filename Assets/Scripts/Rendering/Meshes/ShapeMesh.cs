@@ -216,81 +216,8 @@ public class ShapeMesh : TexturedMesh
      * Callback called when all cells of this mesh have been swept
      * **/
     private void OnMeshSwept()
-    {        
-        List<Shape> shapes = GetShapesHolder().m_shapes;
-        //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
-        EnsureUnityInstancesAreSetBeforeThreading();
-
-        //Perform the difference clipping operation
-        m_shapeData.InitTemporaryStoredShapes();
-        if (this.m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
-        {
-            GetGameScene().GetQueuedThreadedJobsManager().AddJob
-                (
-                new ThreadedJob
-                    (
-                    new ThreadedJob.ThreadFunction(m_shapeData.PerformDifferenceOnOverlappedStaticShape),
-                    null,
-                    new ThreadedJob.ThreadFunction(OnFinishPerformingDifferenceWithOverlappedStaticShape)
-                    )
-                );
-        }
-        
-        //make the shape static before the fusion occurs
-        m_shapeData.m_state = Shape.ShapeState.BUSY_CLIPPING;
-
-        //Perform the fusion
-        GetGameScene().GetQueuedThreadedJobsManager().AddJob
-            (
-            new ThreadedJob
-                (
-                new ThreadedJob.ThreadFunction(PerformFusionWithStaticShapes),
-                null,
-                new ThreadedJob.ThreadFunction(OnFinishPerformingFusionWithStaticShapes)
-                )
-            );
-    }
-
-    /**
-     * Perform fusion between this shape and all static shapes that overlap it
-     * **/
-    private void PerformFusionWithStaticShapes()
     {
-        //Fusion the shape
-        bool bFusionOccured = m_shapeData.PerformFusion();
-        if (bFusionOccured)
-            m_shapeData.Triangulate();
-    }
-
-    /**
-     * Build the extracted shapes from the difference clipping operation and make this shape static
-     * **/
-    private void OnFinishPerformingDifferenceWithOverlappedStaticShape()
-    {
-        //build the shape objects from the 'difference' operation
-        List<Shape> diffShapesToBuild = m_shapeData.m_shapesToCreate;
-        
-        for (int i = 0; i != diffShapesToBuild.Count; i++)
-        {
-            Shape shape = diffShapesToBuild[i];
-            shape.m_state = Shape.ShapeState.STATIC;
-            GetShapesHolder().CreateShapeObjectFromData(shape, false);
-        }
-    }
-
-    /**
-     * Re-render this shape that grew if other static shapes fusion with it or stayed the same if no fusion occured
-     * **/
-    private void OnFinishPerformingFusionWithStaticShapes()
-    {
-        //Destroy cells array and re-render the shape mesh + make it static
-        DestroyCells();
-        Render(false);
-        m_shapeData.m_state = Shape.ShapeState.STATIC;
-
-        //delete the shapes that we store in the fusion process
-        HashSet<Shape> shapesToDelete = m_shapeData.m_shapesToDelete;
-        GetShapesHolder().DeleteShapesSet(shapesToDelete);
+        m_shapeData.FinalizeClippingOperations();
     }
 
     public void AddFullQuadCell(ShapeCell cell)
@@ -414,12 +341,6 @@ public class ShapeMesh : TexturedMesh
 
     //    return false;
     //}
-
-    private void EnsureUnityInstancesAreSetBeforeThreading()
-    {
-        GetClippingManager();
-        GetShapesHolder();
-    }
 
     public GameScene GetGameScene()
     {

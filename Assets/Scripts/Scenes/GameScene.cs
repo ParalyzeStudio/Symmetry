@@ -563,10 +563,10 @@ public class GameScene : GUIScene
 
         //Show top button
         GUIButton.GUIButtonID[] childIDs = new GUIButton.GUIButtonID[4];
-        childIDs[0] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
-        childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
-        childIDs[2] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
-        childIDs[3] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
+        childIDs[0] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
+        childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
+        childIDs[2] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
+        childIDs[3] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
 
         GameObject buttonObject = GetGUIManager().CreateActionButton(actionButtonSkinSize,
                                                                      ActionButton.Location.TOP,

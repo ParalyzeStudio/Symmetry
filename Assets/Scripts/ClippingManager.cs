@@ -43,6 +43,9 @@ public class ClippingManager : MonoBehaviour
 
     public List<Shape> ShapesOperation(Shape subjShape, Shape clipShape, ClipType clipOperation, bool bNewPolygonSets = true)
     {
+        if (subjShape == null)
+            Debug.Log("STOP");
+
         if (bNewPolygonSets)
         {
             //build subjs paths

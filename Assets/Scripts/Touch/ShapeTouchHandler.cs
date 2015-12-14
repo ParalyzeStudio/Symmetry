@@ -21,7 +21,8 @@ public class ShapeTouchHandler : TouchHandler
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
         Shape pickedShape = this.GetComponent<ShapeMesh>().m_shapeData;
-        pickedShape.m_offset = GridPoint.zero;
+        pickedShape.m_offset = Vector2.zero;
+        pickedShape.m_gridOffset = GridPoint.zero;
         pickedShape.m_state = Shape.ShapeState.MOVING_ORIGINAL_SHAPE;
 
         base.OnPointerDown(pointerLocation);
@@ -37,22 +38,18 @@ public class ShapeTouchHandler : TouchHandler
         Shape shape = shapeMesh.m_shapeData;
         shape.m_offset += delta;
 
+        //Instead of transforming the delta (which can be very tiny) in grid coordinates that can lead to approximation errors,
+        //we add the delta to the world offset of the shape. Then we transform the global offset once
+        //(i.e instead of adding multiple big approximation errors we only make one when transforming the whole offset)
         GridPoint prevGridOffset = shape.m_gridOffset;
         Grid grid = ((GameScene) GetSceneManager().m_currentScene).m_grid;
         shape.m_gridOffset = grid.TransformWorldVectorIntoGridVector(shape.m_offset);
         GridPoint deltaGridOffset = shape.m_gridOffset - prevGridOffset;
         shape.Translate(deltaGridOffset);
-
-        //Instead of transforming the delta (which can be very tiny) in grid coordinates that can lead to approximation errors,
-        //we add the delta to the world offset of the shape. Then we transform the global offset once
-        //(i.e instead of adding multiple big approximation errors we only make one when transforming the whole offset)
+                
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-
         shape.InvalidateSubstitutionShapesOnMove();
-
-        shapeMesh.Render(); //render again the shape
-
-        //Debug.Log("OnPointerMove v0:" + shape.m_contour[0]);
+        shapeMesh.Render();
 
         return true;
     }
@@ -61,8 +58,6 @@ public class ShapeTouchHandler : TouchHandler
     {
         if (m_selected)
         {
-            Debug.Log("ShapeTouchHandler +++ OnPointerUp");
-
             GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
             ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
@@ -78,6 +73,7 @@ public class ShapeTouchHandler : TouchHandler
             shape.Translate(translation); //translate all vertices
             
             shape.InvalidateSubstitutionShapesOnMove();
+            shape.FinalizeClippingOperationsOnSubstitutionShapes();            
 
             shape.m_offset = Vector2.zero; //reset offset to zero
             shape.m_gridOffset = GridPoint.zero; //reset offset to zero

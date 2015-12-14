@@ -132,6 +132,8 @@ public class TouchManager : MonoBehaviour
 
                         //or the shapes
                         List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
+                        if (eventType == PointerEventType.POINTER_DOWN)
+                            Debug.Log("shapesCount:" + shapes.Count);
                         for (int iShapeIdx = 0; iShapeIdx != shapes.Count; iShapeIdx++)
                         {
                             ShapeTouchHandler shapeTouchHandler = shapes[iShapeIdx].m_parentMesh.gameObject.GetComponent<ShapeTouchHandler>();

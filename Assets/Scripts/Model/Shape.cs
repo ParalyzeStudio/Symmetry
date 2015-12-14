@@ -354,6 +354,46 @@ public class Shape : GridTriangulable
     }
 
     /**
+     * Perform fusion between this shape and all static shapes that overlap it
+     * **/
+    private void PerformFusionWithStaticShapes()
+    {
+        //Fusion the shape
+        bool bFusionOccured = PerformFusion();
+        if (bFusionOccured)
+            Triangulate();
+    }
+
+    /**
+     * Build the extracted shapes from the difference clipping operation and make this shape static
+     * **/
+    private void OnFinishPerformingDifferenceWithOverlappedStaticShape()
+    {
+        //build the shape objects from the 'difference' operation
+        for (int i = 0; i != m_shapesToCreate.Count; i++)
+        {
+            Shape shape = m_shapesToCreate[i];
+            shape.m_state = Shape.ShapeState.STATIC;
+            m_parentMesh.GetShapesHolder().CreateShapeObjectFromData(shape, false);
+        }
+    }
+
+    /**
+     * Re-render this shape that grew if other static shapes fusion with it or stayed the same if no fusion occured
+     * **/
+    private void OnFinishPerformingFusionWithStaticShapes()
+    {
+        //Destroy cells array and re-render the shape mesh + make it static
+        if (this.IsDynamic())
+            m_parentMesh.DestroyCells();
+        m_parentMesh.Render(false);
+        m_state = Shape.ShapeState.STATIC;
+
+        //delete the shapes that we store in the fusion process
+        m_parentMesh.GetShapesHolder().DeleteShapesSet(m_shapesToDelete);
+    }
+
+    /**
      * This method is called when player moves a shape over the grid
      * We recalculate here the intersection and difference shapes that are clipped against the static shapes
      * **/
@@ -402,10 +442,101 @@ public class Shape : GridTriangulable
     }
 
     /**
+     * When shape is about to become static, perform the last clipping operations:
+     * -difference on overlapped static shape if any
+     * -fusion with all static shapes
+     * This job is threaded when a symmetry is performed becaused it can make the UI lag and this can be noticed by the user
+     * On the other hand when we finalize clipping after releasing shape from drag we do not do it as it is hard to detect any lag
+     * **/
+    public void FinalizeClippingOperations()
+    {
+        InitTemporaryStoredShapes();
+
+        if (IsDynamic())
+        {
+            List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
+            //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
+            EnsureUnityInstancesAreSetBeforeThreading();
+
+            //Perform the difference clipping operation            
+            if (m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
+            {
+                m_parentMesh.GetGameScene().GetQueuedThreadedJobsManager().AddJob
+                    (
+                    new ThreadedJob
+                        (
+                        new ThreadedJob.ThreadFunction(PerformDifferenceOnOverlappedStaticShape),
+                        null,
+                        new ThreadedJob.ThreadFunction(OnFinishPerformingDifferenceWithOverlappedStaticShape)
+                        )
+                    );
+            }
+
+            //make the shape busy before the fusion occurs
+            m_state = Shape.ShapeState.BUSY_CLIPPING;
+
+            //Perform the fusion
+            m_parentMesh.GetGameScene().GetQueuedThreadedJobsManager().AddJob
+                (
+                new ThreadedJob
+                    (
+                    new ThreadedJob.ThreadFunction(PerformFusionWithStaticShapes),
+                    null,
+                    new ThreadedJob.ThreadFunction(OnFinishPerformingFusionWithStaticShapes)
+                    )
+                );
+        }
+        else if (IsSubstitutionShape())
+        {
+            if (m_state == Shape.ShapeState.MOVING_SUBSTITUTION_INTERSECTION)
+            {
+                PerformDifferenceOnOverlappedStaticShape();
+                OnFinishPerformingDifferenceWithOverlappedStaticShape();
+            }
+            PerformFusionWithStaticShapes();
+            OnFinishPerformingFusionWithStaticShapes();
+        }
+    }
+
+    /**
+     * Call this method when player has finished dragging a shape
+     * **/
+    public void FinalizeClippingOperationsOnSubstitutionShapes()
+    {
+        for (int i = 0; i != m_substitutionShapes.Count; i++)
+        {
+            m_substitutionShapes[i].FinalizeClippingOperations();
+        }
+
+        //destroy this shape object
+        Shapes shapesHolder = this.m_parentMesh.GetShapesHolder();
+        shapesHolder.m_shapes.Remove(this);
+        shapesHolder.DestroyShapeObjectForShape(this);
+    }
+
+    /***
+     * We need to set instances before threading because the Unity API is not thread-safe and every call to 
+        GameObject.FindGameObjectWithTag (or else) must be prevented
+     * **/
+    public void EnsureUnityInstancesAreSetBeforeThreading()
+    {
+        m_parentMesh.GetClippingManager();
+        m_parentMesh.GetShapesHolder();
+    }
+
+    /**
      * Simply tells if this shape is dynamic 
      * **/
     public bool IsDynamic()
     {
         return m_state == ShapeState.DYNAMIC_DIFFERENCE || m_state == ShapeState.DYNAMIC_INTERSECTION;
+    }
+
+    /**
+     * Simply tells if this shape is currently a substitution shape 
+     * **/
+    public bool IsSubstitutionShape()
+    {
+        return m_state == ShapeState.MOVING_SUBSTITUTION_INTERSECTION || m_state == ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
     }
 }
