@@ -629,13 +629,13 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(4, 2);
         triangle2.m_points[2] = new GridPoint(3, 4);
 
-        bool bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bool bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bool bResult = triangle1.IntersectsTriangle(triangle2);
+        //bool bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
 
-        if (!bResult1 && !bResult2)
-            Debug.Log("TEST 1 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (!bResult)
+            Debug.Log("TEST 1 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 1 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 1 FAILURE:" + bResult);
 
         //-----TEST 2-----// 1 point
         triangle1 = new GridTriangle();
@@ -647,13 +647,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3000, 0);
         triangle2.m_points[2] = new GridPoint(3000, 3000);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && !bResult2)
-            Debug.Log("TEST 2 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 2 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 2 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 2 FAILURE:" + bResult);
 
 
         //-----TEST 3-----//1 point
@@ -666,13 +665,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 2);
         triangle2.m_points[2] = new GridPoint(2, 4);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && !bResult2)
-            Debug.Log("TEST 3 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 3 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 3 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 3 FAILURE:" + bResult);
 
         //-----TEST 4-----//1 point
         triangle1 = new GridTriangle();
@@ -684,13 +682,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 1);
         triangle2.m_points[2] = new GridPoint(2, 3);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 4 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 4 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 4 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 4 FAILURE:" + bResult);
 
         //-----TEST 5-----//1 point
         triangle1 = new GridTriangle();
@@ -702,13 +699,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 3);
         triangle2.m_points[2] = new GridPoint(-2, 2);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 5 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 5 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 5 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 5 FAILURE:" + bResult);
 
         //-----TEST 6-----//1 point
         triangle1 = new GridTriangle();
@@ -720,13 +716,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(2, 4);
         triangle2.m_points[2] = new GridPoint(-1, 4);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2, true);
 
-        if (bResult1 && !bResult2)
-            Debug.Log("TEST 6 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (!bResult)
+            Debug.Log("TEST 6 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 6 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 6 FAILURE:" + bResult);
 
         //-----TEST 7-----//2 points
         triangle1 = new GridTriangle();
@@ -738,13 +733,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 0);
         triangle2.m_points[2] = new GridPoint(4, 3);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 7 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 7 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 7 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 7 FAILURE:" + bResult);
 
         //-----TEST 8-----//2 points
         triangle1 = new GridTriangle();
@@ -756,13 +750,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(2, -3);
         triangle2.m_points[2] = new GridPoint(2, 0);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2, true);
 
-        if (bResult1 && !bResult2)
-            Debug.Log("TEST 8 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (!bResult)
+            Debug.Log("TEST 8 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 8 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 8 FAILURE:" + bResult);
 
         //-----TEST 9-----//2 points
         triangle1 = new GridTriangle();
@@ -774,13 +767,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(2, 0);
         triangle2.m_points[2] = new GridPoint(0, -2);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2, true);
 
-        if (bResult1 && !bResult2)
-            Debug.Log("TEST 9 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (!bResult)
+            Debug.Log("TEST 9 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 9 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 9 FAILURE:" + bResult);
 
         //-----TEST 10-----//2 points
         triangle1 = new GridTriangle();
@@ -792,13 +784,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(5, 2);
         triangle2.m_points[2] = new GridPoint(2, 2);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 10 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 10 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 10 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 10 FAILURE:" + bResult);
 
         //-----TEST 11-----//2 points
         triangle1 = new GridTriangle();
@@ -810,13 +801,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 1);
         triangle2.m_points[2] = new GridPoint(0, 2);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 11 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 11 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 11 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 11 FAILURE:" + bResult);
 
         //-----TEST 12-----//2 points
         triangle1 = new GridTriangle();
@@ -828,13 +818,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(2, 0);
         triangle2.m_points[2] = new GridPoint(3, 1);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 12 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 12 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 12 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 12 FAILURE:" + bResult);
 
         //-----TEST 13-----//0 point
         triangle1 = new GridTriangle();
@@ -846,13 +835,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(3, 1);
         triangle2.m_points[2] = new GridPoint(3, 2);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 13 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 13 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 13 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 13 FAILURE:" + bResult);
 
         //-----TEST 14-----//3 points
         triangle1 = new GridTriangle();
@@ -864,13 +852,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(1, 1);
         triangle2.m_points[2] = new GridPoint(4, 0);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 14 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 14 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 14 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 14 FAILURE:" + bResult);
 
         //-----TEST 15-----//3 points
         triangle1 = new GridTriangle();
@@ -882,13 +869,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(6, 0);
         triangle2.m_points[2] = new GridPoint(3, 3);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 15 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 15 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 15 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 15 FAILURE:" + bResult);
 
         //-----TEST 16-----//
         triangle1 = new GridTriangle();
@@ -900,13 +886,12 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(6, 0);
         triangle2.m_points[2] = new GridPoint(3, 3);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 16 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 16 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 16 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 16 FAILURE:" + bResult);
 
         //-----TEST 17-----//
         triangle2 = new GridTriangle();
@@ -918,13 +903,12 @@ public class UnitTests
         triangle1.m_points[1] = new GridPoint(2, 2);
         triangle1.m_points[2] = new GridPoint(0, 0);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 17 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 17 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 17 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 17 FAILURE:" + bResult);
 
         //-----TEST 18-----//
         triangle1 = new GridTriangle();
@@ -936,13 +920,29 @@ public class UnitTests
         triangle2.m_points[1] = new GridPoint(300, 204);
         triangle2.m_points[2] = new GridPoint(0, 54);
 
-        bResult1 = triangle1.IntersectsTriangle(triangle2);
-        bResult2 = triangle1.IntersectsTriangleWithNonNullIntersection(triangle2);
+        bResult = triangle1.IntersectsTriangle(triangle2);
 
-        if (bResult1 && bResult2)
-            Debug.Log("TEST 18 SUCCESS:" + bResult1 + "-" + bResult2);
+        if (bResult)
+            Debug.Log("TEST 18 SUCCESS:" + bResult);
         else
-            Debug.Log("TEST 18 FAILURE:" + bResult1 + "-" + bResult2);
+            Debug.Log("TEST 18 FAILURE:" + bResult);
+
+        //-----TEST 19-----//
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(11, 7);
+        triangle1.m_points[1] = new GridPoint(12, 6);
+        triangle1.m_points[2] = new GridPoint(12, 7);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(10, 8);
+        triangle2.m_points[1] = new GridPoint(14, 4);
+        triangle2.m_points[2] = new GridPoint(14, 8);
+
+        bResult = triangle1.IntersectsTriangle(triangle2, true);
+
+        if (bResult)
+            Debug.Log("TEST 19 SUCCESS:" + bResult);
+        else
+            Debug.Log("TEST 19 FAILURE:" + bResult);
     }
 
     /**

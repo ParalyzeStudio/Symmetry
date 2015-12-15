@@ -276,16 +276,19 @@ public class Shape : GridTriangulable
     {
         for (int i = 0; i != m_triangles.Count; i++)
         {
-            if (bEnsureNonNullIntersection)
-            {
-                if (m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle))
-                    return true;
-            }
-            else
-            {
-                if (m_triangles[i].IntersectsTriangle(triangle))
-                    return true;
-            }
+            if (m_triangles[i].IntersectsTriangle(triangle, bEnsureNonNullIntersection))
+                return true;
+            //if (bEnsureNonNullIntersection)
+            //{
+            //    bool bIntersect = m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle);
+            //    if (m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle))
+            //        return true;
+            //}
+            //else
+            //{
+            //    if (m_triangles[i].IntersectsTriangle(triangle))
+            //        return true;
+            //}
         }
 
         return false;
@@ -416,29 +419,29 @@ public class Shape : GridTriangulable
 
         //build the new ones
         ClippingManager clippingManager = m_parentMesh.GetClippingManager();
-        List<Shape> leftClippedInterShapes, leftClippedDiffShapes;
-        clippingManager.ClipAgainstStaticShapes(shapeCopy, out leftClippedInterShapes, out leftClippedDiffShapes, false);
+        List<Shape> clippedInterShapes, clippedDiffShapes;
+        clippingManager.ClipAgainstStaticShapes(shapeCopy, out clippedInterShapes, out clippedDiffShapes, false);
 
-        for (int i = 0; i != leftClippedInterShapes.Count; i++)
+        for (int i = 0; i != clippedInterShapes.Count; i++)
         {
-            Shape interShape = leftClippedInterShapes[i];
+            Shape interShape = clippedInterShapes[i];
             GameObject interShapeObject = shapesHolder.CreateShapeObjectFromData(interShape, false);
             GameObjectAnimator interShapeObjectAnimator = interShapeObject.GetComponent<GameObjectAnimator>();
             interShapeObjectAnimator.SetPosition(new Vector3(0, 0, -1));
             m_substitutionShapes.Add(interShape);
         }
 
-        for (int i = 0; i != leftClippedDiffShapes.Count; i++)
+        for (int i = 0; i != clippedDiffShapes.Count; i++)
         {
-            Shape diffShape = leftClippedDiffShapes[i];
+            Shape diffShape = clippedDiffShapes[i];
             GameObject diffShapeObject = shapesHolder.CreateShapeObjectFromData(diffShape, false);
             GameObjectAnimator diffShapeObjectAnimator = diffShapeObject.GetComponent<GameObjectAnimator>();
             diffShapeObjectAnimator.SetPosition(new Vector3(0, 0, -1));
             m_substitutionShapes.Add(diffShape);
         }
 
-        //Debug.Log("INTER ShapesCount:" + leftClippedInterShapes.Count);
-        //Debug.Log("DIFF ShapesCount:" + leftClippedDiffShapes.Count);
+        Debug.Log("INTER ShapesCount:" + clippedInterShapes.Count);
+        Debug.Log("DIFF ShapesCount:" + clippedDiffShapes.Count);
     }
 
     /**

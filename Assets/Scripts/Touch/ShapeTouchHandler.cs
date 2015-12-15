@@ -58,6 +58,7 @@ public class ShapeTouchHandler : TouchHandler
     {
         if (m_selected)
         {
+            Debug.Log("OnPointerUp");
             GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
             ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();

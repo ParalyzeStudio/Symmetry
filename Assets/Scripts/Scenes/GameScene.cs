@@ -93,7 +93,7 @@ public class GameScene : GUIScene
         /**
          * TEST TRIANGLES INTERSECTIONS
          * **/
-        //UnitTests.TestTrianglesIntersections();
+        UnitTests.TestTrianglesIntersections();
 
         //Contour subjShapeContour1 = new Contour(4);
         //subjShapeContour1.Add(new Vector2(0, 0));
