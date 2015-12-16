@@ -92,51 +92,33 @@ public class GameScene : GUIScene
 
         //Shape shape1 = new Shape();
         //Contour shape1Contour = new Contour(4);
-        //shape1Contour.Add(new GridPoint(0, 0));
-        //shape1Contour.Add(new GridPoint(4, 0));
-        //shape1Contour.Add(new GridPoint(4, 4));
-        //shape1Contour.Add(new GridPoint(0, 4));
+        //shape1Contour.Add(new GridPoint(0, 0, true));
+        //shape1Contour.Add(new GridPoint(4, 0, true));
+        //shape1Contour.Add(new GridPoint(4, 4, true));
+        //shape1Contour.Add(new GridPoint(0, 4, true));
         //Contour shape1Hole1 = new Contour(4);
-        //shape1Hole1.Add(new GridPoint(1, 3));
-        //shape1Hole1.Add(new GridPoint(2, 3));
-        //shape1Hole1.Add(new GridPoint(2, 2));
-        //shape1Hole1.Add(new GridPoint(1, 2));
+        //shape1Hole1.Add(new GridPoint(1, 3, true));
+        //shape1Hole1.Add(new GridPoint(2, 3, true));
+        //shape1Hole1.Add(new GridPoint(2, 2, true));
+        //shape1Hole1.Add(new GridPoint(1, 2, true));
         //Contour shape1Hole2 = new Contour(4);
-        //shape1Hole2.Add(new GridPoint(2, 2));
-        //shape1Hole2.Add(new GridPoint(3, 2));
-        //shape1Hole2.Add(new GridPoint(3, 1));
-        //shape1Hole2.Add(new GridPoint(2, 1));
+        //shape1Hole2.Add(new GridPoint(2, 2, true));
+        //shape1Hole2.Add(new GridPoint(3, 2, true));
+        //shape1Hole2.Add(new GridPoint(3, 1, true));
+        //shape1Hole2.Add(new GridPoint(2, 1, true));
 
         //shape1.m_contour = shape1Contour;
         //shape1.m_holes.Add(shape1Hole1);
         //shape1.m_holes.Add(shape1Hole2);
 
+        //shape1.m_color = Color.white;
+        //shape1.Translate(new GridPoint(5000, 1000));
+
         //shape1.Triangulate();
+        //m_shapesHolder.CreateShapeObjectFromData(shape1, false);
+        //shape1.CalculateArea();
 
-        Shape shape1 = new Shape();
-        Contour shape1Contour = new Contour(4);
-        shape1Contour.Add(new GridPoint(0, 0, true));
-        shape1Contour.Add(new GridPoint(4, 0, true));
-        shape1Contour.Add(new GridPoint(4, 4, true));
-        shape1Contour.Add(new GridPoint(0, 4, true));
-        Contour shape1Hole1 = new Contour(8);
-        shape1Hole1.Add(new GridPoint(1, 2, true));
-        shape1Hole1.Add(new GridPoint(2, 2, true));
-        shape1Hole1.Add(new GridPoint(2, 1, true));
-        shape1Hole1.Add(new GridPoint(3, 1, true));
-        shape1Hole1.Add(new GridPoint(3, 2, true));
-        shape1Hole1.Add(new GridPoint(2, 2, true));
-        shape1Hole1.Add(new GridPoint(2, 3, true));
-        shape1Hole1.Add(new GridPoint(1, 3, true));
-
-        shape1.m_contour = shape1Contour;
-        shape1.m_holes.Add(shape1Hole1);
-
-        shape1.m_color = Color.white;
-        shape1.Translate(new GridPoint(5000, 1000));
-
-        shape1.Triangulate();
-        m_shapesHolder.CreateShapeObjectFromData(shape1, false);
+        //Debug.Log("Diff area:" + (shape1.m_area - shape2.m_area));
 
         /**
          * TEST TRIANGLES INTERSECTIONS

@@ -440,8 +440,8 @@ public class Shape : GridTriangulable
             m_substitutionShapes.Add(diffShape);
         }
 
-        Debug.Log("INTER ShapesCount:" + clippedInterShapes.Count);
-        Debug.Log("DIFF ShapesCount:" + clippedDiffShapes.Count);
+        //Debug.Log("INTER ShapesCount:" + clippedInterShapes.Count);
+        //Debug.Log("DIFF ShapesCount:" + clippedDiffShapes.Count);
     }
 
     /**

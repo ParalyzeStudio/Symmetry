@@ -86,6 +86,15 @@ public struct GridPoint
         }
     }
 
+    /**
+     * Normalize this vector and return it as a Vector2
+     * **/
+    public Vector2 NormalizeAsVector2()
+    {
+        float length = magnitude;
+        return new Vector2(X / length, Y / length);
+    }
+
     //We can scale this vector (by an integer value) for more precision when performing math operations on it
     //public int m_scale { get; set; }
 

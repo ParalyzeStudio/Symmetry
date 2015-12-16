@@ -82,7 +82,11 @@ public class GridTriangulable
         }
         else
         {
-            Vector2[] triangles = Triangulation.P2tTriangulate(this);
+            //use a copy to prevent the current shape contour and holes to be modified when separating shared points
+            GridTriangulable triangulableCopy = new GridTriangulable(this);
+            triangulableCopy.SeparateHolesSharedPoints();
+
+            Vector2[] triangles = Triangulation.P2tTriangulate(triangulableCopy);
             GridPoint[] gridTriangles = new GridPoint[triangles.Length];
             for (int i = 0; i != triangles.Length; i++)
             {
@@ -103,6 +107,42 @@ public class GridTriangulable
                 m_area += triangle.GetArea();
             }
         }       
+    }
+
+    /**
+     * In case of 2 holes (or more) sharing the same point, we have to separate them otherwise the triangulation will fail
+     * When we encounter a hole point that is also on the contour of another hole, we move it in the direction of its 2 neighbouring vertices
+     * **/
+    private void SeparateHolesSharedPoints()
+    {
+        for (int iHoleIdx = 0; iHoleIdx != m_holes.Count; iHoleIdx++)
+        {
+            Contour holeContour = m_holes[iHoleIdx];            
+            for (int i = 0; i != holeContour.Count; i++)
+            {
+                GridPoint holePoint = holeContour[i];
+                for (int j = iHoleIdx + 1; j != m_holes.Count; j++) //search among other holes if they contain this point
+                {
+                    if (m_holes[j].ContainsPoint(holePoint))
+                    {
+                        GridPoint leftNeighbor = (i > 0) ? holeContour[i - 1] : holeContour[holeContour.Count - 1];
+                        GridPoint rightNeighbor = (i < holeContour.Count - 1) ? holeContour[i + 1] : holeContour[0]; 
+                        //Determine the position of the hole point relatively to its 2 neighbors
+                        long det = MathUtils.Determinant(leftNeighbor, rightNeighbor, holePoint);
+                        GridPoint translationDirection = (leftNeighbor - holePoint) + (rightNeighbor - holePoint);
+                        Vector2 normalizedTranslationDirection = translationDirection.NormalizeAsVector2();
+                        int translationLength = 1; //set an approximate length to move the shared point
+                        if (det > 0) //'left'
+                            translationDirection = -translationDirection;
+
+                        GridPoint translation = new GridPoint(Mathf.RoundToInt(normalizedTranslationDirection.x * translationLength),
+                                                              Mathf.RoundToInt(normalizedTranslationDirection.y * translationLength));
+
+                        holeContour[i] += translation;
+                    }
+                }
+            }
+        }
     }
 
     /**
