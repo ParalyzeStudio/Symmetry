@@ -8,7 +8,9 @@ public class LevelManager : MonoBehaviour
     public const int LEVELS_PER_CHAPTER = 15;
 
     public Chapter[] m_chapters { get; set; }
-    public Level m_debugLevel { get; set; }
+    public Level m_debugLevel1 { get; set; }
+    public Level m_debugLevel2 { get; set; }
+    public Level m_debugLevel3 { get; set; }
 
     public Level m_currentLevel { get; set; }
     public Chapter m_currentChapter { get; set; }
@@ -28,7 +30,9 @@ public class LevelManager : MonoBehaviour
         }
 
         //parse debug level
-        m_debugLevel = ParseLevelFile(null, 0, true);
+        m_debugLevel1 = ParseLevelFile(null, 1, true);
+        m_debugLevel2 = ParseLevelFile(null, 2, true);
+        m_debugLevel3 = ParseLevelFile(null, 3, true);
     }
 
     public Chapter BuildChapterFromXml(int iChapterNumber)
@@ -49,7 +53,7 @@ public class LevelManager : MonoBehaviour
     {
         string levelFilename;
         if (bDebugLevel)
-            levelFilename = "Levels/debug_level";
+            levelFilename = "Levels/debug_level" + iLevelNumber;
         else
             levelFilename = "Levels/Chapter" + chapter.m_number + "/level_" + iLevelNumber;
         Object levelObjectFile = Resources.Load(levelFilename);
@@ -284,17 +288,29 @@ public class LevelManager : MonoBehaviour
     /**
      * For debug purposes use the debug level instead of a regular level
      * **/
-    public void SetCurrentLevelAsDebugLevel()
+    public void SetCurrentLevelAsDebugLevel(int iDebugLevelNumber)
     {
-        m_currentLevel = m_debugLevel;
+        if (iDebugLevelNumber == 1)
+            m_currentLevel = m_debugLevel1;
+        else if (iDebugLevelNumber == 2)
+            m_currentLevel = m_debugLevel2;
+        else
+            m_currentLevel = m_debugLevel3;
     }
 
     /**
      * For debug purposes test if current loaded level is the debug level
      * **/
-    public bool IsCurrentLevelDebugLevel()
+    public int IsCurrentLevelDebugLevel()
     {
-        return m_currentLevel == m_debugLevel;
+        if (m_currentLevel == m_debugLevel1)
+            return 1;
+        else if (m_currentLevel == m_debugLevel2)
+            return 2;
+        else if (m_currentLevel == m_debugLevel3)
+            return 3;
+        else
+            return -1;
     }
 
     /**

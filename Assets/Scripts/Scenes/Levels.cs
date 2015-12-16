@@ -31,7 +31,7 @@ public class Levels : GUIScene
         ApplyBackgroundGradient();
 
         ShowLevelsSlots();
-        ShowDebugLevelSlot();
+        ShowDebugLevelSlots();
     }
 
     private void ApplyBackgroundGradient()
@@ -156,16 +156,33 @@ public class Levels : GUIScene
     /**
      * Show a button to display a debug level
      * **/
-    private void ShowDebugLevelSlot()
+    private void ShowDebugLevelSlots()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        GameObject debugLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_LEVEL, new Vector2(256, 128));
-        debugLevelButtonObject.name = "DebugLevelBtn";
+        //debug level 1
+        GameObject debugLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_LEVEL1, new Vector2(256, 128));
+        debugLevelButtonObject.name = "DebugLevel1Btn";
 
         GameObjectAnimator debugLevelButtonAnimator = debugLevelButtonObject.GetComponent<GameObjectAnimator>();
         debugLevelButtonAnimator.SetParentTransform(this.transform);
+        debugLevelButtonAnimator.SetPosition(new Vector3(-0.25f * screenSize.x, -0.5f * screenSize.y + 100, -200));
+
+        //debug level 2
+        debugLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_LEVEL2, new Vector2(256, 128));
+        debugLevelButtonObject.name = "DebugLevel2Btn";
+
+        debugLevelButtonAnimator = debugLevelButtonObject.GetComponent<GameObjectAnimator>();
+        debugLevelButtonAnimator.SetParentTransform(this.transform);
         debugLevelButtonAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 100, -200));
+
+        //debug level 3
+        debugLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_LEVEL3, new Vector2(256, 128));
+        debugLevelButtonObject.name = "DebugLevel3Btn";
+
+        debugLevelButtonAnimator = debugLevelButtonObject.GetComponent<GameObjectAnimator>();
+        debugLevelButtonAnimator.SetParentTransform(this.transform);
+        debugLevelButtonAnimator.SetPosition(new Vector3(0.25f * screenSize.x, -0.5f * screenSize.y + 100, -200));
     }
 
     public LevelSlot BuildLevelSlotForNumber(int iLevelNumber)
@@ -190,15 +207,17 @@ public class Levels : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         //Set the level in the LevelManager
-        if (iLevelSlotIndex < 0) //debug level
-            GetLevelManager().SetCurrentLevelAsDebugLevel();
-        else
+        if (iLevelSlotIndex >= 0)
             GetLevelManager().SetLevelOnCurrentChapter(iLevelSlotIndex + 1);
 
         //Transition black screen
         Vector2 slotPosition;
-        if (iLevelSlotIndex == -1) //debug level
+        if (iLevelSlotIndex == -1) //debug level1
+            slotPosition = new Vector3(-0.25f * screenSize.x, -0.5f * screenSize.y + 100);
+        else if (iLevelSlotIndex == -2) //debug level2
             slotPosition = new Vector3(0, -0.5f * screenSize.y + 100);
+        else if (iLevelSlotIndex == -3) //debug level3
+            slotPosition = new Vector3(0.25f * screenSize.x, -0.5f * screenSize.y + 100);
         else
             slotPosition = m_levelSlots[iLevelSlotIndex].transform.position;
 

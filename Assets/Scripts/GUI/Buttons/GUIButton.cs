@@ -57,7 +57,9 @@ public class GUIButton : MonoBehaviour
 
         //temporary debug
         ID_DEBUG_SKIP_LEVEL,
-        ID_DEBUG_LEVEL
+        ID_DEBUG_LEVEL1,
+        ID_DEBUG_LEVEL2,
+        ID_DEBUG_LEVEL3
     }
 
     public GUIButtonID m_ID;
@@ -245,14 +247,30 @@ public class GUIButton : MonoBehaviour
             GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
             gameScene.EndLevel(GameScene.GameStatus.VICTORY);
         }
-        else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL)
+        else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL1)
         {
             Debug.Log("ID_DEBUG_LEVEL");
             LevelManager levelManager = GetLevelManager();
-            levelManager.SetCurrentLevelAsDebugLevel();
+            levelManager.SetCurrentLevelAsDebugLevel(1);
             Levels levels = (Levels)GetSceneManager().m_currentScene;
             levels.OnClickLevelSlot(-1);
-        }        
+        }
+        else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL2)
+        {
+            Debug.Log("ID_DEBUG_LEVEL");
+            LevelManager levelManager = GetLevelManager();
+            levelManager.SetCurrentLevelAsDebugLevel(2);
+            Levels levels = (Levels)GetSceneManager().m_currentScene;
+            levels.OnClickLevelSlot(-2);
+        }
+        else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL3)
+        {
+            Debug.Log("ID_DEBUG_LEVEL");
+            LevelManager levelManager = GetLevelManager();
+            levelManager.SetCurrentLevelAsDebugLevel(3);
+            Levels levels = (Levels)GetSceneManager().m_currentScene;
+            levels.OnClickLevelSlot(-3);
+        }  
     }
 
     protected GUIManager GetGUIManager()

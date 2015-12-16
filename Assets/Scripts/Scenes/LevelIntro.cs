@@ -116,8 +116,9 @@ public class LevelIntro : GUIScene
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
 
         string titleText;
-        if (levelManager.IsCurrentLevelDebugLevel())
-            titleText = "Debug level";
+        int isDebugLevel = levelManager.IsCurrentLevelDebugLevel();
+        if (isDebugLevel > 0)
+            titleText = "Debug level " + isDebugLevel;
         else
         {
             int currentChapterNumber = levelManager.m_currentChapter.m_number;

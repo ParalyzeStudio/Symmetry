@@ -168,7 +168,7 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinColorFilter;
         else if (iID == GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL)
             skinMaterial = m_skinDebugSkipLevel;
-        else if (iID == GUIButton.GUIButtonID.ID_DEBUG_LEVEL)
+        else if (iID == GUIButton.GUIButtonID.ID_DEBUG_LEVEL1 || iID == GUIButton.GUIButtonID.ID_DEBUG_LEVEL2 || iID == GUIButton.GUIButtonID.ID_DEBUG_LEVEL3)
             skinMaterial = m_skinDebugLevel;
         else
             skinMaterial = m_skinOptions;
