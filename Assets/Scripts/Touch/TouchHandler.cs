@@ -56,8 +56,9 @@ public class TouchHandler : MonoBehaviour
         }
         else if (eventType == TouchManager.PointerEventType.POINTER_UP)
         {
+            bool bSelected = m_selected;
             OnPointerUp();
-            return m_selected;
+            return bSelected;
         }
 
         return false;

@@ -393,7 +393,8 @@ public class Shape : GridTriangulable
         m_state = Shape.ShapeState.STATIC;
 
         //delete the shapes that we store in the fusion process
-        m_parentMesh.GetShapesHolder().DeleteShapesSet(m_shapesToDelete);
+        m_parentMesh.GetShapesHolder().DeleteDeadShapes();
+        //m_parentMesh.GetShapesHolder().DeleteShapesSet(m_shapesToDelete);
     }
 
     /**
@@ -412,8 +413,9 @@ public class Shape : GridTriangulable
         Shapes shapesHolder = m_parentMesh.GetShapesHolder();
         for (int i = 0; i != m_substitutionShapes.Count; i++)
         {
-            shapesHolder.m_shapes.Remove(m_substitutionShapes[i]);
-            shapesHolder.DestroyShapeObjectForShape(m_substitutionShapes[i]);
+            m_substitutionShapes[i].m_state = ShapeState.DESTROYED;
+            //shapesHolder.m_shapes.Remove(m_substitutionShapes[i]);
+            //shapesHolder.DestroyShapeObjectForShape(m_substitutionShapes[i]);
         }
         m_substitutionShapes.Clear();
 
@@ -513,8 +515,9 @@ public class Shape : GridTriangulable
 
         //destroy this shape object
         Shapes shapesHolder = this.m_parentMesh.GetShapesHolder();
-        shapesHolder.m_shapes.Remove(this);
-        shapesHolder.DestroyShapeObjectForShape(this);
+        this.m_state = ShapeState.DESTROYED;
+        //shapesHolder.m_shapes.Remove(this);
+        //shapesHolder.DestroyShapeObjectForShape(this);
     }
 
     /***

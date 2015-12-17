@@ -318,4 +318,18 @@ public class Shapes : MonoBehaviour
             }
         }
     }
+
+    public void DeleteDeadShapes()
+    {
+        for (int i = 0; i != m_shapes.Count; i++)
+        {
+            Shape shape = m_shapes[i];
+            if (shape.m_state == Shape.ShapeState.DESTROYED)
+            {
+                m_shapes.Remove(shape);
+                DestroyShapeObjectForShape(shape);
+                i--;
+            }
+        }
+    }
 }
