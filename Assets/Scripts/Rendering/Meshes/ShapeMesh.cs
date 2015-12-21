@@ -83,6 +83,7 @@ public class ShapeMesh : TexturedMesh
                 AddTriangle(pt1, pt3, pt2);
             }
 
+            //Color tintColor = m_shapeData.m_color;
             SetTintColor(m_shapeData.m_color);
 
             m_meshVerticesDirty = true;
@@ -308,6 +309,7 @@ public class ShapeMesh : TexturedMesh
      * **/
     public void SetTintColor(Color color)
     {
+        m_shapeData.m_color = color;
         for (int i = 0; i != m_colors.Count; i++)
         {
             m_colors[i] = color;

@@ -532,17 +532,19 @@ public class Shape : GridTriangulable
         public ContourHoleSharedPoint(GridPoint point, Contour contour, Contour hole)
         {
             m_point = point;
+            m_contour = contour;
             m_hole = hole;
+            m_contourIndex = -1;
+            m_holeIndex = -1;
         }
 
-        public void FindContourIndex()
+        public void CalculateContourIndex()
         {
-
-        }
-
-        public void FindHoleIndex()
-        {
-
+            for (int i = 0; i != m_contour.Count; i++)
+            {
+                if (m_contour[i] == m_point)
+                    m_contourIndex = i;
+            }
         }
     }
 
@@ -551,54 +553,87 @@ public class Shape : GridTriangulable
      * **/
     public List<Shape> SplitIntoSimpleShapes()
     {
-        List<ContourHoleSharedPoint> m_sharedPoints = new List<ContourHoleSharedPoint>();
+        List<ContourHoleSharedPoint> sharedPoints = new List<ContourHoleSharedPoint>();
+        List<Contour> unsharedHoles = new List<Contour>(); //the list containing holes that do not share more than 1 vertex with the shape contour
 
         //First detect which hole points are shared with the contour
         for (int i = 0; i != m_holes.Count; i++)
         {
             Contour hole = m_holes[i];
+            List<ContourHoleSharedPoint> holeSharedPoints = new List<ContourHoleSharedPoint>();
             for (int j = 0; j != hole.Count; j++)
-            {
+            {                
                 if (m_contour.ContainsPoint(hole[j]))
                 {
-                    m_sharedPoints.Add(new ContourHoleSharedPoint(hole[j], m_contour, hole));
+                    ContourHoleSharedPoint sharedPoint = new ContourHoleSharedPoint(hole[j], m_contour, hole);
+                    sharedPoint.m_holeIndex = j;
+                    holeSharedPoints.Add(sharedPoint);
                 }
-            }
+            } 
+            if (holeSharedPoints.Count > 1)
+                sharedPoints.AddRange(holeSharedPoints);
+            else
+                unsharedHoles.Add(hole);
         }
 
-        if (m_sharedPoints.Count > 2) //shape cannot be split if there are less than 2 intersection points
+        if (sharedPoints.Count > 0)
         {
             //insert shared points into contour
-            for (int i = 0; i != m_sharedPoints.Count; i++)
+            for (int i = 0; i != sharedPoints.Count; i++)
             {
-                ContourHoleSharedPoint sharedPoint = m_sharedPoints[i];
-                sharedPoint.m_contourIndex = m_contour.InsertPoint(sharedPoint.m_point);
+                ContourHoleSharedPoint sharedPoint = sharedPoints[i];
+                m_contour.InsertPoint(sharedPoint.m_point);
+            }
+
+            //Calculate their new indices in contour
+            for (int i = 0; i != sharedPoints.Count; i++)
+            {
+                sharedPoints[i].CalculateContourIndex();
             }
 
             //Finally traverse the new built contour and build new shapes
             List<Shape> splitShapes = new List<Shape>();
-            bool onContour = false;
-            for (int i = 0; i != m_sharedPoints.Count; i++)
+            List<Contour> splitContours = new List<Contour>();
+            for (int i = 0; i != sharedPoints.Count; i++)
             {
                 Contour splitShapeContour = new Contour();
-                ContourHoleSharedPoint sharedPoint = m_sharedPoints[i];
-                int sharedPointIndex = sharedPoint.m_contourIndex;
-                int currentPointIndex = sharedPointIndex;
+                splitContours.Add(splitShapeContour);
+                ContourHoleSharedPoint startSharedPoint = sharedPoints[i]; //we store the first point of the new split shape contour
+                int currentPointIndex = startSharedPoint.m_holeIndex;
+                Contour currentHole = startSharedPoint.m_hole; //the hole that is traversed, it is set to null if shape contour is traversed
+                bool onContour = false;
+                bool bWhileLoopStopCondition = false;
+                bool bFirstLoop = true; //use this bool to prevent the loop from breaking when we enter the shared point for the first time (loop must break when we enter it for the second time)
                 do
                 {
                     //is the new point index a shared point index
                     ContourHoleSharedPoint newSharedPoint = null;
-                    for (int p = 0; p != m_sharedPoints.Count; p++)
+                    for (int p = 0; p != sharedPoints.Count; p++)
                     {
-                        if (currentPointIndex == m_sharedPoints[p].m_contourIndex)
+                        ContourHoleSharedPoint sharedPoint = sharedPoints[p];
+                        if (onContour && currentPointIndex == sharedPoint.m_contourIndex 
+                            || 
+                            !onContour && currentHole == sharedPoint.m_hole && currentPointIndex == sharedPoint.m_holeIndex)
                         {
-                            newSharedPoint = m_sharedPoints[p];
+                            newSharedPoint = sharedPoint;
                             break;
                         }
                     }
 
                     if (newSharedPoint != null) //in this case change the split shape fill mode
+                    {
                         onContour = !onContour;
+                        if (onContour)
+                        {
+                            currentHole = null;
+                            currentPointIndex = newSharedPoint.m_contourIndex;
+                        }
+                        else
+                        {
+                            currentHole = newSharedPoint.m_hole;
+                            currentPointIndex = newSharedPoint.m_holeIndex;
+                        }
+                    }
 
                     //Find the point (contour or hole) to add
                     GridPoint currentPoint;
@@ -606,19 +641,73 @@ public class Shape : GridTriangulable
                         currentPoint = m_contour[currentPointIndex];
                     else
                     {
-
-                        currentPoint =
+                        currentPoint = currentHole[currentPointIndex];
                     }
 
                     splitShapeContour.Add(currentPoint);
 
-                    
-                        
-                    currentPointIndex++;
+
+                    if (onContour) //increment the index
+                    {
+                        currentPointIndex = (currentPointIndex < m_contour.Count - 1) ? currentPointIndex + 1 : 0;
+                    }
+                    else //increment in the same order despite the fact that hole is returned in contour opposite order by ClipperLib
+                    {
+                        currentPointIndex = (currentPointIndex < currentHole.Count - 1) ? currentPointIndex + 1 : 0;
+                    }
+
+                    bWhileLoopStopCondition = !bFirstLoop && 
+                                              (
+                                              onContour && currentPointIndex == startSharedPoint.m_contourIndex //on contour and same index as start shared point
+                                                    ||
+                                              !onContour && currentHole == startSharedPoint.m_hole && currentPointIndex == startSharedPoint.m_holeIndex //on hole and same hole and hole index as start shared point
+                                               );
+                    bFirstLoop = false;
                 }
-                while (currentPointIndex != sharedPointIndex);
+                while (!bWhileLoopStopCondition);
+            }           
+
+            //remove duplicate split contours
+            List<Contour> uniqueContours = new List<Contour>();
+            for (int i = 0; i != splitContours.Count; i++)
+            {
+                Contour splitContour = splitContours[i];
+                bool bAddContour = true;
+                for (int j = 0; j != uniqueContours.Count; j++)
+                {
+                    if (splitContour.EqualsContour(uniqueContours[j])) //contour has already been added to the uniqueContours list
+                        bAddContour = false;
+                }
+                if (bAddContour)
+                {
+                    uniqueContours.Add(splitContour);
+                }
             }
-            
+
+            //Build a shape for every split contour
+            for (int i = 0; i != uniqueContours.Count; i++)
+            {
+                Shape splitShape = new Shape(uniqueContours[i]);
+                splitShapes.Add(splitShape);
+            }
+
+            //Assign remaining holes that do not share more than 2 vertices with contour to one split shape
+            for (int i = 0; i != unsharedHoles.Count; i++)
+            {
+                Contour unsharedHole = unsharedHoles[i];
+                for (int j = 0; j != splitShapes.Count; j++)
+                {
+                    Shape splitShape = splitShapes[j];
+                    Contour splitShapeContour = splitShapes[j].m_contour;
+                    if (splitShapeContour.ContainsPoint(unsharedHole.GetBarycentre()))
+                    {
+                        splitShape.m_holes.Add(unsharedHole);
+                        unsharedHoles.Remove(unsharedHole);
+                        i--;
+                        break;
+                    }
+                }
+            }
 
             return splitShapes;
         }

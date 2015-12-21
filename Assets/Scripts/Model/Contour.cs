@@ -254,14 +254,14 @@ public class Contour : List<GridPoint>
     /**
      * Insert a point into this contour
      * **/
-    public int InsertPoint(GridPoint point)
+    public void InsertPoint(GridPoint point)
     {
         if (!ContainsPoint(point)) //if point is not on the contour we cannot insert it
-            return -1;
+            return;
 
         //First check if the point is equal to one of the contour vertices
         if (HasPoint(point)) //do nothing on the contour, just return
-            return -1; 
+            return; 
 
         //Point is stricly on one of the contour edges
         for (int i = 0; i != Count; i++)
@@ -274,7 +274,7 @@ public class Contour : List<GridPoint>
             {
                 int index = i + 1; //insert point between contourPoint1 and contourPoint2
                 this.Insert(index, point);
-                return index;
+                return;
             }
         }
     }

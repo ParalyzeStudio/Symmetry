@@ -279,6 +279,7 @@ public class GameScene : GUIScene
 
         m_gameStatus = GameStatus.RUNNING;
 
+
         //Set up the ClippingManager
         InitClippingManager();
     }
@@ -675,20 +676,41 @@ public class GameScene : GUIScene
         GameObjectAnimator shapesAnimator = shapesHolderObject.GetComponent<GameObjectAnimator>();
         shapesAnimator.SetParentTransform(this.transform);
         shapesAnimator.SetPosition(new Vector3(0, 0, SHAPES_Z_VALUE));
-        shapesAnimator.SetOpacity(0);
-        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
+        
 
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
 
-            //First triangulate the shape and set the color of each triangle
+            //First triangulate the shape and set it to STATIC
             shape.Triangulate();
             shape.m_state = Shape.ShapeState.STATIC;
 
+            //set opacity 0 to the shape m_color parameter
+            shape.m_color = new Color(shape.m_color.r, shape.m_color.g, shape.m_color.b, 0);
+
             m_shapesHolder.CreateShapeObjectFromData(shape, false);
         }
+
+        shapesAnimator.SetOpacity(0);
+        shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
+
+        //TMP debug
+        //InitClippingManager();
+        //Shape firstShape = m_shapesHolder.m_shapes[0];
+        //List<Shape> resultingShapes = GetClippingManager().ShapesOperation(firstShape, firstShape, ClipperLib.ClipType.ctUnion);
+        //for (int iShapeIndex = 0; iShapeIndex != resultingShapes.Count; iShapeIndex++)
+        //{
+        //    Shape shape = new Shape(resultingShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
+
+        //    //First triangulate the shape and set the color of each triangle
+        //    shape.m_state = Shape.ShapeState.STATIC;
+
+        //    m_shapesHolder.CreateShapeObjectFromData(shape, false);
+        //}
+        //m_shapesHolder.DestroyShapeObjectForShape(firstShape);
+        //m_shapesHolder.m_shapes.Remove(firstShape);
     }
 
     private void BuildAxesHolder()

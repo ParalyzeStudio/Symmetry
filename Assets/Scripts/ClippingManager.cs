@@ -143,14 +143,20 @@ public class ClippingManager : MonoBehaviour
             }
         }
 
-        //We need to split shapes that actually share only points despite the fact that ClipperLib returns them as a contour + holes
+        List<Shape> finalShapes = new List<Shape>();
+        //We need to split shapes that are returned by ClipperLib as contour + holes but can be seen as independent shapes
         for (int i = 0; i != resultingShapes.Count; i++)
         {
             Shape shape = resultingShapes[i];
-            shape.SplitIntoSimpleShapes();
+            List<Shape> simpleShapes = shape.SplitIntoSimpleShapes();
+            if (simpleShapes == null) //no split occured just add the original shape
+                finalShapes.Add(shape);
+            else
+                finalShapes.AddRange(simpleShapes);
+
         }
 
-        return resultingShapes;
+        return finalShapes;
     }
 
     //private List<Contour> ExtractHolesForPolynode(PolyNode polynode)
