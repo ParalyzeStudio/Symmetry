@@ -252,6 +252,34 @@ public class Contour : List<GridPoint>
     }
 
     /**
+     * Insert a point into this contour
+     * **/
+    public int InsertPoint(GridPoint point)
+    {
+        if (!ContainsPoint(point)) //if point is not on the contour we cannot insert it
+            return -1;
+
+        //First check if the point is equal to one of the contour vertices
+        if (HasPoint(point)) //do nothing on the contour, just return
+            return -1; 
+
+        //Point is stricly on one of the contour edges
+        for (int i = 0; i != Count; i++)
+        {
+            GridPoint contourPoint1 = this[i];
+            GridPoint contourPoint2 = this[(i == Count - 1) ? 0 : i + 1];
+            GridEdge edge = new GridEdge(contourPoint1, contourPoint2);
+
+            if (edge.ContainsPoint(point))
+            {
+                int index = i + 1; //insert point between contourPoint1 and contourPoint2
+                this.Insert(index, point);
+                return index;
+            }
+        }
+    }
+
+    /**
      * Test if the contour passed as parameter is the same as this contour
      * Offer the possibility to check if they have the same points despite an opposite winding order
      * **/

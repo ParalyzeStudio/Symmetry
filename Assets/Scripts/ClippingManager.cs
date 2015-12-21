@@ -88,6 +88,12 @@ public class ClippingManager : MonoBehaviour
         if (result)
         {
             resultingShapes = ExtractShapesFromPolyNodes(polytree.Childs);
+            
+            //Triangulate each shape
+            for (int iShapeIdx = 0; iShapeIdx != resultingShapes.Count; iShapeIdx++)
+            {
+                resultingShapes[iShapeIdx].Triangulate();
+            }
 
             //Set color to each resulting shape
             for (int i = 0; i != resultingShapes.Count; i++)
@@ -127,13 +133,7 @@ public class ClippingManager : MonoBehaviour
             for (int iHoleIdx = 0; iHoleIdx != childHoles.Count; iHoleIdx++)
             {
                 shape.m_holes.Add(CreateContourFromPath(childHoles[iHoleIdx].Contour));
-            }
-
-            //Triangulate each shape
-            for (int iShapeIdx = 0; iShapeIdx != resultingShapes.Count; iShapeIdx++)
-            {
-                resultingShapes[iShapeIdx].Triangulate();
-            }
+            }           
 
             //Call recursively the ExtractShapesFromPolyNodes() method on hole Childs (that are outers)
             for (int iHoleIdx = 0; iHoleIdx != childHoles.Count; iHoleIdx++)
@@ -141,6 +141,13 @@ public class ClippingManager : MonoBehaviour
                 if (childHoles[iHoleIdx].ChildCount > 0)
                     resultingShapes.AddRange(ExtractShapesFromPolyNodes(childHoles[iHoleIdx].Childs));
             }
+        }
+
+        //We need to split shapes that actually share only points despite the fact that ClipperLib returns them as a contour + holes
+        for (int i = 0; i != resultingShapes.Count; i++)
+        {
+            Shape shape = resultingShapes[i];
+            shape.SplitIntoSimpleShapes();
         }
 
         return resultingShapes;

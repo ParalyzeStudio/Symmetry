@@ -19,7 +19,7 @@ public class TitleLetter : MonoBehaviour
 
     private GameObject[] m_triangles;
     private GameObject[] m_shadowTriangles;
-    public GameObject m_circleMeshPfb;
+    public GameObject m_texQuadPfb;
 
     public GameObject m_foregroundTrianglesHolder { get; set; }
     public GameObject m_shadowTrianglesHolder { get; set; }
@@ -42,19 +42,19 @@ public class TitleLetter : MonoBehaviour
         m_foregroundTrianglesHolder.AddComponent<GameObjectAnimator>();
         m_shadowTrianglesHolder.AddComponent<GameObjectAnimator>();
 
+        Vector3 triangleScale = new Vector3(1.08f * GetBackgroundRenderer().m_triangleHeight, 1.08f * GetBackgroundRenderer().m_triangleHeight, 1);
+
         for (int i = 0; i != m_trianglesData.Length; i++)
         {
-            GameObject triangleObject = (GameObject)Instantiate(m_circleMeshPfb);
+            GameObject triangleObject = (GameObject)Instantiate(m_texQuadPfb);
             triangleObject.name = "TitleTriangle";
 
-            CircleMesh triangleMesh = triangleObject.GetComponent<CircleMesh>();
+            UVQuad triangleMesh = triangleObject.GetComponent<UVQuad>();
             triangleMesh.Init(material);
 
-            CircleMeshAnimator triangleMeshAnimator = triangleObject.GetComponent<CircleMeshAnimator>();
+            TexturedQuadAnimator triangleMeshAnimator = triangleObject.GetComponent<TexturedQuadAnimator>();
             triangleMeshAnimator.SetParentTransform(m_foregroundTrianglesHolder.transform);
-            triangleMeshAnimator.SetNumSegments(3, false);
-            triangleMeshAnimator.SetInnerRadius(0, false);
-            triangleMeshAnimator.SetOuterRadius(0.92f * 2 / 3.0f * GetBackgroundRenderer().m_triangleHeight);
+            triangleMeshAnimator.SetScale(triangleScale);
 
             //Set correct position for triangle
             Vector3 trianglePosition;
@@ -67,38 +67,39 @@ public class TitleLetter : MonoBehaviour
                 trianglePosition = new Vector3((m_trianglesData[i].m_column + offset.x - 0.5f) * GetBackgroundRenderer().m_triangleHeight,
                                                (m_trianglesData[i].m_line + offset.y) * 0.5f * GetBackgroundRenderer().m_triangleEdgeLength,
                                                0);
+
+            //move triangles horizontally by 1 unit so the spacing between every triangle is correct
             if (m_trianglesData[i].m_pointingToRight)
-                trianglePosition -= new Vector3(1 / 6.0f * GetBackgroundRenderer().m_triangleHeight, 0, 0);
+                trianglePosition -= new Vector3(1, 0, 0);
             else
-                trianglePosition += new Vector3(1 / 6.0f * GetBackgroundRenderer().m_triangleHeight, 0, 0);
+                trianglePosition += new Vector3(1, 0, 0);
 
             triangleMeshAnimator.SetPosition(trianglePosition);
 
             //Set correct orientation for triangle
-            float angle = m_trianglesData[i].m_pointingToRight ? -90 : 90;
+            float angle = m_trianglesData[i].m_pointingToRight ? 0 : 180;
             triangleMeshAnimator.SetRotationAxis(Vector3.forward);
             triangleMeshAnimator.SetRotationAngle(angle);
 
             m_triangles[i] = triangleObject;
 
             //set shadow
-            GameObject shadowTriangleObject = (GameObject)Instantiate(m_circleMeshPfb);
+            GameObject shadowTriangleObject = (GameObject)Instantiate(m_texQuadPfb);
             shadowTriangleObject.name = "ShadowTriangle";
 
-            CircleMesh shadowTriangleMesh = shadowTriangleObject.GetComponent<CircleMesh>();
+            UVQuad shadowTriangleMesh = shadowTriangleObject.GetComponent<UVQuad>();
             shadowTriangleMesh.Init(shadowMaterial);
 
-            CircleMeshAnimator shadowTriangleMeshAnimator = shadowTriangleObject.GetComponent<CircleMeshAnimator>();
+            TexturedQuadAnimator shadowTriangleMeshAnimator = shadowTriangleObject.GetComponent<TexturedQuadAnimator>();
             shadowTriangleMeshAnimator.SetParentTransform(m_shadowTrianglesHolder.transform);
-            shadowTriangleMeshAnimator.SetNumSegments(3, false);
-            shadowTriangleMeshAnimator.SetInnerRadius(0, false);
-            shadowTriangleMeshAnimator.SetOuterRadius(2 / 3.0f * GetBackgroundRenderer().m_triangleHeight);
+            shadowTriangleMeshAnimator.SetScale(triangleScale);
+
             Vector3 shadowTrianglePosition = trianglePosition + new Vector3(-20, 20, 0);
             shadowTrianglePosition.z = trianglePosition.z + 1;
             shadowTriangleMeshAnimator.SetPosition(shadowTrianglePosition);
 
             //Set correct orientation for triangle
-            angle = m_trianglesData[i].m_pointingToRight ? -90 : 90;
+            angle = m_trianglesData[i].m_pointingToRight ? 0 : 180;
             shadowTriangleMeshAnimator.SetRotationAxis(Vector3.forward);
             shadowTriangleMeshAnimator.SetRotationAngle(angle);
 

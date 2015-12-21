@@ -90,29 +90,26 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        //Shape shape1 = new Shape();
-        //Contour shape1Contour = new Contour(4);
-        //shape1Contour.Add(new GridPoint(0, 0, true));
-        //shape1Contour.Add(new GridPoint(4, 0, true));
-        //shape1Contour.Add(new GridPoint(4, 4, true));
-        //shape1Contour.Add(new GridPoint(0, 4, true));
-        //Contour shape1Hole1 = new Contour(4);
-        //shape1Hole1.Add(new GridPoint(1, 3, true));
-        //shape1Hole1.Add(new GridPoint(2, 3, true));
-        //shape1Hole1.Add(new GridPoint(2, 2, true));
-        //shape1Hole1.Add(new GridPoint(1, 2, true));
-        //Contour shape1Hole2 = new Contour(4);
-        //shape1Hole2.Add(new GridPoint(2, 2, true));
-        //shape1Hole2.Add(new GridPoint(3, 2, true));
-        //shape1Hole2.Add(new GridPoint(3, 1, true));
-        //shape1Hole2.Add(new GridPoint(2, 1, true));
+        Shape subjShape = new Shape();
+        Contour subjShapeContour = new Contour(4);
+        subjShapeContour.Add(new GridPoint(0, 0, true));
+        subjShapeContour.Add(new GridPoint(4, 0, true));
+        subjShapeContour.Add(new GridPoint(4, 4, true));
+        subjShapeContour.Add(new GridPoint(0, 4, true));
 
-        //shape1.m_contour = shape1Contour;
-        //shape1.m_holes.Add(shape1Hole1);
-        //shape1.m_holes.Add(shape1Hole2);
+        subjShape.m_contour = subjShapeContour;
 
-        //shape1.m_color = Color.white;
-        //shape1.Translate(new GridPoint(5000, 1000));
+        subjShape.m_color = Color.white;
+
+        Shape clipShape = new Shape();
+        Contour clipShapeContour = new Contour(4);
+        clipShapeContour.Add(new GridPoint(2, 0, true));
+        clipShapeContour.Add(new GridPoint(4, 2, true));
+        clipShapeContour.Add(new GridPoint(2, 4, true));
+        clipShapeContour.Add(new GridPoint(0, 2, true));
+
+        List<Shape> resultShapes = GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference);
+        Debug.Log("resultShapes.Count:" + resultShapes.Count);
 
         //shape1.Triangulate();
         //m_shapesHolder.CreateShapeObjectFromData(shape1, false);
@@ -732,7 +729,7 @@ public class GameScene : GUIScene
         m_clippingManager.Init();
 
         //make a dummy clipping to speed up the next clipping
-        GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(MakeFirstDummyClippingOperation)));        
+        //GetQueuedThreadedJobsManager().AddJob(new ThreadedJob(new ThreadedJob.ThreadFunction(MakeFirstDummyClippingOperation)));        
     }
 
     /**

@@ -121,6 +121,27 @@ public class GridTriangulable
             for (int i = 0; i != holeContour.Count; i++)
             {
                 GridPoint holePoint = holeContour[i];
+
+                //search if contour contains this point
+                if (m_contour.ContainsPoint(holePoint))
+                {
+                    GridPoint leftNeighbor = (i > 0) ? holeContour[i - 1] : holeContour[holeContour.Count - 1];
+                    GridPoint rightNeighbor = (i < holeContour.Count - 1) ? holeContour[i + 1] : holeContour[0];
+                    //Determine the position of the hole point relatively to its 2 neighbors
+                    long det = MathUtils.Determinant(leftNeighbor, rightNeighbor, holePoint);
+                    GridPoint translationDirection = (leftNeighbor - holePoint) + (rightNeighbor - holePoint);
+                    Vector2 normalizedTranslationDirection = translationDirection.NormalizeAsVector2();
+                    int translationLength = 1; //set an approximate length to move the shared point
+                    if (det > 0) //'left'
+                        translationDirection = -translationDirection;
+
+                    GridPoint translation = new GridPoint(Mathf.RoundToInt(normalizedTranslationDirection.x * translationLength),
+                                                          Mathf.RoundToInt(normalizedTranslationDirection.y * translationLength));
+
+                    holeContour[i] += translation;
+                }
+
+                //search among other holes if they contain this point
                 for (int j = iHoleIdx + 1; j != m_holes.Count; j++) //search among other holes if they contain this point
                 {
                     if (m_holes[j].ContainsPoint(holePoint))

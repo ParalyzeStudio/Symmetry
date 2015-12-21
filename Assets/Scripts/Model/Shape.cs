@@ -520,6 +520,112 @@ public class Shape : GridTriangulable
         //shapesHolder.DestroyShapeObjectForShape(this);
     }
 
+
+    private class ContourHoleSharedPoint
+    {
+        public GridPoint m_point { get; set; }
+        public Contour m_contour { get; set; } //the shape contour containing this shared point
+        public Contour m_hole { get; set; } //the shape hole containing this shared point
+        public int m_contourIndex { get; set; } //the index of this point in the shape contour
+        public int m_holeIndex { get; set; } //the index of this point in the hole contour
+
+        public ContourHoleSharedPoint(GridPoint point, Contour contour, Contour hole)
+        {
+            m_point = point;
+            m_hole = hole;
+        }
+
+        public void FindContourIndex()
+        {
+
+        }
+
+        public void FindHoleIndex()
+        {
+
+        }
+    }
+
+    /**
+     * This shape can be split if some holes share points with this shape contour
+     * **/
+    public List<Shape> SplitIntoSimpleShapes()
+    {
+        List<ContourHoleSharedPoint> m_sharedPoints = new List<ContourHoleSharedPoint>();
+
+        //First detect which hole points are shared with the contour
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            Contour hole = m_holes[i];
+            for (int j = 0; j != hole.Count; j++)
+            {
+                if (m_contour.ContainsPoint(hole[j]))
+                {
+                    m_sharedPoints.Add(new ContourHoleSharedPoint(hole[j], m_contour, hole));
+                }
+            }
+        }
+
+        if (m_sharedPoints.Count > 2) //shape cannot be split if there are less than 2 intersection points
+        {
+            //insert shared points into contour
+            for (int i = 0; i != m_sharedPoints.Count; i++)
+            {
+                ContourHoleSharedPoint sharedPoint = m_sharedPoints[i];
+                sharedPoint.m_contourIndex = m_contour.InsertPoint(sharedPoint.m_point);
+            }
+
+            //Finally traverse the new built contour and build new shapes
+            List<Shape> splitShapes = new List<Shape>();
+            bool onContour = false;
+            for (int i = 0; i != m_sharedPoints.Count; i++)
+            {
+                Contour splitShapeContour = new Contour();
+                ContourHoleSharedPoint sharedPoint = m_sharedPoints[i];
+                int sharedPointIndex = sharedPoint.m_contourIndex;
+                int currentPointIndex = sharedPointIndex;
+                do
+                {
+                    //is the new point index a shared point index
+                    ContourHoleSharedPoint newSharedPoint = null;
+                    for (int p = 0; p != m_sharedPoints.Count; p++)
+                    {
+                        if (currentPointIndex == m_sharedPoints[p].m_contourIndex)
+                        {
+                            newSharedPoint = m_sharedPoints[p];
+                            break;
+                        }
+                    }
+
+                    if (newSharedPoint != null) //in this case change the split shape fill mode
+                        onContour = !onContour;
+
+                    //Find the point (contour or hole) to add
+                    GridPoint currentPoint;
+                    if (onContour)
+                        currentPoint = m_contour[currentPointIndex];
+                    else
+                    {
+
+                        currentPoint =
+                    }
+
+                    splitShapeContour.Add(currentPoint);
+
+                    
+                        
+                    currentPointIndex++;
+                }
+                while (currentPointIndex != sharedPointIndex);
+            }
+            
+
+            return splitShapes;
+        }
+
+        return null;
+    }
+
     /***
      * We need to set instances before threading because the Unity API is not thread-safe and every call to 
         GameObject.FindGameObjectWithTag (or else) must be prevented
