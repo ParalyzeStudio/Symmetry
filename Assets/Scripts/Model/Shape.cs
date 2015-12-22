@@ -688,6 +688,7 @@ public class Shape : GridTriangulable
             for (int i = 0; i != uniqueContours.Count; i++)
             {
                 Shape splitShape = new Shape(uniqueContours[i]);
+                splitShape.Triangulate(); //make a first triangulation
                 splitShapes.Add(splitShape);
             }
 
@@ -698,8 +699,7 @@ public class Shape : GridTriangulable
                 for (int j = 0; j != splitShapes.Count; j++)
                 {
                     Shape splitShape = splitShapes[j];
-                    Contour splitShapeContour = splitShapes[j].m_contour;
-                    if (splitShapeContour.ContainsPoint(unsharedHole.GetBarycentre()))
+                    if (splitShape.ContainsPoint(unsharedHole.GetBarycentre()))
                     {
                         splitShape.m_holes.Add(unsharedHole);
                         unsharedHoles.Remove(unsharedHole);

@@ -305,7 +305,7 @@ public class GameScene : GUIScene
 
         //Voxel grid       
         m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
-        m_voxelGrid.Init(8);
+        m_voxelGrid.Init(2);
 
         gridAnimator.SetOpacity(0);
         gridAnimator.FadeTo(1, 1.5f, fDelay);
@@ -697,20 +697,20 @@ public class GameScene : GUIScene
         shapesAnimator.FadeTo(Shapes.SHAPES_OPACITY, 1.0f);
 
         //TMP debug
-        //InitClippingManager();
-        //Shape firstShape = m_shapesHolder.m_shapes[0];
-        //List<Shape> resultingShapes = GetClippingManager().ShapesOperation(firstShape, firstShape, ClipperLib.ClipType.ctUnion);
-        //for (int iShapeIndex = 0; iShapeIndex != resultingShapes.Count; iShapeIndex++)
-        //{
-        //    Shape shape = new Shape(resultingShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
+        InitClippingManager();
+        Shape firstShape = m_shapesHolder.m_shapes[0];
+        List<Shape> resultingShapes = GetClippingManager().ShapesOperation(firstShape, firstShape, ClipperLib.ClipType.ctUnion);
+        for (int iShapeIndex = 0; iShapeIndex != resultingShapes.Count; iShapeIndex++)
+        {
+            Shape shape = new Shape(resultingShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
 
-        //    //First triangulate the shape and set the color of each triangle
-        //    shape.m_state = Shape.ShapeState.STATIC;
+            //First triangulate the shape and set the color of each triangle
+            shape.m_state = Shape.ShapeState.STATIC;
 
-        //    m_shapesHolder.CreateShapeObjectFromData(shape, false);
-        //}
-        //m_shapesHolder.DestroyShapeObjectForShape(firstShape);
-        //m_shapesHolder.m_shapes.Remove(firstShape);
+            m_shapesHolder.CreateShapeObjectFromData(shape, false);
+        }
+        m_shapesHolder.DestroyShapeObjectForShape(firstShape);
+        m_shapesHolder.m_shapes.Remove(firstShape);
     }
 
     private void BuildAxesHolder()

@@ -74,6 +74,11 @@
 					<point column="10" line="4" />
 					<point column="9" line="5" />
 				</hole>
+				<hole>
+					<point column="5" line="5" />
+					<point column="7" line="5" />
+					<point column="6" line="7" />
+				</hole>
 			</holes>
 		</shape>		
 	</shapes>
