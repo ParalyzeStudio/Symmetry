@@ -40,6 +40,19 @@ public class TexturedMesh : ColorMesh
         return vertex;
     }
 
+    /**
+     * Set the tint color of this textured mesh
+     * **/
+    public virtual void SetTintColor(Color color)
+    {   
+        for (int i = 0; i != m_colors.Count; i++)
+        {
+            m_colors[i] = color;
+        }
+
+        m_meshColorsDirty = true;
+    }
+
     protected override void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
     {
         base.AddTriangle(point1, point2, point3);

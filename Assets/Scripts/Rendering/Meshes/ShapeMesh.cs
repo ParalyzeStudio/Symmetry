@@ -9,12 +9,9 @@ using ClipperLib;
 public class ShapeMesh : TexturedMesh
 {
     public const float CELL_APPARITION_INTERVAL = 0.05f;
-    public const int SHAPE_TEXTURES_TILING = 6; //textures is 6x6 squares
+    public const int SHAPE_TEXTURES_TILING = 20; //textures is 6x6 squares
 
     public Shape m_shapeData { get; set; } //the shape data we want to render
-
-    //Prefabs
-    public Material m_shapeTilesMaterial;
 
     //cells
     public bool m_renderedWithCells { get; set; }
@@ -293,12 +290,11 @@ public class ShapeMesh : TexturedMesh
     protected override Vector2 GetUVsForVertex(Vector3 vertex)
     {
         Grid grid = GetGrid();
-        ShapeVoxelGrid voxelGrid = GetVoxelGrid();
-        //Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
-
-        //Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
+        ShapeVoxelGrid voxelGrid = GetVoxelGrid();        
+        Vector2 gridPosition = grid.GetComponent<GameObjectAnimator>().GetPosition();
+        Vector3 localVertex = vertex - GeometryUtils.BuildVector3FromVector2(gridPosition, 0); //coordinates of the vertex in grid local coordinates
         vertex += 0.5f * new Vector3(grid.m_gridSize.x, grid.m_gridSize.y, 0); //offset by half the grid size so the bottom left vertex is at (0,0)
-        Vector2 uv = vertex / (voxelGrid.m_voxelSize * grid.m_gridSpacing); //normalize coordinates of the vertex so it is in UV mode
+        Vector2 uv = localVertex / (voxelGrid.m_voxelSize * grid.m_gridSpacing); //normalize coordinates of the vertex so it is in UV mode
         uv /= SHAPE_TEXTURES_TILING; //divide uvs by the number of tiles along each dimension inside the texture
 
         return uv;
@@ -307,15 +303,10 @@ public class ShapeMesh : TexturedMesh
     /**
      * Set the tint color of this shape
      * **/
-    public void SetTintColor(Color color)
+    public override void SetTintColor(Color color)
     {
         m_shapeData.m_color = color;
-        for (int i = 0; i != m_colors.Count; i++)
-        {
-            m_colors[i] = color;
-        }
-
-        m_meshColorsDirty = true;
+        base.SetTintColor(color);
     }
 
     /**

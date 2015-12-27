@@ -7,8 +7,6 @@ public class Grid : MonoBehaviour
 {
     //Shared prefabs
     public GameObject m_circleMeshPfb;
-    public Material m_positionColorMaterial;
-    private Material m_gridAnchorMaterial;
 
     public class GridAnchor
     {
@@ -38,7 +36,7 @@ public class Grid : MonoBehaviour
         TOP
     }
 
-    public void Build()
+    public void Build(Material gridMaterial)
     {
         GameObject pointsHolder = new GameObject("Points");
 
@@ -53,14 +51,12 @@ public class Grid : MonoBehaviour
         int minNumColumns = currentLevel.m_gridMinNumColumns;
         int exactNumLines = currentLevel.m_gridExactNumLines;
         int exactNumColumns = currentLevel.m_gridExactNumColumns;
-        int anchorsCount = exactNumLines * exactNumColumns;
-        m_anchors = new GridAnchor[anchorsCount];
 
         //get the screen viewport dimensions
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //The grid occupies at maximum 78% of the screen height and 75% of the screen width
-        m_gridSize = new Vector2(0.75f * screenSize.x, 0.78f * screenSize.y);
+        //The grid occupies at maximum 79% of the screen height and 80% of the screen width
+        m_gridSize = new Vector2(0.7865f * screenSize.x, 0.797f * screenSize.y);
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
             lineGridSpacing = m_gridSize.y / (float)(exactNumLines - 1);
@@ -80,13 +76,14 @@ public class Grid : MonoBehaviour
         m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
         m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
 
+        int anchorsCount = m_numLines * m_numColumns;
+        m_anchors = new GridAnchor[anchorsCount];
+
         m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
 
         Vector3 gridPosition = this.transform.position;
 
         //Build anchors
-        m_gridAnchorMaterial = Instantiate(m_positionColorMaterial);
-
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {
             for (int iColumnNumber = 1; iColumnNumber != m_numColumns + 1; iColumnNumber++)
@@ -118,14 +115,14 @@ public class Grid : MonoBehaviour
                 GameObject clonedGridAnchor = (GameObject)Instantiate(m_circleMeshPfb);
 
                 CircleMesh gridAnchorQuad = clonedGridAnchor.GetComponent<CircleMesh>();
-                gridAnchorQuad.Init(m_gridAnchorMaterial);
+                gridAnchorQuad.Init(gridMaterial);
                 int iAnchorIndex = (iLineNumber - 1) * exactNumColumns + (iColumnNumber - 1);
 
                 CircleMeshAnimator anchorAnimator = clonedGridAnchor.GetComponent<CircleMeshAnimator>();
                 anchorAnimator.SetParentTransform(pointsHolder.transform);
                 anchorAnimator.SetNumSegments(4, false);
                 anchorAnimator.SetInnerRadius(0, false);
-                anchorAnimator.SetOuterRadius(4, true);
+                anchorAnimator.SetOuterRadius(3, true);
                 anchorAnimator.SetPosition(anchorPosition);
                 anchorAnimator.SetColor(Color.white);
 

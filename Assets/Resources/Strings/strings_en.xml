@@ -10,6 +10,10 @@
 	<string tag="progress_bar_completion" value="completed"/>
 	<string tag="skip" value="Click to skip"/>
 	
+	<!-- Interface buttons-->
+	<string tag="retry" value="retry"/>
+	<string tag="hints" value="hints"/>
+	
 	<!-- Action buttons-->
 	<string tag="action_symmetry_two_sides" value="SYM 2 SIDES"/>
 	<string tag="action_symmetry_one_side" value="SYM 1 SIDE"/>

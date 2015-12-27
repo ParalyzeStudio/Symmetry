@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 public class Shape : GridTriangulable
 {
+    public const float DEFAULT_SATURATION = 1.0f;
+    public const float DEFAULT_BRIGHTNESS = 7.5f;
+
     public Color m_color { get; set; }
+    public float m_tint { get; set; } //as the tiled chalkboard texture is black we use tsb value instead of regular color to define the exact color of the shape
     public Vector2 m_offset { get; set; }
     public GridPoint m_gridOffset { get; set; }
     public ShapeMesh m_parentMesh { get; set; }
@@ -14,17 +18,18 @@ public class Shape : GridTriangulable
         DYNAMIC_INTERSECTION, //this dynamic shape is the result of the intersection of two shapes
         DYNAMIC_DIFFERENCE, //this dynamic shape is the result of the difference between two shapes
         STATIC, //this shape has been drawn
+        STATIC_OVERLAPPED, //this shape is static but still overlapped by one or more INTERSECTION shapes
         MOVING_ORIGINAL_SHAPE, //the original shape being dragged on the grid by the player
         MOVING_SUBSTITUTION_INTERSECTION, //a shape that is the result of an intersection clipping operation between moving shape and static shapes
         MOVING_SUBSTITUTION_DIFFERENCE, //a shape that is the result of a difference clipping operation between moving shape and static shapes
-        BUSY_CLIPPING, //the shape is being clipped (using threads) and must not be considered as dynamic anymore and it is not static yet
-        DESTROYED
+        BUSY_CLIPPING, //the shape is being clipped (using threads) and must not be considered as dynamic anymore nor static yet
+        DESTROYED //shape is marked to be destroyed
     }
     public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
 
-    public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
+    //public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
+    public List<Shape> m_overlappingShapes { get; set; } //in case of the state of this shape is STATIC_OVERLAPPED, we store here the list of substitution shapes that share an intersection with it
     public List<Shape> m_shapesToCreate { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
-    public HashSet<Shape> m_shapesToDelete { get; set; } //Set of shapes to delete once the difference/fusion occured
     private List<Shape> m_substitutionShapes; //List of shapes that are drawn over the shape that is being moved by the player when clipping occurs
 
     public Shape()
@@ -57,6 +62,7 @@ public class Shape : GridTriangulable
         : base(other)
     {
         m_color = other.m_color;
+        m_tint = other.m_tint;
         m_offset = other.m_offset;
         m_gridOffset = other.m_gridOffset;
         m_state = other.m_state;
@@ -125,7 +131,6 @@ public class Shape : GridTriangulable
             this.m_contour = fusionedShape.m_contour;
             this.m_holes = fusionedShape.m_holes;
 
-            m_shapesToDelete.Add(clipShape); //add the clip shape to the set of shapes to be deleted
             clipShape.m_state = ShapeState.DESTROYED;
 
             return true;
@@ -320,7 +325,6 @@ public class Shape : GridTriangulable
      * **/
     public void InitTemporaryStoredShapes()
     {
-        m_shapesToDelete = new HashSet<Shape>();
         m_shapesToCreate = new List<Shape>();
     }
 
@@ -344,16 +348,124 @@ public class Shape : GridTriangulable
     }
 
     /**
+     * Change the state of this shape to STATIC_OVERLAPPED and build the list of overlapping shapes if not already done
+     * **/
+    public void AddOverlappingShape(Shape overlappingShape)
+    {
+        if (m_overlappingShapes == null)
+            m_overlappingShapes = new List<Shape>();
+
+        m_overlappingShapes.Add(overlappingShape);
+    }
+
+    /**
+     * Once we performed the difference clipping operation, remove the overlapping shape from the list
+     * **/
+    private void RemoveOverlappingShape(Shape overlappingShape)
+    {
+        for (int i = 0; i != m_overlappingShapes.Count; i++)
+        {
+            if (m_overlappingShapes[i] == overlappingShape)
+            {
+                m_overlappingShapes.Remove(overlappingShape);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Tells if the 'parameter' overlappingShape overlaps 'this' shape
+     * **/
+    private bool ContainsOverlappingShape(Shape overlappingShape)
+    {
+        if (m_overlappingShapes == null)
+            return false;
+
+        for (int i = 0; i != m_overlappingShapes.Count; i++)
+        {
+            if (m_overlappingShapes[i] == overlappingShape)
+                return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Substract every overlapping shape from this shape
+     * **/
+    public void PerformDifferenceWithOverlappingShapes()
+    {
+        ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
+        m_shapesToCreate.AddRange(clippingManager.PerformDifferenceAgainstShapes(this, m_overlappingShapes));
+
+        //Destroy this shape
+        m_state = ShapeState.DESTROYED;
+    }
+
+    /**
      * Calculate the difference between the shape that we found overlapping 'this' shape and 'this' shape
      * **/
     public void PerformDifferenceOnOverlappedStaticShape()
     {
-        m_shapesToCreate.AddRange(m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference));
+        ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
 
-        //Destroy the old overlapped static shape
-        m_shapesToDelete.Add(m_overlappedStaticShape);
-        m_overlappedStaticShape.m_state = ShapeState.DESTROYED;
-        m_overlappedStaticShape = null;
+        List<Shape> allShapes = m_parentMesh.GetGameScene().m_shapesHolder.m_shapes;
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            Shape shape = allShapes[i];
+
+            if (shape.m_state == ShapeState.STATIC && shape.ContainsOverlappingShape(this)) //we found the overlapped shape, perform clipping operation
+            {
+                List<Shape> newOverlappedShapes = clippingManager.ShapesOperation(shape, this, ClipperLib.ClipType.ctDifference);
+                m_shapesToCreate.AddRange(newOverlappedShapes);
+                shape.RemoveOverlappingShape(this);
+                
+                //copy the overlapping shapes to the new overlapped shapes
+                for (int p = 0; p != newOverlappedShapes.Count; p++)
+                {
+                    newOverlappedShapes[p].m_overlappingShapes = shape.m_overlappingShapes;
+                }
+
+                shape.m_state = ShapeState.DESTROYED; //mark the old shape for destruction
+            }
+        }
+
+        //ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
+        //clippingManager.PerformDifferenceAgainstShapes(m_overlappedStaticShape, m_overlappedStaticShape.m_overlappingShapes);
+
+        //1st version
+        //List<Shape> overlappingShapes = m_overlappedStaticShape.m_overlappingShapes;
+        //List<Shape> resultingShapes = new List<Shape>();
+        //resultingShapes.Add(m_overlappedStaticShape);
+        //for (int i = 0; i != overlappingShapes.Count; i++)
+        //{
+        //    for (int j = 0; j != resultingShapes.Count; j++)
+        //    {                
+        //    }
+        //}
+
+        //2nd version
+        //List<Shape> overlappingShapes = m_overlappedStaticShape.m_overlappingShapes;
+        //List<Shape> diffShapes = new List<Shape>();
+        //ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
+        //for (int i = 0; i != overlappingShapes.Count; i++)
+        //{
+        //    diffShapes.AddRange(clippingManager.ShapesOperation(m_overlappedStaticShape, overlappingShapes[i], ClipperLib.ClipType.ctDifference));
+        //}
+
+        //int iDiffShapeIdx = 0;
+        //Shape resultIntersectionShape;
+        //do
+        //{
+        //    List<Shape> resultIntersectionShapes = clippingManager.ShapesOperation(diffShapes[iDiffShapeIdx], diffShapes[iDiffShapeIdx + 1], ClipperLib.ClipType.ctIntersection);
+        //}
+        //while ();
+
+        //m_shapesToCreate.AddRange(m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference));
+
+        ////Destroy the old overlapped static shape
+        //m_overlappedStaticShape.m_state = ShapeState.DESTROYED;
+        //m_overlappedStaticShape = null;
     }
 
     /**
@@ -394,7 +506,6 @@ public class Shape : GridTriangulable
 
         //delete the shapes that we store in the fusion process
         m_parentMesh.GetShapesHolder().DeleteDeadShapes();
-        //m_parentMesh.GetShapesHolder().DeleteShapesSet(m_shapesToDelete);
     }
 
     /**
@@ -640,12 +751,9 @@ public class Shape : GridTriangulable
                     if (onContour)
                         currentPoint = m_contour[currentPointIndex];
                     else
-                    {
                         currentPoint = currentHole[currentPointIndex];
-                    }
 
                     splitShapeContour.Add(currentPoint);
-
 
                     if (onContour) //increment the index
                     {
@@ -739,5 +847,18 @@ public class Shape : GridTriangulable
     public bool IsSubstitutionShape()
     {
         return m_state == ShapeState.MOVING_SUBSTITUTION_INTERSECTION || m_state == ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
+    }
+
+    public void CalculateColorFromTSBValues()
+    {
+        m_color = ColorUtils.GetRGBAColorFromTSB(new Vector3(m_tint, DEFAULT_SATURATION, DEFAULT_BRIGHTNESS), 1);
+    }
+
+    /**
+     * Returns the tint, saturation, brightness of this shape
+     * **/
+    public Vector3 GetTSBValues()
+    {
+        return new Vector3(m_tint, DEFAULT_SATURATION, DEFAULT_BRIGHTNESS);
     }
 }

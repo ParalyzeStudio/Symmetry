@@ -12,8 +12,13 @@ public class ShapeTouchHandler : TouchHandler
         GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
         if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
         {
-            //Get the triangles of this shape from the MeshFilter
-            return GetComponent<ShapeMesh>().m_shapeData.ContainsPoint(pointerGridLocation);
+            Shape shape = GetComponent<ShapeMesh>().m_shapeData;
+
+            if (shape.m_state == Shape.ShapeState.STATIC) //we can only move STATIC shapes
+            {
+                //Get the triangles of this shape from the MeshFilter
+                return shape.ContainsPoint(pointerGridLocation);
+            }
         }
         return false;
     }
@@ -73,7 +78,10 @@ public class ShapeTouchHandler : TouchHandler
             shape.Translate(translation); //translate all vertices
             
             shape.InvalidateSubstitutionShapesOnMove();
-            shape.FinalizeClippingOperationsOnSubstitutionShapes();            
+            shape.FinalizeClippingOperationsOnSubstitutionShapes(); 
+           
+            ////Find static shapes that have been overlapped and perform difference with the shapes that have an intersection with them
+            //List<Shape> allShapes = 
 
             shape.m_offset = Vector2.zero; //reset offset to zero
             shape.m_gridOffset = GridPoint.zero; //reset offset to zero

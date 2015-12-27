@@ -89,7 +89,7 @@ public class Chapter
         {
             m_themeTintValues[0] = new Vector3(55, 1.0f, 1.0f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
-            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
+            m_themeTintValues[2] = new Vector3(80, 0.75f, 4.5f);
         }
         else if (m_number == 2)
         {

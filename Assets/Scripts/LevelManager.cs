@@ -184,15 +184,25 @@ public class LevelManager : MonoBehaviour
             foreach (XMLNode shapeNode in shapesNodeList)
             {
                 Shape shape = new Shape();
-                //Get the color of the shape
+                //Get the color of the shape (either RBG or TSB)
                 string strShapeColor = shapeNode.GetValue("@color");
-                string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
-                Color shapeColor = new Color();
-                shapeColor.r = float.Parse(strSplitColor[0]);
-                shapeColor.g = float.Parse(strSplitColor[1]);
-                shapeColor.b = float.Parse(strSplitColor[2]);
-                shapeColor.a = 1;
-                shape.m_color = shapeColor;
+                if (strShapeColor != null)
+                {
+                    string[] strSplitColor = strShapeColor.Split(new char[] { ',' });
+                    Color shapeColor = new Color();
+                    shapeColor.r = float.Parse(strSplitColor[0]);
+                    shapeColor.g = float.Parse(strSplitColor[1]);
+                    shapeColor.b = float.Parse(strSplitColor[2]);
+                    shapeColor.a = 1;
+                    shape.m_color = shapeColor;
+                }
+
+                string strTintShapeColor = shapeNode.GetValue("@tint");
+                if (strTintShapeColor != null)
+                {                    
+                    shape.m_tint = float.Parse(strTintShapeColor);
+                    shape.CalculateColorFromTSBValues();
+                }
 
                 //Contour
                 XMLNodeList contourPointsNodeList = shapeNode.GetNodeList("contour>0>point");

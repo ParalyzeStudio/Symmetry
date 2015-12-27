@@ -66,6 +66,7 @@ public class ValueAnimator : MonoBehaviour
     //Variables to handle color variation
     protected bool m_colorChanging;
     public Color m_color;
+    public Vector4 m_vec4Color;
     protected Color m_fromColor;
     protected Color m_toColor;
     protected float m_colorChangingDuration;
@@ -250,11 +251,15 @@ public class ValueAnimator : MonoBehaviour
         if (colorMode == ColorMode.RGB)
             SetColor(new Color(channels.x, channels.y, channels.z, m_color.a));
         else if (colorMode == ColorMode.TSB)
+        {
+            m_TSB = channels;
+            m_prevTSB = m_TSB;
             SetColor(ColorUtils.GetRGBAColorFromTSB(new Vector3(channels.x, channels.y, channels.z), m_color.a));
+        }
     }
 
     public virtual void SetTSB(Vector3 tsb)
-    {
+    {        
         m_TSB = tsb;        
         m_prevTSB = m_TSB;
         SetColorChannels(tsb, ColorMode.TSB);
@@ -534,6 +539,12 @@ public class ValueAnimator : MonoBehaviour
             SetTSB(m_TSB);
             return;
         }
+
+        if (m_vec4Color.x != m_color.r ||
+            m_vec4Color.y != m_color.g ||
+            m_vec4Color.z != m_color.b ||
+            m_vec4Color.w != m_color.a)
+            m_vec4Color = m_color;
 
         //update values that have to be modified through time
         UpdateOpacity(dt);

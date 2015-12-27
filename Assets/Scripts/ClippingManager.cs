@@ -242,7 +242,7 @@ public class ClippingManager : MonoBehaviour
                         else
                             intersectionShapes[k].m_state = Shape.ShapeState.MOVING_SUBSTITUTION_INTERSECTION;
 
-                        intersectionShapes[k].m_overlappedStaticShape = shape;
+                        shape.AddOverlappingShape(intersectionShapes[k]);
                     }
                     clippedInterShapes.AddRange(intersectionShapes);
                 }
@@ -259,6 +259,47 @@ public class ClippingManager : MonoBehaviour
             clippedDiffShapes.Clear();
             clippedDiffShapes.AddRange(clippedDifferenceShapes);
         }
+    }
+
+    /**
+     * Perform a difference clipping operation between one subj shape and a set of clip shapes
+     * **/
+    public List<Shape> PerformDifferenceAgainstShapes(Shape subjShape, List<Shape> clipShapes)
+    {
+        List<Shape> allShapes = m_shapesHolder.m_shapes;
+        List<Shape> clippedDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
+        clippedDiffShapes.Add(subjShape);
+
+        for (int i = 0; i != clipShapes.Count; i++)
+        {
+            Shape shape = clipShapes[i];
+            {
+                List<Shape> clippedDifferenceShapes = new List<Shape>(10);
+                for (int j = 0; j != clippedDiffShapes.Count; j++)
+                {
+                    Shape clipShape = clippedDiffShapes[j];
+                    if (clipShape.OverlapsShape(shape, true))
+                    {
+                        //difference
+                        List<Shape> differenceShapes = ShapesOperation(clipShape, shape, ClipperLib.ClipType.ctDifference);
+                        for (int k = 0; k != differenceShapes.Count; k++)
+                        {
+                            differenceShapes[k].m_color = clipShape.m_color; //same color as original
+                        }
+                        clippedDifferenceShapes.AddRange(differenceShapes);
+                    }
+                    else //no intersection, add the full clipShape to clippedDifferenceShapes
+                    {
+                        clippedDifferenceShapes.Add(clipShape);
+                    }
+                }
+
+                clippedDiffShapes.Clear();
+                clippedDiffShapes.AddRange(clippedDifferenceShapes);
+            }            
+        }
+
+        return clippedDiffShapes;
     }
 
     /**
