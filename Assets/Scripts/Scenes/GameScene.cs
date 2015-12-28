@@ -453,7 +453,7 @@ public class GameScene : GUIScene
         Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
 
         //pause
-        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
+        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
         pauseButtonObject.name = "PauseButton";
 
         GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();
@@ -619,7 +619,7 @@ public class GameScene : GUIScene
         Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
 
         //pause
-        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MENU_BUTTON, interfaceButtonSize);
+        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
         pauseButtonObject.name = "PauseButton";
 
         GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();

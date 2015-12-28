@@ -3,9 +3,11 @@
 	<string tag="play" value="Touch to play"/>
 	<string tag="options" value="OPTIONS"/>
 	<string tag="about" value="ABOUT"/>
+	<string tag="pause" value="PAUSE"/>
 	<string tag="chapter" value="CHAPTER"/>
 	<string tag="music" value="MUSIC"/>
 	<string tag="sound" value="SOUND"/>
+	<string tag="levels" value="LEVELS"/>
 	<string tag="reset" value="RESET"/>
 	<string tag="progress_bar_completion" value="completed"/>
 	<string tag="skip" value="Click to skip"/>

@@ -38,7 +38,7 @@ public class GUIButton : MonoBehaviour
         ID_SOUND_BUTTON,
         ID_RESET_BUTTON,
         ID_CLOSE_OVERLAY_BUTTON,
-        ID_MENU_BUTTON,
+        ID_PAUSE_BUTTON,
         ID_RETRY_BUTTON,
         ID_HINTS_BUTTON,
         ID_BACK_TO_LEVELS_BUTTON,
@@ -208,11 +208,11 @@ public class GUIButton : MonoBehaviour
         {
             guiManager.DismissSideButtonsOverlay();
         }
-        else if (m_ID == GUIButtonID.ID_MENU_BUTTON)
+        else if (m_ID == GUIButtonID.ID_PAUSE_BUTTON)
         {
-            Debug.Log("CLICK MENU");
-            //GUIManager guiManager = GetGUIManager();
-            //guiManager.ShowPauseWindow();
+            Debug.Log("CLICK PAUSE");
+
+            guiManager.ShowSideButtonsOverlay();
         }
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {

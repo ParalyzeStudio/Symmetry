@@ -5,7 +5,7 @@
  * **/
 public class GUIManager : MonoBehaviour
 {
-    public const float SIDE_OVERLAY_Z_VALUE = -20.0f;
+    public const float SIDE_OVERLAY_Z_VALUE = -50.0f;
 
     //shared prefabs
     public GameObject m_colorQuadPfb;
@@ -31,12 +31,15 @@ public class GUIManager : MonoBehaviour
 
     //global instances
     private BackgroundTrianglesRenderer m_backgroundRenderer;
+    private LevelManager m_levelManager;
+    private SceneManager m_sceneManager;
 
     public enum OverlayDisplayedContent
     {
         NONE = 0,
-        OPTIONS,
-        CREDITS
+        OPTIONS, //options from the main menu and chapters/levels
+        CREDITS, //credits from the main menu and chapters/levels
+        PAUSE //pause from the game scene
     }
     public OverlayDisplayedContent m_overlayDisplayedContent { get; set; }
     //public GameObject m_pauseWindow { get; set; } //the pause menu we can access from game
@@ -48,6 +51,7 @@ public class GUIManager : MonoBehaviour
     public GameObject m_displayedContentHolder { get; set; }
     private GameObject m_optionsContentHolder;
     private GameObject m_creditsContentHolder;
+    private GameObject m_pauseContentHolder;
 
     //Materials for GUI buttons
     public Material m_skinCloseOverlay;
@@ -146,7 +150,7 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinSound;
         else if (iID == GUIButton.GUIButtonID.ID_RESET_BUTTON)
             skinMaterial = m_skinReset;
-        else if (iID == GUIButton.GUIButtonID.ID_MENU_BUTTON)
+        else if (iID == GUIButton.GUIButtonID.ID_PAUSE_BUTTON)
             skinMaterial = m_skinPause;
         else if (iID == GUIButton.GUIButtonID.ID_RETRY_BUTTON)
             skinMaterial = m_skinRetry;
@@ -313,7 +317,8 @@ public class GUIManager : MonoBehaviour
         ColorQuadAnimator overlayBackgroundAnimator = overlayBackgroundObject.GetComponent<ColorQuadAnimator>();
         overlayBackgroundAnimator.SetParentTransform(m_sideButtonsOverlay.transform);
         overlayBackgroundAnimator.SetPosition(Vector3.zero);
-        overlayBackgroundAnimator.SetColor(ColorUtils.GetColorFromRGBAVector4(new Vector4(11, 12, 19, 247)));
+        Color backgroundColor = GetLevelManager().m_currentChapter.GetThemeColors()[5];
+        overlayBackgroundAnimator.SetColor(backgroundColor);
         overlayBackgroundAnimator.SetScale(GeometryUtils.BuildVector3FromVector2(screenSize, 1));
 
         //separation line below title
@@ -338,11 +343,17 @@ public class GUIManager : MonoBehaviour
         closeButtonAnimator.SetParentTransform(m_sideButtonsOverlay.transform);
         closeButtonAnimator.SetPosition(new Vector3(133 - 0.5f * screenSize.x, 0.5f * screenSize.y - 106, -1));
 
-
-        if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
-            ShowOverlayContent(OverlayDisplayedContent.OPTIONS, false);
-        else if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
-            ShowOverlayContent(OverlayDisplayedContent.CREDITS, false);        
+        if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
+        {
+            ShowOverlayContent(OverlayDisplayedContent.PAUSE, false);
+        }
+        else
+        {
+            if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_OPTIONS_BUTTON)
+                ShowOverlayContent(OverlayDisplayedContent.OPTIONS, false);
+            else if (m_selectedSideButtonID == GUIButton.GUIButtonID.ID_CREDITS_BUTTON)
+                ShowOverlayContent(OverlayDisplayedContent.CREDITS, false);
+        }
     }
 
     /**
@@ -393,6 +404,13 @@ public class GUIManager : MonoBehaviour
             m_displayedContentHolder = m_creditsContentHolder;
             overlayTitleAnimator.SetParentTransform(m_creditsContentHolder.transform);
             overlayTitleTextMesh.text = LanguageUtils.GetTranslationForTag("about");
+        }
+        else if (displayedContent == OverlayDisplayedContent.PAUSE)
+        {
+            BuildPauseContent();
+            m_displayedContentHolder = m_pauseContentHolder;
+            overlayTitleAnimator.SetParentTransform(m_pauseContentHolder.transform);
+            overlayTitleTextMesh.text = LanguageUtils.GetTranslationForTag("pause");
         }
         
         //set the position after setting the parent transform
@@ -517,7 +535,6 @@ public class GUIManager : MonoBehaviour
 
         TextMeshAnimator soundTextAnimator = soundTextObject.GetComponent<TextMeshAnimator>();
         soundTextAnimator.SetParentTransform(m_optionsContentHolder.transform);
-        soundTextAnimator.SetParentTransform(m_optionsContentHolder.transform);
         soundTextAnimator.SetPosition(soundButtonPosition - new Vector3(0, 190.0f, 0));
         soundTextAnimator.SetFontHeight(40);
         soundTextAnimator.SetColor(Color.white);
@@ -533,6 +550,119 @@ public class GUIManager : MonoBehaviour
         resetTextAnimator.SetPosition(resetButtonPosition - new Vector3(0, 190.0f, 0));
         resetTextAnimator.SetFontHeight(40);
         resetTextAnimator.SetColor(Color.white);
+    }
+
+    /**
+     * Build content for pause screen
+     * **/
+    private void BuildPauseContent()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        float horizontalGapBetweenButtons = 394.0f;
+
+        m_pauseContentHolder = new GameObject("PauseContentHolder");
+        GameObjectAnimator pauseContentHolderAnimator = m_pauseContentHolder.AddComponent<GameObjectAnimator>();
+        pauseContentHolderAnimator.SetParentTransform(m_sideButtonsOverlay.transform);
+        pauseContentHolderAnimator.SetPosition(new Vector3(0, 0, SIDE_OVERLAY_Z_VALUE - 1));
+
+        //sound button
+        Vector3 soundButtonPosition = new Vector3(-horizontalGapBetweenButtons, -0.06f * screenSize.x, -1);
+        GameObject soundButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_SOUND_BUTTON, new Vector2(100.0f, 100.0f));
+        soundButtonObject.name = "SoundButton";
+        GameObjectAnimator soundButtonAnimator = soundButtonObject.GetComponent<GameObjectAnimator>();
+        soundButtonAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        soundButtonAnimator.SetPosition(soundButtonPosition);
+
+        //music button
+        Vector3 musicButtonPosition = new Vector3(0, -0.06f * screenSize.x, -1);
+        GameObject musicButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_MUSIC_BUTTON, new Vector2(128.0f, 128.0f));
+        musicButtonObject.name = "MusicButton";
+        GameObjectAnimator musicButtonAnimator = musicButtonObject.GetComponent<GameObjectAnimator>();
+        musicButtonAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        musicButtonAnimator.SetPosition(musicButtonPosition);
+
+        //levels button
+        Vector3 levelsButtonPosition = new Vector3(horizontalGapBetweenButtons, -0.06f * screenSize.x, -1);
+        GameObject levelsButtonObject = CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_TO_LEVELS_BUTTON, new Vector2(150.0f, 150.0f));
+        levelsButtonObject.name = "LevelsButton";
+        GameObjectAnimator levelsButtonAnimator = levelsButtonObject.GetComponent<GameObjectAnimator>();
+        levelsButtonAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        levelsButtonAnimator.SetPosition(levelsButtonPosition);
+
+        //Build hexagons around every button skin
+        Material transpWhiteMaterial = Instantiate(m_transpPositionColorMaterial);
+        GameObject soundButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
+        soundButtonHexagon.name = "SoundButtonHexagon";
+        CircleMesh hexaMesh = soundButtonHexagon.GetComponent<CircleMesh>();
+        hexaMesh.Init(transpWhiteMaterial);
+        CircleMeshAnimator hexaMeshAnimator = soundButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
+        hexaMeshAnimator.SetOuterRadius(102, true);
+        hexaMeshAnimator.SetColor(Color.white);
+        hexaMeshAnimator.SetPosition(soundButtonPosition);
+
+        GameObject musicButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
+        musicButtonHexagon.name = "MusicButtonHexagon";
+        hexaMesh = musicButtonHexagon.GetComponent<CircleMesh>();
+        hexaMesh.Init(transpWhiteMaterial);
+        hexaMeshAnimator = musicButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
+        hexaMeshAnimator.SetOuterRadius(102, true);
+        hexaMeshAnimator.SetColor(Color.white);
+        hexaMeshAnimator.SetPosition(musicButtonPosition);
+
+        GameObject levelsButtonHexagon = (GameObject)Instantiate(m_circleMeshPfb);
+        levelsButtonHexagon.name = "LevelsButtonHexagon";
+        hexaMesh = levelsButtonHexagon.GetComponent<CircleMesh>();
+        hexaMesh.Init(transpWhiteMaterial);
+        hexaMeshAnimator = levelsButtonHexagon.GetComponent<CircleMeshAnimator>();
+        hexaMeshAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        hexaMeshAnimator.SetNumSegments(6, false);
+        hexaMeshAnimator.SetInnerRadius(96, false);
+        hexaMeshAnimator.SetOuterRadius(102, true);
+        hexaMeshAnimator.SetColor(Color.white);
+        hexaMeshAnimator.SetPosition(levelsButtonPosition);
+
+        //Text labels
+        //music
+        GameObject musicTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        musicTextObject.name = "MusicText";
+
+        musicTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("music");
+
+        TextMeshAnimator musicTextAnimator = musicTextObject.GetComponent<TextMeshAnimator>();
+        musicTextAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        musicTextAnimator.SetPosition(musicButtonPosition - new Vector3(0, 190.0f, 0));
+        musicTextAnimator.SetFontHeight(40);
+        musicTextAnimator.SetColor(Color.white);
+
+        //sound
+        GameObject soundTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        soundTextObject.name = "SoundText";
+
+        soundTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("sound");
+
+        TextMeshAnimator soundTextAnimator = soundTextObject.GetComponent<TextMeshAnimator>();
+        soundTextAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        soundTextAnimator.SetPosition(soundButtonPosition - new Vector3(0, 190.0f, 0));
+        soundTextAnimator.SetFontHeight(40);
+        soundTextAnimator.SetColor(Color.white);
+
+        //levels
+        GameObject levelsTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        levelsTextObject.name = "LevelsText";
+
+        levelsTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("levels");
+
+        TextMeshAnimator levelsTextAnimator = levelsTextObject.GetComponent<TextMeshAnimator>();
+        levelsTextAnimator.SetParentTransform(m_pauseContentHolder.transform);
+        levelsTextAnimator.SetPosition(levelsButtonPosition - new Vector3(0, 190.0f, 0));
+        levelsTextAnimator.SetFontHeight(40);
+        levelsTextAnimator.SetColor(Color.white);
     }
 
     /**
@@ -552,5 +682,21 @@ public class GUIManager : MonoBehaviour
             m_backgroundRenderer = GameObject.FindGameObjectWithTag("Background").GetComponent<BackgroundTrianglesRenderer>();
 
         return m_backgroundRenderer;
+    }
+
+    private LevelManager GetLevelManager()
+    {
+        if (m_levelManager == null)
+            m_levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+
+        return m_levelManager;
+    }
+
+    private SceneManager GetSceneManager()
+    {
+        if (m_sceneManager == null)
+            m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
+
+        return m_sceneManager;
     }
 }
