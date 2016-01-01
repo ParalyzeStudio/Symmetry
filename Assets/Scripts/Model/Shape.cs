@@ -27,7 +27,6 @@ public class Shape : GridTriangulable
     }
     public ShapeState m_state { get; set; } //is the shape static or dynamic (i.e rendered with animation)
 
-    //public Shape m_overlappedStaticShape { get; set; } //when the state of this shape is DYNAMIC_INTERSECTION, we store the shape that is clipped with this one
     public List<Shape> m_overlappingShapes { get; set; } //in case of the state of this shape is STATIC_OVERLAPPED, we store here the list of substitution shapes that share an intersection with it
     public List<Shape> m_shapesToCreate { get; set; } //the list to store shapes from the difference clipping operation with the overlapped static shape
     private List<Shape> m_substitutionShapes; //List of shapes that are drawn over the shape that is being moved by the player when clipping occurs
@@ -416,56 +415,24 @@ public class Shape : GridTriangulable
 
             if (shape.m_state == ShapeState.STATIC && shape.ContainsOverlappingShape(this)) //we found the overlapped shape, perform clipping operation
             {
-                List<Shape> newOverlappedShapes = clippingManager.ShapesOperation(shape, this, ClipperLib.ClipType.ctDifference);
-                m_shapesToCreate.AddRange(newOverlappedShapes);
-                shape.RemoveOverlappingShape(this);
-                
-                //copy the overlapping shapes to the new overlapped shapes
-                for (int p = 0; p != newOverlappedShapes.Count; p++)
+                //check if the overlapping shape is actually intersecting the static shape with non-zero intersection
+                if (this.OverlapsShape(shape, true))
                 {
-                    newOverlappedShapes[p].m_overlappingShapes = shape.m_overlappingShapes;
+                    List<Shape> newOverlappedShapes = clippingManager.ShapesOperation(shape, this, ClipperLib.ClipType.ctDifference);
+                    m_shapesToCreate.AddRange(newOverlappedShapes);
+
+                    //copy the overlapping shapes to each overlapped shapes                
+                    for (int p = 0; p != newOverlappedShapes.Count; p++)
+                    {
+                        newOverlappedShapes[p].m_overlappingShapes = new List<Shape>(shape.m_overlappingShapes);
+                    }
+
+                    shape.m_state = ShapeState.DESTROYED; //mark the old shape for destruction
                 }
 
-                shape.m_state = ShapeState.DESTROYED; //mark the old shape for destruction
+                shape.RemoveOverlappingShape(this); //in both cases we remove 'this' shape from overlapping shapes
             }
         }
-
-        //ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
-        //clippingManager.PerformDifferenceAgainstShapes(m_overlappedStaticShape, m_overlappedStaticShape.m_overlappingShapes);
-
-        //1st version
-        //List<Shape> overlappingShapes = m_overlappedStaticShape.m_overlappingShapes;
-        //List<Shape> resultingShapes = new List<Shape>();
-        //resultingShapes.Add(m_overlappedStaticShape);
-        //for (int i = 0; i != overlappingShapes.Count; i++)
-        //{
-        //    for (int j = 0; j != resultingShapes.Count; j++)
-        //    {                
-        //    }
-        //}
-
-        //2nd version
-        //List<Shape> overlappingShapes = m_overlappedStaticShape.m_overlappingShapes;
-        //List<Shape> diffShapes = new List<Shape>();
-        //ClippingManager clippingManager = m_parentMesh.GetGameScene().GetClippingManager();
-        //for (int i = 0; i != overlappingShapes.Count; i++)
-        //{
-        //    diffShapes.AddRange(clippingManager.ShapesOperation(m_overlappedStaticShape, overlappingShapes[i], ClipperLib.ClipType.ctDifference));
-        //}
-
-        //int iDiffShapeIdx = 0;
-        //Shape resultIntersectionShape;
-        //do
-        //{
-        //    List<Shape> resultIntersectionShapes = clippingManager.ShapesOperation(diffShapes[iDiffShapeIdx], diffShapes[iDiffShapeIdx + 1], ClipperLib.ClipType.ctIntersection);
-        //}
-        //while ();
-
-        //m_shapesToCreate.AddRange(m_parentMesh.GetGameScene().GetClippingManager().ShapesOperation(m_overlappedStaticShape, this, ClipperLib.ClipType.ctDifference));
-
-        ////Destroy the old overlapped static shape
-        //m_overlappedStaticShape.m_state = ShapeState.DESTROYED;
-        //m_overlappedStaticShape = null;
     }
 
     /**
@@ -507,26 +474,33 @@ public class Shape : GridTriangulable
         //delete the shapes that we store in the fusion process
         m_parentMesh.GetShapesHolder().DeleteDeadShapes();
     }
-
+    
     /**
      * This method is called when player moves a shape over the grid
      * We recalculate here the intersection and difference shapes that are clipped against the static shapes
      * **/
     public void InvalidateSubstitutionShapesOnMove()
     {
+        Shapes shapesHolder = m_parentMesh.GetShapesHolder();
+
+        //First remove the INTERSECTION substitution shapes from the list of overlapping shapes on the relevant overlapped static shapes
+        for (int i = 0; i != shapesHolder.m_shapes.Count; i++)
+        {
+            Shape shape = shapesHolder.m_shapes[i];
+            if (shape.m_state == ShapeState.STATIC && shape.m_overlappingShapes != null)
+                shape.m_overlappingShapes.Clear();
+        }
+
         //Copy the shape before clipping it
         Shape shapeCopy = new Shape(this);
 
         if (m_substitutionShapes == null)
             m_substitutionShapes = new List<Shape>();
 
-        //destroy and clear the old substitution shapes
-        Shapes shapesHolder = m_parentMesh.GetShapesHolder();
+        //destroy and clear the old substitution shapes       
         for (int i = 0; i != m_substitutionShapes.Count; i++)
         {
             m_substitutionShapes[i].m_state = ShapeState.DESTROYED;
-            //shapesHolder.m_shapes.Remove(m_substitutionShapes[i]);
-            //shapesHolder.DestroyShapeObjectForShape(m_substitutionShapes[i]);
         }
         m_substitutionShapes.Clear();
 
