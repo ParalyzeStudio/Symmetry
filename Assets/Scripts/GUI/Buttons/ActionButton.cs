@@ -9,16 +9,8 @@ public class ActionButton : GUIButton
     public GameObject m_textMeshPfb;
     public Material m_transpColorMaterial;
 
-    //protected GameObject m_background;
-    protected UVQuad m_background;
-    protected GameObject m_buttonNameObject;
-
-    //variables to handle the update of the button name
-    private bool m_buttonNameUpdatePending;
-    private float m_buttonNameUpdateElapsedTime;
-    private float m_buttonNameUpdateDuration;
-
     private List<GameObject> m_childButtons;
+    private Vector2 m_childButtonSize;
 
     public enum GroupID
     {
@@ -30,8 +22,8 @@ public class ActionButton : GUIButton
 
     //the list of IDs this button is cycling on
     public GUIButton.GUIButtonID[] m_childIDs { get; set; }
-    public GUIButton.GUIButtonID m_currentChildID { get; set; }
     public int m_currentChildIndex { get; set; }
+    public ColorQuadAnimator m_selectedChildOverlayAnimator;
 
     /**
      * Build an action buttons with a title and one or more sub elements
@@ -43,6 +35,7 @@ public class ActionButton : GUIButton
         m_childIDs = childIDs;
 
         Vector2 screenSize = ScreenUtils.GetScreenSize();
+        m_childButtonSize = new Vector2(242.0f, 80.0f);
 
         //Build group title
         GameObject titleObject = (GameObject)Instantiate(m_textMeshPfb);
@@ -59,21 +52,18 @@ public class ActionButton : GUIButton
         titleAnimator.SetPosition(Vector3.zero);
 
         float titleHeight = titleObject.GetComponent<MeshRenderer>().bounds.size.y;
-        Debug.Log("titleHeight:" + titleHeight);
 
         float titleBottomMargin = 10.0f;
 
         //Build sub elements
         m_childButtons = new List<GameObject>(childIDs.Length);
-        float subElementWidth = 242.0f;
-        float subElementHeight = 80.0f;
         for (int i = 0; i != childIDs.Length; i++)
         {
-            GameObject subElement = BuildSubElement(childIDs[i], subElementWidth);
+            GameObject subElement = BuildSubElement(childIDs[i], m_childButtonSize.x);
             
             GameObjectAnimator elementAnimator = subElement.GetComponent<GameObjectAnimator>();
             elementAnimator.SetParentTransform(this.transform);
-            Vector3 subElementPosition = new Vector3(0, -(i + 0.5f) * subElementHeight - 0.5f * titleHeight - titleBottomMargin, 0);
+            Vector3 subElementPosition = new Vector3(0, -(i + 0.5f) * m_childButtonSize.y - 0.5f * titleHeight - titleBottomMargin, 0);
             elementAnimator.SetPosition(subElementPosition);
         }
 
@@ -83,44 +73,20 @@ public class ActionButton : GUIButton
         for (int i = 0; i != childIDs.Length; i++)
         {
             Vector3 elementPosition = m_childButtons[i].transform.localPosition;
-            Vector3 lineSize = new Vector3(subElementWidth, lineThickness, 1);
-            Vector3 linePosition = elementPosition - new Vector3(0, 0.5f * subElementHeight, 0);
+            Vector3 lineSize = new Vector3(m_childButtonSize.x, lineThickness, 1);
+            Vector3 linePosition = elementPosition - new Vector3(0, 0.5f * m_childButtonSize.y, 0);
 
             BuildSeparationLine(lineSize, linePosition, lineMaterial);
 
             if (i == 0)
             {
-                linePosition = elementPosition + new Vector3(0, 0.5f * subElementHeight, 0);
+                linePosition = elementPosition + new Vector3(0, 0.5f * m_childButtonSize.y, 0);
                 BuildSeparationLine(lineSize, linePosition, lineMaterial);
             }
         }
 
-        ////set the first ID as default
-        //m_ID = m_childIDs[0];
-        //Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
-
-        //base.Init(defaultSkinMaterial);
-        //TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
-        //skinAnimator.SetPosition(new Vector3(-18, 0, -2));
-        //skinAnimator.SetColor(Color.white);
-
-        //GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
-        //buttonAnimator.SetPosition(new Vector3(-128.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
-
-        ////Build the background
-        //GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
-        //buttonBackgroundObject.name = "Background";
-
-        //m_background = buttonBackgroundObject.GetComponent<UVQuad>();
-        //m_background.Init(m_actionButtonFrameMaterial);
-
-        //LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
-
-        //TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
-        //backgroundAnimator.SetParentTransform(this.transform);
-        //backgroundAnimator.SetScale(new Vector2(256, 256));
-        //backgroundAnimator.SetColorChannels(levelManager.m_currentChapter.GetThemeTintValues()[0], ValueAnimator.ColorMode.TSB);
-        //backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
+        //set the first ID as default
+        UpdateSelectedChildID(0, false);
     }
 
     /**
@@ -196,33 +162,54 @@ public class ActionButton : GUIButton
     }
 
     /**
+     * Return the button ID of the currently selected child
+     * **/
+    public GUIButtonID GetSelectedChildID()
+    {
+        return m_childIDs[m_currentChildIndex];
+    }
+
+    /**
+     * Display a white overlay over the currently selected child item
+     * **/
+    private void UpdateSelectedChildID(int newChildIndex, bool bAnimated = false)
+    {
+        m_currentChildIndex = newChildIndex;
+
+        if (m_selectedChildOverlayAnimator == null)
+            BuildSelectedChildOverlay();
+
+        Vector3 overlayFinalPosition = m_childButtons[newChildIndex].transform.localPosition;
+        overlayFinalPosition.z = -1; //set the overlay above all other elements
+        if (bAnimated)
+            m_selectedChildOverlayAnimator.TranslateTo(overlayFinalPosition, 0.3f);
+        else
+            m_selectedChildOverlayAnimator.SetPosition(overlayFinalPosition);
+    }
+
+    /**
+     * Build a rectangle that will be rendered over the selected child button
+     * **/
+    private void BuildSelectedChildOverlay()
+    {
+        GameObject childOverlayObject = (GameObject)Instantiate(m_colorQuadPfb);
+        childOverlayObject.name = "Overlay";
+
+        ColorQuad childOverlay = childOverlayObject.GetComponent<ColorQuad>();
+        childOverlay.Init(Instantiate(m_transpColorMaterial));
+
+        m_selectedChildOverlayAnimator = childOverlayObject.GetComponent<ColorQuadAnimator>();
+        m_selectedChildOverlayAnimator.SetParentTransform(this.transform);
+        m_selectedChildOverlayAnimator.SetScale(new Vector3(m_childButtonSize.x, m_childButtonSize.y, 1));
+        m_selectedChildOverlayAnimator.SetColor(new Color(1, 1, 1, 0.25f));
+    }
+
+    /**
      * Display this action button on the scene
      * **/
     public void Show(float fDelay = 0.0f)
     {
         
-    }
-
-    /**
-     * Show the button name object when button first appear
-     * **/
-    public void ShowButtonName()
-    {
-        m_buttonNameObject = (GameObject)Instantiate(m_textMeshPfb);
-        m_buttonNameObject.name = "Name";
-
-        TextMesh nameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
-        nameTextMesh.text = GetButtonName();
-
-        Vector3 nameTextMeshPosition = new Vector3(0, -115, 0);
-        TextMeshAnimator nameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
-        nameAnimator.SetParentTransform(this.transform);
-        nameAnimator.SetFontHeight(24);
-        nameAnimator.SetColor(Color.white);
-        nameAnimator.SetPosition(nameTextMeshPosition - new Vector3(0.0f, 10.0f, 0.0f));
-        nameAnimator.TranslateTo(nameTextMeshPosition, 0.3f, 0.5f);
-        nameAnimator.SetOpacity(0);
-        nameAnimator.FadeTo(1.0f, 0.3f, 0.5f);
     }
 
     /**
@@ -232,60 +219,6 @@ public class ActionButton : GUIButton
     {
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
         buttonAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
-    }
-
-    /**
-     * Switch to next button child ID if possible
-     * **/
-    public void UpdateButtonToNextID()
-    {
-        if (m_childIDs.Length > 1)
-        {
-            if (m_currentChildIndex == m_childIDs.Length - 1)
-                m_currentChildIndex = 0;
-            else
-                m_currentChildIndex++;
-
-            UpdateButtonID(m_childIDs[m_currentChildIndex]);
-        }
-    }
-
-    /**
-     * Update the ID of this button
-     * **/
-    public void UpdateButtonID(GUIButton.GUIButtonID iID)
-    {
-        m_ID = iID;
-        UpdateSkinForCurrentButtonID(true, 0.5f, 0.5f);
-        UpdateButtonName();
-    }
-
-    /**
-     * Update the skin for the currently active ID
-     * **/
-    private void UpdateSkinForCurrentButtonID(bool bAnimated, float fDuration, float fDelay = 0.0f)
-    {        
-        SetSkinMaterial(GetGUIManager().GetClonedSkinMaterialForID(m_ID));
-
-        if (bAnimated)
-        {
-            TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
-            skinAnimator.SetOpacity(0);
-            skinAnimator.FadeTo(1.0f, fDuration, fDelay);
-        }
-    }
-
-    /**
-     * Update the text inside the button name object by fading out the current one and fading in the new one
-     * **/
-    private void UpdateButtonName()
-    {
-        m_buttonNameUpdatePending = true;
-        m_buttonNameUpdateElapsedTime = 0;
-        m_buttonNameUpdateDuration = 0.75f;
-
-        TextMeshAnimator buttonNameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
-        buttonNameAnimator.FadeTo(0.0f, 0.25f, 0.0f);
     }
 
     /**
@@ -355,32 +288,23 @@ public class ActionButton : GUIButton
         return buttonName;
     }
 
-    public override void OnClick()
+    public override bool ContainsPoint(Vector2 point)
     {
-        UpdateButtonToNextID();
+        float actionButtonHeight = m_childButtons.Count * m_childButtonSize.y + 30.0f; //title (around 30 units)
+        Vector2 buttonTouchAreaSize = new Vector2(0.83f * m_childButtonSize.x, actionButtonHeight);
+        Vector2 buttonTouchAreaPosition = GeometryUtils.BuildVector2FromVector3(this.transform.position) - new Vector2(0, 0.5f * actionButtonHeight);
+
+        float minX = buttonTouchAreaPosition.x - 0.5f * m_childButtonSize.x;
+        float maxX = buttonTouchAreaPosition.x + 0.33f * m_childButtonSize.x;
+        float minY = buttonTouchAreaPosition.y - 0.5f * buttonTouchAreaSize.y;
+        float maxY = buttonTouchAreaPosition.y + 0.5f * buttonTouchAreaSize.y;
+
+        return (point.x >= minX && point.x <= maxX && point.y >= minY && point.y <= maxY);
     }
 
-    /**
-     * Update loop
-     * **/
-    public void Update()
+    public override void OnClick()
     {
-        float dt = Time.deltaTime;
-
-        if (m_buttonNameUpdatePending)
-        {            
-            if (m_buttonNameUpdateElapsedTime > m_buttonNameUpdateDuration)
-            {
-                m_buttonNameUpdatePending = false;
-
-                TextMesh buttonNameTextMesh = m_buttonNameObject.GetComponent<TextMesh>();
-                buttonNameTextMesh.text = GetButtonName();
-
-                TextMeshAnimator buttonNameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
-                buttonNameAnimator.FadeTo(1.0f, 0.25f);
-            }
-            else
-                m_buttonNameUpdateElapsedTime += dt;
-        }
+        int newChildIndex = (m_currentChildIndex == m_childIDs.Length - 1) ? 0 : m_currentChildIndex + 1;
+        UpdateSelectedChildID(newChildIndex, true);
     }
 }

@@ -186,7 +186,6 @@ public class LevelIntro : GUIScene
         m_lineAnimator.FadeTo(0.0f, 1.0f, fDelay, ValueAnimator.InterpolationType.LINEAR, true);        
         m_skipTextAnimator.FadeTo(0.0f, 1.0f, fDelay, ValueAnimator.InterpolationType.LINEAR, true);
 
-
         Vector3 skipButtonPosition = m_skipButtonAnimator.GetPosition();
         m_skipButtonAnimator.TranslateTo(skipButtonPosition + new Vector3(0, 400.0f, 0), 3.0f);
         m_skipButton.StopPulsating();

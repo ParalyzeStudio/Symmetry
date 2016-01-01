@@ -218,7 +218,7 @@ public class GUITouchHandler : TouchHandler
             clickLocation.y <= skipButtonPosition.y + 0.5f * skipButtonTouchArea && clickLocation.y >= skipButtonPosition.y - 0.5f * skipButtonTouchArea)
         {
             OnClickSkipIntro();
-        }         
+        }
     }
 
     /**

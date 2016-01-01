@@ -108,7 +108,7 @@ public class GUIButton : MonoBehaviour
     /**
      * Tells if this button contains the specified point
      * **/
-    public bool ContainsPoint(Vector2 point)
+    public virtual bool ContainsPoint(Vector2 point)
     {
         float minX = this.transform.position.x - 0.5f * m_touchArea.x;
         float maxX = this.transform.position.x + 0.5f * m_touchArea.x;

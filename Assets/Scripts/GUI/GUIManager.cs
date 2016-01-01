@@ -18,9 +18,6 @@ public class GUIManager : MonoBehaviour
     //buttons prefabs
     public GameObject m_GUIButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
     public GameObject m_actionButtonPfb; //the prefab to create a gui button with default skin only (no background, no shadow)
-    public GameObject m_optionsWindowPfb; //the prefab needed to instantiate the options window
-    public GameObject m_pauseWindowPfb; //the prefab needed to instantiate the pause window
-    public GameObject m_GUIFramePfb; //the prefab containing a background frame
 
     public Material m_plainWhiteMaterial { get; set; } //use this shared material to draw plain white meshes
 

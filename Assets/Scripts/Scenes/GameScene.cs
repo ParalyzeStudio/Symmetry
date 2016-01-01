@@ -262,23 +262,23 @@ public class GameScene : GUIScene
         BuildShapesHolder();
 
         //Display the grid
-        ShowGrid(0.0f);
+        ShowGrid();
 
         //Display interface buttons (pause, retry and hints)
-        ShowInterfaceButtons2(0.0f);
+        ShowInterfaceButtons2();
 
         //Display action counter
-        ShowCounter(0.0f);
+        ShowCounter();
 
         //Show outlines (if applicable)
-        ShowOutlines(0.0f);
+        ShowOutlines();
 
         //Show available symmetry axes
         BuildConstrainedDirections();
-        ShowAxisConstraintsIcons2(0.0f);
+        ShowAxisConstraintsIcons2();
 
         //Show action buttons
-        ShowActionButtons(0.0f);
+        ShowActionButtons();
 
         //Show starting shapes
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
@@ -338,11 +338,7 @@ public class GameScene : GUIScene
         Vector3 chalkboardSize = new Vector3(chalkboardWidth, chalkboardHeight, 1);
         Vector3 chalkboardFinalPosition = new Vector3(0, -0.5f * (screenSize.y - chalkboardHeight) - (chalkboardHeight - chalkboardScreenHeight), CHALKBOARD_Z_VALUE);
 
-        //chalkboardAnimator.SetPosition(chalkboardFinalPosition);
         chalkboardAnimator.SetScale(chalkboardSize);
-
-        //chalkboardAnimator.SetPosition(new Vector3(0, -0.5f * (screenSize.y + chalkboardHeight), CHALKBOARD_Z_VALUE));
-        //chalkboardAnimator.TranslateTo(chalkboardFinalPosition, 0.9f, 0.0f);
         chalkboardAnimator.SetPosition(chalkboardFinalPosition);
     }
 
@@ -350,7 +346,7 @@ public class GameScene : GUIScene
      * We build the grid of anchors that is displayed on the screen and that will help the player positionning shapes and axis...
      * Two anchors are separated from each other of a distance of m_gridSpacing that can be set in the editor
      * **/
-    private void ShowGrid(float fDelay = 0.0f)
+    private void ShowGrid()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
                
@@ -398,8 +394,6 @@ public class GameScene : GUIScene
         GameObjectAnimator backgroundShapeAnimator = backgroundShapeObject.GetComponent<GameObjectAnimator>();
         backgroundShapeAnimator.SetPosition(new Vector3(0, 0, TILED_BACKGROUND_RELATIVE_Z_VALUE));
         backgroundShapeAnimator.SetColor(Color.white);
-        backgroundShapeAnimator.SetOpacity(0);
-        backgroundShapeAnimator.FadeTo(1, 0.5f, fDelay);
 
         //Contour
         float contourThickness = 3.0f;
@@ -444,15 +438,12 @@ public class GameScene : GUIScene
         bottomContourAnimator.SetScale(new Vector3(screenSize.x, contourThickness, 1));
         bottomContourAnimator.SetPosition(new Vector3(-gridPosition.x, -0.5f * m_grid.m_gridSize.y, 0));
         bottomContourAnimator.SetColor(Color.white);
-
-        gridAnimator.SetOpacity(0);
-        gridAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     /**
      * Pause, retry and hints buttons
      * **/
-    private void ShowInterfaceButtons2(float fDelay = 0.0f)
+    private void ShowInterfaceButtons2()
     {
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
@@ -537,143 +528,143 @@ public class GameScene : GUIScene
     /**
      * Pause, retry and hints buttons
      * **/
-    private void ShowInterfaceButtons(float fDelay = 0.0f)
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
+    //private void ShowInterfaceButtons(float fDelay = 0.0f)
+    //{
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
+    //    m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
 
-        GameObjectAnimator interfaceButtonsHolderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
-        interfaceButtonsHolderAnimator.SetParentTransform(this.transform);
-        interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, -10));
+    //    GameObjectAnimator interfaceButtonsHolderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
+    //    interfaceButtonsHolderAnimator.SetParentTransform(this.transform);
+    //    interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, -10));
 
-        //Build buttons contours
-        Color blurrySegmentTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
-        Color sharpSegmentTintColor = ColorUtils.LightenColor(blurrySegmentTintColor, 0.75f);
-        blurrySegmentTintColor.a = 0.5f;
+    //    //Build buttons contours
+    //    Color blurrySegmentTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
+    //    Color sharpSegmentTintColor = ColorUtils.LightenColor(blurrySegmentTintColor, 0.75f);
+    //    blurrySegmentTintColor.a = 0.5f;
 
-        GameObject buttonsContour = new GameObject("ButtonsContour");
+    //    GameObject buttonsContour = new GameObject("ButtonsContour");
         
-        GameObjectAnimator buttonsContourAnimator = buttonsContour.AddComponent<GameObjectAnimator>();
-        buttonsContourAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        buttonsContourAnimator.SetPosition(Vector3.zero);
+    //    GameObjectAnimator buttonsContourAnimator = buttonsContour.AddComponent<GameObjectAnimator>();
+    //    buttonsContourAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+    //    buttonsContourAnimator.SetPosition(Vector3.zero);
 
-        SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
-        contourSegmentTree.Init(SegmentTree.SegmentType.BLURRY,
-                                buttonsContour,
-                                m_blurrySegmentPfb, 
-                                4.0f,
-                                16.0f,
-                                Instantiate(m_sharpSegmentMaterial),
-                                Instantiate(m_blurrySegmentMaterial),
-                                sharpSegmentTintColor,
-                                blurrySegmentTintColor);
+    //    SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
+    //    contourSegmentTree.Init(SegmentTree.SegmentType.BLURRY,
+    //                            buttonsContour,
+    //                            m_blurrySegmentPfb, 
+    //                            4.0f,
+    //                            16.0f,
+    //                            Instantiate(m_sharpSegmentMaterial),
+    //                            Instantiate(m_blurrySegmentMaterial),
+    //                            sharpSegmentTintColor,
+    //                            blurrySegmentTintColor);
 
-        float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
-        float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
+    //    float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
+    //    float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
 
-        SegmentTreeNode node1 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y));
-        SegmentTreeNode node2 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-        SegmentTreeNode node3 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-        SegmentTreeNode node4 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-        SegmentTreeNode node5 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y));
-        SegmentTreeNode node6 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-        SegmentTreeNode node7 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-        SegmentTreeNode node8 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y));
-        SegmentTreeNode node9 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-        SegmentTreeNode node10 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-        SegmentTreeNode node11 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y));
+    //    SegmentTreeNode node1 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y));
+    //    SegmentTreeNode node2 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+    //    SegmentTreeNode node3 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+    //    SegmentTreeNode node4 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+    //    SegmentTreeNode node5 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y));
+    //    SegmentTreeNode node6 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+    //    SegmentTreeNode node7 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+    //    SegmentTreeNode node8 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y));
+    //    SegmentTreeNode node9 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
+    //    SegmentTreeNode node10 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
+    //    SegmentTreeNode node11 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y));
 
-        node1.SetAnimationStartNode(true);
+    //    node1.SetAnimationStartNode(true);
 
-        node1.AddChild(node2);
-        node2.AddChild(node3);
-        node3.AddChild(node4);
-        node4.AddChild(node5);
-        node4.AddChild(node6);
-        node6.AddChild(node7);
-        node7.AddChild(node8);
-        node7.AddChild(node9);
-        node9.AddChild(node10);
-        node10.AddChild(node11);
+    //    node1.AddChild(node2);
+    //    node2.AddChild(node3);
+    //    node3.AddChild(node4);
+    //    node4.AddChild(node5);
+    //    node4.AddChild(node6);
+    //    node6.AddChild(node7);
+    //    node7.AddChild(node8);
+    //    node7.AddChild(node9);
+    //    node9.AddChild(node10);
+    //    node10.AddChild(node11);
 
-        contourSegmentTree.m_nodes.Add(node1);
-        contourSegmentTree.m_nodes.Add(node2);
-        contourSegmentTree.m_nodes.Add(node3);
-        contourSegmentTree.m_nodes.Add(node4);
-        contourSegmentTree.m_nodes.Add(node5);
-        contourSegmentTree.m_nodes.Add(node6);
-        contourSegmentTree.m_nodes.Add(node7);
-        contourSegmentTree.m_nodes.Add(node8);
-        contourSegmentTree.m_nodes.Add(node9);
-        contourSegmentTree.m_nodes.Add(node10);
-        contourSegmentTree.m_nodes.Add(node11);
+    //    contourSegmentTree.m_nodes.Add(node1);
+    //    contourSegmentTree.m_nodes.Add(node2);
+    //    contourSegmentTree.m_nodes.Add(node3);
+    //    contourSegmentTree.m_nodes.Add(node4);
+    //    contourSegmentTree.m_nodes.Add(node5);
+    //    contourSegmentTree.m_nodes.Add(node6);
+    //    contourSegmentTree.m_nodes.Add(node7);
+    //    contourSegmentTree.m_nodes.Add(node8);
+    //    contourSegmentTree.m_nodes.Add(node9);
+    //    contourSegmentTree.m_nodes.Add(node10);
+    //    contourSegmentTree.m_nodes.Add(node11);
 
-        contourSegmentTree.BuildSegments(true);
+    //    contourSegmentTree.BuildSegments(true);
 
-        //Add glowing rectangles above each button skin
-        Vector2 glowRectSize = new Vector2(1.733f * triangleHeight, 0.867f * triangleHeight);
-        for (int i = 0; i != 3; i++)
-        {
-            GameObject glowRectObject = (GameObject)Instantiate(m_texQuadPfb);
-            glowRectObject.name = "GlowRectangle" + (i + 1);
+    //    //Add glowing rectangles above each button skin
+    //    Vector2 glowRectSize = new Vector2(1.733f * triangleHeight, 0.867f * triangleHeight);
+    //    for (int i = 0; i != 3; i++)
+    //    {
+    //        GameObject glowRectObject = (GameObject)Instantiate(m_texQuadPfb);
+    //        glowRectObject.name = "GlowRectangle" + (i + 1);
 
-            glowRectObject.GetComponent<UVQuad>().Init(m_glowRectangleMaterial);
+    //        glowRectObject.GetComponent<UVQuad>().Init(m_glowRectangleMaterial);
 
-            TexturedQuadAnimator glowRectAnimator = glowRectObject.GetComponent<TexturedQuadAnimator>();
-            glowRectAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-            float rectPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - (2 * i + 1)) * triangleHeight;
-            float rectPositionY = 0.5f * screenSize.y - 0.4f * triangleEdgeLength;
-            glowRectAnimator.SetPosition(new Vector3(rectPositionX, rectPositionY, 0));
-            glowRectAnimator.SetScale(glowRectSize);
-            glowRectAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-        }
+    //        TexturedQuadAnimator glowRectAnimator = glowRectObject.GetComponent<TexturedQuadAnimator>();
+    //        glowRectAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+    //        float rectPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - (2 * i + 1)) * triangleHeight;
+    //        float rectPositionY = 0.5f * screenSize.y - 0.4f * triangleEdgeLength;
+    //        glowRectAnimator.SetPosition(new Vector3(rectPositionX, rectPositionY, 0));
+    //        glowRectAnimator.SetScale(glowRectSize);
+    //        glowRectAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
+    //    }
 
-        //Add button skins
-        Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
+    //    //Add button skins
+    //    Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
 
-        //pause
-        GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
-        pauseButtonObject.name = "PauseButton";
+    //    //pause
+    //    GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
+    //    pauseButtonObject.name = "PauseButton";
 
-        GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();
-        pauseButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+    //    GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();
+    //    pauseButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
 
-        GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
-        pauseButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float pauseButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight;
-        float pauseButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-        pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, pauseButtonPositionY, 0));
-        pauseButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
+    //    GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
+    //    pauseButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+    //    float pauseButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight;
+    //    float pauseButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+    //    pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, pauseButtonPositionY, 0));
+    //    pauseButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
 
-        //retry
-        GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
-        retryButtonObject.name = "RetryButton";
+    //    //retry
+    //    GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
+    //    retryButtonObject.name = "RetryButton";
 
-        GUIButton retryButton = retryButtonObject.GetComponent<GUIButton>();
-        retryButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+    //    GUIButton retryButton = retryButtonObject.GetComponent<GUIButton>();
+    //    retryButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
 
-        GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
-        retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float retryButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight - 4.0f; //offset a bit the texture, otherwise it gives a weird impression
-        float retryButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-        retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
-        retryButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
+    //    GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
+    //    retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+    //    float retryButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight - 4.0f; //offset a bit the texture, otherwise it gives a weird impression
+    //    float retryButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+    //    retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
+    //    retryButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
 
-        //hints
-        GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
-        hintsButtonObject.name = "HintsButton";
+    //    //hints
+    //    GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
+    //    hintsButtonObject.name = "HintsButton";
 
-        GUIButton hintsButton = hintsButtonObject.GetComponent<GUIButton>();
-        hintsButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
+    //    GUIButton hintsButton = hintsButtonObject.GetComponent<GUIButton>();
+    //    hintsButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
 
-        GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
-        hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float hintsButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight;
-        float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-        hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
-        hintsButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-    }
+    //    GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
+    //    hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+    //    float hintsButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight;
+    //    float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
+    //    hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
+    //    hintsButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
+    //}
 
     /**
      * Fades out interface buttons holder
@@ -685,9 +676,9 @@ public class GameScene : GUIScene
     }
 
     /**
-     * Counters to show remaining actions for the player
+     * Counter to show remaining actions for the player
      * **/
-    private void ShowCounter(float fDelay = 0.0f)
+    private void ShowCounter()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -700,8 +691,6 @@ public class GameScene : GUIScene
 
         GameObjectAnimator counterAnimator = counterObject.GetComponent<GameObjectAnimator>();
         counterAnimator.SetParentTransform(this.transform);
-        counterAnimator.SetOpacity(0);
-        counterAnimator.FadeTo(1, 1.0f, fDelay);
         counterAnimator.SetPosition(new Vector3(0, 0.428f * screenSize.y, COUNTER_Z_VALUE));
     }
 
@@ -716,25 +705,24 @@ public class GameScene : GUIScene
     /**
      * Here we build the dotted outlines (contour and holes) of the shape the player has to reproduce
      * **/
-    private void ShowOutlines(float fDelay = 0.0f)
+    private void ShowOutlines()
     {
         GameObject outlinesObject = (GameObject)Instantiate(m_outlinesPfb);
         outlinesObject.name = "Outlines";        
 
         GameObjectAnimator outlinesAnimator = outlinesObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetParentTransform(this.transform);
-        outlinesAnimator.SetOpacity(0);
         outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
 
         m_outlines = outlinesObject.GetComponent<Outlines>();
         m_outlines.Build();
-        m_outlines.Show(true, 0.5f, fDelay);
+        m_outlines.Show(false);
     }
 
     /**
      * Draw small icons to show the constraints on axes that the player can draw
      * **/
-    private void ShowAxisConstraintsIcons2(float fDelay = 0.0f)
+    private void ShowAxisConstraintsIcons2()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
@@ -769,75 +757,72 @@ public class GameScene : GUIScene
                 iconPositionX = (i - axisConstraints.Count / 2) * (iconSize.x + iconMargin);
             iconAnimator.SetPosition(new Vector3(iconPositionX, 0, 0));
         }
-
-        axisConstraintsIconsHolderAnimator.SetOpacity(0);
-        axisConstraintsIconsHolderAnimator.FadeTo(1, 1.0f, fDelay);
     }
 
     /**
      * Draw small icons to show the constraints on axes that the player can draw
-     * **/
-    private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
-        Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
+    * **/
+    //private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
+    //{
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
+    //    List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
+    //    Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
-        //Show icons
-        m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
+    //    //Show icons
+    //    m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
         
-        float iconHolderLeftMargin = 30.0f;
-        float iconHolderTopMargin = 30.0f; 
+    //    float iconHolderLeftMargin = 30.0f;
+    //    float iconHolderTopMargin = 30.0f; 
 
-        GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
-        axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));              
+    //    GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
+    //    axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
+    //    axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));              
 
-        float horizontalDistanceBetweenIcons = 65.0f;
-        Vector2 iconSize = new Vector2(64, 64);
+    //    float horizontalDistanceBetweenIcons = 65.0f;
+    //    Vector2 iconSize = new Vector2(64, 64);
 
-        for (int i = 0; i != axisConstraints.Count; i++)
-        {
-            GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
-            iconObject.name = "ConstraintAxisIcon";
+    //    for (int i = 0; i != axisConstraints.Count; i++)
+    //    {
+    //        GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
+    //        iconObject.name = "ConstraintAxisIcon";
 
-            UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
-            iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
+    //        UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
+    //        iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
 
-            TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
-            iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-            iconAnimator.SetScale(iconSize);
-            iconAnimator.SetColor(tintColor);
-            float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
-            iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
-        }
+    //        TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
+    //        iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+    //        iconAnimator.SetScale(iconSize);
+    //        iconAnimator.SetColor(tintColor);
+    //        float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
+    //        iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
+    //    }
         
-        axisConstraintsIconsHolderAnimator.SetOpacity(0);
-        axisConstraintsIconsHolderAnimator.FadeTo(1.0f, 0.5f);
+    //    axisConstraintsIconsHolderAnimator.SetOpacity(0);
+    //    axisConstraintsIconsHolderAnimator.FadeTo(1.0f, 0.5f);
 
-        //Show some underline
-        GameObject underlineObject = (GameObject)Instantiate(m_blurrySegmentPfb);
-        underlineObject.name = "Underline";
+    //    //Show some underline
+    //    GameObject underlineObject = (GameObject)Instantiate(m_blurrySegmentPfb);
+    //    underlineObject.name = "Underline";
 
-        BlurrySegmentAnimator underlineAnimator = underlineObject.GetComponent<BlurrySegmentAnimator>();
-        underlineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-        underlineAnimator.SetPosition(Vector3.zero);
+    //    BlurrySegmentAnimator underlineAnimator = underlineObject.GetComponent<BlurrySegmentAnimator>();
+    //    underlineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+    //    underlineAnimator.SetPosition(Vector3.zero);
 
-        float underlineTopMargin = 20.0f;
-        BlurrySegment underline = underlineObject.GetComponent<BlurrySegment>();
-        Vector3 underlinePointA = new Vector3(-iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
-        Vector3 underlinePointB = new Vector3(-iconHolderLeftMargin + axisConstraints.Count * iconSize.x + 2 * iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
-        underline.Build(underlinePointA,
-                        underlinePointA,
-                        4,
-                        16,
-                        Instantiate(m_sharpSegmentMaterial),
-                        Instantiate(m_blurrySegmentMaterial),
-                        Color.white,
-                        tintColor); //TODO obtain the color from the theme;
+    //    float underlineTopMargin = 20.0f;
+    //    BlurrySegment underline = underlineObject.GetComponent<BlurrySegment>();
+    //    Vector3 underlinePointA = new Vector3(-iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
+    //    Vector3 underlinePointB = new Vector3(-iconHolderLeftMargin + axisConstraints.Count * iconSize.x + 2 * iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
+    //    underline.Build(underlinePointA,
+    //                    underlinePointA,
+    //                    4,
+    //                    16,
+    //                    Instantiate(m_sharpSegmentMaterial),
+    //                    Instantiate(m_blurrySegmentMaterial),
+    //                    Color.white,
+    //                    tintColor); //TODO obtain the color from the theme;
 
-        underlineAnimator.TranslatePointBTo(underlinePointB, 0.5f);
-    }
+    //    underlineAnimator.TranslatePointBTo(underlinePointB, 0.5f);
+    //}
 
     public void DismissAxisConstraintsIcons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
@@ -851,7 +836,7 @@ public class GameScene : GUIScene
      * -Second button is for modifying the behavior of color symmetrization (addition or soustraction)
      * -Third button is for picking a color that will apply to the symmetry done by the user by filtering shapes that are not of that specific color
      * **/
-    private void ShowActionButtons(float fDelay = 0.0f)
+    private void ShowActionButtons()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
@@ -933,10 +918,6 @@ public class GameScene : GUIScene
         lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
         lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
         lineAnimator.SetColor(Color.white);
-
-        //Fade in holder
-        actionButtonsHolderAnimator.SetOpacity(0);
-        actionButtonsHolderAnimator.FadeTo(1, 0.5f, fDelay, ValueAnimator.InterpolationType.LINEAR);
     }
 
     private void DismissActionButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
@@ -955,7 +936,7 @@ public class GameScene : GUIScene
         for (int i = 0; i != m_actionButtons.Length; i++)
         {
             if (m_actionButtons[i].m_groupID == groupID)
-                return m_actionButtons[i].m_currentChildID;
+                return m_actionButtons[i].GetSelectedChildID();
         }
 
         return GUIButton.GUIButtonID.NONE;
