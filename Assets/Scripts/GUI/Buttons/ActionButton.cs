@@ -1,22 +1,16 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class ActionButton : GUIButton
 {
-    public const float ACTION_BUTTON_Z_VALUE = -10.0f;
-
     //shared prefabs
-    //public GameObject m_colorQuadPfb;
+    public GameObject m_colorQuadPfb;
     public GameObject m_texQuadPfb;
-    //public GameObject m_circleMeshPfb;
     public GameObject m_textMeshPfb;
-
-    //class specific prefabs
-    public Material m_actionButtonFrameMaterial;
-    //public Material m_actionButtonShadowMaterial;
+    public Material m_transpColorMaterial;
 
     //protected GameObject m_background;
     protected UVQuad m_background;
-    //protected UVQuad m_shadow;
     protected GameObject m_buttonNameObject;
 
     //variables to handle the update of the button name
@@ -24,91 +18,189 @@ public class ActionButton : GUIButton
     private float m_buttonNameUpdateElapsedTime;
     private float m_buttonNameUpdateDuration;
 
-    public enum Location
+    private List<GameObject> m_childButtons;
+
+    public enum GroupID
     {
-        TOP,
-        MIDDLE,
-        BOTTOM
+        MAIN_ACTIONS,
+        CLIP_OPERATION,
+        COLOR_FILTERING
     }
-    private Location m_location;
+    public GroupID m_groupID { get; set; }
 
     //the list of IDs this button is cycling on
     public GUIButton.GUIButtonID[] m_childIDs { get; set; }
-    public int m_currentChildIdIndex { get; set; }
+    public GUIButton.GUIButtonID m_currentChildID { get; set; }
+    public int m_currentChildIndex { get; set; }
 
-    public void Init(Location location, GUIButton.GUIButtonID[] childIDs)
+    /**
+     * Build an action buttons with a title and one or more sub elements
+     * The position is given by the position of the title
+     * **/
+    public void Init(GroupID groupID, GUIButton.GUIButtonID[] childIDs)
     {
-        m_location = location;
+        m_groupID = groupID;
         m_childIDs = childIDs;
 
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //set the first ID as default
-        m_ID = m_childIDs[0];
-        Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
+        //Build group title
+        GameObject titleObject = (GameObject)Instantiate(m_textMeshPfb);
+        titleObject.name = "Title";
 
-        base.Init(defaultSkinMaterial);
-        TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
-        skinAnimator.SetPosition(new Vector3(-18, 0, -2));
-        skinAnimator.SetColor(Color.white);
+        TextMesh titleMesh = titleObject.GetComponent<TextMesh>();
+        titleMesh.text = GetTitleForID(groupID);
+        titleMesh.text = "Actions";
 
-        GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
-        buttonAnimator.SetPosition(new Vector3(-128.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
+        TextMeshAnimator titleAnimator = titleObject.GetComponent<TextMeshAnimator>();
+        titleAnimator.SetParentTransform(this.transform);
+        titleAnimator.SetFontHeight(20);
+        titleAnimator.SetColor(Color.white);
+        titleAnimator.SetPosition(Vector3.zero);
 
-        //Build the background
-        GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
-        buttonBackgroundObject.name = "Background";
+        float titleHeight = titleObject.GetComponent<MeshRenderer>().bounds.size.y;
+        Debug.Log("titleHeight:" + titleHeight);
 
-        m_background = buttonBackgroundObject.GetComponent<UVQuad>();
-        m_background.Init(m_actionButtonFrameMaterial);
+        float titleBottomMargin = 10.0f;
 
-        LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+        //Build sub elements
+        m_childButtons = new List<GameObject>(childIDs.Length);
+        float subElementWidth = 242.0f;
+        float subElementHeight = 80.0f;
+        for (int i = 0; i != childIDs.Length; i++)
+        {
+            GameObject subElement = BuildSubElement(childIDs[i], subElementWidth);
+            
+            GameObjectAnimator elementAnimator = subElement.GetComponent<GameObjectAnimator>();
+            elementAnimator.SetParentTransform(this.transform);
+            Vector3 subElementPosition = new Vector3(0, -(i + 0.5f) * subElementHeight - 0.5f * titleHeight - titleBottomMargin, 0);
+            elementAnimator.SetPosition(subElementPosition);
+        }
 
-        TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
-        backgroundAnimator.SetParentTransform(this.transform);
-        backgroundAnimator.SetScale(new Vector2(256, 256));
-        backgroundAnimator.SetColorChannels(levelManager.m_currentChapter.GetThemeTintValues()[0], ValueAnimator.ColorMode.TSB);
-        backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
+        //Add separation lines
+        Material lineMaterial = Instantiate(m_transpColorMaterial);
+        float lineThickness = 2.0f;
+        for (int i = 0; i != childIDs.Length; i++)
+        {
+            Vector3 elementPosition = m_childButtons[i].transform.localPosition;
+            Vector3 lineSize = new Vector3(subElementWidth, lineThickness, 1);
+            Vector3 linePosition = elementPosition - new Vector3(0, 0.5f * subElementHeight, 0);
+
+            BuildSeparationLine(lineSize, linePosition, lineMaterial);
+
+            if (i == 0)
+            {
+                linePosition = elementPosition + new Vector3(0, 0.5f * subElementHeight, 0);
+                BuildSeparationLine(lineSize, linePosition, lineMaterial);
+            }
+        }
+
+        ////set the first ID as default
+        //m_ID = m_childIDs[0];
+        //Material defaultSkinMaterial = GetGUIManager().GetClonedSkinMaterialForID(m_ID);
+
+        //base.Init(defaultSkinMaterial);
+        //TexturedQuadAnimator skinAnimator = m_skin.GetComponent<TexturedQuadAnimator>();
+        //skinAnimator.SetPosition(new Vector3(-18, 0, -2));
+        //skinAnimator.SetColor(Color.white);
+
+        //GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
+        //buttonAnimator.SetPosition(new Vector3(-128.0f - 0.5f * screenSize.x, GetYPositionForLocation(location), ACTION_BUTTON_Z_VALUE));
+
+        ////Build the background
+        //GameObject buttonBackgroundObject = Instantiate(m_texQuadPfb);
+        //buttonBackgroundObject.name = "Background";
+
+        //m_background = buttonBackgroundObject.GetComponent<UVQuad>();
+        //m_background.Init(m_actionButtonFrameMaterial);
+
+        //LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
+
+        //TexturedQuadAnimator backgroundAnimator = m_background.GetComponent<TexturedQuadAnimator>();
+        //backgroundAnimator.SetParentTransform(this.transform);
+        //backgroundAnimator.SetScale(new Vector2(256, 256));
+        //backgroundAnimator.SetColorChannels(levelManager.m_currentChapter.GetThemeTintValues()[0], ValueAnimator.ColorMode.TSB);
+        //backgroundAnimator.SetPosition(new Vector3(0, 0, -1));
     }
 
     /**
-     * Set the default button ID when level starts
+     * Build one element containing an icon and the corresponding text
      * **/
-    private void SetDefaultButtonID()
+    private GameObject BuildSubElement(GUIButton.GUIButtonID elementID, float width)
     {
-        if (m_location == Location.TOP)
-            m_ID = GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
-        else if (m_location == Location.MIDDLE)
-            m_ID = GUIButtonID.ID_OPERATION_ADD;
-        else
-            m_ID = GUIButtonID.ID_COLOR_FILTER;
+        Vector3 buttonIconSize = new Vector3(64, 64, 1);
+
+        //holder
+        GameObject childButtonObject = new GameObject("ChildButton");
+        m_childButtons.Add(childButtonObject);
+        childButtonObject.AddComponent<GameObjectAnimator>();
+
+        //icon
+        GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
+        iconObject.name = "Icon";
+
+        UVQuad icon = iconObject.GetComponent<UVQuad>();
+        Material iconMaterial = GetGUIManager().GetClonedSkinMaterialForID(elementID);
+        icon.Init(iconMaterial);
+
+        TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
+        iconAnimator.SetParentTransform(childButtonObject.transform);
+        iconAnimator.SetColor(Color.white);
+        iconAnimator.SetScale(buttonIconSize);
+        iconAnimator.SetPosition(new Vector3(-0.27f * width, 0, 0));
+
+        //text
+        GameObject textObject = (GameObject)Instantiate(m_textMeshPfb);
+        textObject.name = "Text";
+
+        TextMesh text = textObject.GetComponent<TextMesh>();
+        text.text = "draw axis";
+
+        TextMeshAnimator textAnimator = textObject.GetComponent<TextMeshAnimator>();
+        textAnimator.SetParentTransform(childButtonObject.transform);
+        textAnimator.SetColor(Color.white);
+        textAnimator.SetFontHeight(20);
+        textAnimator.SetPosition(new Vector3(0.15f * width, 0, 0));
+
+        return childButtonObject;
+    }
+
+    private void BuildSeparationLine(Vector3 size, Vector3 position, Material lineMaterial)
+    {
+        GameObject lineObject = (GameObject)Instantiate(m_colorQuadPfb);
+        lineObject.name = "Line";
+
+        ColorQuad line = lineObject.GetComponent<ColorQuad>();
+        line.Init(lineMaterial);
+
+        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        lineAnimator.SetParentTransform(this.transform);
+        lineAnimator.SetColor(Color.white);
+        lineAnimator.SetScale(size);
+        lineAnimator.SetPosition(position);
+    }
+
+    private string GetTitleForID(GroupID id)
+    {
+        switch (id)
+        {
+            case GroupID.MAIN_ACTIONS:
+                return LanguageUtils.GetTranslationForTag("main_actions");
+            case GroupID.CLIP_OPERATION:
+                return LanguageUtils.GetTranslationForTag("clip_operations");
+            case GroupID.COLOR_FILTERING:
+                return LanguageUtils.GetTranslationForTag("color_filtering");
+            default:
+                return "no title";
+        }
     }
 
     /**
-     * -Rotate the background object
-     * -Fade in the shadow
-     * -Fade in the skin
-     * -translate the whole button from left to right
+     * Display this action button on the scene
      * **/
     public void Show(float fDelay = 0.0f)
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        //animate the background
-        //float rotationDuration = 0.5f;
-        //GameObjectAnimator backgroundAnimator = m_background.GetComponent<GameObjectAnimator>();
-        //backgroundAnimator.SetRotationAxis(Vector3.right);
-        //backgroundAnimator.SetRotationAngle(90);
-        //backgroundAnimator.RotateTo(0, rotationDuration);
-
-        //translate button
-        GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
-        float buttonPositionY = buttonAnimator.GetPosition().y;
-        Vector3 buttonToPosition = new Vector3(-0.5f * screenSize.x + 128.0f, buttonPositionY, ACTION_BUTTON_Z_VALUE);
-        buttonAnimator.TranslateTo(buttonToPosition, 1.0f, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL);
-
-        //Show the name label
-        ShowButtonName();
+        
     }
 
     /**
@@ -134,19 +226,12 @@ public class ActionButton : GUIButton
     }
 
     /**
-     * -Rotate the background object
-     * -Fade out the shadow
-     * -Fade out the skin
-     * -translate the whole button from right to left
+     * Fades out and remove this button from scene
      * **/
     public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
         GameObjectAnimator buttonAnimator = this.GetComponent<GameObjectAnimator>();
-        float buttonPositionY = buttonAnimator.GetPosition().y;
-        Vector3 buttonToPosition = new Vector3(-0.5f * screenSize.x - 128.0f, buttonPositionY, ACTION_BUTTON_Z_VALUE);
-        buttonAnimator.TranslateTo(buttonToPosition, fDuration, fDelay, ValueAnimator.InterpolationType.SINUSOIDAL, bDestroyOnFinish);
+        buttonAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
@@ -156,12 +241,12 @@ public class ActionButton : GUIButton
     {
         if (m_childIDs.Length > 1)
         {
-            if (m_currentChildIdIndex == m_childIDs.Length - 1)
-                m_currentChildIdIndex = 0;
+            if (m_currentChildIndex == m_childIDs.Length - 1)
+                m_currentChildIndex = 0;
             else
-                m_currentChildIdIndex++;
+                m_currentChildIndex++;
 
-            UpdateButtonID(m_childIDs[m_currentChildIdIndex]);
+            UpdateButtonID(m_childIDs[m_currentChildIndex]);
         }
     }
 
@@ -201,21 +286,6 @@ public class ActionButton : GUIButton
 
         TextMeshAnimator buttonNameAnimator = m_buttonNameObject.GetComponent<TextMeshAnimator>();
         buttonNameAnimator.FadeTo(0.0f, 0.25f, 0.0f);
-    }
-
-    /**
-     * Specify the y position for this specific action button
-     * **/
-    public float GetYPositionForLocation(Location location)
-    {
-        float verticalSpacesBetweenButtons = 250.0f;
-
-        if (location == Location.TOP)
-            return verticalSpacesBetweenButtons;
-        else if (location == Location.BOTTOM)
-            return -verticalSpacesBetweenButtons;
-        else 
-            return 0;
     }
 
     /**

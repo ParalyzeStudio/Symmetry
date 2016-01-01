@@ -11,10 +11,10 @@ public class GridTouchHandler : TouchHandler
         //First we verify if we entered the move shape mode
         GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
 
-        GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
-        if (topActionID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES ||
-            topActionID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE ||
-            topActionID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
+        GUIButton.GUIButtonID mainActionsButtonID = gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS);
+        if (mainActionsButtonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES ||
+            mainActionsButtonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE ||
+            mainActionsButtonID == GUIButton.GUIButtonID.ID_POINT_SYMMETRY)
         {
             Grid grid = gameScene.m_grid;
             Vector2 gridSize = grid.m_gridSize;
@@ -40,7 +40,7 @@ public class GridTouchHandler : TouchHandler
 
         Grid.GridAnchor closestAnchor = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorForWorldPosition(pointerLocation);
 
-        Symmetrizer.SymmetryType symmetryType = Symmetrizer.GetSymmetryTypeFromActionButtonID(gameScene.GetActionButtonID(ActionButton.Location.TOP));
+        Symmetrizer.SymmetryType symmetryType = Symmetrizer.GetSymmetryTypeFromActionButtonID(gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS));
         gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition, symmetryType, AxisRenderer.AxisType.DYNAMIC_UNSNAPPED);
     }
 

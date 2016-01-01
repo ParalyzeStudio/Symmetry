@@ -9,7 +9,8 @@ public class ValueAnimator : MonoBehaviour
     {
         LINEAR = 1,
         SINUSOIDAL = 2,
-        CUSTOM = 3 //use this for custom interpolation, but we have to redefine the UpdatePosition method with the appropriate interpolation function
+        X3 = 3, //f(x) = a * x^3
+        CUSTOM = 4 //use this for custom interpolation, but we have to redefine the UpdatePosition method with the appropriate interpolation function
     }
 
     public enum ColorMode
@@ -414,6 +415,15 @@ public class ValueAnimator : MonoBehaviour
                     deltaPosition = dt / m_translatingDuration * positionVariation;
                 else if (m_translatingInterpolationType == InterpolationType.SINUSOIDAL)
                     deltaPosition = positionVariation * (Mathf.Sin(effectiveElapsedTime * Mathf.PI / (2 * m_translatingDuration)) - Mathf.Sin((effectiveElapsedTime - dt) * Mathf.PI / (2 * m_translatingDuration)));
+                else if (m_translatingInterpolationType == InterpolationType.X3) //y = a * (x3 - b) + c
+                {
+                    float b = m_translatingDuration / 2.0f;
+                    float c = 1 / 2.0f;
+                    float a = c / (b * b * b); //c / b3
+                    float d = (effectiveElapsedTime - b);
+                    float e = (effectiveElapsedTime - dt - b);
+                    deltaPosition = positionVariation * (a * (d * d * d - e * e * e));
+                }
 
                 if (effectiveElapsedTime > m_translatingDuration)
                 {

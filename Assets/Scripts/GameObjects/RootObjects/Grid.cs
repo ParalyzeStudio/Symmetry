@@ -21,6 +21,7 @@ public class Grid : MonoBehaviour
     }
 
     public GridAnchor[] m_anchors { get; set; }
+    public Vector2 m_maxGridSize { get; set; }
     public Vector2 m_gridSize { get; set; }
     public int m_numLines { get; set; }
     public int m_numColumns { get; set; }
@@ -36,8 +37,10 @@ public class Grid : MonoBehaviour
         TOP
     }
 
-    public void Build(Material gridMaterial)
+    public void Build(Vector2 maxGridSize, Material gridMaterial)
     {
+        m_maxGridSize = maxGridSize;
+
         GameObject pointsHolder = new GameObject("Points");
 
         GameObjectAnimator pointsHolderAnimator = pointsHolder.AddComponent<GameObjectAnimator>();
@@ -54,27 +57,25 @@ public class Grid : MonoBehaviour
 
         //get the screen viewport dimensions
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        //The grid occupies at maximum 79% of the screen height and 80% of the screen width
-        m_gridSize = new Vector2(0.7865f * screenSize.x, 0.797f * screenSize.y);
+     
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
-            lineGridSpacing = m_gridSize.y / (float)(exactNumLines - 1);
+            lineGridSpacing = maxGridSize.y / (float)(exactNumLines - 1);
         else
-            lineGridSpacing = m_gridSize.y / (float)(minNumLines - 1);
+            lineGridSpacing = maxGridSize.y / (float)(minNumLines - 1);
 
         if (exactNumColumns > 0)
-            columnGridSpacing = m_gridSize.x / (float)(exactNumColumns - 1);
+            columnGridSpacing = maxGridSize.x / (float)(exactNumColumns - 1);
         else
-            columnGridSpacing = m_gridSize.x / (float)(minNumColumns - 1);
+            columnGridSpacing = maxGridSize.x / (float)(minNumColumns - 1);
 
         if (currentLevel.m_maxGridSpacing > 0)
             m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing, currentLevel.m_maxGridSpacing);
         else
             m_gridSpacing = Mathf.Min(lineGridSpacing, columnGridSpacing);
 
-        m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(m_gridSize.y / m_gridSpacing) + 1;
-        m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(m_gridSize.x / m_gridSpacing) + 1;
+        m_numLines = (exactNumLines > 0) ? exactNumLines : Mathf.FloorToInt(maxGridSize.y / m_gridSpacing) + 1;
+        m_numColumns = (exactNumColumns > 0) ? exactNumColumns : Mathf.FloorToInt(maxGridSize.x / m_gridSpacing) + 1;
 
         int anchorsCount = m_numLines * m_numColumns;
         m_anchors = new GridAnchor[anchorsCount];

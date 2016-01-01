@@ -9,6 +9,7 @@ public class ShapeAnimator : GameObjectAnimator
 
         ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
         shapeMesh.SetTintColor(m_color);
+        shapeMesh.RefreshMesh(); //refresh the mesh instantly
     }
 
     public override void SetColor(Color color)
@@ -17,5 +18,6 @@ public class ShapeAnimator : GameObjectAnimator
 
         ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
         shapeMesh.SetTintColor(m_color);
+        shapeMesh.RefreshMesh(); //refresh the mesh instantly
     }
 }

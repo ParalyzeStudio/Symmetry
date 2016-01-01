@@ -209,9 +209,9 @@ public class GUITouchHandler : TouchHandler
     public void HandleClickOnLevelIntro(Vector2 clickLocation)
     {
         LevelIntro levelintro = (LevelIntro)GetSceneManager().m_currentScene;
-        GameObject skipButtonObject = levelintro.m_skipButtonObject;
-        Vector2 skipButtonPosition = skipButtonObject.transform.position;
-        float skipButtonTouchArea = skipButtonObject.GetComponent<PulsatingButton>().Size;
+        PulsatingButton skipButton = levelintro.m_skipButton;
+        Vector2 skipButtonPosition = skipButton.gameObject.transform.position;
+        float skipButtonTouchArea = skipButton.Size;
 
         if (clickLocation.x >= skipButtonPosition.x - 0.5f * skipButtonTouchArea && clickLocation.x <= skipButtonPosition.x + 0.5f * skipButtonTouchArea
             &&

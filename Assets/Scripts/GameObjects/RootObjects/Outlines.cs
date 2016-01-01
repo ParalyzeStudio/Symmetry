@@ -83,7 +83,10 @@ public class Outlines : MonoBehaviour
     {
         GameObjectAnimator outlinesAnimator = this.GetComponent<GameObjectAnimator>();
         if (bAnimated)
+        {
+            outlinesAnimator.SetOpacity(0);
             outlinesAnimator.FadeTo(1, fDuration, fDelay);
+        }
         else
             outlinesAnimator.SetOpacity(1);
     }

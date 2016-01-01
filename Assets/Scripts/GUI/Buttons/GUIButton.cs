@@ -230,6 +230,7 @@ public class GUIButton : MonoBehaviour
         }
         else if (m_ID == GUIButtonID.ID_BACK_TO_LEVELS_BUTTON)
         {
+            Debug.Log("CLICK LEVELS");
             SceneManager sceneManager = GetSceneManager();
             sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVELS, false, 1.0f);
 

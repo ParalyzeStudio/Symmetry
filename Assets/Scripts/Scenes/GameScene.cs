@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 public class GameScene : GUIScene
 {
+    public const float ACTION_BUTTONS_Z_VALUE = -15.0f;
     public const float INTERFACE_BUTTONS_Z_VALUE = -15.0f;
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -15.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
@@ -29,6 +30,9 @@ public class GameScene : GUIScene
     public Shapes m_shapesHolder { get; set; }
     public Axes m_axes { get; set; }
 
+    //plain white material
+    private Material m_plainWhiteMaterial;
+
     //root objects
     public GameObject m_shapesHolderPfb;
     public GameObject m_gridPfb;
@@ -50,13 +54,11 @@ public class GameScene : GUIScene
     public Material m_blurrySegmentMaterial;
     public Material m_sharpSegmentMaterial;
 
+    //action buttons
+    ActionButton[] m_actionButtons;
+
     //grid contour
     public Material m_gridTopContourMaterial;
-
-    //Action buttons
-    private ActionButton m_topActionButton;
-    private ActionButton m_middleActionButton;
-    private ActionButton m_bottomActionButton;
 
     //Constraints on axes
     public const string CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL = "SYMMETRY_AXIS_HORIZONTAL";
@@ -91,6 +93,8 @@ public class GameScene : GUIScene
     public override void Show()
     {
         base.Show();
+
+        m_plainWhiteMaterial = Instantiate(m_transpColorMaterial);
 
         //Gradient
         ApplyBackgroundGradient();
@@ -258,23 +262,23 @@ public class GameScene : GUIScene
         BuildShapesHolder();
 
         //Display the grid
-        ShowGrid();
+        ShowGrid(0.0f);
 
         //Display interface buttons (pause, retry and hints)
-        ShowInterfaceButtons2();
+        ShowInterfaceButtons2(0.0f);
 
         //Display action counter
-        ShowCounter();
+        ShowCounter(0.0f);
 
         //Show outlines (if applicable)
-        ShowOutlines();
+        ShowOutlines(0.0f);
 
         //Show available symmetry axes
         BuildConstrainedDirections();
-        ShowAxisConstraintsIcons2();
+        ShowAxisConstraintsIcons2(0.0f);
 
         //Show action buttons
-        ShowActionButtons();
+        ShowActionButtons(0.0f);
 
         //Show starting shapes
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
@@ -332,10 +336,14 @@ public class GameScene : GUIScene
         }
 
         Vector3 chalkboardSize = new Vector3(chalkboardWidth, chalkboardHeight, 1);
-        Vector3 chalkboardPosition = new Vector3(0, -0.5f * (screenSize.y - chalkboardHeight) - (chalkboardHeight - chalkboardScreenHeight), CHALKBOARD_Z_VALUE);
+        Vector3 chalkboardFinalPosition = new Vector3(0, -0.5f * (screenSize.y - chalkboardHeight) - (chalkboardHeight - chalkboardScreenHeight), CHALKBOARD_Z_VALUE);
 
-        chalkboardAnimator.SetPosition(chalkboardPosition);
+        //chalkboardAnimator.SetPosition(chalkboardFinalPosition);
         chalkboardAnimator.SetScale(chalkboardSize);
+
+        //chalkboardAnimator.SetPosition(new Vector3(0, -0.5f * (screenSize.y + chalkboardHeight), CHALKBOARD_Z_VALUE));
+        //chalkboardAnimator.TranslateTo(chalkboardFinalPosition, 0.9f, 0.0f);
+        chalkboardAnimator.SetPosition(chalkboardFinalPosition);
     }
 
     /**
@@ -352,25 +360,26 @@ public class GameScene : GUIScene
         GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetParentTransform(this.transform);        
 
-        Material gridPlainWhiteMaterial = Instantiate(m_transpColorMaterial);
+        //max size of the grid (not he actual grid size)
+        float leftBorderWidth = 242.0f;
+        float rightBorderWidth = 168.0f;
+        float topBorderHeight = 180.0f;
+        float bottomBorderHeight = 80.0f;
+        Vector2 maxGridSize = new Vector2(screenSize.x - leftBorderWidth - rightBorderWidth, screenSize.y - topBorderHeight - bottomBorderHeight);
 
         //Visible grid
         m_grid = gridObject.GetComponent<Grid>();
-        m_grid.Build(gridPlainWhiteMaterial);
+        m_grid.Build(maxGridSize, m_plainWhiteMaterial);
 
         //set correct position for grid
-        float topBorderHeight = 0.141f * screenSize.y;
-        float gridPositionX = 0.12f * screenSize.x - 0.5f * (screenSize.x - m_grid.m_gridSize.x); 
-        float gridPositionY = -0.5f * m_grid.m_gridSize.y - topBorderHeight + 0.5f * screenSize.y;
+        float gridPositionX = 0.5f * (screenSize.x - maxGridSize.x) - rightBorderWidth;
+        float gridPositionY = -0.5f * (screenSize.y - maxGridSize.y) + bottomBorderHeight;
         Vector3 gridPosition = new Vector3(gridPositionX, gridPositionY, GRID_Z_VALUE);
         gridAnimator.SetPosition(gridPosition);
 
-        //Voxel grid       
+        //Voxel grid
         m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
         m_voxelGrid.Init(3);
-
-        gridAnimator.SetOpacity(0);
-        gridAnimator.FadeTo(1, 1.5f, fDelay);
 
         //Tiled background
         Contour backgroundShapeContour = new Contour(4);
@@ -389,9 +398,11 @@ public class GameScene : GUIScene
         GameObjectAnimator backgroundShapeAnimator = backgroundShapeObject.GetComponent<GameObjectAnimator>();
         backgroundShapeAnimator.SetPosition(new Vector3(0, 0, TILED_BACKGROUND_RELATIVE_Z_VALUE));
         backgroundShapeAnimator.SetColor(Color.white);
+        backgroundShapeAnimator.SetOpacity(0);
+        backgroundShapeAnimator.FadeTo(1, 0.5f, fDelay);
 
         //Contour
-        float contourThickness = 6.0f;
+        float contourThickness = 3.0f;
 
         GameObject topContourObject = Instantiate(m_texQuadPfb);
         topContourObject.name = "TopGridContour";
@@ -401,38 +412,41 @@ public class GameScene : GUIScene
         TexturedQuadAnimator topContourAnimator = topContourObject.GetComponent<TexturedQuadAnimator>();
         topContourAnimator.SetParentTransform(gridObject.transform);
         topContourAnimator.SetScale(new Vector3(screenSize.x, 64, 1));
-        topContourAnimator.SetPosition(new Vector3(-gridPosition.x, 0.5f * m_grid.m_gridSize.y, GRID_Z_VALUE));
+        topContourAnimator.SetPosition(new Vector3(-gridPosition.x, 0.5f * m_grid.m_gridSize.y, 0));
         topContourAnimator.SetColorChannels(new Vector3(100, 0.75f, 1.1f), ValueAnimator.ColorMode.TSB);
 
         GameObject leftContourObject = Instantiate(m_colorQuadPfb);
         leftContourObject.name = "LeftGridContour";
         ColorQuad leftContour = leftContourObject.GetComponent<ColorQuad>();
-        leftContour.Init(gridPlainWhiteMaterial);
+        leftContour.Init(m_plainWhiteMaterial);
         ColorQuadAnimator leftContourAnimator = leftContourObject.GetComponent<ColorQuadAnimator>();
         leftContourAnimator.SetParentTransform(gridObject.transform);
         leftContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-        leftContourAnimator.SetPosition(new Vector3(- 0.5f * m_grid.m_gridSize.x, 0, GRID_Z_VALUE));
+        leftContourAnimator.SetPosition(new Vector3(-0.5f * m_grid.m_gridSize.x, 0, 0));
         leftContourAnimator.SetColor(Color.white);
 
         GameObject rightContourObject = Instantiate(m_colorQuadPfb);
         rightContourObject.name = "RightGridContour";
         ColorQuad rightContour = rightContourObject.GetComponent<ColorQuad>();
-        rightContour.Init(gridPlainWhiteMaterial);
+        rightContour.Init(m_plainWhiteMaterial);
         ColorQuadAnimator rightContourAnimator = rightContourObject.GetComponent<ColorQuadAnimator>();
         rightContourAnimator.SetParentTransform(gridObject.transform);
         rightContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-        rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, GRID_Z_VALUE));
+        rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, 0));
         rightContourAnimator.SetColor(Color.white);
 
         GameObject bottomContourObject = Instantiate(m_colorQuadPfb);
         bottomContourObject.name = "BottomGridContour";
         ColorQuad bottomContour = bottomContourObject.GetComponent<ColorQuad>();
-        bottomContour.Init(gridPlainWhiteMaterial);
+        bottomContour.Init(m_plainWhiteMaterial);
         ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
         bottomContourAnimator.SetParentTransform(gridObject.transform);
         bottomContourAnimator.SetScale(new Vector3(screenSize.x, contourThickness, 1));
-        bottomContourAnimator.SetPosition(new Vector3(-gridPosition.x, -0.5f * m_grid.m_gridSize.y, GRID_Z_VALUE));
+        bottomContourAnimator.SetPosition(new Vector3(-gridPosition.x, -0.5f * m_grid.m_gridSize.y, 0));
         bottomContourAnimator.SetColor(Color.white);
+
+        gridAnimator.SetOpacity(0);
+        gridAnimator.FadeTo(1, 0.5f, fDelay);
     }
 
     /**
@@ -714,7 +728,7 @@ public class GameScene : GUIScene
 
         m_outlines = outlinesObject.GetComponent<Outlines>();
         m_outlines.Build();
-        m_outlines.Show(true, 1.5f, fDelay);
+        m_outlines.Show(true, 0.5f, fDelay);
     }
 
     /**
@@ -757,7 +771,7 @@ public class GameScene : GUIScene
         }
 
         axisConstraintsIconsHolderAnimator.SetOpacity(0);
-        axisConstraintsIconsHolderAnimator.FadeTo(1.0f, 0.5f);
+        axisConstraintsIconsHolderAnimator.FadeTo(1, 1.0f, fDelay);
     }
 
     /**
@@ -839,80 +853,112 @@ public class GameScene : GUIScene
      * **/
     private void ShowActionButtons(float fDelay = 0.0f)
     {
-        Vector2 actionButtonSkinSize = new Vector2(128, 128);
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        //Show top button
+        Vector2 actionButtonsHolderSize = new Vector2(242.0f, m_grid.m_maxGridSize.y);
+        GameObject actionButtonsHolder = new GameObject("ActionButtons");
+        GameObjectAnimator actionButtonsHolderAnimator = actionButtonsHolder.AddComponent<GameObjectAnimator>();
+        actionButtonsHolderAnimator.SetParentTransform(this.transform);
+        actionButtonsHolderAnimator.SetPosition(new Vector3(-0.5f * screenSize.x + 0.5f * actionButtonsHolderSize.x, m_grid.transform.localPosition.y, ACTION_BUTTONS_Z_VALUE));
+
+        m_actionButtons = new ActionButton[3];
+
+        //Show MAIN_ACTIONS button
         GUIButton.GUIButtonID[] childIDs = new GUIButton.GUIButtonID[4];
         childIDs[0] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
         childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
         childIDs[2] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
         childIDs[3] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
 
-        GameObject buttonObject = GetGUIManager().CreateActionButton(actionButtonSkinSize,
-                                                                     ActionButton.Location.TOP,
-                                                                     childIDs);
+        //Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 100.0f, 0);
+        Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 50.0f, 0);
 
+        GameObject buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.MAIN_ACTIONS,
+                                                                     childIDs);
         buttonObject.name = "TopActionBtn";
 
-        m_topActionButton = buttonObject.GetComponent<ActionButton>();
+        ActionButton button = buttonObject.GetComponent<ActionButton>();
+        m_actionButtons[0] = button;
 
-        GameObjectAnimator topActionButtonAnimator = m_topActionButton.GetComponent<GameObjectAnimator>();
-        topActionButtonAnimator.SetParentTransform(this.transform);
+        GameObjectAnimator buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+        buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+        buttonAnimator.SetPosition(buttonPosition);
 
-        //Show middle button
-        childIDs = new GUIButton.GUIButtonID[2];
-        childIDs[0] = GUIButton.GUIButtonID.ID_OPERATION_ADD;
-        childIDs[1] = GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT;
+        ////Show CLIP_OPERATION button
+        //childIDs = new GUIButton.GUIButtonID[2];
+        //childIDs[0] = GUIButton.GUIButtonID.ID_OPERATION_ADD;
+        //childIDs[1] = GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT;
 
-        buttonObject = GetGUIManager().CreateActionButton(actionButtonSkinSize,
-                                                          ActionButton.Location.MIDDLE,
-                                                          childIDs);
+        //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.CLIP_OPERATION,
+        //                                                  childIDs);
 
-        buttonObject.name = "MiddleActionBtn";
+        //buttonObject.name = "MiddleActionBtn";
 
-        m_middleActionButton = buttonObject.GetComponent<ActionButton>();
+        //button = buttonObject.GetComponent<ActionButton>();
+        //m_actionButtons[1] = button;
 
-        GameObjectAnimator middleActionButtonAnimator = m_middleActionButton.GetComponent<GameObjectAnimator>();
-        middleActionButtonAnimator.SetParentTransform(this.transform);
+        //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+        //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+        //buttonAnimator.SetPosition(buttonPosition);
 
-        //Show bottom button
-        childIDs = new GUIButton.GUIButtonID[1];
-        childIDs[0] = GUIButton.GUIButtonID.ID_COLOR_FILTER;
+        ////Show COLOR_FILTERING button
+        //childIDs = new GUIButton.GUIButtonID[1];
+        //childIDs[0] = GUIButton.GUIButtonID.ID_COLOR_FILTER;
 
-        buttonObject = GetGUIManager().CreateActionButton(actionButtonSkinSize,
-                                                          ActionButton.Location.BOTTOM,
-                                                          childIDs);
+        //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.COLOR_FILTERING,
+        //                                                  childIDs);
 
-        buttonObject.name = "BottomActionBtn";
+        //buttonObject.name = "BottomActionBtn";
 
-        m_bottomActionButton = buttonObject.GetComponent<ActionButton>();
+        //button = buttonObject.GetComponent<ActionButton>();
+        //m_actionButtons[2] = button;
 
-        GameObjectAnimator bottomActionButtonAnimator = m_bottomActionButton.GetComponent<GameObjectAnimator>();
-        bottomActionButtonAnimator.SetParentTransform(this.transform);
+        //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+        //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+        //buttonAnimator.SetPosition(buttonPosition);
 
-        m_topActionButton.Show(fDelay);
-        m_middleActionButton.Show(fDelay + 0.2f);
-        m_bottomActionButton.Show(fDelay + 0.4f);
+        for (int i = 0; i != m_actionButtons.Length; i++)
+        {
+            if (m_actionButtons[i] != null)
+                m_actionButtons[i].Show();
+        }
+
+        //build a vertical line to show separation between action buttons and grid
+        GameObject lineObject = Instantiate(m_colorQuadPfb);
+        lineObject.name = "SeparationLine";
+        ColorQuad line = lineObject.GetComponent<ColorQuad>();
+        line.Init(m_plainWhiteMaterial);
+        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        lineAnimator.SetParentTransform(actionButtonsHolder.transform);
+        lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
+        lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
+        lineAnimator.SetColor(Color.white);
+
+        //Fade in holder
+        actionButtonsHolderAnimator.SetOpacity(0);
+        actionButtonsHolderAnimator.FadeTo(1, 0.5f, fDelay, ValueAnimator.InterpolationType.LINEAR);
     }
 
     private void DismissActionButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
-        m_topActionButton.Dismiss(fDuration, fDelay, bDestroyOnFinish);
-        m_middleActionButton.Dismiss(fDuration, fDelay + 0.1f, bDestroyOnFinish);
-        m_bottomActionButton.Dismiss(fDuration, fDelay + 0.2f, bDestroyOnFinish);
+        for (int i = 0; i != m_actionButtons.Length; i++)
+        {
+            m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
+        }
     }
 
     /**
      * Returns the current ID of the action button at specified location
      * **/
-    public GUIButton.GUIButtonID GetActionButtonID(ActionButton.Location buttonLocation)
+    public GUIButton.GUIButtonID GetActionButtonID(ActionButton.GroupID groupID)
     {
-        if (buttonLocation == ActionButton.Location.TOP)
-            return m_topActionButton.m_ID;
-        else if (buttonLocation == ActionButton.Location.MIDDLE)
-            return m_middleActionButton.m_ID;
-        else
-            return m_bottomActionButton.m_ID;
+        for (int i = 0; i != m_actionButtons.Length; i++)
+        {
+            if (m_actionButtons[i].m_groupID == groupID)
+                return m_actionButtons[i].m_currentChildID;
+        }
+
+        return GUIButton.GUIButtonID.NONE;
     }
 
     /**

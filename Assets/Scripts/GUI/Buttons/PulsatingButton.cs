@@ -19,6 +19,7 @@ public class PulsatingButton : MonoBehaviour
 
     //pulsations
     private const float PULSATION_PERIOD = 1.0f;
+    private const float PULSE_TIMESPAN = 3.0f;
     private float m_fadingHexagonsGenerationTimeInterval;
     private float m_fadingHexagonsGenerationElapsedTime;
     private bool m_pulsating;
@@ -51,7 +52,6 @@ public class PulsatingButton : MonoBehaviour
         m_pulsating = true;
         m_fadingHexagonsGenerationElapsedTime = pulsationPeriod; //the first hexagon will start fading after some delay (0.5 sec)
         m_fadingHexagonsGenerationTimeInterval = pulsationPeriod;
-
     }
 
     public void StopPulsating()
@@ -80,8 +80,8 @@ public class PulsatingButton : MonoBehaviour
 
         //launch animation on hexagon
         Vector3 scaleToSize = new Vector3(2.0f * m_size, 2.0f * m_size, 1);
-        fadingHexagonAnimator.ScaleTo(scaleToSize, 3.0f);
-        fadingHexagonAnimator.FadeTo(0.0f, 3.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        fadingHexagonAnimator.ScaleTo(scaleToSize, PULSE_TIMESPAN);
+        fadingHexagonAnimator.FadeTo(0.0f, PULSE_TIMESPAN, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
     public void Update()

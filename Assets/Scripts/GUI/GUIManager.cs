@@ -114,19 +114,13 @@ public class GUIManager : MonoBehaviour
     /**
      * Same as previous method but for an action button
      * **/
-    public GameObject CreateActionButton(Vector2 size, ActionButton.Location location, GUIButton.GUIButtonID[] childIDs)
+    public GameObject CreateActionButton(ActionButton.GroupID groupID, GUIButton.GUIButtonID[] childIDs)
     {
         GameObject buttonObject = (GameObject)Instantiate(m_actionButtonPfb);
 
         //Set the relevant skin material for the specified button ID
         ActionButton button = buttonObject.GetComponent<ActionButton>();
-        button.Init(location, childIDs);
-
-        //Set the size of the button skin
-        button.SetSize(size);
-
-        //add an animator
-        buttonObject.AddComponent<GameObjectAnimator>();
+        button.Init(groupID, childIDs);
 
         return buttonObject;
     }

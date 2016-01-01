@@ -9,8 +9,8 @@ public class ShapeTouchHandler : TouchHandler
 
         GridPoint pointerGridLocation = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
 
-        GUIButton.GUIButtonID topActionID = gameScene.GetActionButtonID(ActionButton.Location.TOP);
-        if (topActionID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
+        GUIButton.GUIButtonID mainActionsButtonID = gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS);
+        if (mainActionsButtonID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
         {
             Shape shape = GetComponent<ShapeMesh>().m_shapeData;
 

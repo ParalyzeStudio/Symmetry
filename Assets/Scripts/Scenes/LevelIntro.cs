@@ -2,8 +2,8 @@
 
 public class LevelIntro : GUIScene
 {
-    private const float OPAQUE_BACKGROUND_Z_VALUE = -8.0f;
-    private const float CONTENT_Z_VALUE = -10.0f;
+    private const float OPAQUE_BACKGROUND_Z_VALUE = -30.0f;
+    private const float CONTENT_Z_VALUE = -31.0f;
 
     public GameObject m_colorQuadPfb;
     //public GameObject m_circleMeshPfb;
@@ -17,14 +17,19 @@ public class LevelIntro : GUIScene
     private GameObjectAnimator m_rightPanelAnimator;
 
     //skip button
-    public GameObject m_skipButtonObject { get; set; }
+    public PulsatingButton m_skipButton { get; set; }
+
+    //animator of scene elements
+    private TextMeshAnimator m_titleAnimator;
+    private ColorQuadAnimator m_lineAnimator;
+    private GameObjectAnimator m_skipButtonAnimator;
+    private TextMeshAnimator m_skipTextAnimator;
 
     public bool m_loadingLevelIntroFromRetry { get; set; } //is the LevelIntro loaded from the retry button in the GameScene
 
     public override void Show()
     {
         base.Show();
-        GameObjectAnimator sceneAnimator = this.GetComponent<GameObjectAnimator>();
         ShowOpaqueBackground();
         ShowChapterAndLevel();
         ShowSeparationLine();
@@ -78,17 +83,6 @@ public class LevelIntro : GUIScene
         }
     }
 
-    private void DismissOpaqueBackground()
-    {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-        //m_leftPanelAnimator.SetParentTransform(null);
-        //m_rightPanelAnimator.SetParentTransform(null);
-
-        m_leftPanelAnimator.TranslateTo(new Vector3(-1.5f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        m_rightPanelAnimator.TranslateTo(new Vector3(1.5f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);        
-    }
-
     private void ShowSeparationLine()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
@@ -99,11 +93,11 @@ public class LevelIntro : GUIScene
         ColorQuad line = lineObject.GetComponent<ColorQuad>();
         line.Init(Instantiate(m_transpColorMaterial));
 
-        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
-        lineAnimator.SetParentTransform(this.transform);
-        lineAnimator.SetPosition(new Vector3(0, -0.045f * screenSize.y, CONTENT_Z_VALUE));
-        lineAnimator.SetScale(new Vector3(1200, 4, 1));
-        lineAnimator.SetColor(Color.white);
+        m_lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        m_lineAnimator.SetParentTransform(this.transform);
+        m_lineAnimator.SetPosition(new Vector3(0, -0.045f * screenSize.y, CONTENT_Z_VALUE));
+        m_lineAnimator.SetScale(new Vector3(1200, 4, 1));
+        m_lineAnimator.SetColor(Color.white);
     }
 
     /**
@@ -127,17 +121,18 @@ public class LevelIntro : GUIScene
         }
 
         GameObject titleObject = (GameObject) Instantiate(m_textMeshPfb);
+        titleObject.name = "Title";
         titleObject.GetComponent<TextMesh>().text = titleText;
 
-        TextMeshAnimator levelIntroTitleAnimator = titleObject.GetComponent<TextMeshAnimator>();
-        levelIntroTitleAnimator.SetParentTransform(this.transform);
-        levelIntroTitleAnimator.SetPosition(new Vector3(0, 0.1f * screenSize.y, CONTENT_Z_VALUE));
-        levelIntroTitleAnimator.SetFontHeight(130);
-        levelIntroTitleAnimator.SetColor(Color.white);
+        m_titleAnimator = titleObject.GetComponent<TextMeshAnimator>();
+        m_titleAnimator.SetParentTransform(this.transform);
+        m_titleAnimator.SetPosition(new Vector3(0, 0.1f * screenSize.y, CONTENT_Z_VALUE));
+        m_titleAnimator.SetFontHeight(130);
+        m_titleAnimator.SetColor(Color.white);
         if (m_loadingLevelIntroFromRetry)
         {
-            levelIntroTitleAnimator.SetOpacity(0);
-            levelIntroTitleAnimator.FadeTo(1.0f, 0.5f);
+            m_titleAnimator.SetOpacity(0);
+            m_titleAnimator.FadeTo(1.0f, 0.5f);
         }
     }
 
@@ -148,26 +143,54 @@ public class LevelIntro : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        m_skipButtonObject = (GameObject)Instantiate(m_pulsatingButtonPfb);
-        m_skipButtonObject.name = "SkipButton";
+        GameObject skipButtonObject = (GameObject)Instantiate(m_pulsatingButtonPfb);
+        skipButtonObject.name = "SkipButton";
 
-        PulsatingButton skipButton = m_skipButtonObject.GetComponent<PulsatingButton>();
-        skipButton.Build(200, Color.white, 8.0f, 1.0f);
+        m_skipButton = skipButtonObject.GetComponent<PulsatingButton>();
+        m_skipButton.Build(200, Color.white, 8.0f, 1.0f);
 
-        GameObjectAnimator skipButtonAnimator = m_skipButtonObject.GetComponent<GameObjectAnimator>();
-        skipButtonAnimator.SetParentTransform(this.transform);
-        skipButtonAnimator.SetPosition(new Vector3(0, -0.29f * screenSize.y, CONTENT_Z_VALUE));
+        m_skipButtonAnimator = skipButtonObject.GetComponent<GameObjectAnimator>();
+        m_skipButtonAnimator.SetParentTransform(this.transform);
+        m_skipButtonAnimator.SetPosition(new Vector3(0, -0.29f * screenSize.y, CONTENT_Z_VALUE));
 
         //Show text above button
         GameObject m_skipTextObject = (GameObject)Instantiate(m_textMeshPfb);
         m_skipTextObject.name = "SkipText";
         m_skipTextObject.GetComponent<TextMesh>().text = LanguageUtils.GetTranslationForTag("skip");
 
-        TextMeshAnimator playTextAnimator = m_skipTextObject.GetComponent<TextMeshAnimator>();
-        playTextAnimator.SetParentTransform(this.transform);
-        playTextAnimator.SetPosition(new Vector3(0, -0.14f * screenSize.y, CONTENT_Z_VALUE));
-        playTextAnimator.SetColor(Color.white);
-        playTextAnimator.SetFontHeight(40);
+        m_skipTextAnimator = m_skipTextObject.GetComponent<TextMeshAnimator>();
+        m_skipTextAnimator.SetParentTransform(this.transform);
+        m_skipTextAnimator.SetPosition(new Vector3(0, -0.14f * screenSize.y, CONTENT_Z_VALUE));
+        m_skipTextAnimator.SetColor(Color.white);
+        m_skipTextAnimator.SetFontHeight(40);
+    }
+    
+    private void DismissOpaqueBackground(float fDelay = 0.0f)
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        m_leftPanelAnimator.SetParentTransform(null);
+        m_rightPanelAnimator.SetParentTransform(null);
+
+        m_leftPanelAnimator.TranslateTo(new Vector3(-0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, fDelay, ValueAnimator.InterpolationType.X3, true);
+        m_rightPanelAnimator.TranslateTo(new Vector3(0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, fDelay, ValueAnimator.InterpolationType.X3, true);
+    }
+
+    private void DismissAllElements(float fDelay = 0.0f)
+    {
+        m_titleAnimator.SetParentTransform(null);
+        m_lineAnimator.SetParentTransform(null);
+        m_skipButtonAnimator.SetParentTransform(null);
+        m_skipTextAnimator.SetParentTransform(null);
+        m_titleAnimator.FadeTo(0.0f, 1.0f, fDelay, ValueAnimator.InterpolationType.LINEAR, true);
+        m_lineAnimator.FadeTo(0.0f, 1.0f, fDelay, ValueAnimator.InterpolationType.LINEAR, true);        
+        m_skipTextAnimator.FadeTo(0.0f, 1.0f, fDelay, ValueAnimator.InterpolationType.LINEAR, true);
+
+
+        Vector3 skipButtonPosition = m_skipButtonAnimator.GetPosition();
+        m_skipButtonAnimator.TranslateTo(skipButtonPosition + new Vector3(0, 400.0f, 0), 3.0f);
+        m_skipButton.StopPulsating();
+        Destroy(m_skipButton.gameObject, 3.0f);
     }
 
     public void LaunchGameScene()
@@ -176,8 +199,8 @@ public class LevelIntro : GUIScene
             return;
 
         m_gameSceneLaunched = true;
-        DismissOpaqueBackground();
-        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 1.0f);
+        DismissOpaqueBackground(0.5f);
+        DismissAllElements(0.5f);
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.GAME, true, 0.0f);
     }
 }
-
