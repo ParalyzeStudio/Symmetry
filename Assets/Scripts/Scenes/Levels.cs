@@ -3,6 +3,7 @@
 public class Levels : GUIScene
 {
     public const float LEVELS_SLOTS_Z_VALUE = -10.0f;
+    public const float BACK_BUTTON_Z_VALUE = -10.0f;
 
     //Shared prefabs
     //public GameObject m_texQuadPfb;
@@ -32,6 +33,7 @@ public class Levels : GUIScene
 
         ShowLevelsSlots();
         ShowDebugLevelSlots();
+        ShowBackButton();
     }
 
     private void ApplyBackgroundGradient()
@@ -185,6 +187,27 @@ public class Levels : GUIScene
         debugLevelButtonAnimator.SetPosition(new Vector3(0.25f * screenSize.x, -0.5f * screenSize.y + 100, -200));
     }
 
+    /**
+     * Show the button to go back to chapters screen
+     * **/
+    private void ShowBackButton()
+    {
+        Vector2 backButtonSize = new Vector2(128, 128);
+        GameObject backButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_BACK_BUTTON, backButtonSize);
+        backButtonObject.name = "BackButton";
+
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        GameObjectAnimator backButtonAnimator = backButtonObject.GetComponent<GameObjectAnimator>();
+        backButtonAnimator.SetParentTransform(this.transform);
+        backButtonAnimator.SetPosition(new Vector3(-0.5f * screenSize.x + GetBackgroundRenderer().m_triangleHeight,
+                                                   0.5f * screenSize.y - GetBackgroundRenderer().m_triangleEdgeLength, 
+                                                   BACK_BUTTON_Z_VALUE));
+    }
+
+    /**
+     * Build and render a hexagonal level slot for a particular level
+     * **/
     public LevelSlot BuildLevelSlotForNumber(int iLevelNumber)
     {
         GameObject levelSlotObject = (GameObject)Instantiate(m_levelSlotPfb);

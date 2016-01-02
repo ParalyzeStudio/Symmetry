@@ -36,6 +36,7 @@ public class GUIButton : MonoBehaviour
         ID_CREDITS_BUTTON,
         ID_MUSIC_BUTTON,
         ID_SOUND_BUTTON,
+        ID_BACK_BUTTON,
         ID_RESET_BUTTON,
         ID_CLOSE_OVERLAY_BUTTON,
         ID_PAUSE_BUTTON,
@@ -204,6 +205,16 @@ public class GUIButton : MonoBehaviour
             PersistentDataManager persistentDataManager = GetPersistentDataManager();
             persistentDataManager.SetMusicStatus(soundManager.m_soundActive);
         }
+        else if (m_ID == GUIButtonID.ID_BACK_BUTTON)
+        {
+            //Translate the button on the left and make it go out of screen
+            GameObjectAnimator buttonAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
+            Vector3 buttonToPosition = buttonAnimator.GetPosition() - new Vector3(256, 0, 0);
+            buttonAnimator.TranslateTo(buttonToPosition, 0.5f);
+
+
+            GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 1.0f);
+        }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
         {
             guiManager.DismissSideButtonsOverlay();
@@ -245,7 +256,7 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_DEBUG_SKIP_LEVEL)
         {
             Debug.Log("ID_DEBUG_SKIP_LEVEL");
-            GameScene gameScene = (GameScene) GetSceneManager().m_currentScene;
+            GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
             gameScene.EndLevel(GameScene.GameStatus.VICTORY);
         }
         else if (m_ID == GUIButtonID.ID_DEBUG_LEVEL1)

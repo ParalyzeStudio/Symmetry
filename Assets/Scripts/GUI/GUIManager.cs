@@ -58,6 +58,7 @@ public class GUIManager : MonoBehaviour
     public Material m_skinOptions;
     public Material m_skinMusic;
     public Material m_skinSound;
+    public Material m_skinBack;
     public Material m_skinReset;
     public Material m_skinHints;
     public Material m_skinRetry;
@@ -139,6 +140,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinMusic;
         else if (iID == GUIButton.GUIButtonID.ID_SOUND_BUTTON)
             skinMaterial = m_skinSound;
+        else if (iID == GUIButton.GUIButtonID.ID_BACK_BUTTON)
+            skinMaterial = m_skinBack;
         else if (iID == GUIButton.GUIButtonID.ID_RESET_BUTTON)
             skinMaterial = m_skinReset;
         else if (iID == GUIButton.GUIButtonID.ID_PAUSE_BUTTON)
