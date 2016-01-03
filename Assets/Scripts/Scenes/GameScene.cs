@@ -397,7 +397,7 @@ public class GameScene : GUIScene
         backgroundShapeContour.Add(new GridPoint(1, m_grid.m_numLines, true));
 
         Shape backgroundShape = new Shape(backgroundShapeContour);
-        backgroundShape.m_state = Shape.ShapeState.NONE; //no special state for the background
+        backgroundShape.m_state = Shape.ShapeState.TILED_BACKGROUND; //no special state for the background
         backgroundShape.m_color = Color.white;
         backgroundShape.Triangulate();
 
@@ -959,7 +959,8 @@ public class GameScene : GUIScene
     {
         for (int i = 0; i != m_actionButtons.Length; i++)
         {
-            m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
+            if (m_actionButtons[i] != null)
+                m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
         }
     }
 
@@ -1269,17 +1270,18 @@ public class GameScene : GUIScene
     {
         if (m_shapesHolder == null)
             return false;
+
         List<Shape> allShapes = m_shapesHolder.m_shapes;
 
         if (allShapes.Count == 0) //if a level contains no shape (i.e in debug mode for instance)
             return false;
 
-        //First we check if every shape is static
+        //First we check if every shape (except the tiled background) is static
         for (int iShapeIdx = 0; iShapeIdx != allShapes.Count; iShapeIdx++)
         {
             Shape shape = allShapes[iShapeIdx];
 
-            if (shape.m_state != Shape.ShapeState.STATIC)
+            if (shape.m_state != Shape.ShapeState.STATIC && shape.m_state != Shape.ShapeState.TILED_BACKGROUND)
                 return false;
         }
 
@@ -1295,8 +1297,8 @@ public class GameScene : GUIScene
         {
             Shape shape = allShapes[iShapeIdx];
 
-            if (shape.m_state != Shape.ShapeState.STATIC)
-                return false;
+            if (shape.m_state == Shape.ShapeState.TILED_BACKGROUND)
+                continue;
 
             bool bInsideOneOutline = false; //check if the shape is inside one of the outlines or outside all outlines
             for (int iOutlineIdx = 0; iOutlineIdx != outlines.Count; iOutlineIdx++)
@@ -1336,6 +1338,9 @@ public class GameScene : GUIScene
         float outlinesArea = 0;
         for (int i = 0; i != allShapes.Count; i++)
         {
+            if (allShapes[i].m_state == Shape.ShapeState.TILED_BACKGROUND)
+                continue;
+
             allShapes[i].CalculateArea();
             shapesArea += allShapes[i].m_area;
         }
@@ -1346,8 +1351,8 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-        //    Debug.Log("STEP3 CHECK");
+        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+            Debug.Log("STEP3 CHECK");
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }

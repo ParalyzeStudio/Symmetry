@@ -14,7 +14,8 @@ public class Shape : GridTriangulable
 
     public enum ShapeState
     {
-        NONE = 0,
+        NONE = 0, //default state, probably never used
+        TILED_BACKGROUND, //used for the tiled background dark shape
         DYNAMIC_INTERSECTION, //this dynamic shape is the result of the intersection of two shapes
         DYNAMIC_DIFFERENCE, //this dynamic shape is the result of the difference between two shapes
         STATIC, //this shape has been drawn
@@ -604,7 +605,6 @@ public class Shape : GridTriangulable
         this.m_state = ShapeState.DESTROYED;
     }
 
-
     private class ContourHoleSharedPoint
     {
         public GridPoint m_point { get; set; }
@@ -822,7 +822,7 @@ public class Shape : GridTriangulable
         return m_state == ShapeState.MOVING_SUBSTITUTION_INTERSECTION || m_state == ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
     }
 
-    public void CalculateColorFromTSBValues()
+    public void CalculateColorFromTint()
     {
         m_color = ColorUtils.GetRGBAColorFromTSB(new Vector3(m_tint, DEFAULT_SATURATION, DEFAULT_BRIGHTNESS), 1);
     }

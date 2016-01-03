@@ -97,6 +97,9 @@ public class ColorUtils
         return new Color(r, g, b, opacity);
     }
 
+    /**
+     * Return the RGBA color (channels are not necessarily clamped between 0 and 1) to the corresponding TSB values and opacity
+     * **/
     public static Color GetRGBAColorFromTSB(Vector3 tsb, float a)
     {
         float tint = tsb.x;
@@ -132,4 +135,3 @@ public class ColorUtils
         return outColor;
     }
 }
-

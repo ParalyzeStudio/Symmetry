@@ -37,7 +37,7 @@
 		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour>
 				<point column="2" line="2" />
 				<point column="2" line="3" />

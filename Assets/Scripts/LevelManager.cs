@@ -201,7 +201,7 @@ public class LevelManager : MonoBehaviour
                 if (strTintShapeColor != null)
                 {                    
                     shape.m_tint = float.Parse(strTintShapeColor);
-                    shape.CalculateColorFromTSBValues();
+                    shape.CalculateColorFromTint();
                 }
 
                 //Contour

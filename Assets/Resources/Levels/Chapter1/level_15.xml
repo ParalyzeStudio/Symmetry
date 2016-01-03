@@ -77,7 +77,7 @@
 		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour area="1">
 				<point column="6" line="6" />
 				<point column="6" line="4" />

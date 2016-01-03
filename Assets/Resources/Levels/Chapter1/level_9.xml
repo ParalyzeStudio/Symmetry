@@ -29,7 +29,7 @@
 		</dottedOutline>
 	</dottedOultines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour>
 				<point column="5" line="5" />
 				<point column="5" line="4" />

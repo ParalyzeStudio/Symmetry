@@ -28,7 +28,7 @@
 			</contour>
 		</shape> -->
 		
-		<shape color="1,0,0">
+		<shape tint="0">
 			<contour>
 				<point column="3" line="4"/>
 				<point column="3" line="3"/>

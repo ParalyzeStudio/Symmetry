@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 4" number="4">
 	<counter maxActions="2"/>
-	<stack size="4"/>
 	<grid exactNumColumns="7" exactNumLines="5" maxGridSpacing="300"/>
 	<dottedOutlines>
 		<dottedOutline>
@@ -22,7 +21,7 @@
 		</dottedOutline>
 	</dottedOultines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour>
 				<point column="2" line="2" />
 				<point column="2" line="4" />

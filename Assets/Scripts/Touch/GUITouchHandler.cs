@@ -7,16 +7,23 @@ public class GUITouchHandler : TouchHandler
     {
         if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
         {
-            GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();          
-
-            for (int i = 0; i != allButtons.Length; i++)
+            if (GetGUIManager().m_sideButtonsOverlayDisplayed)
             {
-                if (allButtons[i].ContainsPoint(pointerLocation))
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
+            else
+            {
+                GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
+
+                for (int i = 0; i != allButtons.Length; i++)
+                {
+                    if (allButtons[i].ContainsPoint(pointerLocation))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
 
         return true;

@@ -20,7 +20,7 @@
 		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour>
 				<point column="4" line="7" />
 				<point column="5" line="6" />
