@@ -336,10 +336,22 @@ public class GameScene : GUIScene
         }
 
         Vector3 chalkboardSize = new Vector3(chalkboardWidth, chalkboardHeight, 1);
-        Vector3 chalkboardFinalPosition = new Vector3(0, -0.5f * (screenSize.y - chalkboardHeight) - (chalkboardHeight - chalkboardScreenHeight), CHALKBOARD_Z_VALUE);
+        Vector3 chalkboardPosition = new Vector3(0, -0.5f * (screenSize.y - chalkboardHeight) - (chalkboardHeight - chalkboardScreenHeight), CHALKBOARD_Z_VALUE);
 
         chalkboardAnimator.SetScale(chalkboardSize);
-        chalkboardAnimator.SetPosition(chalkboardFinalPosition);
+        chalkboardAnimator.SetPosition(chalkboardPosition);
+
+        //Top separation
+        GameObject topContourObject = Instantiate(m_texQuadPfb);
+        topContourObject.name = "ChalkboardTopSeparation";
+        UVQuad topContour = topContourObject.GetComponent<UVQuad>();
+        topContour.Init(Instantiate(m_gridTopContourMaterial));
+        topContour.SetTintColor(ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], 1));
+        TexturedQuadAnimator topContourAnimator = topContourObject.GetComponent<TexturedQuadAnimator>();
+        topContourAnimator.SetParentTransform(this.transform);
+        topContourAnimator.SetScale(new Vector3(screenSize.x, 64, 1));
+        topContourAnimator.SetPosition(new Vector3(0, chalkboardPosition.y + 0.5f * chalkboardHeight, CHALKBOARD_Z_VALUE - 1));
+        topContourAnimator.SetColorChannels(new Vector3(100, 0.75f, 1.1f), ValueAnimator.ColorMode.TSB);
     }
 
     /**
@@ -398,16 +410,15 @@ public class GameScene : GUIScene
         //Contour
         float contourThickness = 3.0f;
 
-        GameObject topContourObject = Instantiate(m_texQuadPfb);
+        GameObject topContourObject = Instantiate(m_colorQuadPfb);
         topContourObject.name = "TopGridContour";
-        UVQuad topContour = topContourObject.GetComponent<UVQuad>();
-        topContour.Init(Instantiate(m_gridTopContourMaterial));
-        topContour.SetTintColor(ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], 1));
-        TexturedQuadAnimator topContourAnimator = topContourObject.GetComponent<TexturedQuadAnimator>();
+        ColorQuad topContour = topContourObject.GetComponent<ColorQuad>();
+        topContour.Init(m_plainWhiteMaterial);
+        ColorQuadAnimator topContourAnimator = topContourObject.GetComponent<ColorQuadAnimator>();
         topContourAnimator.SetParentTransform(gridObject.transform);
-        topContourAnimator.SetScale(new Vector3(screenSize.x, 64, 1));
-        topContourAnimator.SetPosition(new Vector3(-gridPosition.x, 0.5f * m_grid.m_gridSize.y, 0));
-        topContourAnimator.SetColorChannels(new Vector3(100, 0.75f, 1.1f), ValueAnimator.ColorMode.TSB);
+        topContourAnimator.SetScale(new Vector3(m_grid.m_gridSize.x, contourThickness, 1));
+        topContourAnimator.SetPosition(new Vector3(0, 0.5f * m_grid.m_gridSize.y, 0));
+        topContourAnimator.SetColor(Color.white);
 
         GameObject leftContourObject = Instantiate(m_colorQuadPfb);
         leftContourObject.name = "LeftGridContour";
@@ -435,8 +446,8 @@ public class GameScene : GUIScene
         bottomContour.Init(m_plainWhiteMaterial);
         ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
         bottomContourAnimator.SetParentTransform(gridObject.transform);
-        bottomContourAnimator.SetScale(new Vector3(screenSize.x, contourThickness, 1));
-        bottomContourAnimator.SetPosition(new Vector3(-gridPosition.x, -0.5f * m_grid.m_gridSize.y, 0));
+        bottomContourAnimator.SetScale(new Vector3(m_grid.m_maxGridSize.x, contourThickness, 1));
+        bottomContourAnimator.SetPosition(new Vector3(0, -0.5f * m_grid.m_gridSize.y, 0));
         bottomContourAnimator.SetColor(Color.white);
     }
 
@@ -455,7 +466,8 @@ public class GameScene : GUIScene
         interfaceButtonsHolderAnimator.SetParentTransform(this.transform);
         interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, INTERFACE_BUTTONS_Z_VALUE));
 
-        Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
+        Vector2 interfaceButtonSize = new Vector2(128, 128);
+        float rightBorderWidth = 168.0f; //the width of the column on the right of the grid holding retry and hints buttons
 
         //pause
         GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
@@ -480,7 +492,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
         retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float retryButtonPositionX = 0.5f * screenSize.x - 86;
+        float retryButtonPositionX = 0.5f * (screenSize.x - rightBorderWidth);
         Vector3 gridPosition = m_grid.transform.position;
         float retryButtonPositionY = gridPosition.y + 150;
         retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
@@ -523,6 +535,17 @@ public class GameScene : GUIScene
         hintsTextAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY - 60, 0));
         hintsTextAnimator.SetFontHeight(30);
         hintsTextAnimator.SetColor(Color.white);
+
+        //build a vertical line to show separation between interface buttons and grid
+        GameObject lineObject = Instantiate(m_colorQuadPfb);
+        lineObject.name = "SeparationLine";
+        ColorQuad line = lineObject.GetComponent<ColorQuad>();
+        line.Init(m_plainWhiteMaterial);
+        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        lineAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+        lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
+        lineAnimator.SetPosition(new Vector3(0.5f * screenSize.x - rightBorderWidth, gridPosition.y, 0));
+        lineAnimator.SetColor(Color.white);
     }
 
     /**
@@ -727,13 +750,14 @@ public class GameScene : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
         Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
+        float bottomBorderHeight = 80.0f;
 
         //Show icons
         m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
 
         GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
         axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.03125f * screenSize.y, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
+        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.5f * bottomBorderHeight, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
 
         float iconMargin = 20.0f;
         Vector2 iconSize = new Vector2(64, 64);
@@ -757,6 +781,17 @@ public class GameScene : GUIScene
                 iconPositionX = (i - axisConstraints.Count / 2) * (iconSize.x + iconMargin);
             iconAnimator.SetPosition(new Vector3(iconPositionX, 0, 0));
         }
+
+        //build a horizontal line to show separation between axis constraints and grid
+        GameObject lineObject = Instantiate(m_colorQuadPfb);
+        lineObject.name = "SeparationLine";
+        ColorQuad line = lineObject.GetComponent<ColorQuad>();
+        line.Init(m_plainWhiteMaterial);
+        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        lineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+        lineAnimator.SetScale(new Vector3(screenSize.x, 6.0f, 1));
+        lineAnimator.SetPosition(new Vector3(0, 0.5f * bottomBorderHeight, 0));
+        lineAnimator.SetColor(Color.white);
     }
 
     /**

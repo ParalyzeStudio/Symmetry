@@ -491,8 +491,9 @@ public class Shape : GridTriangulable
                 shape.m_overlappingShapes.Clear();
         }
 
-        //Copy the shape before clipping it
+        //Copy the shape before clipping it and make its state as default DIFFERENCE
         Shape shapeCopy = new Shape(this);
+        shapeCopy.m_state = ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
 
         if (m_substitutionShapes == null)
             m_substitutionShapes = new List<Shape>();
@@ -601,8 +602,6 @@ public class Shape : GridTriangulable
         //destroy this shape object
         Shapes shapesHolder = this.m_parentMesh.GetShapesHolder();
         this.m_state = ShapeState.DESTROYED;
-        //shapesHolder.m_shapes.Remove(this);
-        //shapesHolder.DestroyShapeObjectForShape(this);
     }
 
 

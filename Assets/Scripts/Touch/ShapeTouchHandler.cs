@@ -79,13 +79,9 @@ public class ShapeTouchHandler : TouchHandler
             
             shape.InvalidateSubstitutionShapesOnMove();
             shape.FinalizeClippingOperationsOnSubstitutionShapes(); 
-           
-            ////Find static shapes that have been overlapped and perform difference with the shapes that have an intersection with them
-            //List<Shape> allShapes = 
 
             shape.m_offset = Vector2.zero; //reset offset to zero
             shape.m_gridOffset = GridPoint.zero; //reset offset to zero
-            //Shapes.PerformFusionOnShape(shapeRenderer.m_shape);
             shapeMesh.Render(); //render again the shape
 
             //invalidate one more time overlapping shapes and then finalize the clipping operations
