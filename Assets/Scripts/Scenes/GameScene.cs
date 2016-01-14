@@ -8,7 +8,7 @@ public class GameScene : GUIScene
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -15.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
     public const float CHALKBOARD_Z_VALUE = -10.0f;
-    public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 7.0f;
+    public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 5.0f;
     public const float GRID_Z_VALUE = -20.0f;
     public const float CONTOURS_Z_VALUE = -25.0f;
     public const float SHAPES_Z_VALUE = -21.0f;

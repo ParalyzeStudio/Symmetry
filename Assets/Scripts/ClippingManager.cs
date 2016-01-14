@@ -101,7 +101,12 @@ public class ClippingManager : MonoBehaviour
                 if (clipOperation == ClipType.ctUnion)
                     resultingShapes[i].m_color = subjShape.m_color;
                 else if (clipOperation == ClipType.ctIntersection)
-                    resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+                {
+                    if (clipShape.m_state == Shape.ShapeState.TILED_BACKGROUND) //do not mix color when clipping with background
+                        resultingShapes[i].m_color = subjShape.m_color;
+                    else
+                        resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+                }
                 else if (clipOperation == ClipType.ctDifference)
                     resultingShapes[i].m_color = subjShape.m_color;
             }
@@ -196,7 +201,13 @@ public class ClippingManager : MonoBehaviour
         List<Shape> allShapes = m_shapesHolder.m_shapes;
         clippedDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
         clippedInterShapes = new List<Shape>(10);
-        clippedDiffShapes.Add(subjShape);
+
+        //Before any clipping with static shapes, we need to find the intersection with the tiled background shape
+        Shape tiledBackgroundShape = m_shapesHolder.GetTiledBackgroundShape();
+        List<Shape> resultShapes = ShapesOperation(subjShape, tiledBackgroundShape, ClipType.ctIntersection);
+        clippedDiffShapes.AddRange(resultShapes);
+
+        //clippedDiffShapes.Add(subjShape);
 
         for (int i = 0; i != allShapes.Count; i++)
         {

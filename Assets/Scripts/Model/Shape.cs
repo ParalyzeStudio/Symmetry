@@ -480,7 +480,7 @@ public class Shape : GridTriangulable
      * This method is called when player moves a shape over the grid
      * We recalculate here the intersection and difference shapes that are clipped against the static shapes
      * **/
-    public void InvalidateSubstitutionShapesOnMove()
+    public void InvalidateSubstitutionShapes()
     {
         Shapes shapesHolder = m_parentMesh.GetShapesHolder();
 
@@ -490,11 +490,7 @@ public class Shape : GridTriangulable
             Shape shape = shapesHolder.m_shapes[i];
             if (shape.m_state == ShapeState.STATIC && shape.m_overlappingShapes != null)
                 shape.m_overlappingShapes.Clear();
-        }
-
-        //Copy the shape before clipping it and make its state as default DIFFERENCE
-        Shape shapeCopy = new Shape(this);
-        shapeCopy.m_state = ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
+        }        
 
         if (m_substitutionShapes == null)
             m_substitutionShapes = new List<Shape>();
@@ -505,6 +501,10 @@ public class Shape : GridTriangulable
             m_substitutionShapes[i].m_state = ShapeState.DESTROYED;
         }
         m_substitutionShapes.Clear();
+
+        //Copy the shape before clipping it and make its state as default DIFFERENCE
+        Shape shapeCopy = new Shape(this);
+        shapeCopy.m_state = ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
 
         //build the new ones
         ClippingManager clippingManager = m_parentMesh.GetClippingManager();

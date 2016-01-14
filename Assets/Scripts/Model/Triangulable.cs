@@ -104,9 +104,6 @@ public class GridTriangulable
                 m_triangles.Add(triangle);
                 m_area += triangle.GetArea();
             }
-
-            if (this is DottedOutline)
-                Debug.Log("area:" + m_area);
         }       
     }
 

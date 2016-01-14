@@ -69,6 +69,20 @@ public class Shapes : MonoBehaviour
     }
 
     /**
+     * Use this method to get the shape that serves as the tiled background shape
+     * **/
+    public Shape GetTiledBackgroundShape()
+    {
+        for (int i = 0; i != m_shapes.Count; i++)
+        {
+            if (m_shapes[i].m_state == Shape.ShapeState.TILED_BACKGROUND)
+                return m_shapes[i];
+        }
+
+        return null;
+    }
+
+    /**
      * Add a shape GameObject to the list of shapes
      * **/
     //public void AddShapeObject(GameObject shapeObject)

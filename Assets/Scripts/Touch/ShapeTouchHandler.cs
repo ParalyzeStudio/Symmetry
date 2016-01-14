@@ -25,10 +25,17 @@ public class ShapeTouchHandler : TouchHandler
 
     protected override void OnPointerDown(Vector2 pointerLocation)
     {
+        Debug.Log("OnPointerDown");
         Shape pickedShape = this.GetComponent<ShapeMesh>().m_shapeData;
         pickedShape.m_offset = Vector2.zero;
         pickedShape.m_gridOffset = GridPoint.zero;
         pickedShape.m_state = Shape.ShapeState.MOVING_ORIGINAL_SHAPE;
+
+        pickedShape.InvalidateSubstitutionShapes();
+
+        ShapeAnimator shapeAnimator = this.GetComponent<ShapeAnimator>();
+        Vector3 shapeNewPosition = new Vector3(0, 0, GameScene.TILED_BACKGROUND_RELATIVE_Z_VALUE + 1); //place the shape behind the tiled background so it becomes invisible
+        shapeAnimator.SetPosition(shapeNewPosition);
 
         base.OnPointerDown(pointerLocation);
     }
@@ -37,7 +44,9 @@ public class ShapeTouchHandler : TouchHandler
     {
         if (!base.OnPointerMove(pointerLocation, delta))
             return false;
-        
+
+        Debug.Log("OnPointerMove");
+
         //convert the delta vector to grid coordinates and set it to the shape
         ShapeMesh shapeMesh = this.GetComponent<ShapeMesh>();
         Shape shape = shapeMesh.m_shapeData;
@@ -53,7 +62,7 @@ public class ShapeTouchHandler : TouchHandler
         shape.Translate(deltaGridOffset);
                 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        shape.InvalidateSubstitutionShapesOnMove();
+        shape.InvalidateSubstitutionShapes();
         shapeMesh.Render();
 
         return true;
@@ -77,7 +86,7 @@ public class ShapeTouchHandler : TouchHandler
 
             shape.Translate(translation); //translate all vertices
             
-            shape.InvalidateSubstitutionShapesOnMove();
+            shape.InvalidateSubstitutionShapes();
             shape.FinalizeClippingOperationsOnSubstitutionShapes(); 
 
             shape.m_offset = Vector2.zero; //reset offset to zero
