@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<level name="Debug level" number="0">
+<level name="Debug level 2" number="0">
 	<counter maxActions="4"/>
 	<grid exactNumColumns="20" minNumLines="14"/>
 	<dottedOutlines>

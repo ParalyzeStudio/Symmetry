@@ -140,14 +140,14 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * Check if this shape intersects stricly one of the contours of this shape (main contour and holes)
+     * Check if this shape is fully contained inside the parameter 'outline'
      * **/
-    public bool IntersectsOutline(DottedOutline outline)
+    public bool IsInsideOutline(DottedOutline outline)
     {
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = m_triangles[iTriangleIndex];
-            if (triangle.IntersectsOutline(outline, GeometryUtils.SEGMENTS_STRICT_INTERSECTION))
+            if (triangle.IsInsideOutline(outline))
                 return true;
         }
 
@@ -273,6 +273,17 @@ public class Shape : GridTriangulable
         return false;
     }
 
+    public bool OverlapsTriangulable(Shape shape, bool bEnsureNonNullIntersection)
+    {
+        for (int i = 0; i != shape.m_triangles.Count; i++)
+        {
+            if (OverlapsTriangle(shape.m_triangles[i], bEnsureNonNullIntersection))
+                return true;
+        }
+
+        return false;
+    }
+
     /**
     * Does 'this' shape overlaps the triangle passed as parameter
      * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
@@ -283,17 +294,6 @@ public class Shape : GridTriangulable
         {
             if (m_triangles[i].IntersectsTriangle(triangle, bEnsureNonNullIntersection))
                 return true;
-            //if (bEnsureNonNullIntersection)
-            //{
-            //    bool bIntersect = m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle);
-            //    if (m_triangles[i].IntersectsTriangleWithNonNullIntersection(triangle))
-            //        return true;
-            //}
-            //else
-            //{
-            //    if (m_triangles[i].IntersectsTriangle(triangle))
-            //        return true;
-            //}
         }
 
         return false;

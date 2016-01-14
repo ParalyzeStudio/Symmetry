@@ -53,7 +53,8 @@ public class GameController : MonoBehaviour
         //ShowMainMenu();
         //DebugShowChapters();
         //DebugShowLevels(1);
-        DebugShowSpecificLevel(1, 1, false);
+        //DebugShowSpecificLevel(1, 1, false);
+        DebugShowDebugLevel(3, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -95,6 +96,20 @@ public class GameController : MonoBehaviour
 
         GetSceneManager().ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, 0.5f);
     }  
+
+    /**
+     * Tmp method to jump directly to a debug level (with level intro scene optionally)
+     * **/
+    public void DebugShowDebugLevel(int iDebugLevelNumber, bool bShowLevelIntro = true)
+    {
+        if (iDebugLevelNumber > 3)
+            iDebugLevelNumber = 3;
+
+        LevelManager levelManager = GetLevelManager();
+        levelManager.SetCurrentLevelAsDebugLevel(3);
+
+        GetSceneManager().ShowContent(bShowLevelIntro ? SceneManager.DisplayContent.LEVEL_INTRO : SceneManager.DisplayContent.GAME, 0.5f);
+    }
 
     public SceneManager GetSceneManager()
     {

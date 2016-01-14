@@ -1285,7 +1285,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP1 CHECK");
+        Debug.Log("STEP1 CHECK");
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
@@ -1305,33 +1305,34 @@ public class GameScene : GUIScene
             {
                 DottedOutline outline = outlines[iOutlineIdx];
 
-                if (shape.IntersectsOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
+                if (shape.IsInsideOutline(outline)) //strict intersection between the shape and one contour, shape cannot be fully inside the contour
                 {
-                    return false;
+                    bInsideOneOutline = true;
+                    break; //no need to test other outlines
                 }
 
-                //Check if every point of every triangle in shape and its center is inside the outline
-                if (!bInsideOneOutline)
-                {
-                    for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
-                    {
-                        GridTriangle triangle = shape.m_triangles[iTriangleIdx];
-                        if (outline.ContainsPoint(triangle.m_points[0]) &&
-                            outline.ContainsPoint(triangle.m_points[1]) &&
-                            outline.ContainsPoint(triangle.m_points[2]) &&
-                            outline.ContainsPoint(triangle.GetCenter()))
-                        {
-                            bInsideOneOutline = true;
-                        }
-                    }
-                }
+                ////Check if every point of every triangle in shape and its center is inside the outline
+                //if (!bInsideOneOutline)
+                //{
+                //    for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
+                //    {
+                //        GridTriangle triangle = shape.m_triangles[iTriangleIdx];
+                //        if (outline.ContainsPoint(triangle.m_points[0]) &&
+                //            outline.ContainsPoint(triangle.m_points[1]) &&
+                //            outline.ContainsPoint(triangle.m_points[2]) &&
+                //            outline.ContainsPoint(triangle.GetCenter()))
+                //        {
+                //            bInsideOneOutline = true;
+                //        }
+                //    }
+                //}
             }
 
             if (!bInsideOneOutline)
                 return false;
         }
 
-        //Debug.Log("STEP2 CHECK");
+        Debug.Log("STEP2 CHECK");
 
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -1351,6 +1352,7 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
+        Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
         if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
             Debug.Log("STEP3 CHECK");
 

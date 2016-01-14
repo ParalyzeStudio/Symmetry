@@ -64,6 +64,9 @@ public class GridTriangulable
         m_area = other.m_area;
     }
 
+    /**
+     * Triangulate this object
+     * **/
     public virtual void Triangulate()
     {
         m_triangles.Clear();
@@ -84,15 +87,10 @@ public class GridTriangulable
         {
             //use a copy to prevent the current shape contour and holes to be modified when separating shared points
             GridTriangulable triangulableCopy = new GridTriangulable(this);
-            triangulableCopy.SeparateHolesSharedPoints();
+            List<BiasedPoint> biasedPoints = triangulableCopy.SeparateHolesSharedPoints();           
 
             Vector2[] triangles = Triangulation.P2tTriangulate(triangulableCopy);
-            GridPoint[] gridTriangles = new GridPoint[triangles.Length];
-            for (int i = 0; i != triangles.Length; i++)
-            {
-                Vector2 triangleVertex = triangles[i];
-                gridTriangles[i] = new GridPoint((int)triangleVertex.x, (int)triangleVertex.y, false);
-            }
+            GridPoint[] gridTriangles = FillTrianglesWithExactValues(triangles, biasedPoints);         
 
             for (int iVertexIndex = 0; iVertexIndex != gridTriangles.Length; iVertexIndex += 3)
             {
@@ -106,15 +104,34 @@ public class GridTriangulable
                 m_triangles.Add(triangle);
                 m_area += triangle.GetArea();
             }
+
+            if (this is DottedOutline)
+                Debug.Log("area:" + m_area);
         }       
+    }
+
+    public struct BiasedPoint
+    {
+        public GridPoint m_biasedValue { get; set; }
+        public GridPoint m_exactValue { get; set; }
+
+        public BiasedPoint(GridPoint biasedValue, GridPoint exactValue)
+            : this()
+        {
+            m_biasedValue = biasedValue;
+            m_exactValue = exactValue;
+        }
     }
 
     /**
      * In case of 2 holes (or more) sharing the same point, we have to separate them otherwise the triangulation will fail
      * When we encounter a hole point that is also on the contour of another hole, we move it in the direction of its 2 neighbouring vertices
+     * We return a set of pair values each containing the biased GridPoint with its relevant exact GridPoint
      * **/
-    private void SeparateHolesSharedPoints()
+    private List<BiasedPoint> SeparateHolesSharedPoints()
     {
+        List<BiasedPoint> biasedPoints = new List<BiasedPoint>();
+
         for (int iHoleIdx = 0; iHoleIdx != m_holes.Count; iHoleIdx++)
         {
             Contour holeContour = m_holes[iHoleIdx];            
@@ -138,7 +155,13 @@ public class GridTriangulable
                     GridPoint translation = new GridPoint(Mathf.RoundToInt(normalizedTranslationDirection.x * translationLength),
                                                           Mathf.RoundToInt(normalizedTranslationDirection.y * translationLength));
 
-                    holeContour[i] += translation;
+                    //Add the biased point to the set
+                    GridPoint exactGridPoint = holeContour[i];
+                    GridPoint biasedGridPoint = exactGridPoint + translation;
+                    BiasedPoint biasedPoint = new BiasedPoint(biasedGridPoint, exactGridPoint);
+                    biasedPoints.Add(biasedPoint);
+
+                    holeContour[i] = biasedGridPoint;
                 }
 
                 //search among other holes if they contain this point
@@ -159,11 +182,42 @@ public class GridTriangulable
                         GridPoint translation = new GridPoint(Mathf.RoundToInt(normalizedTranslationDirection.x * translationLength),
                                                               Mathf.RoundToInt(normalizedTranslationDirection.y * translationLength));
 
-                        holeContour[i] += translation;
+                        //Add the biased point to the set
+                        GridPoint exactGridPoint = holeContour[i];
+                        GridPoint biasedGridPoint = exactGridPoint + translation;
+                        BiasedPoint biasedPoint = new BiasedPoint(biasedGridPoint, exactGridPoint);
+                        biasedPoints.Add(biasedPoint);
+
+                        holeContour[i] = biasedGridPoint;
                     }
                 }
             }
         }
+
+        return biasedPoints;
+    }
+
+    private GridPoint[] FillTrianglesWithExactValues(Vector2[] triangles, List<BiasedPoint> biasedValues)
+    {
+        GridPoint[] gridTriangles = new GridPoint[triangles.Length];
+
+        for (int i = 0; i != triangles.Length; i++)
+        {
+            Vector2 triangleVertex = triangles[i];
+            GridPoint gridTriangleVertex = new GridPoint((int)triangleVertex.x, (int)triangleVertex.y, false);
+
+            //check if the current vertex had its coordinates biased
+            for (int j = 0; j != biasedValues.Count; j++)
+            {
+                BiasedPoint biasedValue = biasedValues[j];
+                if (biasedValue.m_biasedValue.Equals(gridTriangleVertex)) //if so replace it with the exact value
+                    gridTriangleVertex = biasedValue.m_exactValue;
+            }
+
+            gridTriangles[i] = gridTriangleVertex;
+        }
+
+        return gridTriangles;
     }
 
     /**
@@ -207,6 +261,8 @@ public class GridTriangulable
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = m_triangles[iTriangleIndex];
+            if (this is DottedOutline)
+                Debug.Log("triangleArea" + iTriangleIndex + ":" + triangle.GetArea());
             m_area += triangle.GetArea();
         }
     }

@@ -281,12 +281,19 @@ public class AxisRenderer : MonoBehaviour
                 m_type = AxisType.DYNAMIC_SNAPPED;
             }
             Render(m_pointA, closestAnchor.m_gridPosition);
+
+
+            Debug.Log("axisRenderer.m_snappedAnchor:" + m_snappedAnchor.m_gridPosition);
+            Debug.Log("axisRenderer.m_snappedAnchor:" + m_snappedAnchor.m_localPosition);
             return true;
         }
 
         return false;
     }
 
+    /**
+     * Find the direction (among all constrained directions) of the axis the player is currently drawing
+     * **/
     public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
     {
         //Find all possible directions for our axis

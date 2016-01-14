@@ -1083,22 +1083,22 @@ public class GridTriangle
     }
 
     /**
-    * Tells if one of the edges of this triangle intersects the contour passed as parameter
+    * Tells if this triangle is fully contained inside the parameter 'outline'
     **/
-    public bool IntersectsOutline(DottedOutline outline, int bFilters = GridEdge.EDGES_OVERLAP | GridEdge.EDGES_INTERSECTION_IS_ENDPOINT | GridEdge.EDGES_STRICT_INTERSECTION)
+    public bool IsInsideOutline(DottedOutline outline)
     {
-        //check if triangle intersect outline main contour
+        //check if triangle intersects strictly the outline main contour
         Contour contourPoints = outline.m_contour;
         for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
         {
             GridPoint contourSegmentPoint1 = contourPoints[iContourPointIndex];
             GridPoint contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
 
-            if (IntersectsEdge(new GridEdge(contourSegmentPoint1, contourSegmentPoint2), bFilters))
-                return true;
+            if (IntersectsEdge(new GridEdge(contourSegmentPoint1, contourSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
+                return false;
         }
 
-        //check if triangle intersect outline holes
+        //check if triangle intersects strictly at least one of the outline holes
         List<Contour> outlineHoles = outline.m_holes;
         for (int i = 0; i != outlineHoles.Count; i++)
         {
@@ -1106,11 +1106,26 @@ public class GridTriangle
             GridPoint holeSegmentPoint1 = hole[i];
             GridPoint holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
 
-            if (IntersectsEdge(new GridEdge(holeSegmentPoint1, holeSegmentPoint2), bFilters))
-                return true;
+            if (IntersectsEdge(new GridEdge(holeSegmentPoint1, holeSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
+                return false;
         }
 
-        return false;
+        //the triangle should be either:
+        // -outside the outline (e.g outside the main contour or inside one hole)
+        // -inside main contour and containing one hole
+        // -inside main contour without containing any hole
+
+        if (!outline.ContainsPoint(this.GetCenter())) //the triangle is outside the outline main contour
+            return false;
+
+        for (int i = 0; i != outlineHoles.Count; i++)
+        {
+            Contour hole = outlineHoles[i];
+            if (this.ContainsPoint(hole.GetBarycentre())) //triangle contains one full hole, it is not completely inside the outline
+                return false;
+        }
+
+        return true;
     }
 
     /**

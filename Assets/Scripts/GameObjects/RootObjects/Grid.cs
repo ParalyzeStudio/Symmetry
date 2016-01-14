@@ -11,11 +11,11 @@ public class Grid : MonoBehaviour
     public class GridAnchor
     {
         public GridPoint m_gridPosition { get; set; } //the position of the anchor in local grid coordinates (column, line)
-        public Vector2 m_worldPosition { get; set; } //the position of the anchor in world coordinates
+        public Vector2 m_localPosition { get; set; } //the position of the anchor relatively to its grid parent
 
-        public GridAnchor(GridPoint gridPosition, Vector2 worldPosition)
+        public GridAnchor(GridPoint gridPosition, Vector2 localPosition)
         {
-            m_worldPosition = worldPosition;
+            m_localPosition = localPosition;
             m_gridPosition = gridPosition;
         }
     }
@@ -84,8 +84,6 @@ public class Grid : MonoBehaviour
 
         m_gridSize = new Vector2((m_numColumns - 1) * m_gridSpacing, (m_numLines - 1) * m_gridSpacing);
 
-        Vector3 gridPosition = this.transform.position;
-
         //Build anchors
         for (int iLineNumber = 1; iLineNumber != m_numLines + 1; iLineNumber++)
         {
@@ -129,7 +127,7 @@ public class Grid : MonoBehaviour
                 anchorAnimator.SetPosition(anchorPosition);
                 anchorAnimator.SetColor(Color.white);
 
-                m_anchors[iAnchorIndex] = new GridAnchor(anchorGridPosition, anchorPosition + gridPosition);
+                m_anchors[iAnchorIndex] = new GridAnchor(anchorGridPosition, anchorPosition);
             }
         }
     }
@@ -234,20 +232,24 @@ public class Grid : MonoBehaviour
      * **/
     public GridAnchor GetClosestGridAnchorForWorldPosition(Vector2 worldPosition)
     {
+        //first transform the worldPosition into grid local position
+        Vector2 gridPosition = this.transform.position;
+        Vector2 localPosition = worldPosition - gridPosition;
+
         float sqrMinDistance = float.MaxValue;
         int iMinDistanceAnchorIndex = -1;
         
         for (int iAnchorIndex = 0; iAnchorIndex != m_anchors.Length; iAnchorIndex++)
         {
-            Vector2 gridAnchorWorldPosition = m_anchors[iAnchorIndex].m_worldPosition;
-            float dx = worldPosition.x - gridAnchorWorldPosition.x;
+            Vector2 gridAnchorLocalPosition = m_anchors[iAnchorIndex].m_localPosition;
+            float dx = localPosition.x - gridAnchorLocalPosition.x;
             if (dx <= m_gridSpacing)
             {
-                float dy = worldPosition.y - gridAnchorWorldPosition.y;
+                float dy = localPosition.y - gridAnchorLocalPosition.y;
                 if (dy <= m_gridSpacing)
                 {
                     //this anchor is one of the 4 anchors surrounding the position
-                    float sqrDistance = (worldPosition - gridAnchorWorldPosition).sqrMagnitude;
+                    float sqrDistance = (localPosition - gridAnchorLocalPosition).sqrMagnitude;
                     if (sqrDistance < sqrMinDistance)
                     {
                         sqrMinDistance = sqrDistance;
