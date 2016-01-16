@@ -104,26 +104,35 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        Shape subjShape = new Shape();
-        Contour subjShapeContour = new Contour(4);
-        subjShapeContour.Add(new GridPoint(0, 0, true));
-        subjShapeContour.Add(new GridPoint(4, 0, true));
-        subjShapeContour.Add(new GridPoint(4, 4, true));
-        subjShapeContour.Add(new GridPoint(0, 4, true));
+        Contour contour = new Contour(5);
+        contour.Add(new GridPoint(2, 0, true));
+        contour.Add(new GridPoint(0, 2, true));
+        contour.Add(new GridPoint(0, 0, true));
+        contour.Add(new GridPoint(4, 0, true));
+        //contour.Add(new GridPoint(4, 2, true));
 
-        subjShape.m_contour = subjShapeContour;
+        List<Contour> splitContours = contour.SplitIntoSimpleContours();
+        Debug.Log("splitContoursCount:" + splitContours.Count);
 
-        subjShape.m_color = Color.white;
+        //Shape subjShape = new Shape();
+        //Contour subjShapeContour = new Contour(4);
+        //subjShapeContour.Add(new GridPoint(0, 0, true));
+        //subjShapeContour.Add(new GridPoint(4, 0, true));
+        //subjShapeContour.Add(new GridPoint(4, 4, true));
+        //subjShapeContour.Add(new GridPoint(0, 4, true));
 
-        Shape clipShape = new Shape();
-        Contour clipShapeContour = new Contour(4);
-        clipShapeContour.Add(new GridPoint(2, 0, true));
-        clipShapeContour.Add(new GridPoint(4, 2, true));
-        clipShapeContour.Add(new GridPoint(2, 4, true));
-        clipShapeContour.Add(new GridPoint(0, 2, true));
+        //subjShape.m_contour = subjShapeContour;
 
-        List<Shape> resultShapes = GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference);
-        Debug.Log("resultShapes.Count:" + resultShapes.Count);
+        //subjShape.m_color = Color.white;
+
+        //Shape clipShape = new Shape();
+        //Contour clipShapeContour = new Contour(4);
+        //clipShapeContour.Add(new GridPoint(2, 0, true));
+        //clipShapeContour.Add(new GridPoint(4, 2, true));
+        //clipShapeContour.Add(new GridPoint(2, 4, true));
+        //clipShapeContour.Add(new GridPoint(0, 2, true));
+
+        //List<Shape> resultShapes = GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference);
 
         //shape1.Triangulate();
         //m_shapesHolder.CreateShapeObjectFromData(shape1, false);
@@ -177,7 +186,7 @@ public class GameScene : GUIScene
          * TEST SHAPE CLIPPING
          * **/
 
-        //UnitTests.TestShapesClipping();
+        UnitTests.TestShapesClipping();
 
 
         /**
@@ -1285,7 +1294,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP1 CHECK");
+        //Debug.Log("STEP1 CHECK");
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
@@ -1332,7 +1341,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP2 CHECK");
+        //Debug.Log("STEP2 CHECK");
 
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -1352,9 +1361,9 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
-        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-            Debug.Log("STEP3 CHECK");
+        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
+        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+        //    Debug.Log("STEP3 CHECK");
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }

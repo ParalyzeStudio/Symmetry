@@ -633,7 +633,21 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * This shape can be split if some holes share points with this shape contour
+     * This remove the middle vertex when 3 consecutive aligned vertices are found either on contour or holes
+     * **/
+    public void RemoveAlignedVertices()
+    {
+        m_contour.RemoveAlignedVertices();
+
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            m_holes[i].RemoveAlignedVertices();
+        }
+    }
+
+    /**
+     * This shape can be split if some holes share points with this shape contour 
+     * and/or one contour point is contained in another contour edge
      * **/
     public List<Shape> SplitIntoSimpleShapes()
     {
@@ -660,6 +674,10 @@ public class Shape : GridTriangulable
                 unsharedHoles.Add(hole);
         }
 
+        List<Shape> splitShapes = new List<Shape>();
+        List<Contour> splitContours = new List<Contour>();
+
+        //Test the 1st case: some holes share points with shape main contour
         if (sharedPoints.Count > 0)
         {
             //insert shared points into contour
@@ -675,9 +693,7 @@ public class Shape : GridTriangulable
                 sharedPoints[i].CalculateContourIndex();
             }
 
-            //Finally traverse the new built contour and build new shapes
-            List<Shape> splitShapes = new List<Shape>();
-            List<Contour> splitContours = new List<Contour>();
+            //Finally traverse the new built contour and build new shapes            
             for (int i = 0; i != sharedPoints.Count; i++)
             {
                 Contour splitShapeContour = new Contour();
@@ -695,8 +711,8 @@ public class Shape : GridTriangulable
                     for (int p = 0; p != sharedPoints.Count; p++)
                     {
                         ContourHoleSharedPoint sharedPoint = sharedPoints[p];
-                        if (onContour && currentPointIndex == sharedPoint.m_contourIndex 
-                            || 
+                        if (onContour && currentPointIndex == sharedPoint.m_contourIndex
+                            ||
                             !onContour && currentHole == sharedPoint.m_hole && currentPointIndex == sharedPoint.m_holeIndex)
                         {
                             newSharedPoint = sharedPoint;
@@ -737,7 +753,7 @@ public class Shape : GridTriangulable
                         currentPointIndex = (currentPointIndex < currentHole.Count - 1) ? currentPointIndex + 1 : 0;
                     }
 
-                    bWhileLoopStopCondition = !bFirstLoop && 
+                    bWhileLoopStopCondition = !bFirstLoop &&
                                               (
                                               onContour && currentPointIndex == startSharedPoint.m_contourIndex //on contour and same index as start shared point
                                                     ||
@@ -746,29 +762,50 @@ public class Shape : GridTriangulable
                     bFirstLoop = false;
                 }
                 while (!bWhileLoopStopCondition);
-            }           
-
-            //remove duplicate split contours
-            List<Contour> uniqueContours = new List<Contour>();
-            for (int i = 0; i != splitContours.Count; i++)
-            {
-                Contour splitContour = splitContours[i];
-                bool bAddContour = true;
-                for (int j = 0; j != uniqueContours.Count; j++)
-                {
-                    if (splitContour.EqualsContour(uniqueContours[j])) //contour has already been added to the uniqueContours list
-                        bAddContour = false;
-                }
-                if (bAddContour)
-                {
-                    uniqueContours.Add(splitContour);
-                }
             }
 
-            //Build a shape for every split contour
-            for (int i = 0; i != uniqueContours.Count; i++)
+            //remove duplicate split contours
+            if (splitContours.Count > 1)
             {
-                Shape splitShape = new Shape(uniqueContours[i]);
+                List<Contour> uniqueContours = new List<Contour>();
+                for (int i = 0; i != splitContours.Count; i++)
+                {
+                    Contour splitContour = splitContours[i];
+                    bool bAddContour = true;
+                    for (int j = 0; j != uniqueContours.Count; j++)
+                    {
+                        if (splitContour.EqualsContour(uniqueContours[j])) //contour has already been added to the uniqueContours list
+                            bAddContour = false;
+                    }
+                    if (bAddContour)
+                    {
+                        uniqueContours.Add(splitContour);
+                    }
+                }
+
+                splitContours = uniqueContours;
+            }
+        }
+        else //no shared point with any hole, simply add the shape main contour to the list of splitContours
+            splitContours.Add(m_contour);
+
+        //we need to check if every unique contour can be split again into simple contours
+        List<Contour> simpleContours = new List<Contour>(splitContours.Count);
+        for (int i = 0; i != splitContours.Count; i++)
+        {
+            Contour contour = splitContours[i];
+            List<Contour> splitSimpleContours = contour.SplitIntoSimpleContours();
+            simpleContours.AddRange(splitSimpleContours);
+        }
+
+        if (sharedPoints.Count == 0 && simpleContours.Count < 2) //no split occured
+            return null;
+        else
+        {
+            //Build a shape for every split contour
+            for (int i = 0; i != simpleContours.Count; i++)
+            {
+                Shape splitShape = new Shape(simpleContours[i]);
                 splitShape.Triangulate(); //make a first triangulation
                 splitShapes.Add(splitShape);
             }
@@ -792,8 +829,6 @@ public class Shape : GridTriangulable
 
             return splitShapes;
         }
-
-        return null;
     }
 
     /***

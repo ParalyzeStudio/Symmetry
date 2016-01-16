@@ -612,6 +612,105 @@ public class UnitTests
             Debug.Log("TEST 6 DIFFERENCE SUCCESS");
         else
             Debug.Log("TEST 6 DIFFERENCE FAILURE");
+
+        //-----TEST 7-----//
+        subjShape = new Shape();
+        subjContour = new Contour(6);
+        subjContour.Add(new GridPoint(50, 50));
+        subjContour.Add(new GridPoint(100, 50));
+        subjContour.Add(new GridPoint(100, 100));
+        subjContour.Add(new GridPoint(30, 100));
+        subjContour.Add(new GridPoint(30, 80));
+        subjContour.Add(new GridPoint(50, 80));
+        subjHole = new Contour(5);
+        subjHole.Add(new GridPoint(75, 100));
+        subjHole.Add(new GridPoint(60, 75));
+        subjHole.Add(new GridPoint(75, 50));
+        subjHole.Add(new GridPoint(90, 75));
+        subjShape.m_contour = subjContour;
+        subjShape.m_holes.Add(subjHole);
+
+        clipShape = new Shape();
+        clipContour = new Contour(4);
+        clipContour.Add(new GridPoint(30, 80));
+        clipContour.Add(new GridPoint(50, 80));
+        clipContour.Add(new GridPoint(50, 100));
+        clipShape.m_contour = clipContour;
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference, true);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new GridPoint(30, 100));
+        intersectionExpectedContour1.Add(new GridPoint(30, 80));
+        intersectionExpectedContour1.Add(new GridPoint(50, 100));
+        intersectionExpectedContour2 = new Contour(5);
+        intersectionExpectedContour2.Add(new GridPoint(75, 50));
+        intersectionExpectedContour2.Add(new GridPoint(100, 50));
+        intersectionExpectedContour2.Add(new GridPoint(100, 100));
+        intersectionExpectedContour2.Add(new GridPoint(75, 100));
+        intersectionExpectedContour2.Add(new GridPoint(90, 75));
+        Contour intersectionExpectedContour3 = new Contour(5);
+        intersectionExpectedContour3.Add(new GridPoint(60, 75));
+        intersectionExpectedContour3.Add(new GridPoint(75, 100));
+        intersectionExpectedContour3.Add(new GridPoint(50, 100));
+        intersectionExpectedContour3.Add(new GridPoint(50, 50));
+        intersectionExpectedContour3.Add(new GridPoint(75, 50));
+
+        if (result.Count == 3 &&
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1) &&
+            result[1].m_contour.EqualsContour(intersectionExpectedContour2) &&
+            result[2].m_contour.EqualsContour(intersectionExpectedContour3)
+            )
+            Debug.Log("TEST 7 DIFFERENCE SUCCESS");
+        else
+            Debug.Log("TEST 7 DIFFERENCE FAILURE");
+
+        //-----TEST 8-----//
+        subjShape = new Shape();
+        subjContour = new Contour(6);
+        subjContour.Add(new GridPoint(50, 50));
+        subjContour.Add(new GridPoint(100, 50));
+        subjContour.Add(new GridPoint(100, 100));
+        subjContour.Add(new GridPoint(50, 100));
+        subjHole = new Contour(5);
+        subjHole.Add(new GridPoint(75, 100));
+        subjHole.Add(new GridPoint(60, 75));
+        subjHole.Add(new GridPoint(75, 50));
+        subjHole.Add(new GridPoint(90, 75));
+        subjShape.m_contour = subjContour;
+        subjShape.m_holes.Add(subjHole);
+
+        clipShape = new Shape();
+        clipContour = new Contour(4);
+        clipContour.Add(new GridPoint(50, 80));
+        clipContour.Add(new GridPoint(50, 65));
+        clipContour.Add(new GridPoint(60, 75));
+        clipShape.m_contour = clipContour;
+
+        result = m_clippingManager.ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference, true);
+        intersectionExpectedContour1 = new Contour(4);
+        intersectionExpectedContour1.Add(new GridPoint(75, 100));
+        intersectionExpectedContour1.Add(new GridPoint(50, 100));
+        intersectionExpectedContour1.Add(new GridPoint(50, 80));
+        intersectionExpectedContour1.Add(new GridPoint(60, 75));
+        intersectionExpectedContour2 = new Contour(4);
+        intersectionExpectedContour2.Add(new GridPoint(75, 100));
+        intersectionExpectedContour2.Add(new GridPoint(90, 75));
+        intersectionExpectedContour2.Add(new GridPoint(75, 50));
+        intersectionExpectedContour2.Add(new GridPoint(100, 50));
+        intersectionExpectedContour2.Add(new GridPoint(100, 100));
+        intersectionExpectedContour3 = new Contour(4);
+        intersectionExpectedContour3.Add(new GridPoint(50, 65));
+        intersectionExpectedContour3.Add(new GridPoint(50, 50));
+        intersectionExpectedContour3.Add(new GridPoint(75, 50));
+        intersectionExpectedContour3.Add(new GridPoint(60, 75));
+
+        if (result.Count == 3 &&
+            result[0].m_contour.EqualsContour(intersectionExpectedContour1) &&
+            result[1].m_contour.EqualsContour(intersectionExpectedContour2) &&
+            result[2].m_contour.EqualsContour(intersectionExpectedContour3))
+            Debug.Log("TEST 8 DIFFERENCE SUCCESS");
+        else
+            Debug.Log("TEST 8 DIFFERENCE FAILURE");
     }
     
     /**

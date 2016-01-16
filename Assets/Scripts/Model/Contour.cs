@@ -151,28 +151,111 @@ public class Contour : List<GridPoint>
     /**
      * If 3 points (or more) belong to the same segment remove the inner points
      * **/
-    //public void RemoveAlignedVertices()
-    //{
-    //    for (int i = 0; i != this.Count; i++)
-    //    {
-    //        Vector2 point1 = this[i];
-    //        Vector2 point2 = (i == this.Count - 1) ? this[0] : this[i + 1];
-    //        Vector2 point3;
-    //        if (i == this.Count - 2)
-    //            point3 = this[0];
-    //        else if (i == this.Count - 1)
-    //            point3 = this[1];
-    //        else
-    //            point3 = this[i + 2];
+    public void RemoveAlignedVertices()
+    {
+        for (int i = 0; i != this.Count; i++)
+        {
+            GridPoint point1 = this[i];
+            GridPoint point2 = (i == this.Count - 1) ? this[0] : this[i + 1];
+            GridPoint point3;
+            if (i == this.Count - 2)
+                point3 = this[0];
+            else if (i == this.Count - 1)
+                point3 = this[1];
+            else
+                point3 = this[i + 2];
 
-    //        float determinant = MathUtils.Determinant(point1, point2, point3);
-    //        if (Mathf.Abs(determinant) < MathUtils.DEFAULT_EPSILON)
-    //        {
-    //            this.Remove(point2);
-    //            i--;
-    //        }
-    //    }
-    //}
+            float determinant = MathUtils.Determinant(point1, point2, point3);
+            if (Mathf.Abs(determinant) == 0)
+            {
+                this.Remove(point2);
+                i--;
+            }
+        }
+    }
+
+    /**
+     * When one or more vertex are shared between multiple edges we can split this contour into several
+     * **/
+    public List<Contour> SplitIntoSimpleContours()
+    {
+        List<Contour> splitContours = new List<Contour>();
+
+        Contour contourToSplit = new Contour(this); //make a copy of this contour to work on
+
+        //First thing to do is to test if one or more contour points is shared by another edge
+        for (int i = 0; i != this.Count; i++)
+        {
+            GridPoint contourPoint = this[i];
+            for (int j = 0; j != this.Count; j++)
+            {
+                if (i != j)
+                {
+                    GridPoint edgePoint1 = contourToSplit[j];
+                    GridPoint edgePoint2 = contourToSplit[j < contourToSplit.Count - 1 ? j + 1 : 0];
+                    GridEdge edge = new GridEdge(edgePoint1, edgePoint2);
+
+                    if (edge.ContainsPoint(contourPoint, false))
+                    {
+                        contourToSplit.Insert(j + 1, contourPoint);
+                    }
+                }
+            }
+        }
+
+        bool bRepeatedVertices = false;
+        while (contourToSplit.Count > 0)
+        {
+            for (int i = 0; i != contourToSplit.Count; i++)
+            {
+                bRepeatedVertices = false;
+
+                GridPoint contourPoint = contourToSplit[i];
+
+                int farthestEqualVertexIndex = -1;
+                for (int j = i + 1; j != contourToSplit.Count; j++)
+                {
+                    GridPoint contourTestVertex = contourToSplit[j]; //the vertex to be test against contourVertex for equality
+
+                    if (contourTestVertex.Equals(contourPoint))
+                        farthestEqualVertexIndex = j;
+                }
+
+                if (farthestEqualVertexIndex >= 0) //we found the same vertex at a different index
+                {
+                    bRepeatedVertices = true;
+
+                    //extract the first split contour
+                    Contour splitContour = new Contour();
+                    splitContour.Capacity = contourToSplit.Count - farthestEqualVertexIndex + i;
+                    for (int k = farthestEqualVertexIndex; k != contourToSplit.Count; k++)
+                    {
+                        splitContour.Add(contourToSplit[k]);
+                    }
+                    for (int k = 0; k != i; k++)
+                    {
+                        splitContour.Add(contourToSplit[k]);
+                    }
+
+                    if (splitContour.Count > 2)
+                        splitContours.Add(splitContour);
+
+                    //replace the contour with the sub contour
+                    contourToSplit = new Contour(this.GetRange(i, farthestEqualVertexIndex - i));
+
+                    break; //break the for loop and continue on the while loop
+                }
+            }
+            if (!bRepeatedVertices) //no repeated vertices in this contour, add it to split contours and break the while loop
+            {
+                if (contourToSplit.Count > 2)
+                    splitContours.Add(contourToSplit);
+                break;
+            }
+        }
+
+        return splitContours;
+    }
 
     /**
      * Multiply every point in that contour by a constant
@@ -318,6 +401,8 @@ public class Contour : List<GridPoint>
 
         return true;
     }
+
+
 
      /**
      * Approximate vertices coordinates by rounding values to 'significantFiguresCount' after the decimal point

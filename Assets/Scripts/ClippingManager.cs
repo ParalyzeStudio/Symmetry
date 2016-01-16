@@ -149,10 +149,13 @@ public class ClippingManager : MonoBehaviour
         }
 
         List<Shape> finalShapes = new List<Shape>();
-        //We need to split shapes that are returned by ClipperLib as contour + holes but can be seen as independent shapes
+        //We need to do some work on the shapes:
+        // -remove aligned vertices
+        // -split them, as 1 single shape with contour + holes can be seen as more independent shapes
         for (int i = 0; i != resultingShapes.Count; i++)
         {
             Shape shape = resultingShapes[i];
+            shape.RemoveAlignedVertices();
             List<Shape> simpleShapes = shape.SplitIntoSimpleShapes();
             if (simpleShapes == null) //no split occured just add the original shape
                 finalShapes.Add(shape);
