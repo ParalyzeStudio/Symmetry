@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class AxisRenderer : MonoBehaviour
+public class Axis : MonoBehaviour
 {
     public const float SWEEP_LINE_SPEED = 300.0f;
     public const float DEFAULT_AXIS_THICKNESS = 8.0f;
@@ -14,12 +14,15 @@ public class AxisRenderer : MonoBehaviour
     //materials
     public Material m_endpointMaterial;
     public Material m_endpointOuterContourMaterial;
+    public Material m_indicatingArrowMaterial;
 
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
     public GameObject m_endpoint1Circle { get; set; }
     public GameObject m_endpoint2Circle { get; set; }
+    private GameObjectAnimator m_leftIndicatingArrowAnimator;
+    private GameObjectAnimator m_rightIndicatingArrowAnimator;
     public GridPoint m_pointA { get; set; } //the position of the first endpoint
     public GridPoint m_pointB { get; set; } //the position of the second endpoint
 
@@ -39,6 +42,9 @@ public class AxisRenderer : MonoBehaviour
     }
 
     public AxisType m_type { get; set; }
+
+    //Directions of symmetry (right side only or both left and right sides)
+    public bool m_twoSidedSymmetry { get; set; }
 
     //Strip
     public GameObject m_stripPfb;
@@ -120,7 +126,7 @@ public class AxisRenderer : MonoBehaviour
     }
 
     /**
-     * Build both endpoints and segment
+     * Build endpoints, segment, strip, indicating arrows and deploy button
      * **/
     public void BuildElements(GridPoint pointA, GridPoint pointB)
     {
@@ -137,6 +143,8 @@ public class AxisRenderer : MonoBehaviour
         Material axisMaterial = Instantiate(m_plainWhiteMaterial);
         Material endpointMaterial = Instantiate(m_endpointMaterial);
         Material endpointOuterContourMaterial = Instantiate(m_endpointOuterContourMaterial);
+        Material indicatingArrowMaterial = Instantiate(m_indicatingArrowMaterial);
+        //Material deployButtonMaterial = Instantiate(m_deployButtonMaterial);
 
         //dimensions of each element
         Vector3 endpointSize = new Vector3(64, 64, 1);
@@ -196,6 +204,32 @@ public class AxisRenderer : MonoBehaviour
 
         //strip
         CreateStrip();
+
+        //indicating arrows
+        Vector3 indicatingArrowSize = new Vector3(64, 64, 1);
+
+        GameObject rightIndicatingArrowObject = (GameObject)Instantiate(m_texQuadPfb);
+        rightIndicatingArrowObject.name = "IndicatingArrow";
+        UVQuad rightIndicatingArrow = rightIndicatingArrowObject.GetComponent<UVQuad>();
+        rightIndicatingArrow.Init(indicatingArrowMaterial);
+        m_rightIndicatingArrowAnimator = rightIndicatingArrowObject.GetComponent<TexturedQuadAnimator>();
+        m_rightIndicatingArrowAnimator.SetParentTransform(this.transform);
+        m_rightIndicatingArrowAnimator.SetScale(indicatingArrowSize);
+        m_rightIndicatingArrowAnimator.SetColor(axisTintColor);
+        //m_rightIndicatingArrowAnimator.SetOpacity(0);
+
+        if (m_twoSidedSymmetry)
+        {
+            GameObject leftIndicatingArrowObject = (GameObject)Instantiate(m_texQuadPfb);
+            leftIndicatingArrowObject.name = "IndicatingArrow";
+            UVQuad leftIndicatingArrow = leftIndicatingArrowObject.GetComponent<UVQuad>();
+            leftIndicatingArrow.Init(indicatingArrowMaterial);
+            m_leftIndicatingArrowAnimator = leftIndicatingArrowObject.GetComponent<TexturedQuadAnimator>();
+            m_leftIndicatingArrowAnimator.SetParentTransform(this.transform);
+            m_leftIndicatingArrowAnimator.SetScale(indicatingArrowSize);
+            m_leftIndicatingArrowAnimator.SetColor(axisTintColor);
+            //m_leftIndicatingArrowAnimator.SetOpacity(0);
+        }
     }
 
     /**
@@ -230,6 +264,38 @@ public class AxisRenderer : MonoBehaviour
             RenderStrip();
         else
             m_stripMesh.Hide();
+
+        if (pointA != pointB)
+        {
+            float axisAngle = Mathf.Atan2(pointB.Y - pointA.Y, pointB.X - pointA.X) * Mathf.Rad2Deg;
+            Vector2 normalizedAxisDirection = (pointB - pointA).NormalizeAsVector2();
+            Vector3 cwAxisNormal = new Vector3(normalizedAxisDirection.y, -normalizedAxisDirection.x, 0);
+
+            float distanceFromAxis = 50.0f;
+
+            Vector3 rightArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
+            rightArrowPosition += distanceFromAxis * cwAxisNormal;
+
+            m_rightIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
+            m_rightIndicatingArrowAnimator.SetRotationAngle(axisAngle - 90);
+            m_rightIndicatingArrowAnimator.SetPosition(rightArrowPosition);
+            m_rightIndicatingArrowAnimator.SetOpacity(1);
+
+            if (m_twoSidedSymmetry)
+            {
+                Vector3 leftArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
+                leftArrowPosition -= distanceFromAxis * cwAxisNormal;
+                
+                m_leftIndicatingArrowAnimator.SetPosition(leftArrowPosition);
+                m_leftIndicatingArrowAnimator.SetOpacity(1);
+            }
+        }
+        else //hide some elements, just display the first endpoint
+        {
+            if (m_leftIndicatingArrowAnimator != null)
+                m_leftIndicatingArrowAnimator.SetOpacity(0);
+            m_rightIndicatingArrowAnimator.SetOpacity(0);
+        }
     }
 
     /**
@@ -282,9 +348,6 @@ public class AxisRenderer : MonoBehaviour
             }
             Render(m_pointA, closestAnchor.m_gridPosition);
 
-
-            Debug.Log("axisRenderer.m_snappedAnchor:" + m_snappedAnchor.m_gridPosition);
-            Debug.Log("axisRenderer.m_snappedAnchor:" + m_snappedAnchor.m_localPosition);
             return true;
         }
 
@@ -334,10 +397,8 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void LaunchSweepingLines()
     {
-        if (m_leftSweepingLine != null)
-            m_sweepingLeft = true;
-        if (m_rightSweepingLine != null)
-            m_sweepingRight = true;
+        m_sweepingLeft = m_twoSidedSymmetry;
+        m_sweepingRight = true;
     }
 
     /**
@@ -355,7 +416,7 @@ public class AxisRenderer : MonoBehaviour
         //Create and animate sweeping lines
         GridPoint clockwiseAxisNormal = GetNormal();
         Vector2 normalizedClockwiseAxisNormal = clockwiseAxisNormal / clockwiseAxisNormal.magnitude;
-        if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        if (m_twoSidedSymmetry)
         {
             float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
@@ -377,7 +438,7 @@ public class AxisRenderer : MonoBehaviour
             debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
             debugRightSweepLineAnimator.SetPosition(worldAxisCenter);
         }
-        else if (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+        else
         {
             float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
@@ -453,8 +514,7 @@ public class AxisRenderer : MonoBehaviour
     * **/
     public GridPoint GetDirection()
     {
-        GridPoint axisDirection = m_pointB - m_pointA;
-        return axisDirection;
+        return m_pointB - m_pointA;
     }
 
     /**

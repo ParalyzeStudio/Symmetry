@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Axes : MonoBehaviour
 {
-    public List<AxisRenderer> m_childrenAxes { get; set; }
+    public List<Axis> m_childrenAxes { get; set; }
     public GameObject m_axisPfb;
 
     //snap animation
@@ -13,7 +13,7 @@ public class Axes : MonoBehaviour
 
     public void Awake()
     {
-        m_childrenAxes = new List<AxisRenderer>();
+        m_childrenAxes = new List<Axis>();
     }
 
     public void Start()
@@ -21,7 +21,7 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public AxisRenderer BuildAxis(GridPoint pointA, GridPoint pointB, Symmetrizer.SymmetryType symmetryType, AxisRenderer.AxisType axisType)
+    public Axis BuildAxis(GridPoint pointA, GridPoint pointB, Symmetrizer.SymmetryType symmetryType, Axis.AxisType axisType)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
@@ -35,7 +35,7 @@ public class Axes : MonoBehaviour
         symmetrizer.m_symmetryType = symmetryType;
 
         //Build and render the axis once
-        AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
+        Axis axisRenderer = newAxis.GetComponent<Axis>();
         axisRenderer.BuildElements(pointA, pointB);
         axisRenderer.m_type = axisType;
 
@@ -43,12 +43,12 @@ public class Axes : MonoBehaviour
         return axisRenderer;
     }
 
-    public void AddAxis(AxisRenderer axis)
+    public void AddAxis(Axis axis)
     {
         m_childrenAxes.Add(axis);
     }
 
-    public void RemoveAxis(AxisRenderer axis)
+    public void RemoveAxis(Axis axis)
     {
         for (int axisIndex = 0; axisIndex != m_childrenAxes.Count; axisIndex++)
         {
@@ -87,14 +87,14 @@ public class Axes : MonoBehaviour
     /**
      * Return the axis the player is currently drawing
      * **/
-    public AxisRenderer GetAxisBeingDrawn()
+    public Axis GetAxisBeingDrawn()
     {
         for (int i = 0; i != m_childrenAxes.Count; i++)
         {
-            AxisRenderer axis = m_childrenAxes[i].GetComponent<AxisRenderer>();
+            Axis axis = m_childrenAxes[i].GetComponent<Axis>();
             //stop at the first dynamic axis as th
-            if (axis.m_type == AxisRenderer.AxisType.DYNAMIC_SNAPPED ||
-                axis.m_type == AxisRenderer.AxisType.DYNAMIC_UNSNAPPED)
+            if (axis.m_type == Axis.AxisType.DYNAMIC_SNAPPED ||
+                axis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED)
             {
                 return axis;
             }

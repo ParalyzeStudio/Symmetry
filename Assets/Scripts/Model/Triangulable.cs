@@ -258,8 +258,6 @@ public class GridTriangulable
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = m_triangles[iTriangleIndex];
-            if (this is DottedOutline)
-                Debug.Log("triangleArea" + iTriangleIndex + ":" + triangle.GetArea());
             m_area += triangle.GetArea();
         }
     }

@@ -77,14 +77,23 @@ public class ShapeTouchHandler : TouchHandler
             ShapeMesh shapeMesh = this.gameObject.GetComponent<ShapeMesh>();
             Shape shape = shapeMesh.m_shapeData;
 
-            GridPoint firstShapeVertex = shape.m_contour[0];
+            GridPoint minTranslation = GridPoint.zero;
+            long minDistance = long.MaxValue;
+            for (int i = 0; i != shape.m_contour.Count; i++)
+            {
+                GridPoint shapeVertex = shape.m_contour[i];
+                Grid.GridAnchor closestGridAnchor = gameScene.m_grid.GetClosestGridAnchorForGridPosition(shapeVertex);
 
-            //Find the closest anchor to one of this shape vertices
-            Grid.GridAnchor closestGridAnchor = gameScene.m_grid.GetClosestGridAnchorForGridPosition(firstShapeVertex);
-            //Calculate the translation between old and new shape position
-            GridPoint translation = closestGridAnchor.m_gridPosition - shape.m_contour[0];
+                GridPoint translation = closestGridAnchor.m_gridPosition - shapeVertex;
+                long sqrDistanceToAnchor = translation.sqrMagnitude;
+                if (sqrDistanceToAnchor < minDistance)
+                {
+                    minDistance = sqrDistanceToAnchor;
+                    minTranslation = translation;
+                }
+            }
 
-            shape.Translate(translation); //translate all vertices
+            shape.Translate(minTranslation); //translate all vertices by the value we found previously
             
             shape.InvalidateSubstitutionShapes();
             shape.FinalizeClippingOperationsOnSubstitutionShapes(); 

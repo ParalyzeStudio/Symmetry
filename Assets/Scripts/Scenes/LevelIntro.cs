@@ -25,15 +25,13 @@ public class LevelIntro : GUIScene
     private GameObjectAnimator m_skipButtonAnimator;
     private TextMeshAnimator m_skipTextAnimator;
 
-    public bool m_loadingLevelIntroFromRetry { get; set; } //is the LevelIntro loaded from the retry button in the GameScene
-
     public override void Show()
     {
         base.Show();
         ShowOpaqueBackground();
-        ShowChapterAndLevel();
-        ShowSeparationLine();
-        ShowSkipButton();
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowChapterAndLevel), 1.0f);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSeparationLine), 1.0f);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSkipButton), 1.0f);
 
         m_gameSceneLaunched = false;
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(LaunchGameScene), 5.0f);
@@ -55,14 +53,10 @@ public class LevelIntro : GUIScene
 
         m_leftPanelAnimator = leftPanelObject.GetComponent<GameObjectAnimator>();
         m_leftPanelAnimator.SetParentTransform(this.transform);
-        m_leftPanelAnimator.SetPosition(new Vector3(-0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE));
         m_leftPanelAnimator.SetScale(new Vector3(0.5f * screenSize.x, screenSize.y, 1));        
         m_leftPanelAnimator.SetColor(backgroundColor);
-        if (m_loadingLevelIntroFromRetry)
-        {
-            m_leftPanelAnimator.SetOpacity(0);
-            m_leftPanelAnimator.FadeTo(1.0f, 0.5f);
-        }
+        m_leftPanelAnimator.SetPosition(new Vector3(-0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE));
+        m_leftPanelAnimator.TranslateTo(new Vector3(-0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 1.0f);
 
         //right panel
         GameObject rightPanelObject = (GameObject)Instantiate(m_colorQuadPfb);
@@ -73,14 +67,10 @@ public class LevelIntro : GUIScene
 
         m_rightPanelAnimator = rightPanelObject.GetComponent<GameObjectAnimator>();
         m_rightPanelAnimator.SetParentTransform(this.transform);
-        m_rightPanelAnimator.SetPosition(new Vector3(0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE));
         m_rightPanelAnimator.SetScale(new Vector3(0.5f * screenSize.x, screenSize.y, 1));
         m_rightPanelAnimator.SetColor(backgroundColor);
-        if (m_loadingLevelIntroFromRetry)
-        {
-            m_rightPanelAnimator.SetOpacity(0);
-            m_rightPanelAnimator.FadeTo(1.0f, 0.5f);
-        }
+        m_rightPanelAnimator.SetPosition(new Vector3(0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE));
+        m_rightPanelAnimator.TranslateTo(new Vector3(0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 1.0f);
     }
 
     private void ShowSeparationLine()
@@ -98,6 +88,8 @@ public class LevelIntro : GUIScene
         m_lineAnimator.SetPosition(new Vector3(0, -0.045f * screenSize.y, CONTENT_Z_VALUE));
         m_lineAnimator.SetScale(new Vector3(1200, 4, 1));
         m_lineAnimator.SetColor(Color.white);
+        m_lineAnimator.SetOpacity(0);
+        m_lineAnimator.FadeTo(1.0f, 0.5f);
     }
 
     /**
@@ -129,11 +121,8 @@ public class LevelIntro : GUIScene
         m_titleAnimator.SetPosition(new Vector3(0, 0.1f * screenSize.y, CONTENT_Z_VALUE));
         m_titleAnimator.SetFontHeight(130);
         m_titleAnimator.SetColor(Color.white);
-        if (m_loadingLevelIntroFromRetry)
-        {
-            m_titleAnimator.SetOpacity(0);
-            m_titleAnimator.FadeTo(1.0f, 0.5f);
-        }
+        m_titleAnimator.SetOpacity(0);
+        m_titleAnimator.FadeTo(1.0f, 0.5f);
     }
 
     /**

@@ -20,6 +20,7 @@ public class Grid : MonoBehaviour
         }
     }
 
+    private GameObject m_pointsHolder;
     public GridAnchor[] m_anchors { get; set; }
     public Vector2 m_maxGridSize { get; set; }
     public Vector2 m_gridSize { get; set; }
@@ -41,9 +42,9 @@ public class Grid : MonoBehaviour
     {
         m_maxGridSize = maxGridSize;
 
-        GameObject pointsHolder = new GameObject("Points");
+        m_pointsHolder = new GameObject("Points");
 
-        GameObjectAnimator pointsHolderAnimator = pointsHolder.AddComponent<GameObjectAnimator>();
+        GameObjectAnimator pointsHolderAnimator = m_pointsHolder.AddComponent<GameObjectAnimator>();
         pointsHolderAnimator.SetParentTransform(this.transform);
         pointsHolderAnimator.SetPosition(Vector3.zero);
 
@@ -120,7 +121,7 @@ public class Grid : MonoBehaviour
                 int iAnchorIndex = (iLineNumber - 1) * exactNumColumns + (iColumnNumber - 1);
 
                 CircleMeshAnimator anchorAnimator = clonedGridAnchor.GetComponent<CircleMeshAnimator>();
-                anchorAnimator.SetParentTransform(pointsHolder.transform);
+                anchorAnimator.SetParentTransform(m_pointsHolder.transform);
                 anchorAnimator.SetNumSegments(4, false);
                 anchorAnimator.SetInnerRadius(0, false);
                 anchorAnimator.SetOuterRadius(3, true);
@@ -133,12 +134,11 @@ public class Grid : MonoBehaviour
     }
 
     /**
-     * Fades out the grid (when a level ends for instance)
+     * Fade out all the points inside the grid
      * **/
-    public void Dismiss(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    public void DismissGridPoints(float fDuration)
     {
-        GameObjectAnimator gridAnimator = this.GetComponent<GameObjectAnimator>();
-        gridAnimator.FadeTo(0, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        m_pointsHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
     /**

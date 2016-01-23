@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /**
  * Represents a group of symmetries the player has stacked
  * **/
-public class SymmetryGroup : List<AxisRenderer>
+public class SymmetryGroup : List<Axis>
 {
     /**
      * Calculates the symmetric element of every axis in this group.
@@ -19,7 +19,7 @@ public class SymmetryGroup : List<AxisRenderer>
             //Debug.Log(" A:" + this[i].m_pointA + " B:" + this[i].m_pointB);
             //Debug.Log("about");
             //Debug.Log(" A:" + symmetrizer.m_axis.m_pointA + " B:" + symmetrizer.m_axis.m_pointB);
-            AxisRenderer symmetrizedAxis = symmetrizer.CalculateSymmetricAxis(this[i]);
+            Axis symmetrizedAxis = symmetrizer.CalculateSymmetricAxis(this[i]);
             if (symmetrizedAxis != null)
             {
                 symmetrizedAxis.CreateStrip(false);
@@ -47,7 +47,7 @@ public class SymmetryStack
     /**
      * Add a symmetry to the stack
      * **/
-    public void StackSymmetry(AxisRenderer axis)
+    public void StackSymmetry(Axis axis)
     {
         SymmetryGroup symmetryGroup = new SymmetryGroup();
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 5" number="5">
+	<counter maxActions="4"/>
+	<grid exactNumColumns="13" minNumLines="9"/>
+	<dottedOutlines>
+		<dottedOutline>
+			<contour>
+				<point column="5" line="3"/>
+				<point column="9" line="3"/>
+				<point column="9" line="7"/>
+				<point column="5" line="7"/>
+			</contour>
+			<holes>
+				<hole>
+					<point column="5" line="5"/>
+					<point column="7" line="3"/>
+					<point column="7" line="5"/>
+				</hole>
+				<hole>
+					<point column="7" line="5"/>
+					<point column="9" line="5"/>
+					<point column="7" line="7"/>
+				</hole>
+			</holes>
+		</dottedOutline>
+	</dottedOutlines>
+	<shapes>
+		<shape tint="0">
+			<contour>
+				<point column="5" line="3"/>
+				<point column="7" line="3"/>
+				<point column="5" line="5"/>
+			</contour>
+		</shape>
+		<shape tint="180">
+			<contour>
+				<point column="7" line="3"/>
+				<point column="9" line="3"/>
+				<point column="9" line="5"/>
+			</contour>
+		</shape>
+		<shape tint="0">
+			<contour>
+				<point column="9" line="5"/>
+				<point column="9" line="7"/>
+				<point column="7" line="7"/>
+			</contour>
+		</shape>
+		<shape tint="180">
+			<contour>
+				<point column="7" line="7"/>
+				<point column="5" line="7"/>
+				<point column="5" line="5"/>
+			</contour>
+		</shape>	
+		<shape tint="50">
+			<contour>
+				<point column="7" line="3"/>
+				<point column="9" line="5"/>
+				<point column="7" line="7"/>
+				<point column="5" line="5"/>
+			</contour>
+		</shape>				
+	</shapes>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
+</level>

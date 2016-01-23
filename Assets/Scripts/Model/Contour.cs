@@ -241,7 +241,7 @@ public class Contour : List<GridPoint>
                         splitContours.Add(splitContour);
 
                     //replace the contour with the sub contour
-                    contourToSplit = new Contour(this.GetRange(i, farthestEqualVertexIndex - i));
+                    contourToSplit = new Contour(contourToSplit.GetRange(i, farthestEqualVertexIndex - i));
 
                     break; //break the for loop and continue on the while loop
                 }

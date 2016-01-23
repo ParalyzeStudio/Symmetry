@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 public class Strip : GridTriangulable
 {
-    private AxisRenderer m_parentAxis;
+    private Axis m_parentAxis;
     private Symmetrizer m_parentSymmetrizer;
 
     //parts of the strip that are on the left and on the right of the axis
     public Shape m_stripLeftSubShape { get; set; }
     public Shape m_stripRightSubShape { get; set; }
 
-    public Strip(AxisRenderer parentAxis) : base()
+    public Strip(Axis parentAxis) : base()
     {
         m_parentAxis = parentAxis;
         m_parentSymmetrizer = parentAxis.GetComponent<Symmetrizer>();

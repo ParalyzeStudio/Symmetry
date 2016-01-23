@@ -5,6 +5,7 @@ public class GameScene : GUIScene
 {
     public const float ACTION_BUTTONS_Z_VALUE = -15.0f;
     public const float INTERFACE_BUTTONS_Z_VALUE = -15.0f;
+    public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -15.0f;
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -15.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
     public const float CHALKBOARD_Z_VALUE = -10.0f;
@@ -40,11 +41,13 @@ public class GameScene : GUIScene
     public GameObject m_counterPfb;
     public GameObject m_axesPfb;
 
-    //chalkboard background
+    //chalkboard
+    private GameObject m_chalkboardObject;
     public Material m_chalkboardMaterial;
 
     //holders
     private GameObject m_interfaceButtonsHolder;
+    private GameObject m_actionButtonsHolder;
     private GameObject m_axisConstraintsIconsHolder;
 
     //interface buttons
@@ -55,7 +58,10 @@ public class GameScene : GUIScene
     public Material m_sharpSegmentMaterial;
 
     //action buttons
-    ActionButton[] m_actionButtons;
+    private ActionButton[] m_actionButtons;
+
+    //deploy axis buttons
+    public GameObject m_deployAxisButtonPfb;
 
     //grid contour
     public Material m_gridTopContourMaterial;
@@ -71,8 +77,8 @@ public class GameScene : GUIScene
     public List<Vector2> m_constrainedDirections { get; set; }
 
     //stack for symmetries
-    public GameObject m_gameStackPfb;
-    public GameStack m_gameStack { get; set; }
+    //public GameObject m_gameStackPfb;
+    //public GameStack m_gameStack { get; set; }
 
     public Material m_horizontalAxisMaterial;
     public Material m_verticalAxisMaterial;
@@ -103,16 +109,6 @@ public class GameScene : GUIScene
         //CallFuncHandler callFuncHandler = GetCallFuncHandler();
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
-
-        Contour contour = new Contour(5);
-        contour.Add(new GridPoint(2, 0, true));
-        contour.Add(new GridPoint(0, 2, true));
-        contour.Add(new GridPoint(0, 0, true));
-        contour.Add(new GridPoint(4, 0, true));
-        //contour.Add(new GridPoint(4, 2, true));
-
-        List<Contour> splitContours = contour.SplitIntoSimpleContours();
-        Debug.Log("splitContoursCount:" + splitContours.Count);
 
         //Shape subjShape = new Shape();
         //Contour subjShapeContour = new Contour(4);
@@ -186,8 +182,7 @@ public class GameScene : GUIScene
          * TEST SHAPE CLIPPING
          * **/
 
-        UnitTests.TestShapesClipping();
-
+        //UnitTests.TestShapesClipping();
 
         /**
          * TEST OVERLAP TIME
@@ -274,7 +269,7 @@ public class GameScene : GUIScene
         ShowGrid();
 
         //Display interface buttons (pause, retry and hints)
-        ShowInterfaceButtons2();
+        ShowInterfaceButtons();
 
         //Display action counter
         ShowCounter();
@@ -284,10 +279,13 @@ public class GameScene : GUIScene
 
         //Show available symmetry axes
         BuildConstrainedDirections();
-        ShowAxisConstraintsIcons2();
+        ShowAxisConstraintsIcons();
 
         //Show action buttons
         ShowActionButtons();
+
+        //Show axis deployment buttons
+        ShowDeployAxisButtons();
 
         //Show starting shapes
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
@@ -316,10 +314,10 @@ public class GameScene : GUIScene
      * **/
     private void ShowChalkboard()
     {
-        GameObject chalkboardObject = (GameObject)Instantiate(m_texQuadPfb);
-        chalkboardObject.name = "Chalkboard";
+        m_chalkboardObject = (GameObject)Instantiate(m_texQuadPfb);
+        m_chalkboardObject.name = "Chalkboard";
 
-        UVQuad chalkboard = chalkboardObject.GetComponent<UVQuad>();
+        UVQuad chalkboard = m_chalkboardObject.GetComponent<UVQuad>();
         chalkboard.Init(m_chalkboardMaterial);
 
         TexturedQuadAnimator chalkboardAnimator = chalkboard.GetComponent<TexturedQuadAnimator>();
@@ -463,7 +461,7 @@ public class GameScene : GUIScene
     /**
      * Pause, retry and hints buttons
      * **/
-    private void ShowInterfaceButtons2()
+    private void ShowInterfaceButtons()
     {
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
         float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
@@ -503,7 +501,7 @@ public class GameScene : GUIScene
         retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
         float retryButtonPositionX = 0.5f * (screenSize.x - rightBorderWidth);
         Vector3 gridPosition = m_grid.transform.position;
-        float retryButtonPositionY = gridPosition.y + 150;
+        float retryButtonPositionY = gridPosition.y + 0.5f * m_grid.m_gridSize.y - 80;
         retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
         retryButtonAnimator.SetColor(Color.white);
 
@@ -529,7 +527,7 @@ public class GameScene : GUIScene
         GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
         hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
         float hintsButtonPositionX = 0.5f * screenSize.x - 84;
-        float hintsButtonPositionY = gridPosition.y - 150;
+        float hintsButtonPositionY = retryButtonPositionY - 160;
         hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
         hintsButtonAnimator.SetColor(Color.white);
 
@@ -699,7 +697,15 @@ public class GameScene : GUIScene
     //}
 
     /**
-     * Fades out interface buttons holder
+     * Fade out grid points without grid borders
+     * **/
+    public void DismissGridPoints(float fDuration)
+    {
+        m_grid.DismissGridPoints(fDuration);
+    }
+
+    /**
+     * Fade out interface buttons holder
      * **/
     public void DismissInterfaceButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
@@ -735,6 +741,22 @@ public class GameScene : GUIScene
     }
 
     /**
+     * Fade out every shape except the tiled background one
+     * **/
+    private void DismissShapes(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
+    {
+        for (int i = 0; i != m_shapesHolder.m_shapes.Count; i++)
+        {
+            Shape shape = m_shapesHolder.m_shapes[i];
+            if (shape.m_state != Shape.ShapeState.TILED_BACKGROUND)
+            {
+                ShapeAnimator shapeAnimator = shape.m_parentMesh.gameObject.GetComponent<ShapeAnimator>();
+                shapeAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+            }
+        }
+    }
+
+    /**
      * Here we build the dotted outlines (contour and holes) of the shape the player has to reproduce
      * **/
     private void ShowOutlines()
@@ -754,7 +776,7 @@ public class GameScene : GUIScene
     /**
      * Draw small icons to show the constraints on axes that the player can draw
      * **/
-    private void ShowAxisConstraintsIcons2()
+    private void ShowAxisConstraintsIcons()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
@@ -803,71 +825,6 @@ public class GameScene : GUIScene
         lineAnimator.SetColor(Color.white);
     }
 
-    /**
-     * Draw small icons to show the constraints on axes that the player can draw
-    * **/
-    //private void ShowAxisConstraintsIcons(float fDelay = 0.0f)
-    //{
-    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-    //    List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
-    //    Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
-
-    //    //Show icons
-    //    m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
-        
-    //    float iconHolderLeftMargin = 30.0f;
-    //    float iconHolderTopMargin = 30.0f; 
-
-    //    GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
-    //    axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-    //    axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(iconHolderLeftMargin - 0.5f * screenSize.x, 0.5f * screenSize.y - iconHolderTopMargin, AXIS_CONSTRAINTS_ICONS_Z_VALUE));              
-
-    //    float horizontalDistanceBetweenIcons = 65.0f;
-    //    Vector2 iconSize = new Vector2(64, 64);
-
-    //    for (int i = 0; i != axisConstraints.Count; i++)
-    //    {
-    //        GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
-    //        iconObject.name = "ConstraintAxisIcon";
-
-    //        UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
-    //        iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
-
-    //        TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
-    //        iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-    //        iconAnimator.SetScale(iconSize);
-    //        iconAnimator.SetColor(tintColor);
-    //        float iconPositionX = 0.5f * iconSize.x + i * horizontalDistanceBetweenIcons;
-    //        iconAnimator.SetPosition(new Vector3(iconPositionX, -0.5f * iconSize.y, 0));
-    //    }
-        
-    //    axisConstraintsIconsHolderAnimator.SetOpacity(0);
-    //    axisConstraintsIconsHolderAnimator.FadeTo(1.0f, 0.5f);
-
-    //    //Show some underline
-    //    GameObject underlineObject = (GameObject)Instantiate(m_blurrySegmentPfb);
-    //    underlineObject.name = "Underline";
-
-    //    BlurrySegmentAnimator underlineAnimator = underlineObject.GetComponent<BlurrySegmentAnimator>();
-    //    underlineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-    //    underlineAnimator.SetPosition(Vector3.zero);
-
-    //    float underlineTopMargin = 20.0f;
-    //    BlurrySegment underline = underlineObject.GetComponent<BlurrySegment>();
-    //    Vector3 underlinePointA = new Vector3(-iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
-    //    Vector3 underlinePointB = new Vector3(-iconHolderLeftMargin + axisConstraints.Count * iconSize.x + 2 * iconHolderLeftMargin, -iconSize.y - underlineTopMargin, 0);
-    //    underline.Build(underlinePointA,
-    //                    underlinePointA,
-    //                    4,
-    //                    16,
-    //                    Instantiate(m_sharpSegmentMaterial),
-    //                    Instantiate(m_blurrySegmentMaterial),
-    //                    Color.white,
-    //                    tintColor); //TODO obtain the color from the theme;
-
-    //    underlineAnimator.TranslatePointBTo(underlinePointB, 0.5f);
-    //}
-
     public void DismissAxisConstraintsIcons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
         GameObjectAnimator iconsHolderAnimator = m_axisConstraintsIconsHolder.GetComponent<GameObjectAnimator>();
@@ -885,8 +842,8 @@ public class GameScene : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         Vector2 actionButtonsHolderSize = new Vector2(242.0f, m_grid.m_maxGridSize.y);
-        GameObject actionButtonsHolder = new GameObject("ActionButtons");
-        GameObjectAnimator actionButtonsHolderAnimator = actionButtonsHolder.AddComponent<GameObjectAnimator>();
+        m_actionButtonsHolder = new GameObject("ActionButtons");
+        GameObjectAnimator actionButtonsHolderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
         actionButtonsHolderAnimator.SetParentTransform(this.transform);
         actionButtonsHolderAnimator.SetPosition(new Vector3(-0.5f * screenSize.x + 0.5f * actionButtonsHolderSize.x, m_grid.transform.localPosition.y, ACTION_BUTTONS_Z_VALUE));
 
@@ -910,7 +867,7 @@ public class GameScene : GUIScene
         m_actionButtons[0] = button;
 
         GameObjectAnimator buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
-        buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+        buttonAnimator.SetParentTransform(m_actionButtonsHolder.transform);
         buttonAnimator.SetPosition(buttonPosition);
 
         ////Show CLIP_OPERATION button
@@ -958,19 +915,60 @@ public class GameScene : GUIScene
         ColorQuad line = lineObject.GetComponent<ColorQuad>();
         line.Init(m_plainWhiteMaterial);
         ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
-        lineAnimator.SetParentTransform(actionButtonsHolder.transform);
+        lineAnimator.SetParentTransform(m_actionButtonsHolder.transform);
         lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
         lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
         lineAnimator.SetColor(Color.white);
     }
 
+    /**
+     * Buttons associated with pending axes waiting to be deployed
+     * **/
+    public void ShowDeployAxisButtons()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+        GameObject deployAxisButtonsHolder = new GameObject();
+        deployAxisButtonsHolder.name = "DeployAxisButtonsHolder";
+
+        GameObjectAnimator holderAnimator = deployAxisButtonsHolder.AddComponent<GameObjectAnimator>();
+        holderAnimator.SetParentTransform(this.transform);
+        Vector3 gridPosition = m_grid.transform.position;
+        Vector2 gridSize = m_grid.m_gridSize;
+        float rightBorderWidth = 168.0f;
+        Vector3 holderPosition = new Vector3(0.5f * (screenSize.x - rightBorderWidth),
+                                             gridPosition.y - 0.5f * gridSize.y,
+                                             DEPLOY_AXIS_BUTTONS_Z_VALUE);
+        holderAnimator.SetPosition(holderPosition);
+
+        int buttonsCount = 4;
+        float verticalDistanceBetweenButtons = 130.0f;
+        float bottomMargin = 20.0f;
+        for (int i = 0; i != buttonsCount; i++)
+        {
+            GameObject axisDeployButtonObject = (GameObject)Instantiate(m_deployAxisButtonPfb);
+            axisDeployButtonObject.name = "AxisDeploy" + (i + 1);
+
+            AxisDeploymentButton axisDeployButton = axisDeployButtonObject.GetComponent<AxisDeploymentButton>();
+            axisDeployButton.BuildForNumber(i + 1);
+
+            GameObjectAnimator buttonAnimator = axisDeployButtonObject.GetComponent<GameObjectAnimator>();
+            buttonAnimator.SetParentTransform(deployAxisButtonsHolder.transform);
+            float buttonPositionY = (i + 0.5f) * verticalDistanceBetweenButtons + bottomMargin;
+            buttonAnimator.SetPosition(new Vector3(0, buttonPositionY, 0));
+        }
+    }
+
     private void DismissActionButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
     {
-        for (int i = 0; i != m_actionButtons.Length; i++)
-        {
-            if (m_actionButtons[i] != null)
-                m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
-        }
+        m_actionButtonsHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+
+        ////Fade out every button
+        //for (int i = 0; i != m_actionButtons.Length; i++)
+        //{
+        //    if (m_actionButtons[i] != null)
+        //        m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
+        //}
+
     }
 
     /**
@@ -1051,25 +1049,25 @@ public class GameScene : GUIScene
     /**
      * If symmetries are stackable in this level, show the stack on the right side of the screen
      * **/
-    private void ShowSymmetryStack()
-    {
-        if (GetLevelManager().m_currentLevel.m_symmetriesStackable)
-        {
-            Vector2 screenSize = ScreenUtils.GetScreenSize();
+    //private void ShowSymmetryStack()
+    //{
+    //    if (GetLevelManager().m_currentLevel.m_symmetriesStackable)
+    //    {
+    //        Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-            GameObject gameStackObject = (GameObject)Instantiate(m_gameStackPfb);
-            gameStackObject.name = "SymmetryStack";
+    //        GameObject gameStackObject = (GameObject)Instantiate(m_gameStackPfb);
+    //        gameStackObject.name = "SymmetryStack";
 
-            GameObjectAnimator gameStackAnimator = gameStackObject.GetComponent<GameObjectAnimator>();
-            gameStackAnimator.SetParentTransform(this.transform);
-            gameStackAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 96.0f, 256.0f, SYMMETRY_STACK_Z_VALUE));
-            gameStackAnimator.SetOpacity(0);
-            gameStackAnimator.FadeTo(1.0f, 1.0f);
+    //        GameObjectAnimator gameStackAnimator = gameStackObject.GetComponent<GameObjectAnimator>();
+    //        gameStackAnimator.SetParentTransform(this.transform);
+    //        gameStackAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 96.0f, 256.0f, SYMMETRY_STACK_Z_VALUE));
+    //        gameStackAnimator.SetOpacity(0);
+    //        gameStackAnimator.FadeTo(1.0f, 1.0f);
 
-            m_gameStack = gameStackObject.GetComponent<GameStack>();
-            m_gameStack.Build();
-        }
-    }
+    //        m_gameStack = gameStackObject.GetComponent<GameStack>();
+    //        m_gameStack.Build();
+    //    }
+    //}
 
     private void InitClippingManager()
     {
@@ -1403,18 +1401,20 @@ public class GameScene : GUIScene
         if (gameStatus == GameStatus.VICTORY)
         {
             Debug.Log("EndLevel VICTORY");
-            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(DismissSceneElementsOnVictory), 2.0f);
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(DismissSceneElementsOnVictory), 1.5f);
 
             LevelManager levelManager = GetLevelManager();
             if (levelManager.IsCurrentLevelDebugLevel() > 0)
             {
-                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
+                Debug.Log("debug");
+                GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 4.0f);
             }
             else
             {
                 int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
                 if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
                 {
+                    Debug.Log("new level:" + (levelManager.m_currentLevel.m_chapterRelativeNumber + 1));
                     levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
                     GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
                 }
@@ -1435,16 +1435,25 @@ public class GameScene : GUIScene
 
     /**
      * Fade out and remove every scene element except shapes holder when player completed a level
+     * + destroy remaining element after a certain delay leaving time for the level intro scene backgorund to cover the whole screen
      * **/
     private void DismissSceneElementsOnVictory()
     {
-        m_grid.Dismiss(1.0f);
         m_outlines.Dismiss(1.0f);
         m_axes.Dismiss(1.0f);
+        DismissGridPoints(0.5f);
         DismissInterfaceButtons(0.5f);
         DismissActionButtons(1.0f);
         DismissAxisConstraintsIcons(0.5f);
         DismissCounter(0.5f);
+        //DismissShapes(0.5f, 4.0f);
+
+        m_shapesHolder.transform.parent = null;
+        Destroy(m_shapesHolder.gameObject, 5.0f);
+        m_chalkboardObject.transform.parent = null;
+        Destroy(m_chalkboardObject, 5.0f);
+        m_grid.gameObject.transform.parent = null;
+        Destroy(m_grid.gameObject, 5.0f);
     }
 
     /**
@@ -1453,7 +1462,7 @@ public class GameScene : GUIScene
      * **/
     private void OnFinishEndingLevelVictory()
     {
-        m_shapesHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.5f, 0.0f);
+        m_shapesHolder.m_shapes.Clear();
         GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(StartLevelIntroScene), 0.5f);
     }
 

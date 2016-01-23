@@ -14,7 +14,7 @@ public class Symmetrizer : MonoBehaviour
 
     public SymmetryType m_symmetryType { get; set; }
 
-    private AxisRenderer m_axis;
+    private Axis m_axis;
     private GameScene m_gameScene;
     private ClippingManager m_clippingManager;
 
@@ -34,7 +34,7 @@ public class Symmetrizer : MonoBehaviour
         GameObject gameControllerObject = (GameObject) GameObject.FindGameObjectWithTag("GameController");
         m_gameScene = (GameScene)gameControllerObject.GetComponent<SceneManager>().m_currentScene;
         m_clippingManager = gameControllerObject.GetComponent<ClippingManager>();
-        m_axis = this.GetComponent<AxisRenderer>();
+        m_axis = this.GetComponent<Axis>();
     }
 
     /**
@@ -107,11 +107,11 @@ public class Symmetrizer : MonoBehaviour
     {
         Axes axesHolder = m_gameScene.m_axes;
 
-        List<AxisRenderer> axes = axesHolder.m_childrenAxes;
+        List<Axis> axes = axesHolder.m_childrenAxes;
         for (int i = 0; i != axes.Count; i++)
         {
-            AxisRenderer axis = axes[i];
-            if (axis.m_type == AxisRenderer.AxisType.STATIC_PENDING)
+            Axis axis = axes[i];
+            if (axis.m_type == Axis.AxisType.STATIC_PENDING)
             {
                 //AxisRenderer symmetricAxis = axis.CalculateSymmetricAxis(this);
             }
@@ -154,7 +154,7 @@ public class Symmetrizer : MonoBehaviour
     /**
      * Calculate the symmetric axis of this axis by the parameter 'axis'
      * **/
-    public AxisRenderer CalculateSymmetricAxis(AxisRenderer axisToSymmetrize)
+    public Axis CalculateSymmetricAxis(Axis axisToSymmetrize)
     {
         Axes axesHolder = m_gameScene.m_axes;
 

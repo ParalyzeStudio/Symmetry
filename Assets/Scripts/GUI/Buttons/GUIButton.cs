@@ -45,7 +45,7 @@ public class GUIButton : MonoBehaviour
         ID_BACK_TO_LEVELS_BUTTON,
         ID_CHAPTER_SELECTION_ARROW_PREVIOUS,
         ID_CHAPTER_SELECTION_ARROW_NEXT,        
-        ID_UNSTACK_SYMMETRY,
+        //ID_UNSTACK_SYMMETRY,
 
         //Action buttons
         ID_AXIS_SYMMETRY_TWO_SIDES,
@@ -233,7 +233,6 @@ public class GUIButton : MonoBehaviour
             //the Show() method will be called in the next frame due to the way CallFuncHandler works.
             //Thus we can set the boolean in this frame and be sure it will be set before Show() is actually called
             LevelIntro levelIntroPendingScene = (LevelIntro)sceneManager.m_pendingScene;
-            levelIntroPendingScene.m_loadingLevelIntroFromRetry = true;
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {
@@ -248,11 +247,11 @@ public class GUIButton : MonoBehaviour
             //GUIManager guiManager = GetGUIManager();
             //guiManager.DismissPauseWindow();
         }
-        else if (m_ID == GUIButtonID.ID_UNSTACK_SYMMETRY)
-        {
-            GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-            gameScene.m_gameStack.Pop();
-        }
+        //else if (m_ID == GUIButtonID.ID_UNSTACK_SYMMETRY)
+        //{
+        //    GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
+        //    gameScene.m_gameStack.Pop();
+        //}
         else if (m_ID == GUIButtonID.ID_DEBUG_SKIP_LEVEL)
         {
             Debug.Log("ID_DEBUG_SKIP_LEVEL");

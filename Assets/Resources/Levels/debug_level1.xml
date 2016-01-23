@@ -1,74 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<level name="Debug level" number="0">
+<level name="Debug level 1" number="0">
 	<counter maxActions="10"/>
 	<stack size="4"/>
-	<grid exactNumColumns="20" exactNumLines="14"/>
+	<grid exactNumColumns="13" exactNumLines="11"/>
 	<dottedOutlines>
-		<!-- <dottedOutline>
-			<contour>
-				<point column="5" line="9"/>
-				<point column="5" line="8"/>
-				<point column="6" line="8"/>
-				<point column="6" line="9"/>
-			</contour>
-		</dottedOutline>
 		<dottedOutline>
 			<contour>
-				<point column="6" line="8"/>
-				<point column="6" line="6"/>
-				<point column="8" line="6"/>
-				<point column="8" line="8"/>
-			</contour>
-		</dottedOutline>
-		<dottedOutline>
-			<contour>
-				<point column="5" line="6"/>
-				<point column="5" line="5"/>
+				<point column="5" line="3"/>
+				<point column="9" line="3"/>				
+				<point column="9" line="5"/>				
+				<point column="8" line="5"/>
+				<point column="8" line="7"/>
+				<point column="6" line="7"/>
 				<point column="6" line="5"/>
-				<point column="6" line="6"/>
+				<point column="5" line="5"/>
 			</contour>
 		</dottedOutline>
-		<dottedOutline>
-			<contour>
-				<point column="10" line="8"/>
-				<point column="10" line="6"/>
-				<point column="12" line="6"/>
-				<point column="12" line="8"/>
-			</contour>
-		</dottedOutline>
-		<dottedOutline>
-			<contour>
-				<point column="12" line="8"/>
-				<point column="14" line="8"/>
-				<point column="14" line="10"/>
-				<point column="12" line="10"/>
-			</contour>
-		</dottedOutline>
-		<dottedOutline>
-			<contour>
-				<point column="12" line="4"/>
-				<point column="14" line="4"/>
-				<point column="14" line="6"/>
-				<point column="12" line="6"/>
-			</contour>
-		</dottedOutline> -->
 	</dottedOutlines>
 	<shapes>
 		 <shape tint="0">
 			<contour>
-				<point column="4" line="11"/>
-				<point column="4" line="2"/>
-				<point column="14" line="2"/>
-				<point column="14" line="11"/>
+				<point column="1" line="3"/>
+				<point column="5" line="3"/>
+				<point column="5" line="7"/>
+				<point column="4" line="7"/>
 			</contour>
 		</shape>
 		<shape tint="50">
 			<contour>
-				<point column="7" line="8"/>
-				<point column="9" line="11"/>
-				<point column="12" line="8"/>
-				<point column="12" line="4"/>
-				<point column="7" line="4"/>
+				<point column="5" line="3"/>
+				<point column="9" line="3"/>
+				<point column="6" line="7"/>
+				<point column="5" line="7"/>
 			</contour>
 		</shape>
 	</shapes>

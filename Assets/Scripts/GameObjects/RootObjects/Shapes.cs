@@ -304,7 +304,7 @@ public class Shapes : MonoBehaviour
     /**
     * Sweep dynamic shapes and reveal their cells if they have just crossed the sweeping line and are now on the correct 'side'
     * **/
-    public void SweepDynamicShapesWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
+    public void SweepDynamicShapesWithLine(Axis.SweepingLine line, bool bLeftSide)
     {
         for (int i = 0; i != m_shapes.Count; i++)
         {
