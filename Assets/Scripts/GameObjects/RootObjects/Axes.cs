@@ -36,6 +36,7 @@ public class Axes : MonoBehaviour
 
         //Build and render the axis once
         Axis axisRenderer = newAxis.GetComponent<Axis>();
+        axisRenderer.m_twoSidedSymmetry = (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES);
         axisRenderer.BuildElements(pointA, pointB);
         axisRenderer.m_type = axisType;
 

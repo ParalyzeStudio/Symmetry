@@ -110,6 +110,35 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
+        GridTriangle testTriangle = new GridTriangle();
+        testTriangle.m_points[0] = new GridPoint(7000, 8000);
+        testTriangle.m_points[1] = new GridPoint(7000, 6000);
+        testTriangle.m_points[2] = new GridPoint(8000, 7000);
+
+        DottedOutline testOutline = new DottedOutline();
+        Contour outlineContour = new Contour(6);
+        outlineContour.Add(new GridPoint(6000, 8000));
+        outlineContour.Add(new GridPoint(5000, 7000));
+        outlineContour.Add(new GridPoint(5000, 4000));
+        outlineContour.Add(new GridPoint(9000, 4000));
+        outlineContour.Add(new GridPoint(9000, 7000));
+        outlineContour.Add(new GridPoint(8000, 8000));
+
+        Contour outlineHole = new Contour(5);
+        outlineHole.Add(new GridPoint(6000, 7000));
+        outlineHole.Add(new GridPoint(6000, 6000));
+        outlineHole.Add(new GridPoint(8000, 6000));
+        outlineHole.Add(new GridPoint(8000, 7000));
+        outlineHole.Add(new GridPoint(7000, 6000));
+
+        testOutline.m_contour = outlineContour;
+        testOutline.m_holes.Add(outlineHole);
+
+        testOutline.Triangulate();
+
+        bool bResult = testTriangle.IsInsideOutline(testOutline);
+        Debug.Log(bResult);
+
         //Shape subjShape = new Shape();
         //Contour subjShapeContour = new Contour(4);
         //subjShapeContour.Add(new GridPoint(0, 0, true));
@@ -1010,6 +1039,9 @@ public class GameScene : GUIScene
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
 
+            //clean the shape (remove aligned vertices that can lead to errors before actually triangulate the shape)
+            shape.PrepareShapeForTriangulation();
+
             //First triangulate the shape and set it to STATIC
             shape.Triangulate();
             shape.m_state = Shape.ShapeState.STATIC;
@@ -1292,7 +1324,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP1 CHECK");
+        Debug.Log("STEP1 CHECK");
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
@@ -1339,7 +1371,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP2 CHECK");
+        Debug.Log("STEP2 CHECK");
 
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -1359,9 +1391,9 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
-        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-        //    Debug.Log("STEP3 CHECK");
+        Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
+        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+            Debug.Log("STEP3 CHECK");
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }

@@ -797,6 +797,20 @@ public class GridTriangle
             return (det1 <= 0 && det2 <= 0 && det3 <= 0) || (det1 >= 0 && det2 >= 0 && det3 >= 0);
     }
 
+    /**
+     * To test if a triangle contains a entire contour, we need to test if every point of this contour is inside the triangle
+     * **/
+    public bool ContainsContour(Contour contour)
+    {
+        for (int i = 0; i != contour.Count; i++)
+        {
+            if (!this.ContainsPoint(contour[i]))
+                return false;
+        }
+
+        return true;
+    }
+
     public bool IntersectsTriangle(GridTriangle triangle, bool bNonNullIntersection = false)
     {
         for (int i = 0; i != 3; i++)
@@ -1121,7 +1135,7 @@ public class GridTriangle
         for (int i = 0; i != outlineHoles.Count; i++)
         {
             Contour hole = outlineHoles[i];
-            if (this.ContainsPoint(hole.GetBarycentre())) //triangle contains one full hole, it is not completely inside the outline
+            if (this.ContainsContour(hole)) //triangle contains one full hole, it is not completely inside the outline
                 return false;
         }
 

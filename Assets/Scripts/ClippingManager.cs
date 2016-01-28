@@ -208,9 +208,12 @@ public class ClippingManager : MonoBehaviour
         //Before any clipping with static shapes, we need to find the intersection with the tiled background shape
         Shape tiledBackgroundShape = m_shapesHolder.GetTiledBackgroundShape();
         List<Shape> resultShapes = ShapesOperation(subjShape, tiledBackgroundShape, ClipType.ctIntersection);
+        //set their state to MOVING_SUBSTITUTION_DIFFERENCE so if there is no static shape in the scene the clippedDiffShapes list can be directly used
+        for (int i = 0; i != resultShapes.Count; i++)
+        {
+            resultShapes[i].m_state = Shape.ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
+        }
         clippedDiffShapes.AddRange(resultShapes);
-
-        //clippedDiffShapes.Add(subjShape);
 
         for (int i = 0; i != allShapes.Count; i++)
         {

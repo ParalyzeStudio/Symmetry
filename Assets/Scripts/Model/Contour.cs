@@ -50,18 +50,18 @@ public class Contour : List<GridPoint>
     /**
      * Calculate the position of the barycentre of this contour
      * **/
-    public GridPoint GetBarycentre()
-    {
-        GridPoint barycentre = GridPoint.zero;
-        for (int i = 0; i != this.Count; i++)
-        {
-            barycentre += this[i];
-        }
+    //public GridPoint GetBarycentre()
+    //{
+    //    GridPoint barycentre = GridPoint.zero;
+    //    for (int i = 0; i != this.Count; i++)
+    //    {
+    //        barycentre += this[i];
+    //    }
 
-        barycentre /= this.Count;
+    //    barycentre /= this.Count;
 
-        return barycentre;
-    }
+    //    return barycentre;
+    //}
 
     /**
      * Ensure that the contour has no vertices that repeat.

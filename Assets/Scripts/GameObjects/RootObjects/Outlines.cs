@@ -26,6 +26,9 @@ public class Outlines : MonoBehaviour
             //clonedOutline.ApproximateVertices(1);
             m_outlinesList.Add(clonedOutline);            
             
+            //clean up the outline before triangulating it
+            clonedOutline.PrepareShapeForTriangulation();
+
             //First triangulate the outline
             clonedOutline.Triangulate();
 

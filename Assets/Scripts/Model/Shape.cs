@@ -90,7 +90,7 @@ public class Shape : GridTriangulable
     //}
 
     /**
-     * Fusion this shape with every static shape that overlaps it. 
+     * Try to fusion this shape with the first static shape
      * A new static shape is created if a fusion occured and old fusioned shapes are destroyed
      * Else null is returned
      * **/
@@ -98,7 +98,6 @@ public class Shape : GridTriangulable
     {
         List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
         Shape subjShape = this;
-        Shape clipShape = null;
 
         //Find the first static shape that overlaps this shape
         for (int iShapeIndex = 0; iShapeIndex != shapes.Count; iShapeIndex++)
@@ -114,27 +113,58 @@ public class Shape : GridTriangulable
             if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
                 continue;
 
-            if (clipShape == null && this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
-                clipShape = shapeData;
+            if (this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
+            {
+                //we have to perform the clipping operation here to test if the intersection is made of isolated points.
+                //In fact a fusion is declared successful when the result of the clipping operation is one single shape
 
-            if (clipShape != null && subjShape != null) //we have both subj and clip shape we can break the loop
-                break;
+                //Debug.Log("trying to fusion subjShape >>>");
+                //for (int p = 0; p != subjShape.m_contour.Count; p++)
+                //{
+                //    Debug.Log(subjShape.m_contour[p]);
+                //}
+                //Debug.Log("with clipShape >>>");
+                //for (int p = 0; p != shapeData.m_contour.Count; p++)
+                //{
+                //    Debug.Log(shapeData.m_contour[p]);
+                //}
+                List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, shapeData, ClipperLib.ClipType.ctUnion);
+                //Debug.Log("resultingShapesCount:" + resultingShapes.Count);
+                if (resultingShapes.Count == 1) //success
+                {
+                    Shape fusionedShape = resultingShapes[0];
+                    this.m_contour = fusionedShape.m_contour;
+                    this.m_holes = fusionedShape.m_holes;
+
+                    shapeData.m_state = ShapeState.DESTROYED;
+
+                    return true;
+                }
+            }
         }
 
-        if (clipShape == null) //no shape overlaps 'this' shape
-            return false;
+        //Debug.Log("trying to fusion subjShape >>>");
+        //for (int p = 0; p != subjShape.m_contour.Count; p++)
+        //{
+        //    Debug.Log(subjShape.m_contour[p]);
+        //}
+        //Debug.Log("with clipShape >>>");
+        //for (int p = 0; p != clipShape.m_contour.Count; p++)
+        //{
+        //    Debug.Log(clipShape.m_contour[p]);
+        //}
+        //List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
+        //Debug.Log("resultingShapesCount:" + resultingShapes.Count);
+        //if (resultingShapes.Count == 1)
+        //{
+        //    Shape fusionedShape = resultingShapes[0];
+        //    this.m_contour = fusionedShape.m_contour;
+        //    this.m_holes = fusionedShape.m_holes;
 
-        List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
-        if (resultingShapes.Count == 1)
-        {             
-            Shape fusionedShape = resultingShapes[0];
-            this.m_contour = fusionedShape.m_contour;
-            this.m_holes = fusionedShape.m_holes;
+        //    clipShape.m_state = ShapeState.DESTROYED;
 
-            clipShape.m_state = ShapeState.DESTROYED;
-
-            return true;
-        }
+        //    return true;
+        //}
 
         return false;
     }
@@ -147,11 +177,11 @@ public class Shape : GridTriangulable
         for (int iTriangleIndex = 0; iTriangleIndex != m_triangles.Count; iTriangleIndex++)
         {
             GridTriangle triangle = m_triangles[iTriangleIndex];
-            if (triangle.IsInsideOutline(outline))
-                return true;
+            if (!triangle.IsInsideOutline(outline))
+                return false;
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -440,7 +470,7 @@ public class Shape : GridTriangulable
      * Perform fusion between this shape and all static shapes that overlap it
      * **/
     private void PerformFusionWithStaticShapes()
-    {
+    {      
         //Fusion the shape
         bool bFusionOccured = PerformFusion();
         if (bFusionOccured)
@@ -817,7 +847,20 @@ public class Shape : GridTriangulable
                 for (int j = 0; j != splitShapes.Count; j++)
                 {
                     Shape splitShape = splitShapes[j];
-                    if (splitShape.ContainsPoint(unsharedHole.GetBarycentre()))
+
+                    //check if this shape contains every point of this hole
+                    bool bShapeContainsHole = true;
+                    for (int p = 0; p != unsharedHole.Count; p++)
+                    {
+                        if (!splitShape.ContainsPoint(unsharedHole[p]))
+                        {
+                            bShapeContainsHole = false;
+                            break;
+                        }
+                    }
+
+                    //if so, add the hole to the shape
+                    if (bShapeContainsHole)
                     {
                         splitShape.m_holes.Add(unsharedHole);
                         unsharedHoles.Remove(unsharedHole);

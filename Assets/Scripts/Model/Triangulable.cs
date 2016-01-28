@@ -65,6 +65,19 @@ public class GridTriangulable
     }
 
     /**
+     * Clean up the shape that can have some duplicate/aligned vertices due to bad XML file writing
+     * **/
+    public void PrepareShapeForTriangulation()
+    {
+        m_contour.RemoveAlignedVertices();
+
+        for (int i = 0; i != m_holes.Count; i++)
+        {
+            m_holes[i].RemoveAlignedVertices();
+        }
+    }
+
+    /**
      * Triangulate this object
      * **/
     public virtual void Triangulate()

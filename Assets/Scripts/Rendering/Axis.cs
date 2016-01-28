@@ -216,7 +216,7 @@ public class Axis : MonoBehaviour
         m_rightIndicatingArrowAnimator.SetParentTransform(this.transform);
         m_rightIndicatingArrowAnimator.SetScale(indicatingArrowSize);
         m_rightIndicatingArrowAnimator.SetColor(axisTintColor);
-        //m_rightIndicatingArrowAnimator.SetOpacity(0);
+        m_rightIndicatingArrowAnimator.SetOpacity(0);
 
         if (m_twoSidedSymmetry)
         {
@@ -228,7 +228,7 @@ public class Axis : MonoBehaviour
             m_leftIndicatingArrowAnimator.SetParentTransform(this.transform);
             m_leftIndicatingArrowAnimator.SetScale(indicatingArrowSize);
             m_leftIndicatingArrowAnimator.SetColor(axisTintColor);
-            //m_leftIndicatingArrowAnimator.SetOpacity(0);
+            m_leftIndicatingArrowAnimator.SetOpacity(0);
         }
     }
 
@@ -285,7 +285,9 @@ public class Axis : MonoBehaviour
             {
                 Vector3 leftArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
                 leftArrowPosition -= distanceFromAxis * cwAxisNormal;
-                
+
+                m_leftIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
+                m_leftIndicatingArrowAnimator.SetRotationAngle(axisAngle + 90);
                 m_leftIndicatingArrowAnimator.SetPosition(leftArrowPosition);
                 m_leftIndicatingArrowAnimator.SetOpacity(1);
             }

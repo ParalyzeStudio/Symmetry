@@ -45,8 +45,6 @@ public class ShapeTouchHandler : TouchHandler
         if (!base.OnPointerMove(pointerLocation, delta))
             return false;
 
-        Debug.Log("OnPointerMove");
-
         //convert the delta vector to grid coordinates and set it to the shape
         ShapeMesh shapeMesh = this.GetComponent<ShapeMesh>();
         Shape shape = shapeMesh.m_shapeData;
@@ -63,7 +61,6 @@ public class ShapeTouchHandler : TouchHandler
                 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         shape.InvalidateSubstitutionShapes();
-        shapeMesh.Render();
 
         return true;
     }
@@ -96,15 +93,7 @@ public class ShapeTouchHandler : TouchHandler
             shape.Translate(minTranslation); //translate all vertices by the value we found previously
             
             shape.InvalidateSubstitutionShapes();
-            shape.FinalizeClippingOperationsOnSubstitutionShapes(); 
-
-            shape.m_offset = Vector2.zero; //reset offset to zero
-            shape.m_gridOffset = GridPoint.zero; //reset offset to zero
-            shapeMesh.Render(); //render again the shape
-
-            //invalidate one more time overlapping shapes and then finalize the clipping operations
-            //gameScene.m_shapes.InvalidateOverlappingAndSubstitutionShapes();
-            //gameScene.m_shapes.FinalizeClippingOperations();
+            shape.FinalizeClippingOperationsOnSubstitutionShapes();
 
             m_selected = false;
         }
