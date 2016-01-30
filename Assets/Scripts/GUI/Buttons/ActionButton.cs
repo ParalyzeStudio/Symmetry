@@ -29,13 +29,13 @@ public class ActionButton : GUIButton
      * Build an action buttons with a title and one or more sub elements
      * The position is given by the position of the title
      * **/
-    public void Init(GroupID groupID, GUIButton.GUIButtonID[] childIDs)
+    public void Init(GroupID groupID, GUIButton.GUIButtonID[] childIDs, float width)
     {
         m_groupID = groupID;
         m_childIDs = childIDs;
 
         Vector2 screenSize = ScreenUtils.GetScreenSize();
-        m_childButtonSize = new Vector2(242.0f, 80.0f);
+        m_childButtonSize = new Vector2(width, 90.0f);
 
         //Build group title
         GameObject titleObject = (GameObject)Instantiate(m_textMeshPfb);

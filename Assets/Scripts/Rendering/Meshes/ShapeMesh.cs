@@ -9,7 +9,7 @@ using ClipperLib;
 public class ShapeMesh : TexturedMesh
 {
     public const float CELL_APPARITION_INTERVAL = 0.05f;
-    public const int SHAPE_TEXTURES_TILING = 20; //textures is 6x6 squares
+    public const int SHAPE_TEXTURES_TILING = 20; //textures is 20x20 squares
 
     public Shape m_shapeData { get; set; } //the shape data we want to render
 
@@ -61,17 +61,6 @@ public class ShapeMesh : TexturedMesh
             for (int i = 0; i != m_shapeData.m_triangles.Count; i++)
             {
                 GridTriangle shapeTriangle = m_shapeData.m_triangles[i];
-
-                //Add shape offset to every triangle vertex before rendering
-                //GridPoint trianglePt1 = shapeTriangle.m_points[0];
-                //GridPoint trianglePt2 = shapeTriangle.m_points[1];
-                //GridPoint trianglePt3 = shapeTriangle.m_points[2];
-                //GridPoint gridPt1 = trianglePt1 + m_shapeData.m_gridOffset;
-                //GridPoint gridPt2 = trianglePt2 + m_shapeData.m_gridOffset;
-                //GridPoint gridPt3 = trianglePt3 + m_shapeData.m_gridOffset;
-                //Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt1);
-                //Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt2);
-                //Vector2 pt3 = grid.GetPointWorldCoordinatesFromGridCoordinates(gridPt3);
 
                 Vector2 pt1 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[0]);
                 Vector2 pt2 = grid.GetPointWorldCoordinatesFromGridCoordinates(shapeTriangle.m_points[1]);

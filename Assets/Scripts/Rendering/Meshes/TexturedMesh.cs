@@ -6,12 +6,17 @@ public class TexturedMesh : ColorMesh
     protected List<Vector2> m_UVs;
     public bool m_meshUVsDirty { get; set; }
 
+    public float m_textureTiling { get; set; }
+    public Vector2 m_textureSize { get; set; }
+
     public override void Init(Material material = null)
     {
         base.Init(material);
         m_mesh.name = "TexturedMesh";
         m_UVs = new List<Vector2>();
         m_meshUVsDirty = false;
+        m_textureTiling = 1;
+        GetComponent<MeshRenderer>().sharedMaterial.mainTexture.wrapMode = TextureWrapMode.Repeat;
     }
 
     protected override void ClearMesh()
@@ -37,7 +42,15 @@ public class TexturedMesh : ColorMesh
      * **/
     protected virtual Vector2 GetUVsForVertex(Vector3 vertex)
     {
-        return vertex;
+        if (m_textureSize == Vector2.zero)
+            throw new System.Exception("Define a texture size for your mesh");
+
+        float u = vertex.x / m_textureSize.x;
+        float v = vertex.y / m_textureSize.y;
+        Vector2 uv = new Vector2(u, v);
+        uv /= m_textureTiling;
+
+        return uv;
     }
 
     /**
@@ -53,7 +66,7 @@ public class TexturedMesh : ColorMesh
         m_meshColorsDirty = true;
     }
 
-    protected override void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
+    public override void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
     {
         base.AddTriangle(point1, point2, point3);
 
@@ -64,7 +77,7 @@ public class TexturedMesh : ColorMesh
         m_meshUVsDirty = true;
     }
 
-    protected override void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+    public override void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
     {
         base.AddQuad(point1, point2, point3, point4);
 

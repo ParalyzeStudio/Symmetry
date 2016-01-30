@@ -32,7 +32,7 @@ public class ColorMesh : BaseMesh
         m_meshColorsDirty = true;
     }
 
-    protected override void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
+    public override void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
     {
         base.AddTriangle(point1, point2, point3);
 
@@ -43,7 +43,7 @@ public class ColorMesh : BaseMesh
         m_meshColorsDirty = true;
     }
 
-    protected override void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+    public override void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
     {
         base.AddQuad(point1, point2, point3, point4);
 

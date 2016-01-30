@@ -112,13 +112,13 @@ public class GUIManager : MonoBehaviour
     /**
      * Same as previous method but for an action button
      * **/
-    public GameObject CreateActionButton(ActionButton.GroupID groupID, GUIButton.GUIButtonID[] childIDs)
+    public GameObject CreateActionButton(ActionButton.GroupID groupID, GUIButton.GUIButtonID[] childIDs, float width)
     {
         GameObject buttonObject = (GameObject)Instantiate(m_actionButtonPfb);
 
         //Set the relevant skin material for the specified button ID
         ActionButton button = buttonObject.GetComponent<ActionButton>();
-        button.Init(groupID, childIDs);
+        button.Init(groupID, childIDs, width);
 
         return buttonObject;
     }

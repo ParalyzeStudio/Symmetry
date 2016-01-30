@@ -3,18 +3,34 @@ using System.Collections.Generic;
 
 public class GameScene : GUIScene
 {
-    public const float ACTION_BUTTONS_Z_VALUE = -15.0f;
-    public const float INTERFACE_BUTTONS_Z_VALUE = -15.0f;
-    public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -15.0f;
-    public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -15.0f;
+    public const float ACTION_BUTTONS_Z_VALUE = -22.0f;
+    public const float INTERFACE_BUTTONS_Z_VALUE = -22.0f;
+    public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -22.0f;
+    public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -22.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
     public const float CHALKBOARD_Z_VALUE = -10.0f;
-    public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 5.0f;
-    public const float GRID_Z_VALUE = -20.0f;
-    public const float CONTOURS_Z_VALUE = -25.0f;
-    public const float SHAPES_Z_VALUE = -21.0f;
-    public const float AXES_Z_VALUE = -26.0f;
-    public const float SYMMETRY_STACK_Z_VALUE = -20.0f;
+    public const float CHALKBOARD_TOP_SEPARATION_Z_VALUE = -22.0f;
+    public const float HATCHINGS_Z_VALUE = -20.0f;
+    public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 1.0f;
+    public const float GRID_Z_VALUE = -21.0f;
+    public const float OUTLINES_Z_VALUE = -22.0f;
+    public const float SHAPES_Z_VALUE = -20.0f;
+    public const float AXES_Z_VALUE = -22.0f;
+    //public const float SYMMETRY_STACK_Z_VALUE = -20.0f;
+
+    //dimensions of scenes partitions
+    private const float LEFT_CONTENT_DEFAULT_WIDTH = 242.0f;
+    private const float RIGHT_CONTENT_DEFAULT_WIDTH = 168.0f;
+    private const float TOP_CONTENT_DEFAULT_HEIGHT = 180.0f;
+    private const float BOTTOM_CONTENT_DEFAULT_HEIGHT = 80.0f;
+
+    private float m_leftContentWidth;
+    private float m_rightContentWidth;
+    private float m_bottomContentHeight;
+    private float m_topContentHeight;
+
+    //above a certain distance, we have to draw hatchings between the grid and the side contents, else we just move the side contents borders
+    private const float DRAW_HATCHINGS_THRESHOLD = 64.0f; 
 
     //shared prefabs
     public GameObject m_radialGradientPfb;
@@ -22,6 +38,8 @@ public class GameScene : GUIScene
     public GameObject m_colorQuadPfb;
     public GameObject m_blurrySegmentPfb;
     public GameObject m_textMeshPfb;
+    public GameObject m_texturedMeshPfb;
+    public Material m_hatchingsMaterial;
     public Material m_transpColorMaterial;
 
     public Grid m_grid { get; set; }
@@ -109,35 +127,6 @@ public class GameScene : GUIScene
         //CallFuncHandler callFuncHandler = GetCallFuncHandler();
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
-
-        GridTriangle testTriangle = new GridTriangle();
-        testTriangle.m_points[0] = new GridPoint(7000, 8000);
-        testTriangle.m_points[1] = new GridPoint(7000, 6000);
-        testTriangle.m_points[2] = new GridPoint(8000, 7000);
-
-        DottedOutline testOutline = new DottedOutline();
-        Contour outlineContour = new Contour(6);
-        outlineContour.Add(new GridPoint(6000, 8000));
-        outlineContour.Add(new GridPoint(5000, 7000));
-        outlineContour.Add(new GridPoint(5000, 4000));
-        outlineContour.Add(new GridPoint(9000, 4000));
-        outlineContour.Add(new GridPoint(9000, 7000));
-        outlineContour.Add(new GridPoint(8000, 8000));
-
-        Contour outlineHole = new Contour(5);
-        outlineHole.Add(new GridPoint(6000, 7000));
-        outlineHole.Add(new GridPoint(6000, 6000));
-        outlineHole.Add(new GridPoint(8000, 6000));
-        outlineHole.Add(new GridPoint(8000, 7000));
-        outlineHole.Add(new GridPoint(7000, 6000));
-
-        testOutline.m_contour = outlineContour;
-        testOutline.m_holes.Add(outlineHole);
-
-        testOutline.Triangulate();
-
-        bool bResult = testTriangle.IsInsideOutline(testOutline);
-        Debug.Log(bResult);
 
         //Shape subjShape = new Shape();
         //Contour subjShapeContour = new Contour(4);
@@ -287,6 +276,8 @@ public class GameScene : GUIScene
 
     public void ShowElements()
     {
+        m_topContentHeight = TOP_CONTENT_DEFAULT_HEIGHT;
+
         //Show the chalkboard background
         ShowChalkboard();
 
@@ -323,6 +314,9 @@ public class GameScene : GUIScene
         //Show stack
         //ShowSymmetryStack();
 
+        //Draw hatchings to show empty areas like holes or borders
+        DrawHatchings();
+
         //add small debug button to skip the level
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         GameObject skipLevelButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_DEBUG_SKIP_LEVEL, new Vector2(128, 128));
@@ -355,7 +349,7 @@ public class GameScene : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         Vector2 chalkboardTextureSize = new Vector2(1920, 1110);
         float chalkboardTextureRatio = chalkboardTextureSize.y / chalkboardTextureSize.x;
-        float chalkboardScreenHeight = 0.859f * screenSize.y;
+        float chalkboardScreenHeight = screenSize.y - m_topContentHeight;
         float chalkboardScreenWidth = screenSize.x;
         float chalkboardScreenRatio = chalkboardScreenHeight / chalkboardScreenWidth;
 
@@ -386,7 +380,7 @@ public class GameScene : GUIScene
         TexturedQuadAnimator topContourAnimator = topContourObject.GetComponent<TexturedQuadAnimator>();
         topContourAnimator.SetParentTransform(this.transform);
         topContourAnimator.SetScale(new Vector3(screenSize.x, 64, 1));
-        topContourAnimator.SetPosition(new Vector3(0, chalkboardPosition.y + 0.5f * chalkboardHeight, CHALKBOARD_Z_VALUE - 1));
+        topContourAnimator.SetPosition(new Vector3(0, chalkboardPosition.y + 0.5f * chalkboardHeight, CHALKBOARD_TOP_SEPARATION_Z_VALUE));
         topContourAnimator.SetColorChannels(new Vector3(100, 0.75f, 1.1f), ValueAnimator.ColorMode.TSB);
     }
 
@@ -404,22 +398,42 @@ public class GameScene : GUIScene
         GameObjectAnimator gridAnimator = gridObject.GetComponent<GameObjectAnimator>();
         gridAnimator.SetParentTransform(this.transform);        
 
-        //max size of the grid (not he actual grid size)
-        float leftBorderWidth = 242.0f;
-        float rightBorderWidth = 168.0f;
-        float topBorderHeight = 180.0f;
-        float bottomBorderHeight = 80.0f;
-        Vector2 maxGridSize = new Vector2(screenSize.x - leftBorderWidth - rightBorderWidth, screenSize.y - topBorderHeight - bottomBorderHeight);
+        //max size of the grid (not the actual grid size)
+        Vector2 maxGridSize = new Vector2(screenSize.x - LEFT_CONTENT_DEFAULT_WIDTH - RIGHT_CONTENT_DEFAULT_WIDTH, screenSize.y - m_topContentHeight - BOTTOM_CONTENT_DEFAULT_HEIGHT);     
 
         //Visible grid
         m_grid = gridObject.GetComponent<Grid>();
         m_grid.Build(maxGridSize, m_plainWhiteMaterial);
 
-        //set correct position for grid
-        float gridPositionX = 0.5f * (screenSize.x - maxGridSize.x) - rightBorderWidth;
-        float gridPositionY = -0.5f * (screenSize.y - maxGridSize.y) + bottomBorderHeight;
-        Vector3 gridPosition = new Vector3(gridPositionX, gridPositionY, GRID_Z_VALUE);
-        gridAnimator.SetPosition(gridPosition);
+        //set final dimension of side and bottom contents and correct position for grid
+        float hatchingsSize = 0.5f * (maxGridSize.x - m_grid.m_gridSize.x);
+        float gridPositionX, gridPositionY;
+        if (hatchingsSize >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            m_leftContentWidth = LEFT_CONTENT_DEFAULT_WIDTH;
+            m_rightContentWidth = RIGHT_CONTENT_DEFAULT_WIDTH;
+            gridPositionX = 0.5f * (screenSize.x - maxGridSize.x) - m_rightContentWidth;
+        }
+        else
+        {
+            m_leftContentWidth = LEFT_CONTENT_DEFAULT_WIDTH + hatchingsSize;
+            m_rightContentWidth = RIGHT_CONTENT_DEFAULT_WIDTH + hatchingsSize;
+            gridPositionX = 0.5f * (screenSize.x - m_grid.m_gridSize.x) - m_rightContentWidth;
+        }
+
+        hatchingsSize = 0.5f * (maxGridSize.y - m_grid.m_gridSize.y);
+        if (hatchingsSize >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            m_bottomContentHeight = BOTTOM_CONTENT_DEFAULT_HEIGHT;
+            gridPositionY = -0.5f * (screenSize.y - maxGridSize.y) + m_bottomContentHeight;
+        }
+        else
+        {
+            m_bottomContentHeight = BOTTOM_CONTENT_DEFAULT_HEIGHT + 2 * hatchingsSize;
+            gridPositionY = -0.5f * (screenSize.y - m_grid.m_gridSize.y) + m_bottomContentHeight;
+        }
+        
+        gridAnimator.SetPosition(new Vector3(gridPositionX, gridPositionY, GRID_Z_VALUE));
 
         //Voxel grid
         m_voxelGrid = gridObject.GetComponent<ShapeVoxelGrid>();
@@ -443,48 +457,54 @@ public class GameScene : GUIScene
         backgroundShapeAnimator.SetPosition(new Vector3(0, 0, TILED_BACKGROUND_RELATIVE_Z_VALUE));
         backgroundShapeAnimator.SetColor(Color.white);
 
-        //Contour
+        //Borders
         float contourThickness = 3.0f;
+        
+        if (0.5f * (m_grid.m_maxGridSize.y - m_grid.m_gridSize.y) >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            GameObject topContourObject = Instantiate(m_colorQuadPfb);
+            topContourObject.name = "TopGridContour";
+            ColorQuad topContour = topContourObject.GetComponent<ColorQuad>();
+            topContour.Init(m_plainWhiteMaterial);
+            ColorQuadAnimator topContourAnimator = topContourObject.GetComponent<ColorQuadAnimator>();
+            topContourAnimator.SetParentTransform(gridObject.transform);
+            topContourAnimator.SetScale(new Vector3(m_grid.m_gridSize.x, contourThickness, 1));
+            topContourAnimator.SetPosition(new Vector3(0, 0.5f * m_grid.m_gridSize.y, 0));
+            topContourAnimator.SetColor(Color.white);
 
-        GameObject topContourObject = Instantiate(m_colorQuadPfb);
-        topContourObject.name = "TopGridContour";
-        ColorQuad topContour = topContourObject.GetComponent<ColorQuad>();
-        topContour.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator topContourAnimator = topContourObject.GetComponent<ColorQuadAnimator>();
-        topContourAnimator.SetParentTransform(gridObject.transform);
-        topContourAnimator.SetScale(new Vector3(m_grid.m_gridSize.x, contourThickness, 1));
-        topContourAnimator.SetPosition(new Vector3(0, 0.5f * m_grid.m_gridSize.y, 0));
-        topContourAnimator.SetColor(Color.white);
+            GameObject bottomContourObject = Instantiate(m_colorQuadPfb);
+            bottomContourObject.name = "BottomGridContour";
+            ColorQuad bottomContour = bottomContourObject.GetComponent<ColorQuad>();
+            bottomContour.Init(m_plainWhiteMaterial);
+            ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
+            bottomContourAnimator.SetParentTransform(gridObject.transform);
+            bottomContourAnimator.SetScale(new Vector3(m_grid.m_maxGridSize.x, contourThickness, 1));
+            bottomContourAnimator.SetPosition(new Vector3(0, -0.5f * m_grid.m_gridSize.y, 0));
+            bottomContourAnimator.SetColor(Color.white);
+        }
 
-        GameObject leftContourObject = Instantiate(m_colorQuadPfb);
-        leftContourObject.name = "LeftGridContour";
-        ColorQuad leftContour = leftContourObject.GetComponent<ColorQuad>();
-        leftContour.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator leftContourAnimator = leftContourObject.GetComponent<ColorQuadAnimator>();
-        leftContourAnimator.SetParentTransform(gridObject.transform);
-        leftContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-        leftContourAnimator.SetPosition(new Vector3(-0.5f * m_grid.m_gridSize.x, 0, 0));
-        leftContourAnimator.SetColor(Color.white);
+        if (0.5f * (m_grid.m_maxGridSize.x - m_grid.m_gridSize.x) >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            GameObject leftContourObject = Instantiate(m_colorQuadPfb);
+            leftContourObject.name = "LeftGridContour";
+            ColorQuad leftContour = leftContourObject.GetComponent<ColorQuad>();
+            leftContour.Init(m_plainWhiteMaterial);
+            ColorQuadAnimator leftContourAnimator = leftContourObject.GetComponent<ColorQuadAnimator>();
+            leftContourAnimator.SetParentTransform(gridObject.transform);
+            leftContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
+            leftContourAnimator.SetPosition(new Vector3(-0.5f * m_grid.m_gridSize.x, 0, 0));
+            leftContourAnimator.SetColor(Color.white);
 
-        GameObject rightContourObject = Instantiate(m_colorQuadPfb);
-        rightContourObject.name = "RightGridContour";
-        ColorQuad rightContour = rightContourObject.GetComponent<ColorQuad>();
-        rightContour.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator rightContourAnimator = rightContourObject.GetComponent<ColorQuadAnimator>();
-        rightContourAnimator.SetParentTransform(gridObject.transform);
-        rightContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-        rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, 0));
-        rightContourAnimator.SetColor(Color.white);
-
-        GameObject bottomContourObject = Instantiate(m_colorQuadPfb);
-        bottomContourObject.name = "BottomGridContour";
-        ColorQuad bottomContour = bottomContourObject.GetComponent<ColorQuad>();
-        bottomContour.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
-        bottomContourAnimator.SetParentTransform(gridObject.transform);
-        bottomContourAnimator.SetScale(new Vector3(m_grid.m_maxGridSize.x, contourThickness, 1));
-        bottomContourAnimator.SetPosition(new Vector3(0, -0.5f * m_grid.m_gridSize.y, 0));
-        bottomContourAnimator.SetColor(Color.white);
+            GameObject rightContourObject = Instantiate(m_colorQuadPfb);
+            rightContourObject.name = "RightGridContour";
+            ColorQuad rightContour = rightContourObject.GetComponent<ColorQuad>();
+            rightContour.Init(m_plainWhiteMaterial);
+            ColorQuadAnimator rightContourAnimator = rightContourObject.GetComponent<ColorQuadAnimator>();
+            rightContourAnimator.SetParentTransform(gridObject.transform);
+            rightContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
+            rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, 0));
+            rightContourAnimator.SetColor(Color.white);
+        }       
     }
 
     /**
@@ -503,7 +523,6 @@ public class GameScene : GUIScene
         interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, INTERFACE_BUTTONS_Z_VALUE));
 
         Vector2 interfaceButtonSize = new Vector2(128, 128);
-        float rightBorderWidth = 168.0f; //the width of the column on the right of the grid holding retry and hints buttons
 
         //pause
         GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
@@ -528,7 +547,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
         retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float retryButtonPositionX = 0.5f * (screenSize.x - rightBorderWidth);
+        float retryButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
         Vector3 gridPosition = m_grid.transform.position;
         float retryButtonPositionY = gridPosition.y + 0.5f * m_grid.m_gridSize.y - 80;
         retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
@@ -555,7 +574,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
         hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float hintsButtonPositionX = 0.5f * screenSize.x - 84;
+        float hintsButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
         float hintsButtonPositionY = retryButtonPositionY - 160;
         hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
         hintsButtonAnimator.SetColor(Color.white);
@@ -579,8 +598,8 @@ public class GameScene : GUIScene
         line.Init(m_plainWhiteMaterial);
         ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
         lineAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
-        lineAnimator.SetPosition(new Vector3(0.5f * screenSize.x - rightBorderWidth, gridPosition.y, 0));
+        lineAnimator.SetScale(new Vector3(6.0f, screenSize.y - m_topContentHeight - m_bottomContentHeight, 1));
+        lineAnimator.SetPosition(new Vector3(0.5f * screenSize.x - m_rightContentWidth, gridPosition.y, 0));
         lineAnimator.SetColor(Color.white);
     }
 
@@ -779,7 +798,7 @@ public class GameScene : GUIScene
             Shape shape = m_shapesHolder.m_shapes[i];
             if (shape.m_state != Shape.ShapeState.TILED_BACKGROUND)
             {
-                ShapeAnimator shapeAnimator = shape.m_parentMesh.gameObject.GetComponent<ShapeAnimator>();
+                TexturedMeshAnimator shapeAnimator = shape.m_parentMesh.gameObject.GetComponent<TexturedMeshAnimator>();
                 shapeAnimator.FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
             }
         }
@@ -795,7 +814,7 @@ public class GameScene : GUIScene
 
         GameObjectAnimator outlinesAnimator = outlinesObject.GetComponent<GameObjectAnimator>();
         outlinesAnimator.SetParentTransform(this.transform);
-        outlinesAnimator.SetPosition(new Vector3(0, 0, CONTOURS_Z_VALUE));
+        outlinesAnimator.SetPosition(new Vector3(0, 0, OUTLINES_Z_VALUE));
 
         m_outlines = outlinesObject.GetComponent<Outlines>();
         m_outlines.Build();
@@ -810,14 +829,13 @@ public class GameScene : GUIScene
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
         Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
-        float bottomBorderHeight = 80.0f;
 
         //Show icons
         m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
 
         GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
         axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.5f * bottomBorderHeight, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
+        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.5f * m_bottomContentHeight, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
 
         float iconMargin = 20.0f;
         Vector2 iconSize = new Vector2(64, 64);
@@ -850,7 +868,7 @@ public class GameScene : GUIScene
         ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
         lineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
         lineAnimator.SetScale(new Vector3(screenSize.x, 6.0f, 1));
-        lineAnimator.SetPosition(new Vector3(0, 0.5f * bottomBorderHeight, 0));
+        lineAnimator.SetPosition(new Vector3(0, 0.5f * m_bottomContentHeight, 0));
         lineAnimator.SetColor(Color.white);
     }
 
@@ -870,7 +888,7 @@ public class GameScene : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        Vector2 actionButtonsHolderSize = new Vector2(242.0f, m_grid.m_maxGridSize.y);
+        Vector2 actionButtonsHolderSize = new Vector2(m_leftContentWidth, m_grid.m_maxGridSize.y);
         m_actionButtonsHolder = new GameObject("ActionButtons");
         GameObjectAnimator actionButtonsHolderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
         actionButtonsHolderAnimator.SetParentTransform(this.transform);
@@ -889,7 +907,8 @@ public class GameScene : GUIScene
         Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 50.0f, 0);
 
         GameObject buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.MAIN_ACTIONS,
-                                                                     childIDs);
+                                                                     childIDs,
+                                                                     m_leftContentWidth);
         buttonObject.name = "TopActionBtn";
 
         ActionButton button = buttonObject.GetComponent<ActionButton>();
@@ -945,7 +964,7 @@ public class GameScene : GUIScene
         line.Init(m_plainWhiteMaterial);
         ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
         lineAnimator.SetParentTransform(m_actionButtonsHolder.transform);
-        lineAnimator.SetScale(new Vector3(6.0f, m_grid.m_maxGridSize.y, 1));
+        lineAnimator.SetScale(new Vector3(6.0f, screenSize.y - m_topContentHeight - m_bottomContentHeight, 1));
         lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
         lineAnimator.SetColor(Color.white);
     }
@@ -1067,6 +1086,128 @@ public class GameScene : GUIScene
         //}
         //m_shapesHolder.DestroyShapeObjectForShape(firstShape);
         //m_shapesHolder.m_shapes.Remove(firstShape);
+    }
+
+    /**
+     * Draw hatchings to fill empty areas like holes or borders
+     * **/
+    private void DrawHatchings()
+    {
+        //objet holding all hatchings
+        GameObject hatchingsHolder = new GameObject("Hatchings");
+        Vector2 gridPosition = m_grid.transform.position;
+
+        GameObjectAnimator holderAnimator = hatchingsHolder.AddComponent<GameObjectAnimator>();
+        holderAnimator.SetParentTransform(this.transform);
+        holderAnimator.SetPosition(new Vector3(0, 0, HATCHINGS_Z_VALUE));
+
+        //left and right hatchings
+        if (0.5f * (m_grid.m_maxGridSize.x - m_grid.m_gridSize.x) >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            //left
+            GameObject hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+            hatchingsMeshObject.name = "HatchingsMesh";
+
+            TexturedMeshAnimator hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+            hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+            hatchingsMeshAnimator.SetPosition(Vector3.zero);
+
+            TexturedMesh hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+            hatchingsMesh.Init(m_hatchingsMaterial);
+            hatchingsMesh.m_textureSize = new Vector2(64, 64);
+            Vector2 point1 = new Vector2(gridPosition.x - 0.5f * m_grid.m_maxGridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            Vector2 point2 = new Vector2(gridPosition.x - 0.5f * m_grid.m_maxGridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            Vector2 point3 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            Vector2 point4 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            hatchingsMesh.AddQuad(point1, point2, point3, point4);
+
+            //right
+            hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+            hatchingsMeshObject.name = "HatchingsMesh";
+
+            hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+            hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+            hatchingsMeshAnimator.SetPosition(Vector3.zero);
+
+            hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+            hatchingsMesh.Init(m_hatchingsMaterial);
+            hatchingsMesh.m_textureSize = new Vector2(64, 64);
+            point1 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            point2 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            point3 = new Vector2(gridPosition.x + 0.5f * m_grid.m_maxGridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            point4 = new Vector2(gridPosition.x + 0.5f * m_grid.m_maxGridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            hatchingsMesh.AddQuad(point1, point2, point3, point4);
+        }
+
+        //bottom and top hatchings
+        if (0.5f * (m_grid.m_maxGridSize.y - m_grid.m_gridSize.y) >= DRAW_HATCHINGS_THRESHOLD)
+        {
+            //top
+            GameObject hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+            hatchingsMeshObject.name = "HatchingsMesh";
+
+            TexturedMeshAnimator hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+            hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+            hatchingsMeshAnimator.SetPosition(Vector3.zero);
+
+            TexturedMesh hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+            hatchingsMesh.Init(m_hatchingsMaterial);
+            hatchingsMesh.m_textureSize = new Vector2(64, 64);
+            Vector2 point1 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_gridSize.y);
+            Vector2 point2 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            Vector2 point3 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_gridSize.y);
+            Vector2 point4 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y + 0.5f * m_grid.m_maxGridSize.y);
+            hatchingsMesh.AddQuad(point1, point2, point3, point4);
+
+            //bottom
+            hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+            hatchingsMeshObject.name = "HatchingsMesh";
+
+            hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+            hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+            hatchingsMeshAnimator.SetPosition(Vector3.zero);
+
+            hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+            hatchingsMesh.Init(m_hatchingsMaterial);
+            hatchingsMesh.m_textureSize = new Vector2(64, 64);
+            point1 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            point2 = new Vector2(gridPosition.x - 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_gridSize.y);
+            point3 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_maxGridSize.y);
+            point4 = new Vector2(gridPosition.x + 0.5f * m_grid.m_gridSize.x, gridPosition.y - 0.5f * m_grid.m_gridSize.y);
+            hatchingsMesh.AddQuad(point1, point2, point3, point4);
+        }
+
+        //outlines holes
+        for (int i = 0; i != m_outlines.m_outlinesList.Count; i++)
+        {
+            DottedOutline outline = m_outlines.m_outlinesList[i];
+            for (int j = 0; j != outline.m_holes.Count; j++)
+            {
+                GameObject hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+                hatchingsMeshObject.name = "HatchingsMesh";
+
+                TexturedMeshAnimator hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+                hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+                hatchingsMeshAnimator.SetPosition(Vector3.zero);
+
+                TexturedMesh hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+                hatchingsMesh.Init(m_hatchingsMaterial);
+                hatchingsMesh.m_textureSize = new Vector2(64, 64);
+
+                //Quickly make this hole as a GridTriangulable to perform triangulation on it
+                GridTriangulable holeTriangulable = new GridTriangulable(outline.m_holes[j]);
+                holeTriangulable.Triangulate();
+
+                for (int k = 0; k != holeTriangulable.m_triangles.Count; k++)
+                {
+                    GridTriangle holeTriangle = holeTriangulable.m_triangles[k];
+                    Vector2 pt1 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[0]);
+                    Vector2 pt2 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[1]);
+                    Vector2 pt3 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[2]);
+                    hatchingsMesh.AddTriangle(pt1, pt3, pt2);
+                }                    
+            }
+        }
     }
 
     private void BuildAxesHolder()
@@ -1324,7 +1465,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP1 CHECK");
+        //Debug.Log("STEP1 CHECK");
 
         //Then check if every shape is fully inside one of the dotted outlines       
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
@@ -1371,7 +1512,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        Debug.Log("STEP2 CHECK");
+        //Debug.Log("STEP2 CHECK");
 
         //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
         float shapesArea = 0;
@@ -1391,9 +1532,9 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
-        if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-            Debug.Log("STEP3 CHECK");
+        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
+        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+        //    Debug.Log("STEP3 CHECK");
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }

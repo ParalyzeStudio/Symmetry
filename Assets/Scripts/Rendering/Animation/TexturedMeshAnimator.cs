@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class ShapeAnimator : GameObjectAnimator
+public class TexturedMeshAnimator : GameObjectAnimator
 {
     public override void SetOpacity(float opacity, bool bPassOnChildren = true)
     {

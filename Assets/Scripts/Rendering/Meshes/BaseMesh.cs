@@ -60,7 +60,7 @@ public class BaseMesh : MonoBehaviour
      * / \
     * 1---3
     * **/
-    protected virtual void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
+    public virtual void AddTriangle(Vector3 point1, Vector3 point2, Vector3 point3)
     {
         //add vertices
         m_vertices.Add(point1);
@@ -85,7 +85,7 @@ public class BaseMesh : MonoBehaviour
      * |  |
      * 1--3
      * **/
-    protected virtual void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
+    public virtual void AddQuad(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 point4)
     {
         //add vertices
         m_vertices.Add(point1);

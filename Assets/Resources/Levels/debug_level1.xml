@@ -2,7 +2,7 @@
 <level name="Debug level 1" number="0">
 	<counter maxActions="10"/>
 	<stack size="4"/>
-	<grid exactNumColumns="11" exactNumLines="11"/>
+	<grid exactNumColumns="20" exactNumLines="15"/>
 	<dottedOutlines>
 		<!-- <dottedOutline>
 			<contour>

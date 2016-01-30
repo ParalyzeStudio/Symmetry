@@ -33,7 +33,7 @@ public class ShapeTouchHandler : TouchHandler
 
         pickedShape.InvalidateSubstitutionShapes();
 
-        ShapeAnimator shapeAnimator = this.GetComponent<ShapeAnimator>();
+        TexturedMeshAnimator shapeAnimator = this.GetComponent<TexturedMeshAnimator>();
         Vector3 shapeNewPosition = new Vector3(0, 0, GameScene.TILED_BACKGROUND_RELATIVE_Z_VALUE + 1); //place the shape behind the tiled background so it becomes invisible
         shapeAnimator.SetPosition(shapeNewPosition);
 

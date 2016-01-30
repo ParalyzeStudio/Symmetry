@@ -45,7 +45,7 @@ public class Shapes : MonoBehaviour
         shapeMesh.SetShapeData(shapeData);
         shapeMesh.Render(bCellRendering);
 
-        ShapeAnimator shapeAnimator = clonedShapeObject.GetComponent<ShapeAnimator>();
+        TexturedMeshAnimator shapeAnimator = clonedShapeObject.GetComponent<TexturedMeshAnimator>();
         shapeAnimator.SetParentTransform(this.transform);
         shapeAnimator.SetPosition(Vector3.zero);
         shapeAnimator.SetColor(shapeData.m_color);
