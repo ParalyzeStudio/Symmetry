@@ -17,9 +17,8 @@ public class ApertureTransitionAnimator : CircleMeshAnimator
                     AnimateInnerRadiusTo(m_outerRadius, 1.0f, 0.0f, InterpolationType.SINUSOIDAL, true);
                     GetSceneManager().SwitchDisplayedContent(m_toSceneContent, false);
 
-                    //the Show() method will be called in the next frame due to the way CallFuncHandler works.
-                    //Thus we can set the boolean in this frame and be sure it will be set before Show() is actually called
                     LevelIntro levelIntroPendingScene = (LevelIntro)GetSceneManager().m_pendingScene;
+                    levelIntroPendingScene.m_startingFromLevelsScene = true;
 
                     //remove side buttons
                     GetGUIManager().DismissSideButtons(false);

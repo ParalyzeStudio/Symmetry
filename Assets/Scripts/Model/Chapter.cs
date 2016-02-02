@@ -2,7 +2,7 @@
 
 public class Chapter
 {
-    public const int LEVELS_COUNT = 16;
+    public const int LEVELS_COUNT = 15;
 
     public Level[] m_levels { get; set; }
     public int m_number;
@@ -126,21 +126,27 @@ public class Chapter
         LevelManager levelManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<LevelManager>();
         if (m_number > 1)
         {
+            //chapter is locked if less than 75% (i.e less than 11 levels out of 15) of previous chapter levels are completed
             Chapter previousChapter = levelManager.GetChapterForNumber(this.m_number - 1);
-
-            //chapter is unlocked if at least 75% of previous chapter is done
-            int iDoneLevelsCount = 0;
-            for (int iLevelIdx = 0; iLevelIdx != previousChapter.m_levels.Length; iLevelIdx++)
-            {
-                if (previousChapter.m_levels[iLevelIdx] == null)//TODO remove this condition when all chapters are built with 15 levels in each
-                    break;
-                if (previousChapter.m_levels[iLevelIdx].IsDone())
-                    iDoneLevelsCount++;
-            }
-
-           return (iDoneLevelsCount / (float)Chapter.LEVELS_COUNT) >= 0.75f;
+            return previousChapter.GetCompletionPercentage() < 0.75f;
         }
 
         return false;
+    }
+
+    /**
+     * Return a float number between 0 and 1 corresponding to the ratio 'completed levels'/'levels' in this chapter
+     * **/
+    public float GetCompletionPercentage()
+    {
+        int completedLevelsCount = 0;
+        int levelsCount = m_levels.Length;
+        for (int i = 0; i != levelsCount; i++)
+        {
+            if (m_levels[i] != null && m_levels[i].IsDone())
+                completedLevelsCount++;
+        }
+
+        return completedLevelsCount / (float)levelsCount;
     }
 }

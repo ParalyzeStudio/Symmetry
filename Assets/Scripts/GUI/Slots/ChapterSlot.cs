@@ -5,6 +5,8 @@ public class ChapterSlot : BaseSlot
     public const float CHAPTER_SLOT_BACKGROUND_OPACITY = 0.5f;
     public const float FADING_HEXAGONS_GENERATION_TIME_INTERVAL = 1.0f;
 
+    public Chapter m_parentChapter { get; set; }
+
     //Shared prefabs
     public Material m_positionColorMaterial;
     public GameObject m_circleMeshPfb;
@@ -19,24 +21,21 @@ public class ChapterSlot : BaseSlot
     private bool m_slotDismissed;
 
     //hexagons growing and fading around chapter slot if chapter is unlocked
-    private GameObject m_blurryContourObject;
     private float m_fadingHexagonsGenerationTimeInterval;
     private float m_fadingHexagonsGenerationElapsedTime;
 
     //progress bar
-    //private GameObject m_progressBar;
-    //private Vector2 m_progressBarSize;
-    //public Material m_progressBarMaterial;
-    //public GameObject m_progressBarBackground;
-    //public GameObject m_progressBarFill;
+    public GameObject m_progressBarPfb;
+    private ChapterSlotProgressBar m_progressBar;
+    private GameObjectAnimator m_progressBarAnimator;
 
     public void Init(Chapters parentScene)
     {
         base.Init(parentScene);
-        int chapterNumber = parentScene.m_displayedChapterIndex + 1;
+        m_parentChapter = parentScene.GetLevelManager().GetChapterForNumber(parentScene.m_displayedChapterIndex + 1);
 
         //Init background mesh
-        Color slotBackgroundBlendColor = parentScene.GetLevelManager().GetChapterForNumber(chapterNumber).GetThemeColors()[2];
+        Color slotBackgroundBlendColor = m_parentChapter.GetThemeColors()[2];
 
         CircleMesh hexaMesh = m_background.GetComponent<CircleMesh>();
         hexaMesh.Init(Instantiate(m_positionColorMaterial));
@@ -58,24 +57,6 @@ public class ChapterSlot : BaseSlot
         contourAnimator.SetScale(m_blurryContourScale);
         contourAnimator.SetPosition(new Vector3(0, 0, -1)); //set the contour above hexagon
 
-        m_blurryContourObject = Instantiate(m_contour); //copy the contour at this current state (without adding the sharp contour) to create from this model all fading hexagons
-
-        //Then create a sharp contour with some thickness
-        GameObject contourHexaObject = Instantiate(m_circleMeshPfb);
-        contourHexaObject.name = "ContourHexagon";
-
-        CircleMesh contourMesh = contourHexaObject.GetComponent<CircleMesh>();
-        contourMesh.Init(Instantiate(m_positionColorMaterial));
-
-        float contourThickness = 8.0f;
-        CircleMeshAnimator contourMeshAnimator = contourHexaObject.GetComponent<CircleMeshAnimator>();
-        contourMeshAnimator.SetParentTransform(m_contour.transform);
-        contourMeshAnimator.SetNumSegments(6, false);
-        contourMeshAnimator.SetInnerRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength, false);
-        contourMeshAnimator.SetOuterRadius(4 * parentScene.GetBackgroundRenderer().m_triangleEdgeLength + contourThickness, true);
-        contourMeshAnimator.SetColor(Color.white);
-        contourMeshAnimator.SetPosition(Vector3.zero);
-
         //Set color on texts
         TextMeshAnimator titleAnimator = m_chapterTitleText.GetComponent<TextMeshAnimator>();
         titleAnimator.SetColor(Color.white);
@@ -83,6 +64,9 @@ public class ChapterSlot : BaseSlot
         TextMeshAnimator numberAnimator = m_chapterNumberText.GetComponent<TextMeshAnimator>();
         numberAnimator.SetColor(Color.white);
         numberAnimator.SetFontHeight(m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength);
+
+        //build the progress bar
+        BuildProgressBar();
 
         //init some variables
         m_fadingHexagonsGenerationElapsedTime = FADING_HEXAGONS_GENERATION_TIME_INTERVAL - 0.5f; //the first hexagon will start fading after some delay (0.5 sec)
@@ -92,71 +76,31 @@ public class ChapterSlot : BaseSlot
     /**
      * Build the progress bar elements
      * **/
-    //private void BuildProgressBar()
-    //{
-    //    BackgroundTrianglesRenderer bgRenderer = GetBackgroundRenderer();
+    private void BuildProgressBar()
+    {
+        GameObject progressBarObject = (GameObject)Instantiate(m_progressBarPfb);
+        progressBarObject.name = "ProgressBar";
 
-    //    m_progressBar = new GameObject("ProgressBar");
+        m_progressBarAnimator = progressBarObject.GetComponent<GameObjectAnimator>();
+        m_progressBarAnimator.SetParentTransform(this.transform);
+        m_progressBarAnimator.SetPosition(new Vector3(0, -1.5f * m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength, -1));
 
-    //    GameObjectAnimator progressBarAnimator = m_progressBar.AddComponent<GameObjectAnimator>();
-    //    progressBarAnimator.SetParentTransform(m_infoContainer.transform);
-    //    progressBarAnimator.SetPosition(new Vector3(0, -1.5f * bgRenderer.m_triangleEdgeLength, 0));
+        float progressBarWidth = 5.5f * m_parentScene.GetBackgroundRenderer().m_triangleHeight;
+        float progressBarHeight = 20.0f;
+        Vector2 progressBarSize = new Vector2(progressBarWidth, progressBarHeight);
+        float fontHeight = 0.33f * m_parentScene.GetBackgroundRenderer().m_triangleEdgeLength;
 
-    //    float progressBarWidth = 5.5f * bgRenderer.m_triangleHeight;
-    //    float progressBarHeight = 20.0f;
-    //    m_progressBarSize = new Vector2(progressBarWidth, progressBarHeight);
-
-    //    Material progressBarBgMaterial = Instantiate(m_progressBarMaterial);
-    //    Material progressBarFillMaterial = Instantiate(m_progressBarMaterial);
-
-    //    //Background
-    //    m_progressBarBackgroundObject = Instantiate(m_progressBarBgGameObject);
-
-    //    ColorQuad colorQuad = m_progressBarBackgroundObject.GetComponent<ColorQuad>();
-    //    colorQuad.Init(progressBarBgMaterial);
-
-    //    ColorQuadAnimator progressBarBgAnimator = m_progressBarBackgroundObject.GetComponent<ColorQuadAnimator>();
-    //    progressBarBgAnimator.SetParentTransform(m_progressBar.transform);
-    //    progressBarBgAnimator.SetPosition(Vector3.zero);
-    //    progressBarBgAnimator.SetScale(m_progressBarSize);
-
-    //    //Fill
-    //    m_progressBarFillObject = Instantiate(m_progressBarBgGameObject);
-
-    //    colorQuad = m_progressBarFillObject.GetComponent<ColorQuad>();
-    //    colorQuad.Init(progressBarFillMaterial);
-
-    //    ColorQuadAnimator progressBarFillAnimator = m_progressBarFillObject.GetComponent<ColorQuadAnimator>();
-    //    progressBarFillAnimator.SetParentTransform(m_progressBar.transform);
-    //    progressBarFillAnimator.UpdatePivotPoint(new Vector3(0, 0.5f, 0.5f));
-    //    progressBarFillAnimator.SetPosition(new Vector3(-0.5f * progressBarWidth, 0, -1));
-    //    progressBarFillAnimator.SetColor(Color.white);
-
-    //    //completion info
-    //    m_progressBarCompletionTextObject = Instantiate(m_textMeshPfb);
-
-    //    TextMesh completionTextMesh = m_progressBarCompletionTextObject.GetComponent<TextMesh>();
-    //    completionTextMesh.text = (0.5f * 100) + "% " + LanguageUtils.GetTranslationForTag("progress_bar_completion");
-
-    //    TextMeshAnimator completionTextAnimator = m_progressBarCompletionTextObject.GetComponent<TextMeshAnimator>();
-    //    float fontHeight = 0.33f * bgRenderer.m_triangleEdgeLength;
-    //    completionTextAnimator.SetParentTransform(m_progressBar.transform);
-    //    completionTextAnimator.SetFontHeight(fontHeight);
-    //    completionTextAnimator.UpdatePivotPoint(new Vector3(1.0f, 0.5f, 0.5f));
-    //    completionTextAnimator.SetPosition(new Vector3(0.5f * progressBarWidth, -0.5f * progressBarHeight - fontHeight - 8.0f, 0));
-    //    completionTextAnimator.SetColor(Color.white);
-    //}
+        m_progressBar = progressBarObject.GetComponent<ChapterSlotProgressBar>();
+        m_progressBar.Init(this, progressBarSize, fontHeight);
+    }
 
     /**
     * Change the color of slot background with animation
     * **/
     public void UpdateChapterSlotBackgroundColor()
     {
-        int chapterNumber = ((Chapters)m_parentScene).m_displayedChapterIndex + 1;
-        Chapter displayedChapter = m_parentScene.GetLevelManager().GetChapterForNumber(chapterNumber);
-
         CircleMeshAnimator chapterSlotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
-        Color toColor = displayedChapter.GetThemeColors()[2];
+        Color toColor = m_parentChapter.GetThemeColors()[2];
         toColor.a = CHAPTER_SLOT_BACKGROUND_OPACITY;
         chapterSlotBackgroundAnimator.ColorChangeTo(toColor, 1.0f);
     }
@@ -169,16 +113,24 @@ public class ChapterSlot : BaseSlot
         TextMesh chapterTitleTextMesh = m_chapterTitleText.GetComponent<TextMesh>();
         chapterTitleTextMesh.text = LanguageUtils.GetTranslationForTag("chapter");
 
-        int chapterNumber = ((Chapters)m_parentScene).m_displayedChapterIndex + 1;
         TextMesh chapterNumberTextMesh = m_chapterNumberText.GetComponent<TextMesh>();
-        chapterNumberTextMesh.text = LanguageUtils.GetLatinNumberForNumber(chapterNumber);
+        chapterNumberTextMesh.text = LanguageUtils.GetLatinNumberForNumber(m_parentChapter.m_number);        
+    }
 
-        //Display Lock or progress bar
-        //Chapter displayedChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
-        //if (displayedChapter.IsLocked())
-        //    ShowLock();
-        //else
-        //    UpdateProgressBarData();
+    /**
+    * Replace progress bar
+    * **/
+    public void UpdateProgressBarData()
+    {
+        m_progressBar.RefreshData();
+    }
+    
+    /**
+     * Show lock icon and with a description on how to unlock the chapter
+     * **/
+    public void ShowLock()
+    {
+
     }
 
     public override void Show()
@@ -190,16 +142,17 @@ public class ChapterSlot : BaseSlot
         slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 100.0f, 0), 0.5f);
     }
 
-    public override void Dismiss()
+    public override void Dismiss(float fDuration, bool bDestroyOnFinish = true)
     {
-        base.Dismiss();
+        base.Dismiss(fDuration, bDestroyOnFinish);
+        DismissProgressBar(fDuration, bDestroyOnFinish);
         m_slotDismissed = true;
 
         //detach the slot from its parent scene
         this.transform.parent = null;
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-        slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 800.0f, 0), 4.0f);
+        slotAnimator.TranslateTo(slotAnimator.GetPosition() + new Vector3(0, 800.0f, 0), 4.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
     /**
@@ -243,31 +196,48 @@ public class ChapterSlot : BaseSlot
         slotInfoContainerAnimator.FadeTo(1.0f, 0.5f);
     }
 
+    public void ShowProgressBar()
+    {
+        m_progressBarAnimator.SetOpacity(0);
+        m_progressBarAnimator.FadeTo(1.0f, 0.5f);
+    }
+
     /**
      * Fade out chapter background with eventually destroying the object at zero opacity
      * **/
-    public override void DismissSlotBackground(bool bDestroyOnFinish)
+    public override void DismissSlotBackground(float fDuration, bool bDestroyOnFinish = true)
     {
         CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
-        slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotBackgroundAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
 
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
-        slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotContourAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
-    public override void DismissSlotContour(bool bDestroyOnFinish)
+    /**
+     * Fade out slot contour
+     * **/
+    public override void DismissSlotContour(float fDuration, bool bDestroyOnFinish = true)
     {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
-        slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotContourAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
     /**
      * Fade out chapter information with eventually destroying the object at zero opacity
      * **/
-    public override void DismissSlotInformation(bool bDestroyOnFinish)
+    public override void DismissSlotInformation(float fDuration, bool bDestroyOnFinish = true)
     {
         GameObjectAnimator slotInfoContainerAnimator = m_infoContainer.GetComponent<GameObjectAnimator>();
-        slotInfoContainerAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotInfoContainerAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+    }
+
+    /**
+     * Fade out progressBar
+     * **/
+    public void DismissProgressBar(float fDuration, bool bDestroyOnFinish = true)
+    {
+        m_progressBarAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
     
     /**
@@ -275,7 +245,7 @@ public class ChapterSlot : BaseSlot
      * **/
     private void LaunchFadingHexagon()
     {
-        GameObject fadingHexagonObject = (GameObject)Instantiate(m_blurryContourObject); //instantiate a second contour that will serve as a fading object
+        GameObject fadingHexagonObject = (GameObject)Instantiate(m_contour); //instantiate a second contour that will serve as a fading object
         fadingHexagonObject.name = "FadingHexagon";
 
         UVQuad fadingHexagon = fadingHexagonObject.GetComponent<UVQuad>();
@@ -292,45 +262,11 @@ public class ChapterSlot : BaseSlot
         fadingHexagonAnimator.FadeTo(0.0f, 3.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
-    /**
-     * Update progress bar data
-     * **/
-    //public void UpdateProgressBarData()
-    //{
-    //    float progressBarWidth = m_progressBarSize.x;
-    //    float progressBarHeight = m_progressBarSize.y;
-    //    float ratio = 0.5f;
-
-    //    //Background
-    //    ColorQuadAnimator progressBarBgAnimator = m_progressBarBackgroundObject.GetComponent<ColorQuadAnimator>();
-    //    Color bgColor = GetCurrentlyDisplayedChapter().GetThemeColors()[3];
-    //    bgColor.a = progressBarBgAnimator.m_color.a;
-    //    progressBarBgAnimator.SetColor(bgColor);
-
-    //    //Fill
-    //    ColorQuadAnimator progressBarFillAnimator = m_progressBarFillObject.GetComponent<ColorQuadAnimator>();
-    //    progressBarFillAnimator.SetScale(new Vector3(ratio * progressBarWidth, progressBarHeight, 1));
-
-    //    //completion info
-    //    TextMesh completionTextMesh = m_progressBarCompletionTextObject.GetComponent<TextMesh>();
-    //    completionTextMesh.text = (ratio * 100) + "% " + LanguageUtils.GetTranslationForTag("progress_bar_completion");
-    //}
-
-    /**
-     * Show lock icon and with a description on how to unlock the chapter
-     * **/
-    //private void ShowLock()
-    //{
-
-    //}
-
     public void Update()
     {
         float dt = Time.deltaTime;
 
-        int chapterNumber = ((Chapters)m_parentScene).m_displayedChapterIndex + 1;
-        Chapter displayedChapter = m_parentScene.GetLevelManager().GetChapterForNumber(chapterNumber);
-        if (!displayedChapter.IsLocked() && !m_slotDismissed) //chapter unlocked, generate fading hexagons
+        if (!m_parentChapter.IsLocked() && !m_slotDismissed) //chapter unlocked, generate fading hexagons
         {
             if (m_fadingHexagonsGenerationElapsedTime > m_fadingHexagonsGenerationTimeInterval)
             {

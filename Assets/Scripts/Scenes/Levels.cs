@@ -277,11 +277,14 @@ public class Levels : GUIScene
 
         apertureAnimator.m_toSceneContent = SceneManager.DisplayContent.LEVEL_INTRO;
         apertureAnimator.AnimateInnerRadiusTo(0, 0.5f);
+    }
 
-        //Load and display LevelIntro scene
-        //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.5f, 1.1f);
-
-        //GetGUIManager().DismissBackButton();
-        //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, true, 0.0f, 1.1f);
+    public void OnClickBackButton()
+    {
+        for (int i = 0; i != m_levelSlots.Length; i++)
+        {
+            m_levelSlots[i].transform.parent = null;
+            m_levelSlots[i].Dismiss(0.5f);
+        }
     }
 }

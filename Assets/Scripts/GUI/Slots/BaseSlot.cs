@@ -24,11 +24,14 @@ public class BaseSlot : MonoBehaviour
     /**
      * Dismiss and remove the whole slot
      * **/
-    public virtual void Dismiss()
+    public virtual void Dismiss(float fDuration, bool bDestroyOnFinish = true)
     {
-        DismissSlotBackground(true);
-        DismissSlotContour(true);
-        DismissSlotInformation(true);
+        DismissSlotBackground(fDuration, true);
+        DismissSlotContour(fDuration, true);
+        DismissSlotInformation(fDuration, true);
+
+        if (bDestroyOnFinish)
+            Destroy(this.gameObject, fDuration);
     }
 
     /**
@@ -58,7 +61,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out background with eventually destroying the object at zero opacity
      * **/
-    public virtual void DismissSlotBackground(bool bDestroyOnFinish)
+    public virtual void DismissSlotBackground(float fDuration, bool bDestroyOnFinish = true)
     {
 
     }
@@ -66,7 +69,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out contour with eventually destroying the object at zero opacity
      * **/
-    public virtual void DismissSlotContour(bool bDestroyOnFinish)
+    public virtual void DismissSlotContour(float fDuration, bool bDestroyOnFinish = true)
     {
 
     }
@@ -74,7 +77,7 @@ public class BaseSlot : MonoBehaviour
     /**
      * Fade out information with eventually destroying the object at zero opacity
      * **/
-    public virtual void DismissSlotInformation(bool bDestroyOnFinish)
+    public virtual void DismissSlotInformation(float fDuration, bool bDestroyOnFinish = true)
     {
         
     }

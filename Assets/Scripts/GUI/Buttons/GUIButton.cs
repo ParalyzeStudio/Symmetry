@@ -211,9 +211,8 @@ public class GUIButton : MonoBehaviour
             GameObjectAnimator buttonAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
             Vector3 buttonToPosition = buttonAnimator.GetPosition() - new Vector3(256, 0, 0);
             buttonAnimator.TranslateTo(buttonToPosition, 0.5f);
-
-
-            GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, true, 1.0f);
+            
+            ((Levels)GetSceneManager().m_currentScene).OnClickBackButton();
         }
         else if (m_ID == GUIButtonID.ID_CLOSE_OVERLAY_BUTTON)
         {
@@ -233,6 +232,7 @@ public class GUIButton : MonoBehaviour
             //the Show() method will be called in the next frame due to the way CallFuncHandler works.
             //Thus we can set the boolean in this frame and be sure it will be set before Show() is actually called
             LevelIntro levelIntroPendingScene = (LevelIntro)sceneManager.m_pendingScene;
+            levelIntroPendingScene.m_startingFromLevelsScene = false;
         }
         else if (m_ID == GUIButtonID.ID_HINTS_BUTTON)
         {

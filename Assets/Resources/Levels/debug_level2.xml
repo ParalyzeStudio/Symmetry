@@ -3,7 +3,7 @@
 	<counter maxActions="4"/>
 	<grid exactNumColumns="20" exactNumLines="16"/>
 	<dottedOutlines>
-		 <dottedOutline>
+		<!--  <dottedOutline>
 			<contour>
 				<point column="7" line="11"/>
 				<point column="7" line="8"/>
@@ -22,23 +22,37 @@
 					<point column="10" line="8" />
 				</hole>
 			</holes>
-		</dottedOutline>		
+		</dottedOutline>		 -->
 	</dottedOutlines>
 	<shapes>
-		<!-- <shape tint="0">
+		<shape tint="0">
 			<contour>
-				<point column="10" line="10"/>
-				<point column="10" line="8"/>
-				<point column="12" line="10"/>
+				<point column="2" line="6"/>
+				<point column="10" line="6"/>
+				<point column="10" line="14"/>
 			</contour>
 		</shape>		
+		<shape tint="90">
+			<contour>
+				<point column="10" line="6"/>
+				<point column="14" line="6"/>
+				<point column="10" line="10"/>
+			</contour>
+		</shape>
+		<shape tint="180">
+			<contour>
+				<point column="10" line="6"/>
+				<point column="10" line="4"/>
+				<point column="12" line="6"/>
+			</contour>
+		</shape>
 		<shape tint="270">
 			<contour>
-				<point column="6" line="6"/>
-				<point column="6" line="4"/>
-				<point column="8" line="4"/>
+				<point column="10" line="6"/>
+				<point column="9" line="6"/>
+				<point column="10" line="5"/>
 			</contour>
-		</shape>	 -->
+		</shape>
 	</shapes>
 	<constraints>
 		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	

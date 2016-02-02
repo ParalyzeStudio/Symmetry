@@ -34,32 +34,7 @@ public class Chapters : GUIScene
 
         //Show chapter selection arrows
         ShowSelectionArrows();
-
-        //m_debugVariable = 2;
-        //LogDebugVariable();
-        //GetCallFuncHandler().AddCallFuncInstance(ModifyDebugVariable, 1.0f);
-        //GetCallFuncHandler().AddCallFuncInstance(ModifyDebugVariable, 1.0f);
-        //GetCallFuncHandler().AddCallFuncInstance(LogDebugVariable, 1.5f);
-        //m_debugVariable = 68;
-        //LogDebugVariable();
     }
-
-    //private int m_debugVariable;
-    //private GameObject m_debugObject;
-
-    //private void ModifyDebugVariable()
-    //{
-    //    m_debugVariable = (int) (Random.value * 1000);
-    //    m_debugObject = new GameObject("dbgObject" + Random.value);
-    //    LogDebugVariable();
-    //}
-
-    //private void LogDebugVariable()
-    //{
-    //    Debug.Log("m_debugVariable:" + m_debugVariable);
-    //    if (m_debugObject != null)
-    //        Debug.Log(m_debugObject.name);
-    //}
 
     private void ApplyGradientOnBackground(Gradient gradient, float fDelay = 0.0f)
     {
@@ -78,7 +53,7 @@ public class Chapters : GUIScene
      * **/
     protected override void DismissSelf()
     {
-        m_chapterSlot.Dismiss();
+        m_chapterSlot.Dismiss(0.5f, false);
         DismissSelectionArrows();
     }
 
@@ -183,10 +158,19 @@ public class Chapters : GUIScene
 
         UpdateBackgroundGradient();
 
+        Debug.Log("m_displayedChapterIndex:" + m_displayedChapterIndex);
+        Chapter newChapter = GetLevelManager().GetChapterForNumber(m_displayedChapterIndex + 1);
+        m_chapterSlot.m_parentChapter = newChapter;
         m_chapterSlot.UpdateChapterSlotBackgroundColor();
-        m_chapterSlot.DismissSlotInformation(false);
+        m_chapterSlot.DismissSlotInformation(0.5f, false);
+        m_chapterSlot.DismissProgressBar(0.5f, false);
         GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.UpdateChapterSlotInformation), 0.5f);
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.UpdateProgressBarData), 0.5f);
         GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.ShowSlotInformation), 0.5f);
+        if (newChapter.IsLocked())
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.ShowLock), 0.5f);
+        else
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(m_chapterSlot.ShowProgressBar), 0.5f);
     }
 
     /**
@@ -205,6 +189,7 @@ public class Chapters : GUIScene
         m_chapterSlot = chapterSlotObject.GetComponent<ChapterSlot>();
         m_chapterSlot.Init(this);
         m_chapterSlot.UpdateChapterSlotInformation();
+        m_chapterSlot.UpdateProgressBarData();
 
         //Show chapter slot with animation
         m_chapterSlot.Show();

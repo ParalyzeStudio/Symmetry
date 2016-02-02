@@ -14,10 +14,19 @@ public class GameObjectAnimator : ValueAnimator
     public virtual Vector3 GetGameObjectSize()
     {
         MeshRenderer[] childRenderers = this.gameObject.GetComponentsInChildren<MeshRenderer>();
-        Bounds bounds = new Bounds();
-        for (int i = 0; i != childRenderers.Length; i++)
+
+        if (childRenderers.Length == 0)
+            return Vector3.zero;
+
+        Bounds bounds = childRenderers[0].bounds;
+
+        //encapsulate further bounds
+        if (childRenderers.Length > 1)
         {
-            bounds.Encapsulate(childRenderers[i].bounds);
+            for (int i = 1; i != childRenderers.Length; i++)
+            {
+                bounds.Encapsulate(childRenderers[i].bounds);
+            }
         }
 
         return bounds.size;

@@ -19,6 +19,11 @@ public class Level
     public int m_gridExactNumColumns { get; set; }
     public float m_maxGridSpacing { get; set; }
 
+    private bool m_statusDirty;
+    private bool m_done;
+
+    private PersistentDataManager m_persistentDataManager;
+
     public Level()
     {
         m_outlines = new List<DottedOutline>();
@@ -29,11 +34,36 @@ public class Level
         m_gridMinNumColumns = 0;
         m_gridExactNumLines = 0;
         m_gridExactNumColumns = 0;
+
+        m_statusDirty = true;
+    }
+
+    public void SetAsDone()
+    {
+        if (!m_done)
+        {
+            m_done = true;
+            GetPersistentDataManager().SetLevelDone((m_parentChapter.m_number - 1) * Chapter.LEVELS_COUNT + m_chapterRelativeNumber);
+            m_statusDirty = false;
+        }
     }
 
     public bool IsDone()
     {
-        PersistentDataManager persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
-        return persistentDataManager.IsLevelDone((m_parentChapter.m_number - 1) * Chapter.LEVELS_COUNT + m_chapterRelativeNumber);
+        if (!m_statusDirty)
+            return m_done;
+
+        //we do not know for sure the status of this level, so check it in persistent data
+        m_done = GetPersistentDataManager().IsLevelDone((m_parentChapter.m_number - 1) * Chapter.LEVELS_COUNT + m_chapterRelativeNumber);
+        m_statusDirty = false;
+        return m_done;
+    }
+
+    private PersistentDataManager GetPersistentDataManager()
+    {
+        if (m_persistentDataManager == null)
+            m_persistentDataManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<PersistentDataManager>();
+
+        return m_persistentDataManager;
     }
 }

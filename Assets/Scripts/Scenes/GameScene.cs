@@ -1584,25 +1584,26 @@ public class GameScene : GUIScene
             }
             else
             {
+                //Save the status of this level
+                levelManager.m_currentLevel.SetAsDone();
+
                 int currentLevelNumber = levelManager.m_currentLevel.m_chapterRelativeNumber;
-                if (currentLevelNumber < LevelManager.LEVELS_PER_CHAPTER - 1)
+                if (currentLevelNumber < levelManager.m_currentChapter.m_levels.Length)
                 {
-                    Debug.Log("new level:" + (levelManager.m_currentLevel.m_chapterRelativeNumber + 1));
                     levelManager.SetLevelOnCurrentChapter(levelManager.m_currentLevel.m_chapterRelativeNumber + 1);
                     GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(OnFinishEndingLevelVictory), 5.0f);
                 }
                 else
                 {
                     //TODO go to next chapter by showing chapter menu for instance
-                }
-                //Save the status of this level to preferences
-                GetPersistentDataManager().SetLevelDone(currentLevelNumber);
+                }               
             }
         }
         else if (gameStatus == GameStatus.DEFEAT)
         {
             Debug.Log("EndLevel DEFEAT");
             //GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0.0f, 0.5f, 0.5f); //restart the level
+            //((LevelIntro)GetSceneManager().m_pendingScene).m_startingFromLevelsScene = false;
         }
     }
 
@@ -1642,6 +1643,7 @@ public class GameScene : GUIScene
     private void StartLevelIntroScene()
     {
         GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false); //restart the level
+        ((LevelIntro)GetSceneManager().m_pendingScene).m_startingFromLevelsScene = false;
     }
 
     public void Update()

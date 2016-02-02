@@ -352,6 +352,6 @@ public class LevelManager : MonoBehaviour
      * **/
     public int GetAbsoluteLevelNumberForCurrentChapterAndLevel(int iChapterRelativeLevelNumber)
     {
-        return m_currentChapter.m_number * LEVELS_PER_CHAPTER + iChapterRelativeLevelNumber;
+        return (m_currentChapter.m_number - 1) * LEVELS_PER_CHAPTER + iChapterRelativeLevelNumber;
     }
 }

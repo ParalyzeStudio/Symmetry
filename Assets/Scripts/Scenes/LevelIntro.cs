@@ -11,10 +11,10 @@ public class LevelIntro : GUIScene
     public GameObject m_textMeshPfb;
     public GameObject m_pulsatingButtonPfb;
     private bool m_gameSceneLaunched;
+    public bool m_startingFromLevelsScene { get; set; }
 
-    //background
-    private GameObjectAnimator m_leftPanelAnimator;
-    private GameObjectAnimator m_rightPanelAnimator;
+    //backgroundm_startingFromLevelsScene
+    private GameObjectAnimator m_backgroundAnimator;
 
     //skip button
     public PulsatingButton m_skipButton { get; set; }
@@ -29,9 +29,18 @@ public class LevelIntro : GUIScene
     {
         base.Show();
         ShowOpaqueBackground();
-        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowChapterAndLevel), 1.0f);
-        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSeparationLine), 1.0f);
-        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSkipButton), 1.0f);
+        if (m_startingFromLevelsScene)
+        {
+            ShowChapterAndLevel();
+            ShowSeparationLine();
+            ShowSkipButton();
+        }
+        else //delay the display of elements
+        {
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowChapterAndLevel), 1.0f);
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSeparationLine), 1.0f);
+            GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSkipButton), 1.0f);
+        }
 
         m_gameSceneLaunched = false;
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(LaunchGameScene), 5.0f);
@@ -44,33 +53,25 @@ public class LevelIntro : GUIScene
         Color backgroundColor = GetLevelManager().m_currentChapter.GetThemeColors()[0];
         backgroundColor = ColorUtils.DarkenColor(backgroundColor, 0.2f);
 
-        //left panel
-        GameObject leftPanelObject = (GameObject)Instantiate(m_colorQuadPfb);
-        leftPanelObject.name = "BackgroundLeftPanel";
+        //background panel
+        GameObject backgroundObject = (GameObject)Instantiate(m_colorQuadPfb);
+        backgroundObject.name = "Background";
 
-        ColorQuad leftPanel = leftPanelObject.GetComponent<ColorQuad>();
-        leftPanel.Init(backgroundMaterial);
+        ColorQuad backgroundQuad = backgroundObject.GetComponent<ColorQuad>();
+        backgroundQuad.Init(backgroundMaterial);
 
-        m_leftPanelAnimator = leftPanelObject.GetComponent<GameObjectAnimator>();
-        m_leftPanelAnimator.SetParentTransform(this.transform);
-        m_leftPanelAnimator.SetScale(new Vector3(0.5f * screenSize.x, screenSize.y, 1));        
-        m_leftPanelAnimator.SetColor(backgroundColor);
-        m_leftPanelAnimator.SetPosition(new Vector3(-0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE));
-        m_leftPanelAnimator.TranslateTo(new Vector3(-0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 1.0f);
-
-        //right panel
-        GameObject rightPanelObject = (GameObject)Instantiate(m_colorQuadPfb);
-        rightPanelObject.name = "BackgroundRightPanel";
-
-        ColorQuad rightPanel = rightPanelObject.GetComponent<ColorQuad>();
-        rightPanel.Init(backgroundMaterial);
-
-        m_rightPanelAnimator = rightPanelObject.GetComponent<GameObjectAnimator>();
-        m_rightPanelAnimator.SetParentTransform(this.transform);
-        m_rightPanelAnimator.SetScale(new Vector3(0.5f * screenSize.x, screenSize.y, 1));
-        m_rightPanelAnimator.SetColor(backgroundColor);
-        m_rightPanelAnimator.SetPosition(new Vector3(0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE));
-        m_rightPanelAnimator.TranslateTo(new Vector3(0.25f * screenSize.x, 0, OPAQUE_BACKGROUND_Z_VALUE), 1.0f);
+        m_backgroundAnimator = backgroundObject.GetComponent<GameObjectAnimator>();
+        m_backgroundAnimator.SetParentTransform(this.transform);
+        m_backgroundAnimator.SetScale(new Vector3(screenSize.x, screenSize.y, 1));
+        m_backgroundAnimator.SetColor(backgroundColor);
+        if (m_startingFromLevelsScene)
+            m_backgroundAnimator.SetPosition(new Vector3(0, 0, OPAQUE_BACKGROUND_Z_VALUE));
+        else
+        {
+            m_backgroundAnimator.SetPosition(new Vector3(0, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE));
+            m_backgroundAnimator.TranslateTo(new Vector3(0, 0, OPAQUE_BACKGROUND_Z_VALUE), 1.0f);
+        }
+            
     }
 
     private void ShowSeparationLine()
@@ -88,8 +89,11 @@ public class LevelIntro : GUIScene
         m_lineAnimator.SetPosition(new Vector3(0, -0.045f * screenSize.y, CONTENT_Z_VALUE));
         m_lineAnimator.SetScale(new Vector3(1200, 4, 1));
         m_lineAnimator.SetColor(Color.white);
-        m_lineAnimator.SetOpacity(0);
-        m_lineAnimator.FadeTo(1.0f, 0.5f);
+        if (!m_startingFromLevelsScene)
+        {
+            m_lineAnimator.SetOpacity(0);
+            m_lineAnimator.FadeTo(1.0f, 0.5f);
+        }
     }
 
     /**
@@ -121,8 +125,11 @@ public class LevelIntro : GUIScene
         m_titleAnimator.SetPosition(new Vector3(0, 0.1f * screenSize.y, CONTENT_Z_VALUE));
         m_titleAnimator.SetFontHeight(130);
         m_titleAnimator.SetColor(Color.white);
-        m_titleAnimator.SetOpacity(0);
-        m_titleAnimator.FadeTo(1.0f, 0.5f);
+        if (!m_startingFromLevelsScene)
+        {
+            m_titleAnimator.SetOpacity(0);
+            m_titleAnimator.FadeTo(1.0f, 0.5f);
+        }
     }
 
     /**
@@ -158,11 +165,9 @@ public class LevelIntro : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        m_leftPanelAnimator.SetParentTransform(null);
-        m_rightPanelAnimator.SetParentTransform(null);
+        m_backgroundAnimator.SetParentTransform(null);
 
-        m_leftPanelAnimator.TranslateTo(new Vector3(-0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, fDelay, ValueAnimator.InterpolationType.X3, true);
-        m_rightPanelAnimator.TranslateTo(new Vector3(0.25f * screenSize.x, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, fDelay, ValueAnimator.InterpolationType.X3, true);
+        m_backgroundAnimator.TranslateTo(new Vector3(0, screenSize.y, OPAQUE_BACKGROUND_Z_VALUE), 2.0f, fDelay, ValueAnimator.InterpolationType.X3, true);
     }
 
     private void DismissAllElements(float fDelay = 0.0f)

@@ -2,7 +2,7 @@
 
 public class LevelSlot : BaseSlot
 {
-    public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.5f;
+    public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.75f;
 
     private int m_levelNumber;
 
@@ -84,12 +84,6 @@ public class LevelSlot : BaseSlot
 
         float localDelay = (m_levelNumber - 1) * 0.025f;
         slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.5f, localDelay);
-        slotAnimator.FadeTo(1.0f, 0.5f, localDelay);
-    }
-
-    public override void Dismiss()
-    {
-        base.Dismiss();
     }
 
     public override void ShowSlotBackground()
@@ -119,25 +113,25 @@ public class LevelSlot : BaseSlot
         slotInfoContainerAnimator.FadeTo(1.0f, 0.5f);
     }
 
-    public override void DismissSlotBackground(bool bDestroyOnFinish)
+    public override void DismissSlotBackground(float fDuration, bool bDestroyOnFinish = true)
     {
         if (m_background != null)
         {
             CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
-            slotBackgroundAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+            slotBackgroundAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
         }
     }
 
-    public override void DismissSlotContour(bool bDestroyOnFinish)
+    public override void DismissSlotContour(float fDuration, bool bDestroyOnFinish)
     {
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
-        slotContourAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotContourAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
-    public override void DismissSlotInformation(bool bDestroyOnFinish)
+    public override void DismissSlotInformation(float fDuration, bool bDestroyOnFinish)
     {
         GameObjectAnimator slotInfoContainerAnimator = m_levelNumberText.GetComponent<GameObjectAnimator>();
-        slotInfoContainerAnimator.FadeTo(0.0f, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
+        slotInfoContainerAnimator.FadeTo(0.0f, fDuration, 0.0f, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
     }
 
 
