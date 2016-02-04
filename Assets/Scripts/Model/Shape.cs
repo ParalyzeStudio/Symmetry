@@ -98,6 +98,7 @@ public class Shape : GridTriangulable
     {
         List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
         Shape subjShape = this;
+        Shape clipShape;
 
         //Find the first static shape that overlaps this shape
         for (int iShapeIndex = 0; iShapeIndex != shapes.Count; iShapeIndex++)
@@ -115,6 +116,7 @@ public class Shape : GridTriangulable
 
             if (this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
             {
+                clipShape = shapeData;
                 //we have to perform the clipping operation here to test if the intersection is made of isolated points.
                 //In fact a fusion is declared successful when the result of the clipping operation is one single shape
 
@@ -128,7 +130,7 @@ public class Shape : GridTriangulable
                 //{
                 //    Debug.Log(shapeData.m_contour[p]);
                 //}
-                List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, shapeData, ClipperLib.ClipType.ctUnion);
+                List<Shape> resultingShapes = m_parentMesh.GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctUnion);
                 //Debug.Log("resultingShapesCount:" + resultingShapes.Count);
                 if (resultingShapes.Count == 1) //success
                 {
@@ -137,6 +139,17 @@ public class Shape : GridTriangulable
                     this.m_holes = fusionedShape.m_holes;
 
                     shapeData.m_state = ShapeState.DESTROYED;
+
+                    //if some shapes were overlapping the clip shape, they will overlap the shape resulting from the union of subj shape and clip shape
+                    //so move them them to that fusioned shape
+                    if (clipShape.m_overlappingShapes != null)
+                    {
+                        if (this.m_overlappingShapes == null)
+                            this.m_overlappingShapes = clipShape.m_overlappingShapes;
+                        else
+                            this.m_overlappingShapes.AddRange(clipShape.m_overlappingShapes);
+                    }
+                   
 
                     return true;
                 }
@@ -625,6 +638,7 @@ public class Shape : GridTriangulable
      * **/
     public void FinalizeClippingOperationsOnSubstitutionShapes()
     {
+        Shapes shapesHolder1 = this.m_parentMesh.GetShapesHolder();
         for (int i = 0; i != m_substitutionShapes.Count; i++)
         {
             m_substitutionShapes[i].FinalizeClippingOperations();

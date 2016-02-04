@@ -227,7 +227,7 @@ public class GUIButton : MonoBehaviour
         else if (m_ID == GUIButtonID.ID_RETRY_BUTTON)
         {
             SceneManager sceneManager = GetSceneManager();
-            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false);
+            sceneManager.SwitchDisplayedContent(SceneManager.DisplayContent.LEVEL_INTRO, false, 0, 1.0f);
 
             //the Show() method will be called in the next frame due to the way CallFuncHandler works.
             //Thus we can set the boolean in this frame and be sure it will be set before Show() is actually called

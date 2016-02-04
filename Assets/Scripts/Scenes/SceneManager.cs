@@ -37,9 +37,10 @@ public class SceneManager : MonoBehaviour
      * **/
     public void SwitchDisplayedContent(DisplayContent contentToDisplay, 
                                        bool bHideWithAnimation = true,
-                                       float fHideDuration = 0.5f)
+                                       float fHideDuration = 0.5f,
+                                       float fHideDelay = 0.0f)
     {
-        HideContent(m_displayedContent, bHideWithAnimation, fHideDuration);
+        HideContent(m_displayedContent, bHideWithAnimation, fHideDuration, fHideDelay);
         ShowContent(contentToDisplay, bHideWithAnimation ? fHideDuration : 0.0f); //show next content 1 second after hiding the previous one
     }
 
@@ -105,7 +106,7 @@ public class SceneManager : MonoBehaviour
             m_currentScene.Dismiss(fDuration, fDelay);
         else
         {
-            Destroy(m_currentScene.gameObject);
+            Destroy(m_currentScene.gameObject, fDelay);
         }
 
         m_currentScene = null;

@@ -99,16 +99,30 @@ public class ClippingManager : MonoBehaviour
             for (int i = 0; i != resultingShapes.Count; i++)
             {
                 if (clipOperation == ClipType.ctUnion)
+                {
+                    resultingShapes[i].m_tint = subjShape.m_tint;
                     resultingShapes[i].m_color = subjShape.m_color;
+                }
                 else if (clipOperation == ClipType.ctIntersection)
                 {
                     if (clipShape.m_state == Shape.ShapeState.TILED_BACKGROUND) //do not mix color when clipping with background
+                    {
+                        resultingShapes[i].m_tint = subjShape.m_tint;
                         resultingShapes[i].m_color = subjShape.m_color;
+                    }
                     else
-                        resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+                    {
+                        Debug.Log("CalculateColorFromTint");
+                        resultingShapes[i].m_tint = 0.5f * (subjShape.m_tint + clipShape.m_tint);
+                        resultingShapes[i].CalculateColorFromTint();
+                        //resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
+                    }
                 }
-                else if (clipOperation == ClipType.ctDifference)
+                else if (clipOperation == ClipType.ctDifference) //TODO modify this code to perform an actual difference on colors
+                {
+                    resultingShapes[i].m_tint = subjShape.m_tint;
                     resultingShapes[i].m_color = subjShape.m_color;
+                }
             }
         }
         return resultingShapes;
