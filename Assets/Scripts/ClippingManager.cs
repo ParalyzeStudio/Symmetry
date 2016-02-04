@@ -112,13 +112,11 @@ public class ClippingManager : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("CalculateColorFromTint");
                         resultingShapes[i].m_tint = 0.5f * (subjShape.m_tint + clipShape.m_tint);
                         resultingShapes[i].CalculateColorFromTint();
-                        //resultingShapes[i].m_color = 0.5f * (subjShape.m_color + clipShape.m_color);
                     }
                 }
-                else if (clipOperation == ClipType.ctDifference) //TODO modify this code to perform an actual difference on colors
+                else if (clipOperation == ClipType.ctDifference)
                 {
                     resultingShapes[i].m_tint = subjShape.m_tint;
                     resultingShapes[i].m_color = subjShape.m_color;
@@ -258,7 +256,8 @@ public class ClippingManager : MonoBehaviour
                     List<Shape> intersectionShapes = new List<Shape>(5);
                     if (differenceShapes.Count == 0) //no difference, so intersection is the full clipShape
                     {
-                        clipShape.m_color = 0.5f * (clipShape.m_color + shape.m_color);
+                        clipShape.m_tint = 0.5f * (clipShape.m_tint + shape.m_tint);
+                        clipShape.CalculateColorFromTint();
                         intersectionShapes.Add(clipShape);
                     }
                     else

@@ -148,8 +148,7 @@ public class Shape : GridTriangulable
                             this.m_overlappingShapes = clipShape.m_overlappingShapes;
                         else
                             this.m_overlappingShapes.AddRange(clipShape.m_overlappingShapes);
-                    }
-                   
+                    }                   
 
                     return true;
                 }
