@@ -248,6 +248,7 @@ public class ClippingManager : MonoBehaviour
                             differenceShapes[k].m_state = Shape.ShapeState.DYNAMIC_DIFFERENCE;
                         else
                             differenceShapes[k].m_state = Shape.ShapeState.MOVING_SUBSTITUTION_DIFFERENCE;
+                        differenceShapes[k].m_tint = clipShape.m_tint; //same color as original
                         differenceShapes[k].m_color = clipShape.m_color; //same color as original
                     }
                     clippedDifferenceShapes.AddRange(differenceShapes);

@@ -11,6 +11,7 @@ public class LevelManager : MonoBehaviour
     public Level m_debugLevel1 { get; set; }
     public Level m_debugLevel2 { get; set; }
     public Level m_debugLevel3 { get; set; }
+    public Level m_debugLevel4 { get; set; }
 
     public Level m_currentLevel { get; set; }
     public Chapter m_currentChapter { get; set; }
@@ -33,6 +34,7 @@ public class LevelManager : MonoBehaviour
         m_debugLevel1 = ParseLevelFile(null, 1, true);
         m_debugLevel2 = ParseLevelFile(null, 2, true);
         m_debugLevel3 = ParseLevelFile(null, 3, true);
+        m_debugLevel4 = ParseLevelFile(null, 4, true);
     }
 
     public Chapter BuildChapterFromXml(int iChapterNumber)
@@ -304,8 +306,10 @@ public class LevelManager : MonoBehaviour
             m_currentLevel = m_debugLevel1;
         else if (iDebugLevelNumber == 2)
             m_currentLevel = m_debugLevel2;
-        else
+        else if (iDebugLevelNumber == 3)
             m_currentLevel = m_debugLevel3;
+        else
+            m_currentLevel = m_debugLevel4;
     }
 
     /**
@@ -319,6 +323,8 @@ public class LevelManager : MonoBehaviour
             return 2;
         else if (m_currentLevel == m_debugLevel3)
             return 3;
+        else if (m_currentLevel == m_debugLevel4)
+            return 4;
         else
             return -1;
     }

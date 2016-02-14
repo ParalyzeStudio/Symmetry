@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿//#define REMOVE_THREADS_DEBUG
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,14 +17,17 @@ public class Symmetrizer : MonoBehaviour
     public SymmetryType m_symmetryType { get; set; }
 
     private Axis m_axis;
+    private SymmetryPoint m_symmetryPoint;
     private GameScene m_gameScene;
     private ClippingManager m_clippingManager;
 
     //Lists to store the results of the symmetry on both left and right sides
-    private List<Shape> m_leftClippedInterShapes;
-    private List<Shape> m_leftClippedDiffShapes;
-    private List<Shape> m_rightClippedInterShapes;
-    private List<Shape> m_rightClippedDiffShapes;
+    private List<Shape> m_axisLeftClippedInterShapes;
+    private List<Shape> m_axisLeftClippedDiffShapes;
+    private List<Shape> m_axisRightClippedInterShapes;
+    private List<Shape> m_axisRightClippedDiffShapes;
+    private List<Shape> m_pointClippedInterShapes;
+    private List<Shape> m_pointClippedDiffShapes;
 
     public void Awake()
     {
@@ -34,13 +39,61 @@ public class Symmetrizer : MonoBehaviour
         GameObject gameControllerObject = (GameObject) GameObject.FindGameObjectWithTag("GameController");
         m_gameScene = (GameScene)gameControllerObject.GetComponent<SceneManager>().m_currentScene;
         m_clippingManager = gameControllerObject.GetComponent<ClippingManager>();
+        
+        //find either the axis or the symmetry point component
         m_axis = this.GetComponent<Axis>();
+        m_symmetryPoint = this.GetComponent<SymmetryPoint>();
     }
 
     /**
-     * Apply symmetry on all shapes located inside the axis strip
+     * Apply symmetry to scene elements depending on the symmetry type
      * **/
-    public void SymmetrizeShapes()
+    //public void SymmetrizeShapes()
+    //{      
+    //    if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE || m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+    //        PerformAxisSymmetry();
+    //    else if (m_symmetryType == SymmetryType.SYMMETRY_POINT)
+    //        PerformPointSymmetry();
+    //}
+
+    public void PerformSymmetry()
+    {
+#if (REMOVE_THREADS_DEBUG)
+        if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE || m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+            PerformAxisSymmetry();
+        else if (m_symmetryType == SymmetryType.SYMMETRY_POINT)
+            PerformPointSymmetry();
+
+        OnSymmetryDone();
+#else
+        QueuedThreadedJobsManager threadedJobsManager = m_gameScene.GetQueuedThreadedJobsManager();
+        if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE || m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        {
+            threadedJobsManager.AddJob(new ThreadedJob
+                                            (
+                                                new ThreadedJob.ThreadFunction(PerformAxisSymmetry),
+                                                null,
+                                                new ThreadedJob.ThreadFunction(OnSymmetryDone)
+                                            )
+                                      );
+        }
+        else if (m_symmetryType == SymmetryType.SYMMETRY_POINT)
+        {
+            threadedJobsManager.AddJob(new ThreadedJob
+                                           (
+                                               new ThreadedJob.ThreadFunction(PerformPointSymmetry),
+                                               null,
+                                               new ThreadedJob.ThreadFunction(OnSymmetryDone)
+                                           )
+                                     );
+        }
+#endif
+    }
+
+    /**
+     * Symmetrize shapes by an axis
+     * **/
+    private void PerformAxisSymmetry()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
@@ -53,10 +106,10 @@ public class Symmetrizer : MonoBehaviour
 
         //Clip all shapes
         List<Shape> shapes = shapesHolder.m_shapes;
-        m_leftClippedInterShapes = new List<Shape>(10);
-        m_leftClippedDiffShapes = new List<Shape>(10);
-        m_rightClippedInterShapes = new List<Shape>(10);
-        m_rightClippedDiffShapes = new List<Shape>(10);
+        m_axisLeftClippedInterShapes = new List<Shape>(10);
+        m_axisLeftClippedDiffShapes = new List<Shape>(10);
+        m_axisRightClippedInterShapes = new List<Shape>(10);
+        m_axisRightClippedDiffShapes = new List<Shape>(10);
 
         for (int i = 0; i != shapes.Count; i++)
         {
@@ -68,17 +121,19 @@ public class Symmetrizer : MonoBehaviour
             if (stripLeftClipShape != null)
             {
                 List<Shape> lResultShapes = m_clippingManager.ShapesOperation(shape, stripLeftClipShape, ClipperLib.ClipType.ctIntersection);
-                
+
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
-                    Shape lSymmetricShape = CalculateSymmetricShape(lResultShapes[lShapeIdx]);
+                    Shape lSymmetricShape = CalculateSymmetricShapeByAxis(lResultShapes[lShapeIdx]);
                     lSymmetricShape.Triangulate();
-                    lSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the strip
+                    //dont mix the color of the shape with the color of the strip
+                    lSymmetricShape.m_tint = shape.m_tint;
+                    lSymmetricShape.m_color = shape.m_color; 
 
                     List<Shape> leftClippedInterShapes, leftClippedDiffShapes;
                     m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out leftClippedInterShapes, out leftClippedDiffShapes);
-                    m_leftClippedInterShapes.AddRange(leftClippedInterShapes);
-                    m_leftClippedDiffShapes.AddRange(leftClippedDiffShapes);
+                    m_axisLeftClippedInterShapes.AddRange(leftClippedInterShapes);
+                    m_axisLeftClippedDiffShapes.AddRange(leftClippedDiffShapes);
                 }
             }
 
@@ -87,41 +142,55 @@ public class Symmetrizer : MonoBehaviour
                 List<Shape> rResultShapes = m_clippingManager.ShapesOperation(shape, stripRightClipShape, ClipperLib.ClipType.ctIntersection);
                 for (int rShapeIdx = 0; rShapeIdx != rResultShapes.Count; rShapeIdx++)
                 {
-                    Shape rSymmetricShape = CalculateSymmetricShape(rResultShapes[rShapeIdx]);
+                    Shape rSymmetricShape = CalculateSymmetricShapeByAxis(rResultShapes[rShapeIdx]);
                     rSymmetricShape.Triangulate();
-                    rSymmetricShape.m_color = shape.m_color; //dont mix the color of the shape with the color of the strip
+                    //dont mix the color of the shape with the color of the strip
+                    rSymmetricShape.m_tint = shape.m_tint;
+                    rSymmetricShape.m_color = shape.m_color;
 
                     List<Shape> rightClippedInterShapes, rightClippedDiffShapes;
                     m_clippingManager.ClipAgainstStaticShapes(rSymmetricShape, out rightClippedInterShapes, out rightClippedDiffShapes);
-                    m_rightClippedInterShapes.AddRange(rightClippedInterShapes);
-                    m_rightClippedDiffShapes.AddRange(rightClippedDiffShapes);
+                    m_axisRightClippedInterShapes.AddRange(rightClippedInterShapes);
+                    m_axisRightClippedDiffShapes.AddRange(rightClippedDiffShapes);
                 }
-            }            
+            }
         }        
     }
 
     /**
-     * Calculate the symmetrical axis of each axis in the grid by the parameter 'axis'
+     * Symmetrize shapes and axes by a point
      * **/
-    public void SymmetrizeAxes()
+    private void PerformPointSymmetry()
     {
-        Axes axesHolder = m_gameScene.m_axes;
+        Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
-        List<Axis> axes = axesHolder.m_childrenAxes;
-        for (int i = 0; i != axes.Count; i++)
+        //Clip all shapes
+        List<Shape> shapes = shapesHolder.m_shapes;
+        m_pointClippedInterShapes = new List<Shape>(10);
+        m_pointClippedDiffShapes = new List<Shape>(10);
+
+        for (int i = 0; i != shapes.Count; i++)
         {
-            Axis axis = axes[i];
-            if (axis.m_type == Axis.AxisType.STATIC_PENDING)
-            {
-                //AxisRenderer symmetricAxis = axis.CalculateSymmetricAxis(this);
-            }
-        }
+            Shape shape = shapes[i];
+
+            if (shape.m_state != Shape.ShapeState.STATIC)
+                continue;
+
+            Shape symmetricShape = CalculateSymmetricShapeByPoint(shape);
+            Debug.Log("shape tint:" + shape.m_tint + " symmetric shape tint:" + symmetricShape.m_tint);
+            symmetricShape.Triangulate();
+
+            List<Shape> clippedInterShapes, clippedDiffShapes;
+            m_clippingManager.ClipAgainstStaticShapes(symmetricShape, out clippedInterShapes, out clippedDiffShapes);
+            m_pointClippedInterShapes.AddRange(clippedInterShapes);
+            m_pointClippedDiffShapes.AddRange(clippedDiffShapes);
+        }        
     }
 
     /**
      * Return a Shape that is symmetric of the parameter 'shapeToSymmetrize' about this axis
      * **/
-    public Shape CalculateSymmetricShape(Shape shapeToSymmetrize)
+    public Shape CalculateSymmetricShapeByAxis(Shape shapeToSymmetrize)
     {
         //Symmetrize contour
         Contour contourToSymmetrize = shapeToSymmetrize.m_contour;
@@ -129,7 +198,7 @@ public class Symmetrizer : MonoBehaviour
 
         for (int i = contourToSymmetrize.Count - 1; i != -1; i--)
         {
-            symmetricContour.Add(CalculateSymmetricPoint(contourToSymmetrize[i]));
+            symmetricContour.Add(CalculateSymmetricPointByAxis(contourToSymmetrize[i]));
         }
 
         //Symmetrize holes
@@ -141,7 +210,7 @@ public class Symmetrizer : MonoBehaviour
             Contour symmetricHole = new Contour(hole.Count);
             for (int j = hole.Count - 1; j != -1; j--)
             {
-                symmetricHole.Add(CalculateSymmetricPoint(hole[j]));
+                symmetricHole.Add(CalculateSymmetricPointByAxis(hole[j]));
             }
             symmetricHoles.Add(symmetricHole);
         }
@@ -152,144 +221,139 @@ public class Symmetrizer : MonoBehaviour
     }
 
     /**
-     * Calculate the symmetric axis of this axis by the parameter 'axis'
+     * Return a Shape that is symmetric of the parameter 'shapeToSymmetrize' about this symmetry point
      * **/
-    public Axis CalculateSymmetricAxis(Axis axisToSymmetrize)
+    public Shape CalculateSymmetricShapeByPoint(Shape shapeToSymmetrize)
     {
-        Axes axesHolder = m_gameScene.m_axes;
+        //Symmetrize contour
+        Contour contourToSymmetrize = shapeToSymmetrize.m_contour;
+        Contour symmetricContour = new Contour(contourToSymmetrize.Count);
 
-        GridPoint axisEndpoint1Position = m_axis.m_pointA;
-        GridPoint axisEndpoint2Position = m_axis.m_pointB;
-        GridPoint axisToSymmetrizeEndpoint1Position = axisToSymmetrize.m_pointA;
-        GridPoint axisToSymmetrizeEndpoint2Position = axisToSymmetrize.m_pointB;
-
-        //Axis to symmetrize has to be fully contained in this axis strip in order to be actually symmetrized
-        GridEdge axisEdge = new GridEdge(axisEndpoint1Position, axisEndpoint2Position);
-        bool bSymmetrizeEndpoint1 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint1Position);
-        bool bSymmetrizeEndpoint2 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint2Position);
-
-        if (!bSymmetrizeEndpoint1 || !bSymmetrizeEndpoint2) //axis to symmetrize is not fully contained in this axis strip
-            return null;        
-
-        if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+        for (int i = contourToSymmetrize.Count - 1; i != -1; i--)
         {
-            long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
-            long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
-
-            if (det1 >= 0 && det2 >= 0) //axis to symmetrize is on the 'left' of this axis
-            {
-                GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
-                GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
-
-                //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
-                GridPoint axisMiddle = axisToSymmetrize.GetCenter();
-                GridPoint axisClockwiseNormal = axisToSymmetrize.GetNormal();
-                GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
-                GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
-
-                //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
-                long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);              
-                if (det >= 0) //on the 'left', so swap points
-                {
-                    return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
-                }
-                else
-                {
-                    return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
-                }
-            }
-            else if (det1 >= 0 && det2 < 0 || det1 < 0 && det2 >= 0)
-            {
-                return null; //TODO Build the axis, do not return null
-            }
+            symmetricContour.Add(CalculateSymmetricPointByPoint(contourToSymmetrize[i]));
         }
-        else if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        symmetricContour.Reverse();
+
+        //Symmetrize holes
+        List<Contour> holesToSymmetrize = shapeToSymmetrize.m_holes;
+        List<Contour> symmetricHoles = new List<Contour>(holesToSymmetrize.Count);
+        for (int i = 0; i != holesToSymmetrize.Count; i++)
         {
-            long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
-            long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
-
-            GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
-            GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
-
-            //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
-            GridPoint axisMiddle = m_axis.GetCenter();
-            GridPoint axisClockwiseNormal = m_axis.GetNormal();
-            GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
-            GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
-
-            //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
-            long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);
-            if (det >= 0) //on the 'left', so swap points
+            Contour hole = holesToSymmetrize[i];
+            Contour symmetricHole = new Contour(hole.Count);
+            for (int j = hole.Count - 1; j != -1; j--)
             {
-                return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
+                symmetricHole.Add(CalculateSymmetricPointByPoint(hole[j]));
             }
-            else
-            {
-                return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
-            }
+            symmetricHoles.Add(symmetricHole);
         }
 
-        return null;
+        Shape symmetricShape = new Shape(symmetricContour, symmetricHoles);
+        symmetricShape.m_tint = shapeToSymmetrize.m_tint;
+        symmetricShape.m_color = shapeToSymmetrize.m_color;
+        return symmetricShape;
     }
 
     /**
-     * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
+     * Calculate the symmetric axis of this axis by the parameter 'axis'
      * **/
-    public void OnSymmetrizingShapesDone()
-    {
-        Shapes shapesHolder = m_gameScene.m_shapesHolder;
+    //public Axis CalculateSymmetricAxis(Axis axisToSymmetrize)
+    //{
+    //    Axes axesHolder = m_gameScene.m_axes;
 
-        //build the difference shape objects
-        if (m_leftClippedInterShapes != null)
-        {
-            for (int p = 0; p != m_leftClippedInterShapes.Count; p++)
-            {
-                m_leftClippedInterShapes[p].Triangulate();
-                shapesHolder.CreateShapeObjectFromData(m_leftClippedInterShapes[p], true);
-            }
-        }
+    //    GridPoint axisEndpoint1Position = m_axis.m_pointA;
+    //    GridPoint axisEndpoint2Position = m_axis.m_pointB;
+    //    GridPoint axisToSymmetrizeEndpoint1Position = axisToSymmetrize.m_pointA;
+    //    GridPoint axisToSymmetrizeEndpoint2Position = axisToSymmetrize.m_pointB;
 
-        //build the intersection shape objects
-        if (m_leftClippedDiffShapes != null)
-        {
-            for (int p = 0; p != m_leftClippedDiffShapes.Count; p++)
-            {
-                m_leftClippedDiffShapes[p].Triangulate();
-                shapesHolder.CreateShapeObjectFromData(m_leftClippedDiffShapes[p], true);
-            }
-        }
+    //    //Axis to symmetrize has to be fully contained in this axis strip in order to be actually symmetrized
+    //    GridEdge axisEdge = new GridEdge(axisEndpoint1Position, axisEndpoint2Position);
+    //    bool bSymmetrizeEndpoint1 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint1Position);
+    //    bool bSymmetrizeEndpoint2 = axisEdge.ContainsPointInStrip(axisToSymmetrizeEndpoint2Position);
 
-        //build the difference shape objects
-        if (m_rightClippedInterShapes != null)
-        {
-            for (int p = 0; p != m_rightClippedInterShapes.Count; p++)
-            {
-                m_rightClippedInterShapes[p].Triangulate();
-                shapesHolder.CreateShapeObjectFromData(m_rightClippedInterShapes[p], true);
-            }
-        }
+    //    if (!bSymmetrizeEndpoint1 || !bSymmetrizeEndpoint2) //axis to symmetrize is not fully contained in this axis strip
+    //        return null;        
 
-        //build the intersection shape objects
-        if (m_rightClippedDiffShapes != null)
-        {
-            for (int p = 0; p != m_rightClippedDiffShapes.Count; p++)
-            {
-                m_rightClippedDiffShapes[p].Triangulate();
-                shapesHolder.CreateShapeObjectFromData(m_rightClippedDiffShapes[p], true);
-            }
-        }
+    //    if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE)
+    //    {
+    //        long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
+    //        long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
 
-        //Callback on the AxisRenderer
-        m_axis.OnPerformSymmetry(m_symmetryType);
-    }
+    //        if (det1 >= 0 && det2 >= 0) //axis to symmetrize is on the 'left' of this axis
+    //        {
+    //            GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
+    //            GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
+
+    //            //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
+    //            GridPoint axisMiddle = axisToSymmetrize.GetCenter();
+    //            GridPoint axisClockwiseNormal = axisToSymmetrize.GetNormal();
+    //            GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
+    //            GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
+
+    //            //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
+    //            long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);              
+    //            if (det >= 0) //on the 'left', so swap points
+    //            {
+    //                return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
+    //            }
+    //            else
+    //            {
+    //                return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
+    //            }
+    //        }
+    //        else if (det1 >= 0 && det2 < 0 || det1 < 0 && det2 >= 0)
+    //        {
+    //            return null; //TODO Build the axis, do not return null
+    //        }
+    //    }
+    //    else if (this.m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+    //    {
+    //        long det1 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint1Position);
+    //        long det2 = MathUtils.Determinant(axisEndpoint1Position, axisEndpoint2Position, axisToSymmetrizeEndpoint2Position);
+
+    //        GridPoint symmetricEndpoint1 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint1Position);
+    //        GridPoint symmetricEndpoint2 = this.CalculateSymmetricPoint(axisToSymmetrizeEndpoint2Position);
+
+    //        //axis pointA has to be on the right of the line passing by the middle of the axis and directed by the clockwise normal of the axis
+    //        GridPoint axisMiddle = m_axis.GetCenter();
+    //        GridPoint axisClockwiseNormal = m_axis.GetNormal();
+    //        GridEdge normalEdge = new GridEdge(axisMiddle, axisMiddle + axisClockwiseNormal); //this edge represents the normal vector with its two endpoints
+    //        GridEdge symmetrizedNormalEdge = CalculateSymmetricEdge(normalEdge);
+
+    //        //Determine the position of each symmetric endpoint about the symmetrizedNormalEdge
+    //        long det = MathUtils.Determinant(symmetrizedNormalEdge.m_pointA, symmetrizedNormalEdge.m_pointB, symmetricEndpoint1);
+    //        if (det >= 0) //on the 'left', so swap points
+    //        {
+    //            return axesHolder.BuildAxis(symmetricEndpoint2, symmetricEndpoint1, m_symmetryType, m_axis.m_type);
+    //        }
+    //        else
+    //        {
+    //            return axesHolder.BuildAxis(symmetricEndpoint1, symmetricEndpoint2, m_symmetryType, m_axis.m_type);
+    //        }
+    //    }
+
+    //    return null;
+    //}  
 
     /**
      * Return the symmetric edge of the parameter 'edge' about this axis
      * **/
-    public GridEdge CalculateSymmetricEdge(GridEdge edge)
+    public GridEdge CalculateSymmetricEdgeByAxis(GridEdge edge)
     {
-        GridPoint symmetricPointA = CalculateSymmetricPoint(edge.m_pointA);
-        GridPoint symmetricPointB = CalculateSymmetricPoint(edge.m_pointB);
+        GridPoint symmetricPointA = CalculateSymmetricPointByAxis(edge.m_pointA);
+        GridPoint symmetricPointB = CalculateSymmetricPointByAxis(edge.m_pointB);
+
+        return new GridEdge(symmetricPointA, symmetricPointB);
+    }
+
+    /**
+     * Return the symmetric edge of the parameter 'edge' about this symmetry point
+     * **/
+    public GridEdge CalculateSymmetricEdgeByPoint(GridEdge edge)
+    {
+        GridPoint symmetricPointA = CalculateSymmetricPointByPoint(edge.m_pointA);
+        GridPoint symmetricPointB = CalculateSymmetricPointByPoint(edge.m_pointB);
 
         return new GridEdge(symmetricPointA, symmetricPointB);
     }
@@ -297,7 +361,7 @@ public class Symmetrizer : MonoBehaviour
     /**
      * Return the point symmetric of the parameter 'point' about this axis
      * **/
-    public GridPoint CalculateSymmetricPoint(GridPoint point)
+    public GridPoint CalculateSymmetricPointByAxis(GridPoint point)
     {
         GridPoint axisNormal = m_axis.GetNormal();
         GridPoint axisPoint1 = m_axis.m_pointA;
@@ -326,16 +390,106 @@ public class Symmetrizer : MonoBehaviour
     }
 
     /**
-     * Called when SymmetrizeAxesByAxis() job is done
+     * Return the point symmetric of the parameter 'point' about this symmetry point
      * **/
-    public void OnSymmetrizingAxesDone()
+    public GridPoint CalculateSymmetricPointByPoint(GridPoint point)
     {
+        GridPoint symmetryPointPosition = m_symmetryPoint.GetCircleGridPosition();
 
+        //Calculate the distance between the point and the symmetry point
+        GridPoint pointToSymmetryPoint = (symmetryPointPosition - point);
+
+        return symmetryPointPosition + pointToSymmetryPoint;
     }
 
-    public void SymmetrizeByPoint()
+    /**
+    * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
+    * **/
+    public void OnSymmetryDone()
     {
+        Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
+        if (m_symmetryType == SymmetryType.SYMMETRY_AXES_ONE_SIDE || m_symmetryType == SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        {
+            //build the difference shape objects
+            if (m_axisLeftClippedInterShapes != null)
+            {
+                for (int p = 0; p != m_axisLeftClippedInterShapes.Count; p++)
+                {
+                    m_axisLeftClippedInterShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedInterShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedInterShapes[p], false);
+                    m_axisLeftClippedInterShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            //build the intersection shape objects
+            if (m_axisLeftClippedDiffShapes != null)
+            {
+                for (int p = 0; p != m_axisLeftClippedDiffShapes.Count; p++)
+                {
+                    m_axisLeftClippedDiffShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedDiffShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedDiffShapes[p], false);
+                    m_axisLeftClippedDiffShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            //build the difference shape objects
+            if (m_axisRightClippedInterShapes != null)
+            {
+                for (int p = 0; p != m_axisRightClippedInterShapes.Count; p++)
+                {
+                    m_axisRightClippedInterShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_axisRightClippedInterShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_axisRightClippedInterShapes[p], false);
+                    m_axisRightClippedInterShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            //build the intersection shape objects
+            if (m_axisRightClippedDiffShapes != null)
+            {
+                for (int p = 0; p != m_axisRightClippedDiffShapes.Count; p++)
+                {
+                    m_axisRightClippedDiffShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_axisRightClippedDiffShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_axisRightClippedDiffShapes[p], false);
+                    m_axisRightClippedDiffShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            //Callback on the AxisRenderer
+            m_axis.OnPerformSymmetry();
+        }
+        else if (m_symmetryType == SymmetryType.SYMMETRY_POINT)
+        {
+            //build the intersection shape objects
+            if (m_pointClippedInterShapes != null)
+            {
+                for (int p = 0; p != m_pointClippedInterShapes.Count; p++)
+                {
+                    m_pointClippedInterShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_pointClippedInterShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_pointClippedInterShapes[p], false);
+                    m_pointClippedInterShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            //build the difference shape objects
+            if (m_pointClippedDiffShapes != null)
+            {
+                for (int p = 0; p != m_pointClippedDiffShapes.Count; p++)
+                {
+                    m_pointClippedDiffShapes[p].Triangulate();
+                    //shapesHolder.CreateShapeObjectFromData(m_pointClippedDiffShapes[p], true);
+                    shapesHolder.CreateShapeObjectFromData(m_pointClippedDiffShapes[p], false);
+                    m_pointClippedDiffShapes[p].FinalizeClippingOperations();
+                }
+            }
+
+            m_symmetryPoint.OnPerformSymmetry();
+        }
     }
 
     /**

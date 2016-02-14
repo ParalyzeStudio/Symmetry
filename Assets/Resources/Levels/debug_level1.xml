@@ -2,9 +2,9 @@
 <level name="Debug level 1" number="0">
 	<counter maxActions="10"/>
 	<stack size="4"/>
-	<grid exactNumColumns="10" exactNumLines="8"/>
+	<grid exactNumColumns="20" exactNumLines="14"/>
 	<dottedOutlines>
-		<dottedOutline>
+		<!-- <dottedOutline>
 			<contour>
 				<point column="4" line="6"/>
 				<point column="4" line="5"/>				
@@ -19,29 +19,69 @@
 				<point column="6" line="5"/>
 				<point column="6" line="6"/>
 			</contour>
-		</dottedOutline>
+		</dottedOutline> -->
 	</dottedOutlines>
 	<shapes>
-		 <shape tint="150">
+		 <shape tint="0">
 			<contour>
-				<point column="4" line="4" />
-				<point column="5" line="4" />
-				<point column="5" line="5" />
-				<point column="7" line="5" />
+				<point column="4" line="7" />
+				<point column="4" line="5" />
+				<point column="8" line="5" />
+				<point column="8" line="7" />
+				<point column="7" line="7" />
 				<point column="7" line="6" />
-				<point column="4" line="6" />
+				<point column="5" line="6" />
+				<point column="5" line="7" />
 			</contour>
-			</shape>
-			<shape tint="300">
-				<contour>
-					<point column="5" line="4" />
-					<point column="3" line="4" />				
-					<point column="3" line="3" />
-					<point column="6" line="3" />
-					<point column="6" line="5" />
-					<point column="5" line="5" />
-				</contour>
-			</shape>
+		</shape>
+		<shape tint="50">
+			<contour>
+				<point column="5" line="7" />
+				<point column="5" line="6" />
+				<point column="7" line="6" />
+				<point column="7" line="7" />
+			</contour>
+		</shape>
+		<shape tint="100">
+			<contour>
+				<point column="4" line="7" />
+				<point column="7" line="7" />
+				<point column="7" line="8" />
+				<point column="6" line="8" />
+				<point column="6" line="9" />
+				<point column="5" line="9" />
+				<point column="5" line="8" />
+				<point column="4" line="8" />
+			</contour>
+		</shape>
+		<shape tint="150">
+			<contour>
+				<point column="4" line="8" />
+				<point column="5" line="8" />
+				<point column="5" line="9" />
+				<point column="4" line="9" />
+			</contour>
+		</shape>
+		<shape tint="200">
+			<contour>
+				<point column="6" line="9" />
+				<point column="6" line="8" />
+				<point column="7" line="8" />
+				<point column="7" line="7" />
+				<point column="8" line="7" />
+				<point column="8" line="9" />
+			</contour>
+		</shape>
+		<!-- <shape tint="300">
+			<contour>
+				<point column="5" line="4" />
+				<point column="3" line="4" />				
+				<point column="3" line="3" />
+				<point column="6" line="3" />
+				<point column="6" line="5" />
+				<point column="5" line="5" />
+			</contour>
+		</shape> -->
 	</shapes>
 	<constraints>
 		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	

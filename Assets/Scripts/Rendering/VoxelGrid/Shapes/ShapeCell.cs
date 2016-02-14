@@ -40,6 +40,15 @@ public class ShapeCell
         }
     }
 
+    private bool m_rendered;
+    public bool Rendered
+    {
+        get
+        {
+            return m_rendered;
+        }
+    }
+
     //neighboring cells
     public ShapeCell m_topCell { get; set; }
     public ShapeCell m_leftCell { get; set; }
@@ -81,6 +90,8 @@ public class ShapeCell
         {
             m_parentMesh.NullifyCellAtIndex(m_index);
         }
+        
+        m_parentMesh.OnCellRendered();
     }
 
     /**
@@ -88,11 +99,11 @@ public class ShapeCell
      * **/
     public void Show()
     {
-        if (m_showing || m_swept)
+        if (m_showing || m_swept || m_rendered)
             return;
 
+        m_showing = true;
         m_swept = true;
-        m_showing = true;        
 
         //Show neighboring cells with delay
         //CallFuncHandler callFuncHandler = m_parentMesh.GetCallFuncHandler();
@@ -107,6 +118,17 @@ public class ShapeCell
 
         //animate cell by fading in it
         SetColor(m_parentMesh.m_shapeData.m_color);
+
+        OnCellRendered();
+    }
+
+    /**
+     * Callback when the cell is fully rendered
+     * **/
+    private void OnCellRendered()
+    {
+        m_showing = false;
+        m_rendered = true;
     }
 
     /**

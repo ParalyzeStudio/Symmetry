@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿//#define REMOVE_THREADS_DEBUG
+
+using UnityEngine;
 using System.Collections.Generic;
 
 public class Shape : GridTriangulable
@@ -111,7 +113,7 @@ public class Shape : GridTriangulable
             if (shapeData.m_state != ShapeState.STATIC) //check only static shapes
                 continue;
 
-            if (!shapeData.m_color.Equals(this.m_color)) //dismiss shapes that are of different color than 'this' shape
+            if (shapeData.m_tint != this.m_tint) //dismiss shapes that are of different tint than 'this' shape
                 continue;
 
             if (this.OverlapsShape(shapeData, false)) //we have not found a clip shape yet
@@ -464,6 +466,8 @@ public class Shape : GridTriangulable
                     List<Shape> newOverlappedShapes = clippingManager.ShapesOperation(shape, this, ClipperLib.ClipType.ctDifference);
                     m_shapesToCreate.AddRange(newOverlappedShapes);
 
+                    shape.RemoveOverlappingShape(this);
+
                     //copy the overlapping shapes to each overlapped shapes                
                     for (int p = 0; p != newOverlappedShapes.Count; p++)
                     {
@@ -472,8 +476,8 @@ public class Shape : GridTriangulable
 
                     shape.m_state = ShapeState.DESTROYED; //mark the old shape for destruction
                 }
-
-                shape.RemoveOverlappingShape(this); //in both cases we remove 'this' shape from overlapping shapes
+                else //empty intersection, 'this' shape does not really overlaps the other shape so remove it from list
+                    shape.RemoveOverlappingShape(this); 
             }
         }
     }
@@ -586,7 +590,17 @@ public class Shape : GridTriangulable
     {
         InitTemporaryStoredShapes();
 
-        if (IsDynamic())
+        if (IsSubstitutionShape())
+        {
+            if (m_state == Shape.ShapeState.MOVING_SUBSTITUTION_INTERSECTION)
+            {
+                PerformDifferenceOnOverlappedStaticShape();
+                OnFinishPerformingDifferenceWithOverlappedStaticShape();
+            }
+            PerformFusionWithStaticShapes();
+            OnFinishPerformingFusionWithStaticShapes();
+        }
+        else if (IsDynamic())
         {
             List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
             //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
@@ -595,6 +609,10 @@ public class Shape : GridTriangulable
             //Perform the difference clipping operation            
             if (m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
             {
+#if (REMOVE_THREADS_DEBUG)
+                PerformDifferenceOnOverlappedStaticShape();
+                OnFinishPerformingDifferenceWithOverlappedStaticShape();
+#else
                 m_parentMesh.GetGameScene().GetQueuedThreadedJobsManager().AddJob
                     (
                     new ThreadedJob
@@ -604,12 +622,18 @@ public class Shape : GridTriangulable
                         new ThreadedJob.ThreadFunction(OnFinishPerformingDifferenceWithOverlappedStaticShape)
                         )
                     );
+#endif
+                
             }
 
             //make the shape busy before the fusion occurs
             m_state = Shape.ShapeState.BUSY_CLIPPING;
 
             //Perform the fusion
+#if (REMOVE_THREADS_DEBUG)
+            PerformFusionWithStaticShapes();
+            OnFinishPerformingFusionWithStaticShapes();
+#else
             m_parentMesh.GetGameScene().GetQueuedThreadedJobsManager().AddJob
                 (
                 new ThreadedJob
@@ -619,16 +643,7 @@ public class Shape : GridTriangulable
                     new ThreadedJob.ThreadFunction(OnFinishPerformingFusionWithStaticShapes)
                     )
                 );
-        }
-        else if (IsSubstitutionShape())
-        {
-            if (m_state == Shape.ShapeState.MOVING_SUBSTITUTION_INTERSECTION)
-            {
-                PerformDifferenceOnOverlappedStaticShape();
-                OnFinishPerformingDifferenceWithOverlappedStaticShape();
-            }
-            PerformFusionWithStaticShapes();
-            OnFinishPerformingFusionWithStaticShapes();
+#endif
         }
     }
 

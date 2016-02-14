@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 public class GUITouchHandler : TouchHandler
 {
+    private GUIButton m_selectedGUIButton;
+    private SymmetryPoint m_selectedSymmetryPoint;
+
     protected override bool IsPointerLocationContainedInObject(Vector2 pointerLocation)
     {
         if (GetSceneManager().m_displayedContent == SceneManager.DisplayContent.GAME)
@@ -13,20 +16,70 @@ public class GUITouchHandler : TouchHandler
             }
             else
             {
+                //check GUI buttons
                 GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
 
                 for (int i = 0; i != allButtons.Length; i++)
                 {
                     if (allButtons[i].ContainsPoint(pointerLocation))
                     {
+                        m_selectedGUIButton = allButtons[i];
                         return true;
                     }
                 }
+
+                //check symmetry points
+                List<SymmetryPoint> symmetryPoints = GetGUIManager().m_symmetryPoints;
+                for (int i = 0; i != symmetryPoints.Count; i++)
+                {
+                    SymmetryPoint symmetryPoint = symmetryPoints[i];
+                    if (symmetryPoint.ContainsPointer(pointerLocation))
+                    {
+                        m_selectedSymmetryPoint = symmetryPoint;
+                        return true;
+                    }
+                }
+
                 return false;
             }
         }
 
         return true;
+    }
+
+    protected override void OnPointerDown(Vector2 pointerLocation)
+    {
+        base.OnPointerDown(pointerLocation);
+    }
+
+    protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
+    {
+        if (m_selectedSymmetryPoint != null)
+        {
+            m_selectedSymmetryPoint.DetachCircle(); //detach circle if not done already
+
+            Vector3 oldPosition = m_selectedSymmetryPoint.GetCirclePosition();
+            //m_selectedSymmetryPoint.SetCirclePosition(oldPosition + GeometryUtils.BuildVector3FromVector2(delta, 0));
+
+            Grid grid = ((GameScene)GetSceneManager().m_currentScene).m_grid;
+            m_selectedSymmetryPoint.SnapToClosestGridAnchor(grid, pointerLocation);
+
+            return true;
+        }
+        else
+            return base.OnPointerMove(pointerLocation, delta);
+    }
+
+    protected override void OnPointerUp()
+    {
+        if (m_selectedSymmetryPoint != null)
+        {
+            m_selectedSymmetryPoint.ReleaseCircle();
+            m_selectedSymmetryPoint = null;
+            m_selected = false;
+        }
+        else
+            base.OnPointerUp();
     }
 
     /**

@@ -406,74 +406,74 @@ public class Axis : MonoBehaviour
     /**
      * Callback used when a symmetry is performed on the grid
      * **/
-    public void OnPerformSymmetry(Symmetrizer.SymmetryType symmetryType)
+    public void OnPerformSymmetry()
     {
-        GridPoint axisDirection = GetDirection();
-        Grid grid = GetGameScene().m_grid;
+        //GridPoint axisDirection = GetDirection();
+        //Grid grid = GetGameScene().m_grid;
 
-        Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
-        Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
-        Vector2 worldAxisCenter = GetWorldCenter();
+        //Vector2 endpoint1WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointA);
+        //Vector2 endpoint2WorldPosition = grid.GetPointWorldCoordinatesFromGridCoordinates(m_pointB);
+        //Vector2 worldAxisCenter = GetWorldCenter();
 
-        //Create and animate sweeping lines
-        GridPoint clockwiseAxisNormal = GetNormal();
-        Vector2 normalizedClockwiseAxisNormal = clockwiseAxisNormal / clockwiseAxisNormal.magnitude;
-        if (m_twoSidedSymmetry)
-        {
-            float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
+        ////Create and animate sweeping lines
+        //GridPoint clockwiseAxisNormal = GetNormal();
+        //Vector2 normalizedClockwiseAxisNormal = clockwiseAxisNormal / clockwiseAxisNormal.magnitude;
+        //if (m_twoSidedSymmetry)
+        //{
+        //    float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
-            m_leftSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, -normalizedClockwiseAxisNormal);
-            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
+        //    m_leftSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, -normalizedClockwiseAxisNormal);
+        //    m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
 
-            //debug objects
-            m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);            
+        //    //debug objects
+        //    m_debugLeftSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+        //    m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);            
 
-            GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
-            debugLeftSweepLineAnimator.SetParentTransform(this.transform);
-            debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
-            debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
-            debugLeftSweepLineAnimator.SetPosition(worldAxisCenter);
-            GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
-            debugRightSweepLineAnimator.SetParentTransform(this.transform);
-            debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
-            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
-            debugRightSweepLineAnimator.SetPosition(worldAxisCenter);
-        }
-        else
-        {
-            float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
+        //    GameObjectAnimator debugLeftSweepLineAnimator = m_debugLeftSweepLineObject.GetComponent<GameObjectAnimator>();
+        //    debugLeftSweepLineAnimator.SetParentTransform(this.transform);
+        //    debugLeftSweepLineAnimator.SetRotationAxis(Vector3.forward);
+        //    debugLeftSweepLineAnimator.SetRotationAngle(axisAngle);
+        //    debugLeftSweepLineAnimator.SetPosition(worldAxisCenter);
+        //    GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
+        //    debugRightSweepLineAnimator.SetParentTransform(this.transform);
+        //    debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+        //    debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
+        //    debugRightSweepLineAnimator.SetPosition(worldAxisCenter);
+        //}
+        //else
+        //{
+        //    float axisAngle = Mathf.Atan2(axisDirection.Y, axisDirection.X) * Mathf.Rad2Deg;
 
-            m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
-            m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
-            m_debugRightSweepLineObject.name = "RightSweepLine";
+        //    m_rightSweepingLine = new SweepingLine(endpoint1WorldPosition, endpoint2WorldPosition, normalizedClockwiseAxisNormal);
+        //    m_debugRightSweepLineObject = (GameObject)Instantiate(m_sweepLinePfb);
+        //    m_debugRightSweepLineObject.name = "RightSweepLine";
 
-            GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
-            debugRightSweepLineAnimator.SetParentTransform(this.transform);
-            debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
-            debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
-            debugRightSweepLineAnimator.SetPosition(worldAxisCenter);
+        //    GameObjectAnimator debugRightSweepLineAnimator = m_debugRightSweepLineObject.GetComponent<GameObjectAnimator>();
+        //    debugRightSweepLineAnimator.SetParentTransform(this.transform);
+        //    debugRightSweepLineAnimator.SetRotationAxis(Vector3.forward);
+        //    debugRightSweepLineAnimator.SetRotationAngle(axisAngle);
+        //    debugRightSweepLineAnimator.SetPosition(worldAxisCenter);
 
-            m_leftSweepingLine = null;
-        }
+        //    m_leftSweepingLine = null;
+        //}
 
-        //Assign a sweeping line to each dynamic shape
-        List<Shape> allShapes = GetShapesHolder().m_shapes;
-        for (int i = 0; i != allShapes.Count; i++)
-        {
-            Shape shape = allShapes[i];
-            if (shape.IsDynamic()) 
-            {
-                ShapeMesh shapeMesh = shape.m_parentMesh;
-                if (shapeMesh.m_sweepingLine == null) //check if shape is not already swept by another line
-                {
-                    if (MathUtils.Determinant(m_pointA, m_pointB, shape.GetBarycentre()) >= 0) //shape is on the 'left' of the axis
-                        shapeMesh.m_sweepingLine = m_leftSweepingLine;
-                    else //on the 'right' of the axis
-                        shapeMesh.m_sweepingLine = m_rightSweepingLine;
-                }
-            }
-        }
+        ////Assign a sweeping line to each dynamic shape
+        //List<Shape> allShapes = GetShapesHolder().m_shapes;
+        //for (int i = 0; i != allShapes.Count; i++)
+        //{
+        //    Shape shape = allShapes[i];
+        //    if (shape.IsDynamic()) 
+        //    {
+        //        ShapeMesh shapeMesh = shape.m_parentMesh;
+        //        if (shapeMesh.m_sweepingLine == null) //check if shape is not already swept by another line
+        //        {
+        //            if (MathUtils.Determinant(m_pointA, m_pointB, shape.GetBarycentre()) >= 0) //shape is on the 'left' of the axis
+        //                shapeMesh.m_sweepingLine = m_leftSweepingLine;
+        //            else //on the 'right' of the axis
+        //                shapeMesh.m_sweepingLine = m_rightSweepingLine;
+        //        }
+        //    }
+        //}
 
         //Destroy strip
         Destroy(m_stripMesh.gameObject);
@@ -488,7 +488,7 @@ public class Axis : MonoBehaviour
         endpoint2CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
 
         //Start sweeping
-        LaunchSweepingLines();
+        //LaunchSweepingLines();
     }
 
     /**

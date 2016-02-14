@@ -81,6 +81,9 @@ public class GameScene : GUIScene
     //deploy axis buttons
     public GameObject m_deployAxisButtonPfb;
 
+    //symmetry point button
+    public GameObject m_symmetryPointPfb;
+
     //grid contour
     public Material m_gridTopContourMaterial;
 
@@ -306,6 +309,9 @@ public class GameScene : GUIScene
 
         //Show axis deployment buttons
         ShowDeployAxisButtons();
+
+        //Show point symmetry buttons
+        ShowSymmetryPointButtons();
 
         //Show starting shapes
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
@@ -544,26 +550,28 @@ public class GameScene : GUIScene
 
         GUIButton retryButton = retryButtonObject.GetComponent<GUIButton>();
         retryButton.SetTouchArea(new Vector2(130, 130));
+        retryButton.SetTintColor(ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], 1));
 
         GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
         retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float retryButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
+        float retryButtonPositionX = 0.5f * screenSize.x - GetBackgroundRenderer().m_triangleHeight;
+        float retryButtonPositionY = 0.5f * screenSize.y - GetBackgroundRenderer().m_triangleEdgeLength;
+        //float retryButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
         Vector3 gridPosition = m_grid.transform.position;
-        float retryButtonPositionY = gridPosition.y + 0.5f * m_grid.m_gridSize.y - 80;
+        //float retryButtonPositionY = gridPosition.y + 0.5f * m_grid.m_gridSize.y - 80;
         retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
-        retryButtonAnimator.SetColor(Color.white);
 
-        GameObject retryTextObject = (GameObject)Instantiate(m_textMeshPfb);
-        retryTextObject.name = "RetryText";
+        //GameObject retryTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        //retryTextObject.name = "RetryText";
 
-        TextMesh retryText = retryTextObject.GetComponent<TextMesh>();
-        retryText.text = LanguageUtils.GetTranslationForTag("retry");
+        //TextMesh retryText = retryTextObject.GetComponent<TextMesh>();
+        //retryText.text = LanguageUtils.GetTranslationForTag("retry");
 
-        TextMeshAnimator retryTextAnimator = retryText.GetComponent<TextMeshAnimator>();
-        retryTextAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        retryTextAnimator.SetPosition(new Vector3(retryButtonPositionX + 2, retryButtonPositionY - 60, 0));
-        retryTextAnimator.SetFontHeight(30);
-        retryTextAnimator.SetColor(Color.white);
+        //TextMeshAnimator retryTextAnimator = retryText.GetComponent<TextMeshAnimator>();
+        //retryTextAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+        //retryTextAnimator.SetPosition(new Vector3(retryButtonPositionX + 2, retryButtonPositionY - 60, 0));
+        //retryTextAnimator.SetFontHeight(30);
+        //retryTextAnimator.SetColor(Color.white);
 
         //hints
         GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
@@ -571,25 +579,27 @@ public class GameScene : GUIScene
 
         GUIButton hintsButton = hintsButtonObject.GetComponent<GUIButton>();
         hintsButton.SetTouchArea(new Vector2(130, 130));
+        hintsButton.SetTintColor(ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], 1));
 
         GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
         hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        float hintsButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
-        float hintsButtonPositionY = retryButtonPositionY - 160;
+        float hintsButtonPositionX = 0.5f * screenSize.x - 3 * GetBackgroundRenderer().m_triangleHeight;
+        float hintsButtonPositionY = 0.5f * screenSize.y - GetBackgroundRenderer().m_triangleEdgeLength;
+        //float hintsButtonPositionX = 0.5f * (screenSize.x - m_rightContentWidth);
+        //float hintsButtonPositionY = retryButtonPositionY - 160;
         hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
-        hintsButtonAnimator.SetColor(Color.white);
 
-        GameObject hintsTextObject = (GameObject)Instantiate(m_textMeshPfb);
-        hintsTextObject.name = "HintsText";
+        //GameObject hintsTextObject = (GameObject)Instantiate(m_textMeshPfb);
+        //hintsTextObject.name = "HintsText";
 
-        TextMesh hintsText = hintsTextObject.GetComponent<TextMesh>();
-        hintsText.text = LanguageUtils.GetTranslationForTag("hints");
+        //TextMesh hintsText = hintsTextObject.GetComponent<TextMesh>();
+        //hintsText.text = LanguageUtils.GetTranslationForTag("hints");
 
-        TextMeshAnimator hintsTextAnimator = hintsText.GetComponent<TextMeshAnimator>();
-        hintsTextAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-        hintsTextAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY - 60, 0));
-        hintsTextAnimator.SetFontHeight(30);
-        hintsTextAnimator.SetColor(Color.white);
+        //TextMeshAnimator hintsTextAnimator = hintsText.GetComponent<TextMeshAnimator>();
+        //hintsTextAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
+        //hintsTextAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY - 60, 0));
+        //hintsTextAnimator.SetFontHeight(30);
+        //hintsTextAnimator.SetColor(Color.white);
 
         //build a vertical line to show separation between interface buttons and grid
         GameObject lineObject = Instantiate(m_colorQuadPfb);
@@ -602,147 +612,6 @@ public class GameScene : GUIScene
         lineAnimator.SetPosition(new Vector3(0.5f * screenSize.x - m_rightContentWidth, gridPosition.y, 0));
         lineAnimator.SetColor(Color.white);
     }
-
-    /**
-     * Pause, retry and hints buttons
-     * **/
-    //private void ShowInterfaceButtons(float fDelay = 0.0f)
-    //{
-    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
-
-    //    m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
-
-    //    GameObjectAnimator interfaceButtonsHolderAnimator = m_interfaceButtonsHolder.AddComponent<GameObjectAnimator>();
-    //    interfaceButtonsHolderAnimator.SetParentTransform(this.transform);
-    //    interfaceButtonsHolderAnimator.SetPosition(new Vector3(0, 0, -10));
-
-    //    //Build buttons contours
-    //    Color blurrySegmentTintColor = ColorUtils.GetRGBAColorFromTSB(GetLevelManager().m_currentChapter.GetThemeTintValues()[1], 1);
-    //    Color sharpSegmentTintColor = ColorUtils.LightenColor(blurrySegmentTintColor, 0.75f);
-    //    blurrySegmentTintColor.a = 0.5f;
-
-    //    GameObject buttonsContour = new GameObject("ButtonsContour");
-        
-    //    GameObjectAnimator buttonsContourAnimator = buttonsContour.AddComponent<GameObjectAnimator>();
-    //    buttonsContourAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-    //    buttonsContourAnimator.SetPosition(Vector3.zero);
-
-    //    SegmentTree contourSegmentTree = m_interfaceButtonsHolder.AddComponent<SegmentTree>();
-    //    contourSegmentTree.Init(SegmentTree.SegmentType.BLURRY,
-    //                            buttonsContour,
-    //                            m_blurrySegmentPfb, 
-    //                            4.0f,
-    //                            16.0f,
-    //                            Instantiate(m_sharpSegmentMaterial),
-    //                            Instantiate(m_blurrySegmentMaterial),
-    //                            sharpSegmentTintColor,
-    //                            blurrySegmentTintColor);
-
-    //    float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
-    //    float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
-
-    //    SegmentTreeNode node1 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y));
-    //    SegmentTreeNode node2 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 6) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-    //    SegmentTreeNode node3 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-    //    SegmentTreeNode node4 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-    //    SegmentTreeNode node5 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 4) * triangleHeight, 0.5f * screenSize.y));
-    //    SegmentTreeNode node6 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-    //    SegmentTreeNode node7 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-    //    SegmentTreeNode node8 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 2) * triangleHeight, 0.5f * screenSize.y));
-    //    SegmentTreeNode node9 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight, 0.5f * screenSize.y - 2.0f * triangleEdgeLength));
-    //    SegmentTreeNode node10 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y - 1.5f * triangleEdgeLength));
-    //    SegmentTreeNode node11 = new SegmentTreeNode(new Vector2((BackgroundTrianglesRenderer.NUM_COLUMNS / 2) * triangleHeight, 0.5f * screenSize.y));
-
-    //    node1.SetAnimationStartNode(true);
-
-    //    node1.AddChild(node2);
-    //    node2.AddChild(node3);
-    //    node3.AddChild(node4);
-    //    node4.AddChild(node5);
-    //    node4.AddChild(node6);
-    //    node6.AddChild(node7);
-    //    node7.AddChild(node8);
-    //    node7.AddChild(node9);
-    //    node9.AddChild(node10);
-    //    node10.AddChild(node11);
-
-    //    contourSegmentTree.m_nodes.Add(node1);
-    //    contourSegmentTree.m_nodes.Add(node2);
-    //    contourSegmentTree.m_nodes.Add(node3);
-    //    contourSegmentTree.m_nodes.Add(node4);
-    //    contourSegmentTree.m_nodes.Add(node5);
-    //    contourSegmentTree.m_nodes.Add(node6);
-    //    contourSegmentTree.m_nodes.Add(node7);
-    //    contourSegmentTree.m_nodes.Add(node8);
-    //    contourSegmentTree.m_nodes.Add(node9);
-    //    contourSegmentTree.m_nodes.Add(node10);
-    //    contourSegmentTree.m_nodes.Add(node11);
-
-    //    contourSegmentTree.BuildSegments(true);
-
-    //    //Add glowing rectangles above each button skin
-    //    Vector2 glowRectSize = new Vector2(1.733f * triangleHeight, 0.867f * triangleHeight);
-    //    for (int i = 0; i != 3; i++)
-    //    {
-    //        GameObject glowRectObject = (GameObject)Instantiate(m_texQuadPfb);
-    //        glowRectObject.name = "GlowRectangle" + (i + 1);
-
-    //        glowRectObject.GetComponent<UVQuad>().Init(m_glowRectangleMaterial);
-
-    //        TexturedQuadAnimator glowRectAnimator = glowRectObject.GetComponent<TexturedQuadAnimator>();
-    //        glowRectAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-    //        float rectPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - (2 * i + 1)) * triangleHeight;
-    //        float rectPositionY = 0.5f * screenSize.y - 0.4f * triangleEdgeLength;
-    //        glowRectAnimator.SetPosition(new Vector3(rectPositionX, rectPositionY, 0));
-    //        glowRectAnimator.SetScale(glowRectSize);
-    //        glowRectAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-    //    }
-
-    //    //Add button skins
-    //    Vector2 interfaceButtonSize = new Vector2(1.733f * triangleHeight, 1.733f * triangleHeight);
-
-    //    //pause
-    //    GameObject pauseButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_PAUSE_BUTTON, interfaceButtonSize);
-    //    pauseButtonObject.name = "PauseButton";
-
-    //    GUIButton pauseButton = pauseButtonObject.GetComponent<GUIButton>();
-    //    pauseButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
-
-    //    GameObjectAnimator pauseButtonAnimator = pauseButtonObject.GetComponent<GameObjectAnimator>();
-    //    pauseButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-    //    float pauseButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 1) * triangleHeight;
-    //    float pauseButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-    //    pauseButtonAnimator.SetPosition(new Vector3(pauseButtonPositionX, pauseButtonPositionY, 0));
-    //    pauseButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-
-    //    //retry
-    //    GameObject retryButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_RETRY_BUTTON, interfaceButtonSize);
-    //    retryButtonObject.name = "RetryButton";
-
-    //    GUIButton retryButton = retryButtonObject.GetComponent<GUIButton>();
-    //    retryButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
-
-    //    GameObjectAnimator retryButtonAnimator = retryButtonObject.GetComponent<GameObjectAnimator>();
-    //    retryButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-    //    float retryButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 3) * triangleHeight - 4.0f; //offset a bit the texture, otherwise it gives a weird impression
-    //    float retryButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-    //    retryButtonAnimator.SetPosition(new Vector3(retryButtonPositionX, retryButtonPositionY, 0));
-    //    retryButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-
-    //    //hints
-    //    GameObject hintsButtonObject = GetGUIManager().CreateGUIButtonForID(GUIButton.GUIButtonID.ID_HINTS_BUTTON, interfaceButtonSize);
-    //    hintsButtonObject.name = "HintsButton";
-
-    //    GUIButton hintsButton = hintsButtonObject.GetComponent<GUIButton>();
-    //    hintsButton.SetTouchArea(new Vector2(2 * triangleHeight, 3 * triangleEdgeLength));
-
-    //    GameObjectAnimator hintsButtonAnimator = hintsButtonObject.GetComponent<GameObjectAnimator>();
-    //    hintsButtonAnimator.SetParentTransform(m_interfaceButtonsHolder.transform);
-    //    float hintsButtonPositionX = (BackgroundTrianglesRenderer.NUM_COLUMNS / 2 - 5) * triangleHeight;
-    //    float hintsButtonPositionY = 0.5f * screenSize.y - 1.14f * triangleEdgeLength;
-    //    hintsButtonAnimator.SetPosition(new Vector3(hintsButtonPositionX, hintsButtonPositionY, 0));
-    //    hintsButtonAnimator.SetColorChannels(GetLevelManager().m_currentChapter.GetThemeTintValues()[2], ValueAnimator.ColorMode.TSB);
-    //}
 
     /**
      * Fade out grid points without grid borders
@@ -982,8 +851,7 @@ public class GameScene : GUIScene
         holderAnimator.SetParentTransform(this.transform);
         Vector3 gridPosition = m_grid.transform.position;
         Vector2 gridSize = m_grid.m_gridSize;
-        float rightBorderWidth = 168.0f;
-        Vector3 holderPosition = new Vector3(0.5f * (screenSize.x - rightBorderWidth),
+        Vector3 holderPosition = new Vector3(0.5f * (screenSize.x - m_rightContentWidth),
                                              gridPosition.y - 0.5f * gridSize.y,
                                              DEPLOY_AXIS_BUTTONS_Z_VALUE);
         holderAnimator.SetPosition(holderPosition);
@@ -1003,6 +871,48 @@ public class GameScene : GUIScene
             buttonAnimator.SetParentTransform(deployAxisButtonsHolder.transform);
             float buttonPositionY = (i + 0.5f) * verticalDistanceBetweenButtons + bottomMargin;
             buttonAnimator.SetPosition(new Vector3(0, buttonPositionY, 0));
+        }
+    }
+
+    /**
+     * Symmetry points that player can drag onto the scene
+     * **/
+    private void ShowSymmetryPointButtons()
+    {
+        Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+        //holder
+        GameObject symmetryPointsHolder = new GameObject();
+        symmetryPointsHolder.name = "SymmetryPointsHolder";
+
+        GameObjectAnimator holderAnimator = symmetryPointsHolder.AddComponent<GameObjectAnimator>();
+        holderAnimator.SetParentTransform(this.transform);
+        Vector3 gridPosition = m_grid.transform.position;
+        Vector2 gridSize = m_grid.m_gridSize;
+        Vector3 holderPosition = new Vector3(0.5f * (screenSize.x - m_rightContentWidth),
+                                             gridPosition.y + 0.5f * gridSize.y,
+                                             DEPLOY_AXIS_BUTTONS_Z_VALUE);
+        holderAnimator.SetPosition(holderPosition);
+
+
+        //build points
+        int symmetryPointsCount = 3;
+        float verticalDistanceBetweenButtons = 130.0f;
+        float topMargin = 20.0f;
+        for (int i = 0; i != symmetryPointsCount; i++)
+        {
+            GameObject symmetryPointObject = (GameObject)Instantiate(m_symmetryPointPfb);
+            symmetryPointObject.name = "SymmetryPoint" + (i + 1);
+
+            SymmetryPoint symmetryPoint = symmetryPointObject.GetComponent<SymmetryPoint>();
+            symmetryPoint.Build();
+
+            GameObjectAnimator symmetryPointAnimator = symmetryPointObject.GetComponent<GameObjectAnimator>();
+            symmetryPointAnimator.SetParentTransform(symmetryPointsHolder.transform);
+            float buttonPositionY = -(i + 0.5f) * verticalDistanceBetweenButtons - topMargin;
+            symmetryPointAnimator.SetPosition(new Vector3(0, buttonPositionY, 0));
+
+            GetGUIManager().m_symmetryPoints.Add(symmetryPoint);
         }
     }
 
@@ -1467,9 +1377,30 @@ public class GameScene : GUIScene
 
         //Debug.Log("STEP1 CHECK");
 
-        //Then check if every shape is fully inside one of the dotted outlines       
+        //Check if the sum of shapes areas is equal to the sum of outlines areas        
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
+        float shapesArea = 0;
+        float outlinesArea = 0;
+        for (int i = 0; i != allShapes.Count; i++)
+        {
+            if (allShapes[i].m_state == Shape.ShapeState.TILED_BACKGROUND)
+                continue;
 
+            allShapes[i].CalculateArea();
+            shapesArea += allShapes[i].m_area;
+        }
+
+        for (int i = 0; i != outlines.Count; i++)
+        {
+            outlines[i].CalculateArea();
+            outlinesArea += outlines[i].m_area;
+        }
+
+        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
+        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
+        //    Debug.Log("STEP2 CHECK");
+
+        //Finally check if every shape is fully inside one of the dotted outlines
         if (outlines.Count == 0) //if a level contains no outline (i.e in debug mode for instance)
             return false;
 
@@ -1512,29 +1443,9 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP2 CHECK");
+        //Debug.Log("STEP3 CHECK");
 
-        //Finally, check if the sum of shapes areas is equal to the sum of outlines areas
-        float shapesArea = 0;
-        float outlinesArea = 0;
-        for (int i = 0; i != allShapes.Count; i++)
-        {
-            if (allShapes[i].m_state == Shape.ShapeState.TILED_BACKGROUND)
-                continue;
-
-            allShapes[i].CalculateArea();
-            shapesArea += allShapes[i].m_area;
-        }
-
-        for (int i = 0; i != outlines.Count; i++)
-        {
-            outlines[i].CalculateArea();
-            outlinesArea += outlines[i].m_area;
-        }
-
-        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
-        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-        //    Debug.Log("STEP3 CHECK");
+        
 
         return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
     }

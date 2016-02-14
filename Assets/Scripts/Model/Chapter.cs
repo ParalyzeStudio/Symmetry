@@ -94,25 +94,25 @@ public class Chapter
         {
             m_themeTintValues[0] = new Vector3(55, 1.0f, 1.0f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
-            m_themeTintValues[2] = new Vector3(80, 0.75f, 4.5f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
         }
         else if (m_number == 2)
         {
             m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
-            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
         }
         else if (m_number == 3)
         {
             m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
-            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
         }
         else if (m_number == 4)
         {
             m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
-            m_themeTintValues[2] = new Vector3(0, 0.75f, 4.5f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
         }
 
         return m_themeTintValues;

@@ -27,36 +27,39 @@
 	<shapes>
 		<shape tint="0">
 			<contour>
-				<point column="2" line="6"/>
-				<point column="10" line="6"/>
-				<point column="10" line="14"/>
+				<point column="4" line="6"/>
+				<point column="6" line="6"/>
+				<point column="6" line="7"/>
+				<point column="4" line="7"/>
 			</contour>
 		</shape>		
 		<shape tint="90">
 			<contour>
+				<point column="8" line="6"/>
 				<point column="10" line="6"/>
-				<point column="14" line="6"/>
-				<point column="10" line="10"/>
+				<point column="10" line="7"/>
+				<point column="8" line="7"/>
 			</contour>
 		</shape>
-		<shape tint="180">
+		<shape tint="50">
 			<contour>
-				<point column="10" line="6"/>
-				<point column="10" line="4"/>
-				<point column="12" line="6"/>
+				<point column="4" line="7"/>
+				<point column="10" line="7"/>
+				<point column="8" line="9"/>
+				<point column="6" line="9"/>
 			</contour>
 		</shape>
-		<shape tint="270">
+		<shape tint="25">
 			<contour>
-				<point column="10" line="6"/>
-				<point column="9" line="6"/>
-				<point column="10" line="5"/>
+				<point column="6" line="9"/>
+				<point column="8" line="9"/>
+				<point column="7" line="10"/>
 			</contour>
 		</shape>
 	</shapes>
 	<constraints>
-		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
-		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>	
 		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
 		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
 		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	

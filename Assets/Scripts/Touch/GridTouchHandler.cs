@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#define REMOVE_THREADS_FOR_DEBUG
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -109,15 +111,7 @@ public class GridTouchHandler : TouchHandler
 
                     //Launch the symmetry process
                     Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
-
-                    QueuedThreadedJobsManager threadedJobsManager = gameScene.GetQueuedThreadedJobsManager();
-                    threadedJobsManager.AddJob(new ThreadedJob
-                                                    (
-                                                        new ThreadedJob.ThreadFunction(symmetrizer.SymmetrizeShapes),
-                                                        null,
-                                                        new ThreadedJob.ThreadFunction(symmetrizer.OnSymmetrizingShapesDone)
-                                                    )
-                                              );
+                    symmetrizer.PerformSymmetry();
                 }
             }
             else if (currentAxis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis

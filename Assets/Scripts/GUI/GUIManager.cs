@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 /**
  * Class that handles GUI on menus only
@@ -77,6 +78,11 @@ public class GUIManager : MonoBehaviour
 
     public Color[] m_framesColors;
 
+    //store gui elements here
+    public List<GUIButton> m_guiButtons;
+    public List<ActionButton> m_actionButtons;
+    public List<SymmetryPoint> m_symmetryPoints;
+
     /**
      * Init some variables
      * **/
@@ -84,6 +90,10 @@ public class GUIManager : MonoBehaviour
     {
         //m_optionsWindow = null;
         m_plainWhiteMaterial = Instantiate(m_transpPositionColorMaterial);
+
+        m_guiButtons = new List<GUIButton>();
+        m_actionButtons = new List<ActionButton>();
+        m_symmetryPoints = new List<SymmetryPoint>();
     }
 
     /**
@@ -106,6 +116,8 @@ public class GUIManager : MonoBehaviour
         //Set the size of the button skin
         button.SetSize(size);
 
+        m_guiButtons.Add(button);
+
         return buttonObject;
     }
 
@@ -120,7 +132,27 @@ public class GUIManager : MonoBehaviour
         ActionButton button = buttonObject.GetComponent<ActionButton>();
         button.Init(groupID, childIDs, width);
 
+        m_actionButtons.Add(button);
+
         return buttonObject;
+    }
+
+    /**
+     * 
+     * **/
+    public GameObject CreateSymmetryPoint()
+    {
+        return null;
+    }
+
+    /**
+     * Clear the elements store by the GUIManager for one scene
+     * **/
+    public void ClearStoredElements()
+    {
+        m_guiButtons.Clear();
+        m_actionButtons.Clear();
+        m_symmetryPoints.Clear();
     }
 
     public Material GetClonedSkinMaterialForID(GUIButton.GUIButtonID iID)

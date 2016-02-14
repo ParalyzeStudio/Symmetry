@@ -54,7 +54,7 @@ public class GameController : MonoBehaviour
         //DebugShowChapters();
         //DebugShowLevels(1);
         //DebugShowSpecificLevel(1, 12, false);
-        DebugShowDebugLevel(3, false);
+        DebugShowDebugLevel(4, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 
         //TouchHandler.s_touchDeactivated = false;
@@ -102,8 +102,8 @@ public class GameController : MonoBehaviour
      * **/
     public void DebugShowDebugLevel(int iDebugLevelNumber, bool bShowLevelIntro = true)
     {
-        if (iDebugLevelNumber > 3)
-            iDebugLevelNumber = 3;
+        if (iDebugLevelNumber > 4)
+            iDebugLevelNumber = 4;
 
         LevelManager levelManager = GetLevelManager();
         levelManager.SetCurrentLevelAsDebugLevel(iDebugLevelNumber);

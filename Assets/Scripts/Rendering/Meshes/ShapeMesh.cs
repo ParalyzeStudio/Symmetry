@@ -54,6 +54,18 @@ public class ShapeMesh : TexturedMesh
             GetVoxelGrid().AssignShapeToVoxels(m_shapeData);
             BuildCells();
             //GetVoxelGrid().UnassignShapeFromVoxels(m_shapeData);
+
+            //TODO show cells one after another or with some kind of chain animation
+            //TODO for the moment show all cells at once
+            for (int iCellIdx = 0; iCellIdx != m_cells.Length; iCellIdx++)
+            {
+                ShapeCell cell = m_cells[iCellIdx];
+                if (cell != null)
+                {
+                    Debug.Log("TriangulateAndShow");
+                    cell.TriangulateAndShow();
+                }
+            }
         }
         else //render shape with simple triangulation
         {
@@ -200,10 +212,40 @@ public class ShapeMesh : TexturedMesh
     }
 
     /**
+     * Callback when a child cell has been fully rendered
+     * **/
+    public void OnCellRendered()
+    {
+        //check if all cells have been rendered
+        bool allCellsRendered = true;
+        int numCells = 0;
+        for (int i = 0; i != m_cells.Length; i++)
+        {
+            ShapeCell cell = m_cells[i];
+            if (cell != null)
+                numCells++;
+            if (cell == null || cell.Rendered)
+                continue;
+            else
+            {
+                allCellsRendered = false;
+            }
+        }        
+
+        if (allCellsRendered) //we just swept all cells, we can now render this whole mesh with simple triangles
+        {
+            Debug.Log("OnMeshSwept");
+            OnMeshSwept();
+        }
+    }
+
+    /**
      * Callback called when all cells of this mesh have been swept
      * **/
     private void OnMeshSwept()
     {
+        if (m_shapeData.m_state == Shape.ShapeState.DYNAMIC_INTERSECTION)
+            Debug.Log("swpet intersection");
         m_shapeData.FinalizeClippingOperations();
     }
 
