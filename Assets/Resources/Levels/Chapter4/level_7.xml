@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Debug level 3" number="0">
+	<counter maxActions="4"/>
+	<grid exactNumColumns="20" minNumLines="14"/>
+	<dottedOutlines>
+		<!-- <dottedOutline>
+			<contour>
+				<point column="5" line="5"/>
+				<point column="5.5" line="4.5"/>
+				<point column="5" line="4"/>
+				<point column="6" line="3"/>
+				<point column="6.5" line="3.5"/>
+				<point column="7" line="3"/>
+				<point column="8" line="4"/>
+				<point column="7.5" line="4.5"/>
+				<point column="8" line="5"/>
+				<point column="7" line="6"/>
+				<point column="6.5" line="5.5"/>
+				<point column="6" line="6"/>
+			</contour>
+		</dottedOutline>  -->
+	</dottedOutlines>
+	<shapes>
+		<shape tint="240">
+			<contour>
+				<point column="4" line="3"/>
+				<point column="8" line="3"/>
+				<point column="8" line="9"/>
+				<point column="6" line="9"/>
+				<point column="6" line="5"/>
+				<point column="4" line="5"/>
+			</contour>
+		</shape>
+		<shape tint="0">
+			<contour>
+				<point column="4" line="5"/>
+				<point column="6" line="5"/>
+				<point column="6" line="9"/>
+				<point column="8" line="9"/>
+				<point column="8" line="11"/>
+				<point column="4" line="11"/>
+			</contour>
+		</shape>
+	</shapes>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
+</level>

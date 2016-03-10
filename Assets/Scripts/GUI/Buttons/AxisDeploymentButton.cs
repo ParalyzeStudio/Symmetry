@@ -2,7 +2,7 @@
 
 public class AxisDeploymentButton : GUIButton
 {
-    private Axis m_axis; //the axis bound to this button
+    private AxisRenderer m_axis; //the axis bound to this button
     public Material m_deployAxisSkinMaterial;
 
     public GameObject m_numberTextObject; //the number that appears below the skin
@@ -22,7 +22,7 @@ public class AxisDeploymentButton : GUIButton
     /**
      * Make this button active
      * **/
-    public void EnableForAxis(Axis axis)
+    public void EnableForAxis(AxisRenderer axis)
     {
         m_axis = axis;
     }

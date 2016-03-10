@@ -1,0 +1,1 @@
+déplacement simple d'objets avec filtres par couleur

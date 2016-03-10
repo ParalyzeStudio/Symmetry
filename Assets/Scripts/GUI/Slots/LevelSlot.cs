@@ -4,7 +4,7 @@ public class LevelSlot : BaseSlot
 {
     public const float LEVEL_SLOT_BACKGROUND_OPACITY = 0.75f;
 
-    private int m_levelNumber;
+    private Level m_level; //the level related to this slot
 
     //Shared prefabs
     public GameObject m_circleMeshPfb;
@@ -14,12 +14,13 @@ public class LevelSlot : BaseSlot
     public void Init(GUIScene parentScene, int iLevelNumber)
     {
         base.Init(parentScene);
-        m_levelNumber = iLevelNumber;
+        m_level = m_parentScene.GetLevelManager().GetLevelForCurrentChapterAndLevelRelativeNumber(iLevelNumber);
 
         //Add a background only if level is completed        
-        int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
+        //int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
         CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
-        if (m_parentScene.GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+        //if (m_parentScene.GetPersistentDataManager().IsLevelDone(iAbsoluteLevelNumber))
+        if (m_level.IsDone())
         {
             Color slotColor = m_parentScene.GetLevelManager().m_currentChapter.GetThemeColors()[2];
 
@@ -64,7 +65,7 @@ public class LevelSlot : BaseSlot
         sharpContourAnimator.SetPosition(Vector3.zero);
 
         //Set correct level number
-        m_levelNumberText.GetComponent<TextMesh>().text = m_levelNumber.ToString();
+        m_levelNumberText.GetComponent<TextMesh>().text = m_level.m_chapterRelativeNumber.ToString();
 
         //Set color on texts
         TextMeshAnimator numberAnimator = m_levelNumberText.GetComponent<TextMeshAnimator>();
@@ -82,7 +83,7 @@ public class LevelSlot : BaseSlot
         slotAnimator.SetScale(new Vector3(0, 0, 1));
         slotAnimator.SetOpacity(0);
 
-        float localDelay = (m_levelNumber - 1) * 0.025f;
+        float localDelay = (m_level.m_chapterRelativeNumber - 1) * 0.025f;
         slotAnimator.ScaleTo(new Vector3(1, 1, 1), 0.5f, localDelay);
     }
 

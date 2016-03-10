@@ -46,7 +46,7 @@ public class Outlines : MonoBehaviour
 
                 GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                 OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                outlineSegment.Build(worldPointA, worldPointB, Color.white); //TODO replace white color by contour segment color
+                outlineSegment.Build(worldPointA, worldPointB, Color.white, 32); //TODO replace white color by contour segment color
 
                 TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
                 outlineSegmentAnimator.SetParentTransform(outlineObject.transform);
@@ -66,7 +66,7 @@ public class Outlines : MonoBehaviour
 
                     GameObject clonedOutlineSegmentObject = (GameObject)Instantiate(m_outlineSegmentPfb);
                     OutlineSegment outlineSegment = clonedOutlineSegmentObject.GetComponent<OutlineSegment>();
-                    outlineSegment.Build(worldPointA, worldPointB, Color.white);
+                    outlineSegment.Build(worldPointB, worldPointA, Color.white, 32); //reverse the order of pointA and pointB as holes have a different winding number tha normal contours
 
                     TexturedSegmentAnimator outlineSegmentAnimator = outlineSegment.GetComponent<TexturedSegmentAnimator>();
                     outlineSegmentAnimator.SetParentTransform(outlineObject.transform);

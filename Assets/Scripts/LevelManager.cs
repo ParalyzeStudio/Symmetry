@@ -337,6 +337,11 @@ public class LevelManager : MonoBehaviour
         return m_chapters[iChapterNumber - 1].m_levels[iLevelRelativeNumber - 1];
     }
 
+    public Level GetLevelForCurrentChapterAndLevelRelativeNumber(int iLevelRelativeNumber)
+    {
+        return m_currentChapter.m_levels[iLevelRelativeNumber - 1];
+    }
+
     /**
      * Sets the m_currentChapter variable 
      * **/

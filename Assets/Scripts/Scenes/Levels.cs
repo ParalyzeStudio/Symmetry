@@ -286,5 +286,7 @@ public class Levels : GUIScene
             m_levelSlots[i].transform.parent = null;
             m_levelSlots[i].Dismiss(0.5f);
         }
+
+        GetSceneManager().SwitchDisplayedContent(SceneManager.DisplayContent.CHAPTERS, false);
     }
 }

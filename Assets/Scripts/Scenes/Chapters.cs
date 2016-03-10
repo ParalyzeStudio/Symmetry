@@ -33,7 +33,7 @@ public class Chapters : GUIScene
         ShowChapterSlot();
 
         //Show chapter selection arrows
-        ShowSelectionArrows();
+        GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowSelectionArrows), 0.5f);
     }
 
     private void ApplyGradientOnBackground(Gradient gradient, float fDelay = 0.0f)
@@ -60,7 +60,7 @@ public class Chapters : GUIScene
     /**
      * Show chapter selection arrows
      * **/
-    public void ShowSelectionArrows(float fDelay = 0.0f)
+    public void ShowSelectionArrows()
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 

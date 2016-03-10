@@ -109,7 +109,7 @@ public class PersistentDataManager : MonoBehaviour
         }
         catch (Exception)
         {
-            Debug.Log("+++++failed to open or create the file at location: " + Application.persistentDataPath + "/level_" + levelData.m_absNumber + ".dat");
+            fs.Close();
             return false; //failed to open or create the file
         }
 
@@ -124,40 +124,32 @@ public class PersistentDataManager : MonoBehaviour
      * **/
     private LevelData LoadLevelDataFromFile(int iAbsoluteLevelNumber)
     {
-        BinaryFormatter bf = new BinaryFormatter();
-        FileStream fs = null;
         LevelData levelData = null;
 
         string filePath = Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat";
         if (File.Exists(filePath))
         {
-            fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream fs = null;
+            try
+            {
+                fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+            }
+            catch (System.Exception e)
+            {
+                fs.Close();
+                levelData = new LevelData(iAbsoluteLevelNumber);
+                return levelData;
+            }
             levelData = (LevelData)bf.Deserialize(fs);
-            
+            fs.Close();            
         }
         else
         {
             levelData = new LevelData(iAbsoluteLevelNumber);
-            fs = File.Create(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat");
+            SaveLevelDataToFile(levelData);
         }
-
-        fs.Close();
         return levelData;
-
-        //try
-        //{
-        //    fs = File.Open(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat", FileMode.Open, FileAccess.Read, FileShare.None);
-        //}
-        //catch (Exception)
-        //{
-        //    levelData = new LevelData(iAbsoluteLevelNumber);
-        //    fs = File.Create(Application.persistentDataPath + "/level_" + iAbsoluteLevelNumber + ".dat");
-        //    fs.Close();
-        //    return levelData;
-        //}
-        //levelData = (LevelData)bf.Deserialize(fs);
-        //fs.Close();
-        //return levelData;
     }
 }
 

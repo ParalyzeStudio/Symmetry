@@ -1,46 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<level name="Level 2" number="2">
-	<counter maxActions="2"/>
-	<grid exactNumColumns="11" exactNumLines="9" maxGridSpacing="150"/>
+<level name="Debug level 1" number="2">
+	<counter maxActions="10"/>
+	<stack size="4"/>
+	<grid exactNumColumns="9" exactNumLines="7"/>
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
-				<point column="4" line="5" />
-				<point column="4" line="4" />
-				<point column="5" line="4" />
-				<point column="5" line="3" />
-				<point column="7" line="3" />
-				<point column="7" line="4" />
-				<point column="6" line="4" />
-				<point column="6" line="5" />				
-			</contour>
-		</dottedOutline>
-		<dottedOutline>
-			<contour>
-				<point column="5" line="7" />
-				<point column="5" line="6" />
-				<point column="6" line="6" />
-				<point column="6" line="5" />
-				<point column="8" line="5" />
-				<point column="8" line="6" />
-				<point column="7" line="6" />
-				<point column="7" line="7" />	
+				<point column="5" line="5"/>
+				<point column="4" line="4"/>				
+				<point column="4" line="3"/>				
+				<point column="5" line="2"/>
+				<point column="6" line="3"/>
+				<point column="6" line="4"/>
 			</contour>
 		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+		 <shape tint="0">
 			<contour>
-				<point column="4" line="5" />
-				<point column="4" line="4" />
-				<point column="5" line="4" />
-				<point column="5" line="3" />
-				<point column="6" line="3" />
-				<point column="6" line="5" />
+				<point column="4" line="5"/>
+				<point column="6" line="5"/>
+				<point column="5" line="6"/>
+			</contour>
+		</shape>
+		<shape tint="50">
+			<contour>
+				<point column="4" line="5"/>
+				<point column="4" line="3"/>
+				<point column="6" line="3"/>
+				<point column="6" line="5"/>
 			</contour>
 		</shape>
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXES_ALL"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+	</constraints>
 </level>

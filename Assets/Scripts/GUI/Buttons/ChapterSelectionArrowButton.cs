@@ -75,7 +75,7 @@ public class ChapterSelectionArrowButton : GUIButton
         {
             StartArrowTranslationAnimation();
             arrowAnimator.SetOpacity(0);
-            arrowAnimator.FadeTo(1.0f, 0.5f);
+            arrowAnimator.FadeTo(1.0f, 1.0f);
         }
         else
         {

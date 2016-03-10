@@ -42,8 +42,9 @@ public class GridTouchHandler : TouchHandler
 
         Grid.GridAnchor closestAnchor = this.gameObject.GetComponent<Grid>().GetClosestGridAnchorForWorldPosition(pointerLocation);
 
-        Symmetrizer.SymmetryType symmetryType = Symmetrizer.GetSymmetryTypeFromActionButtonID(gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS));
-        gameScene.m_axes.BuildAxis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition, symmetryType, Axis.AxisType.DYNAMIC_UNSNAPPED);
+        Axis.AxisSymmetryType symmetryType = Axis.GetSymmetryTypeFromActionButtonID(gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS));
+        Axis axis = new Axis(closestAnchor.m_gridPosition, closestAnchor.m_gridPosition, Axis.AxisType.DYNAMIC_UNSNAPPED, symmetryType);
+        gameScene.m_axesHolder.BuildAxis(axis);
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -52,19 +53,19 @@ public class GridTouchHandler : TouchHandler
             return false;
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        Axis currentAxis = gameScene.m_axes.GetAxisBeingDrawn();
+        Axis currentAxis = gameScene.m_axesHolder.GetAxisBeingDrawn();
 
         if (currentAxis == null)
             return false;
 
         //render the axis again
-        Axis axisRenderer = currentAxis.GetComponent<Axis>();
+        AxisRenderer axisRenderer = currentAxis.m_parentRenderer;
 
         //find the constrained direction that will allow us to calculate the projected pointer location
         Vector2 constrainedDirection;
         float projectionLength;
         axisRenderer.FindConstrainedDirection(pointerLocation, out constrainedDirection, out projectionLength);
-        Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_pointA);
+        Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_axisData.m_pointA);
         pointerLocation = axisEndpoint1WorldPosition + constrainedDirection * projectionLength;
 
         axisRenderer.SnapAxisEndpointToClosestAnchor(pointerLocation);
@@ -91,10 +92,11 @@ public class GridTouchHandler : TouchHandler
             return;
 
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
-        Axis currentAxis = gameScene.m_axes.GetAxisBeingDrawn();
+        Axis currentAxis = gameScene.m_axesHolder.GetAxisBeingDrawn();
 
         if (currentAxis != null)
         {
+            AxisRenderer axisRenderer = currentAxis.m_parentRenderer;
             if (currentAxis.m_type == Axis.AxisType.DYNAMIC_SNAPPED)
             {
                 Level currentLevel = GetLevelManager().m_currentLevel;
@@ -110,15 +112,15 @@ public class GridTouchHandler : TouchHandler
                     currentAxis.m_type = Axis.AxisType.STATIC_DONE; //make the axis static
 
                     //Launch the symmetry process
-                    Symmetrizer symmetrizer = currentAxis.GetComponent<Symmetrizer>();
-                    symmetrizer.PerformSymmetry();
+                    Symmetrizer symmetrizer = axisRenderer.GetComponent<Symmetrizer>();
+                    symmetrizer.Symmetrize();
                 }
             }
             else if (currentAxis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {
                 //remove the axis from the axes list and destroy the object
-                gameScene.m_axes.RemoveAxis(currentAxis);
-                Destroy(currentAxis.gameObject);
+                gameScene.m_axesHolder.RemoveAxis(axisRenderer);
+                Destroy(axisRenderer.gameObject);
             }
         }
     }

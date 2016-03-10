@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 1" number="1">
+	<counter maxActions="4"/>
+	<grid exactNumColumns="10" exactNumLines="6"/>
+	<dottedOutlines>
+		<dottedOutline>
+			<contour>
+				<point column="5" line="3"/>
+				<point column="6" line="3"/>
+				<point column="6" line="4"/>
+				<point column="5" line="4"/>
+			</contour>
+		</dottedOutline>
+	</dottedOutlines>
+	<shapes>
+		<shape tint="0">
+			<contour>
+				<point column="3" line="3"/>
+				<point column="5" line="3"/>
+				<point column="5" line="4"/>
+				<point column="3" line="4"/>
+			</contour>
+		</shape>		
+		<shape tint="25">
+			<contour>
+				<point column="5" line="3"/>
+				<point column="6" line="3"/>
+				<point column="6" line="4"/>
+				<point column="5" line="4"/>
+			</contour>
+		</shape>
+		<shape tint="50">
+			<contour>
+				<point column="6" line="3"/>
+				<point column="8" line="3"/>
+				<point column="8" line="4"/>
+				<point column="6" line="4"/>
+			</contour>
+		</shape>
+	</shapes>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>	
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
+</level>

@@ -13,7 +13,7 @@ public class Strip : GridTriangulable
     public Strip(Axis parentAxis) : base()
     {
         m_parentAxis = parentAxis;
-        m_parentSymmetrizer = parentAxis.GetComponent<Symmetrizer>();
+        m_parentSymmetrizer = parentAxis.m_parentRenderer.GetComponent<Symmetrizer>();
     }
 
     /**
@@ -22,7 +22,7 @@ public class Strip : GridTriangulable
     public void CalculateContour()
     {
         //Calculate intersection points
-        Grid grid = m_parentAxis.GetGameScene().m_grid;
+        Grid grid = m_parentAxis.m_parentRenderer.GetGameScene().m_grid;
         Vector2 axisNormal = m_parentAxis.GetNormal();
         GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x),
                                                  Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y),
@@ -174,7 +174,7 @@ public class Strip : GridTriangulable
 
         m_stripLeftSubShape = new Shape(leftSubContour);
 
-        if (m_parentSymmetrizer.m_symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        if (m_parentAxis.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES)
         {
             Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
             rightSubContour.Add(m_parentAxis.m_pointA);

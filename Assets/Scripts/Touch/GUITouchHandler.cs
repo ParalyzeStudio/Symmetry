@@ -17,16 +17,29 @@ public class GUITouchHandler : TouchHandler
             else
             {
                 //check GUI buttons
-                GUIButton[] allButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
+                GUIButton[] guiButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<GUIButton>();
+                //List<GUIButton> guiButtons = GetGUIManager().m_guiButtons;
 
-                for (int i = 0; i != allButtons.Length; i++)
+                for (int i = 0; i != guiButtons.Length; i++)
                 {
-                    if (allButtons[i].ContainsPoint(pointerLocation))
+                    if (guiButtons[i].ContainsPoint(pointerLocation))
                     {
-                        m_selectedGUIButton = allButtons[i];
+                        m_selectedGUIButton = guiButtons[i];
                         return true;
                     }
                 }
+
+                //check action buttons
+                //List<ActionButton> actionButtons = GetGUIManager().m_actionButtons;
+
+                //for (int i = 0; i != actionButtons.Count; i++)
+                //{
+                //    if (actionButtons[i].ContainsPoint(pointerLocation))
+                //    {
+                //        m_selectedGUIButton = actionButtons[i];
+                //        return true;
+                //    }
+                //}
 
                 //check symmetry points
                 List<SymmetryPoint> symmetryPoints = GetGUIManager().m_symmetryPoints;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class Axes : MonoBehaviour
 {
-    public List<Axis> m_childrenAxes { get; set; }
+    public List<AxisRenderer> m_axes { get; set; }
     public GameObject m_axisPfb;
 
     //snap animation
@@ -13,7 +13,7 @@ public class Axes : MonoBehaviour
 
     public void Awake()
     {
-        m_childrenAxes = new List<Axis>();
+        m_axes = new List<AxisRenderer>();
     }
 
     public void Start()
@@ -21,7 +21,7 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public Axis BuildAxis(GridPoint pointA, GridPoint pointB, Symmetrizer.SymmetryType symmetryType, Axis.AxisType axisType)
+    public AxisRenderer BuildAxis(Axis axis)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
@@ -32,30 +32,28 @@ public class Axes : MonoBehaviour
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
         symmetrizer.Init();
         GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
-        symmetrizer.m_symmetryType = symmetryType;
 
         //Build and render the axis once
-        Axis axisRenderer = newAxis.GetComponent<Axis>();
-        axisRenderer.m_twoSidedSymmetry = (symmetryType == Symmetrizer.SymmetryType.SYMMETRY_AXES_TWO_SIDES);
-        axisRenderer.BuildElements(pointA, pointB);
-        axisRenderer.m_type = axisType;
+        AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
+        axisRenderer.SetAxisData(axis);
+        axisRenderer.BuildElements();
 
         AddAxis(axisRenderer);
         return axisRenderer;
     }
 
-    public void AddAxis(Axis axis)
+    public void AddAxis(AxisRenderer axis)
     {
-        m_childrenAxes.Add(axis);
+        m_axes.Add(axis);
     }
 
-    public void RemoveAxis(Axis axis)
+    public void RemoveAxis(AxisRenderer axis)
     {
-        for (int axisIndex = 0; axisIndex != m_childrenAxes.Count; axisIndex++)
+        for (int axisIndex = 0; axisIndex != m_axes.Count; axisIndex++)
         {
-            if (m_childrenAxes[axisIndex] == axis)
+            if (m_axes[axisIndex] == axis)
             {
-                m_childrenAxes.Remove(axis);
+                m_axes.Remove(axis);
                 return;
             }
         }
@@ -63,7 +61,7 @@ public class Axes : MonoBehaviour
 
     public void ClearAxes()
     {
-        m_childrenAxes.Clear();
+        m_axes.Clear();
     }
 
     ///**
@@ -90,9 +88,9 @@ public class Axes : MonoBehaviour
      * **/
     public Axis GetAxisBeingDrawn()
     {
-        for (int i = 0; i != m_childrenAxes.Count; i++)
+        for (int i = 0; i != m_axes.Count; i++)
         {
-            Axis axis = m_childrenAxes[i].GetComponent<Axis>();
+            Axis axis = m_axes[i].GetComponent<AxisRenderer>().m_axisData;
             //stop at the first dynamic axis as th
             if (axis.m_type == Axis.AxisType.DYNAMIC_SNAPPED ||
                 axis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED)

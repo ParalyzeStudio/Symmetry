@@ -18,7 +18,7 @@ public class ShapeMesh : TexturedMesh
     public ShapeCell[] m_cells { get; set; }
 
     //sweeping line associated to this dynamic shape
-    public Axis.SweepingLine m_sweepingLine { get; set; }
+    public AxisRenderer.SweepingLine m_sweepingLine { get; set; }
 
     private GameScene m_gameScene; //global instance of the Shapes holder
 
@@ -163,7 +163,7 @@ public class ShapeMesh : TexturedMesh
      * Sweep mesh cells and reveal them if they have just crossed the sweeping line and are now on the 'side' specified by the associated paramater.
      * return true if all cells have been swept, false otherwise
      * **/
-    public bool SweepCellsWithLine(Axis.SweepingLine line, bool bLeftSide)
+    public bool SweepCellsWithLine(AxisRenderer.SweepingLine line, bool bLeftSide)
     {
         bool allCellsSwept = true;
         for (int i = 0; i != m_cells.Length; i++)

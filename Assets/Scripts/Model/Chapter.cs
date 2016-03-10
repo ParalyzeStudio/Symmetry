@@ -76,6 +76,42 @@ public class Chapter
                 m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
                 m_themeColors[5] = ColorUtils.GetColorFromRGBAVector4(new Vector4(20, 20, 3, 253));
             }
+            else if (m_number == 5)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
+                m_themeColors[5] = ColorUtils.GetColorFromRGBAVector4(new Vector4(20, 20, 3, 253));
+            }
+            else if (m_number == 6)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
+                m_themeColors[5] = ColorUtils.GetColorFromRGBAVector4(new Vector4(20, 20, 3, 253));
+            }
+            else if (m_number == 7)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
+                m_themeColors[5] = ColorUtils.GetColorFromRGBAVector4(new Vector4(20, 20, 3, 253));
+            }
+            else if (m_number == 8)
+            {
+                m_themeColors[0] = ColorUtils.GetColorFromRGBAVector4(new Vector4(155, 175, 29, 255));
+                m_themeColors[1] = ColorUtils.GetColorFromRGBAVector4(new Vector4(53, 62, 10, 255));
+                m_themeColors[2] = ColorUtils.GetColorFromRGBAVector4(new Vector4(64, 12, 26, 255));
+                m_themeColors[3] = ColorUtils.GetColorFromRGBAVector4(new Vector4(59, 15, 29, 255));
+                m_themeColors[4] = ColorUtils.GetColorFromRGBAVector4(new Vector4(255, 241, 82, 255));
+                m_themeColors[5] = ColorUtils.GetColorFromRGBAVector4(new Vector4(20, 20, 3, 253));
+            }
         }
 
         return m_themeColors;
@@ -109,6 +145,30 @@ public class Chapter
             m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
         }
         else if (m_number == 4)
+        {
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
+        }
+        else if (m_number == 5)
+        {
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
+        }
+        else if (m_number == 6)
+        {
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
+        }
+        else if (m_number == 7)
+        {
+            m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
+            m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);
+            m_themeTintValues[2] = new Vector3(70, 0.85f, 7.0f);
+        }
+        else if (m_number == 8)
         {
             m_themeTintValues[0] = new Vector3(280.0f, 1.0f, 1.75f);
             m_themeTintValues[1] = new Vector3(5, 0.8f, 2.75f);

@@ -1,56 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <level name="Level 4" number="4">
-	<counter maxActions="2"/>
-	<grid exactNumColumns="13" exactNumLines="13" maxGridSpacing="150"/>
+	<counter maxActions="4"/>
+	<grid exactNumColumns="16" minNumLines="9"/>
 	<dottedOutlines>
 		<dottedOutline>
 			<contour>
-				<point column="4" line="8" />
-				<point column="4" line="6" />
-				<point column="5" line="6" />
-				<point column="5" line="5" />
-				<point column="6" line="5" />
-				<point column="6" line="4" />
-				<point column="7" line="4" />
-				<point column="7" line="5" />
-				<point column="9" line="5" />
-				<point column="9" line="4" />
-				<point column="10" line="4" />
-				<point column="10" line="6" />
-				<point column="9" line="6" />
-				<point column="9" line="7" />
-				<point column="8" line="7" />
-				<point column="8" line="8" />
-				<point column="7" line="8" />
-				<point column="7" line="7" />
-				<point column="5" line="7" />
-				<point column="5" line="8" />
+				<point column="3" line="8"/>
+				<point column="3" line="3"/>
+				<point column="8" line="3"/>
+				<point column="8" line="4"/>
+				<point column="11" line="4"/>
+				<point column="11" line="7"/>
+				<point column="8" line="7"/>
+				<point column="8" line="8"/>
 			</contour>
+			<holes>
+				<hole>
+					<point column="4" line="7" />
+					<point column="4" line="4" />
+					<point column="7" line="4" />
+					<point column="7" line="7" />
+				</hole>
+			</holes>
 		</dottedOutline>
+		
 	</dottedOutlines>
 	<shapes>
-		<shape color="1,0,0,1">
+		<shape tint="0">
 			<contour>
-				<point column="11" line="10" />
-				<point column="8" line="7" />
-				<point column="10" line="5" />
-				<point column="11" line="6" />
-				<point column="10" line="7" />
-				<point column="12" line="9" />
+				<point column="3" line="8"/>
+				<point column="3" line="3"/>
+				<point column="8" line="3"/>
+				<point column="8" line="8"/>
 			</contour>
 		</shape>
-		<shape color="1,0,0,1">
+		<shape tint="50">
 			<contour>
-				<point column="4" line="8" />
-				<point column="4" line="6" />
-				<point column="6" line="6" />
-				<point column="6" line="7" />
-				<point column="5" line="7" />
-				<point column="5" line="8" />
+				<point column="9" line="8"/>
+				<point column="9" line="3"/>
+				<point column="14" line="3"/>
+				<point column="14" line="8"/>
 			</contour>
-		</shape>
+		</shape>		
 	</shapes>
-	<actions>
-		<action tag="SYMMETRY_AXES_ALL"/>
-	</actions>
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
 </level>

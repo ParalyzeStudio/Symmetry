@@ -47,7 +47,7 @@ public class GameScene : GUIScene
     public Counter m_counter { get; set; }
     public Outlines m_outlines { get; set; }
     public Shapes m_shapesHolder { get; set; }
-    public Axes m_axes { get; set; }
+    public Axes m_axesHolder { get; set; }
 
     //plain white material
     private Material m_plainWhiteMaterial;
@@ -1088,42 +1088,42 @@ public class GameScene : GUIScene
         }
 
         //outlines holes
-        for (int i = 0; i != m_outlines.m_outlinesList.Count; i++)
-        {
-            DottedOutline outline = m_outlines.m_outlinesList[i];
-            for (int j = 0; j != outline.m_holes.Count; j++)
-            {
-                GameObject hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
-                hatchingsMeshObject.name = "HatchingsMesh";
+        //for (int i = 0; i != m_outlines.m_outlinesList.Count; i++)
+        //{
+        //    DottedOutline outline = m_outlines.m_outlinesList[i];
+        //    for (int j = 0; j != outline.m_holes.Count; j++)
+        //    {
+        //        GameObject hatchingsMeshObject = (GameObject)Instantiate(m_texturedMeshPfb);
+        //        hatchingsMeshObject.name = "HatchingsMesh";
 
-                TexturedMeshAnimator hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
-                hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
-                hatchingsMeshAnimator.SetPosition(Vector3.zero);
+        //        TexturedMeshAnimator hatchingsMeshAnimator = hatchingsMeshObject.GetComponent<TexturedMeshAnimator>();
+        //        hatchingsMeshAnimator.SetParentTransform(hatchingsHolder.transform);
+        //        hatchingsMeshAnimator.SetPosition(Vector3.zero);
 
-                TexturedMesh hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
-                hatchingsMesh.Init(m_hatchingsMaterial);
-                hatchingsMesh.m_textureSize = new Vector2(64, 64);
+        //        TexturedMesh hatchingsMesh = hatchingsMeshObject.GetComponent<TexturedMesh>();
+        //        hatchingsMesh.Init(m_hatchingsMaterial);
+        //        hatchingsMesh.m_textureSize = new Vector2(64, 64);
 
-                //Quickly make this hole as a GridTriangulable to perform triangulation on it
-                GridTriangulable holeTriangulable = new GridTriangulable(outline.m_holes[j]);
-                holeTriangulable.Triangulate();
+        //        //Quickly make this hole as a GridTriangulable to perform triangulation on it
+        //        GridTriangulable holeTriangulable = new GridTriangulable(outline.m_holes[j]);
+        //        holeTriangulable.Triangulate();
 
-                for (int k = 0; k != holeTriangulable.m_triangles.Count; k++)
-                {
-                    GridTriangle holeTriangle = holeTriangulable.m_triangles[k];
-                    Vector2 pt1 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[0]);
-                    Vector2 pt2 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[1]);
-                    Vector2 pt3 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[2]);
-                    hatchingsMesh.AddTriangle(pt1, pt3, pt2);
-                }                    
-            }
-        }
+        //        for (int k = 0; k != holeTriangulable.m_triangles.Count; k++)
+        //        {
+        //            GridTriangle holeTriangle = holeTriangulable.m_triangles[k];
+        //            Vector2 pt1 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[0]);
+        //            Vector2 pt2 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[1]);
+        //            Vector2 pt3 = m_grid.GetPointWorldCoordinatesFromGridCoordinates(holeTriangle.m_points[2]);
+        //            hatchingsMesh.AddTriangle(pt1, pt3, pt2);
+        //        }                    
+        //    }
+        //}
     }
 
     private void BuildAxesHolder()
     {
         GameObject axesHolderObject = (GameObject)Instantiate(m_axesPfb);
-        m_axes = axesHolderObject.GetComponent<Axes>();
+        m_axesHolder = axesHolderObject.GetComponent<Axes>();
         GameObjectAnimator axesAnimator = axesHolderObject.GetComponent<GameObjectAnimator>();
         axesAnimator.SetParentTransform(this.transform);
         axesAnimator.SetPosition(new Vector3(0, 0, AXES_Z_VALUE));
@@ -1482,6 +1482,9 @@ public class GameScene : GUIScene
 
         m_gameStatus = GameStatus.FINISHED;
 
+        //Clear symmetry points
+        GetGUIManager().ClearStoredElements();
+
         if (gameStatus == GameStatus.VICTORY)
         {
             Debug.Log("EndLevel VICTORY");
@@ -1525,7 +1528,7 @@ public class GameScene : GUIScene
     private void DismissSceneElementsOnVictory()
     {
         m_outlines.Dismiss(1.0f);
-        m_axes.Dismiss(1.0f);
+        m_axesHolder.Dismiss(1.0f);
         DismissGridPoints(0.5f);
         DismissInterfaceButtons(0.5f);
         DismissActionButtons(1.0f);

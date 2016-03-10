@@ -25,63 +25,35 @@
 		 <shape tint="0">
 			<contour>
 				<point column="4" line="7" />
-				<point column="4" line="5" />
-				<point column="8" line="5" />
-				<point column="8" line="7" />
-				<point column="7" line="7" />
-				<point column="7" line="6" />
-				<point column="5" line="6" />
-				<point column="5" line="7" />
-			</contour>
-		</shape>
-		<shape tint="50">
-			<contour>
-				<point column="5" line="7" />
-				<point column="5" line="6" />
-				<point column="7" line="6" />
-				<point column="7" line="7" />
-			</contour>
-		</shape>
-		<shape tint="100">
-			<contour>
-				<point column="4" line="7" />
-				<point column="7" line="7" />
-				<point column="7" line="8" />
-				<point column="6" line="8" />
-				<point column="6" line="9" />
-				<point column="5" line="9" />
-				<point column="5" line="8" />
-				<point column="4" line="8" />
-			</contour>
-		</shape>
-		<shape tint="150">
-			<contour>
-				<point column="4" line="8" />
-				<point column="5" line="8" />
-				<point column="5" line="9" />
-				<point column="4" line="9" />
-			</contour>
-		</shape>
-		<shape tint="200">
-			<contour>
-				<point column="6" line="9" />
-				<point column="6" line="8" />
-				<point column="7" line="8" />
-				<point column="7" line="7" />
-				<point column="8" line="7" />
-				<point column="8" line="9" />
-			</contour>
-		</shape>
-		<!-- <shape tint="300">
-			<contour>
-				<point column="5" line="4" />
-				<point column="3" line="4" />				
-				<point column="3" line="3" />
-				<point column="6" line="3" />
 				<point column="6" line="5" />
-				<point column="5" line="5" />
+				<point column="8" line="7" />
+				<point column="6" line="9" />
 			</contour>
-		</shape> -->
+		</shape>
+		<shape tint="90">
+			<contour>
+				<point column="6" line="5" />
+				<point column="8" line="3" />
+				<point column="10" line="5" />
+				<point column="8" line="7" />
+			</contour>
+		</shape>
+		<shape tint="180">
+			<contour>
+				<point column="10" line="5" />
+				<point column="12" line="7" />
+				<point column="10" line="9" />
+				<point column="8" line="7" />
+			</contour>
+		</shape>
+		<shape tint="270">
+			<contour>
+				<point column="8" line="7" />
+				<point column="10" line="9" />
+				<point column="8" line="11" />
+				<point column="6" line="9" />
+			</contour>
+		</shape>
 	</shapes>
 	<constraints>
 		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	

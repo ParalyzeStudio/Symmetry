@@ -209,8 +209,10 @@ public class GUIButton : MonoBehaviour
         {
             //Translate the button on the left and make it go out of screen
             GameObjectAnimator buttonAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
-            Vector3 buttonToPosition = buttonAnimator.GetPosition() - new Vector3(256, 0, 0);
-            buttonAnimator.TranslateTo(buttonToPosition, 0.5f);
+            Vector3 buttonPosition = this.transform.position;
+            Vector3 buttonToPosition = buttonPosition - new Vector3(256, 0, 0);
+            buttonAnimator.SetParentTransform(null);
+            buttonAnimator.TranslateTo(buttonToPosition, 0.5f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
             
             ((Levels)GetSceneManager().m_currentScene).OnClickBackButton();
         }

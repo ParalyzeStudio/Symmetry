@@ -23,9 +23,8 @@ public class SymmetryPoint : MonoBehaviour
         m_arrowsAnimator = m_arrowsObject.GetComponent<TexturedQuadAnimator>();
 
         //initialize the symmetrizer component
-        Symmetrizer symmetrizer = this.GetComponent<Symmetrizer>();
+        PointSymmetrizer symmetrizer = this.GetComponent<PointSymmetrizer>();
         symmetrizer.Init();
-        symmetrizer.m_symmetryType = Symmetrizer.SymmetryType.SYMMETRY_POINT;
     }
 
     public bool ContainsPointer(Vector2 pointerLocation)
@@ -78,7 +77,7 @@ public class SymmetryPoint : MonoBehaviour
         if (m_snappedAnchor != null) //perform point symmetry
         {
             Symmetrizer pointSymmetrizer = (Symmetrizer)this.gameObject.GetComponent<Symmetrizer>();
-            pointSymmetrizer.PerformSymmetry();
+            pointSymmetrizer.Symmetrize();
         }
         else
         {
