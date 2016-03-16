@@ -23,9 +23,7 @@ public class ChapterSlotProgressBar : MonoBehaviour
     {
         m_parentSlot = parentSlot;
 
-        Chapter parentChapter = parentSlot.m_parentChapter;
         m_size = size;
-        float completionPercentage = parentChapter.GetCompletionPercentage();
 
         //Background
         ColorQuad backgroundQuad = m_background.GetComponent<ColorQuad>();

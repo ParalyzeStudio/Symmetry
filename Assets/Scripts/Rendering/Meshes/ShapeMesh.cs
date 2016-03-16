@@ -22,6 +22,12 @@ public class ShapeMesh : TexturedMesh
 
     private GameScene m_gameScene; //global instance of the Shapes holder
 
+    //shape selection contour
+    public GameObject m_shapeSelectionContourSegmentPfb;
+    public Material m_shapeSelectionContourMaterial;
+    public Material m_transpColorMaterial;
+    private GameObjectAnimator m_selectionContourAnimator;
+
     public override void Init(Material material = null)
     {
         base.Init(material);
@@ -90,6 +96,76 @@ public class ShapeMesh : TexturedMesh
         }
 
         RefreshMesh(); //refresh mesh immediately, do not wait next frame Update call
+    }
+
+    /**
+     * Draw some contour around the shape to indicate that the player has selected this shape
+     * **/
+    public void DrawSelectionContour()
+    {
+        Contour shapeContour = m_shapeData.m_contour;
+
+        GameObject selectionContourObject = new GameObject("SelectionContour");
+
+        m_selectionContourAnimator = selectionContourObject.AddComponent<GameObjectAnimator>();
+        m_selectionContourAnimator.SetParentTransform(this.transform);
+        m_selectionContourAnimator.SetPosition(new Vector3(0, 0, -50));
+
+        for (int i = 0; i != shapeContour.Count; i++)
+        {
+            GridPoint gridPointA = shapeContour[i];
+            GridPoint gridPointB = shapeContour[(i == shapeContour.Count - 1) ? 0 : i + 1];
+            Vector2 worldPointA = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(gridPointA);
+            Vector2 worldPointB = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(gridPointB);
+
+            GameObject segmentObject = (GameObject)Instantiate(m_shapeSelectionContourSegmentPfb);
+            segmentObject.name = "SelectionContourSegment";
+            segmentObject.transform.parent = selectionContourObject.transform;
+
+            ColorSegment contourSegment = segmentObject.GetComponent<ColorSegment>();
+            float shapeTint = this.m_shapeData.m_tint;
+            Color contourColor = ColorUtils.GetRGBAColorFromTSB(new Vector3(shapeTint, 1, 1), 1);
+            contourSegment.Build(worldPointB, worldPointA, 6, m_transpColorMaterial, contourColor, 4);
+
+            SegmentAnimator segmentAnimator = segmentObject.GetComponent<SegmentAnimator>();
+            segmentAnimator.SetOpacity(0.0f);
+            segmentAnimator.FadeTo(1.0f, 0.5f);
+        }
+    }
+
+    /**
+     * PENDING WORK Draw an inner blur for a closed contour
+     * **/
+    private void DrawInnerBlur(Contour contour)
+    {
+        ////start by building an inner belt joining points on bisector edges
+        //float beltThickness = 20.0f;
+
+        //for (int i = 0; i != contour.Count; i++)
+        //{
+        //    GridPoint point1 = contour[(i > 0) ? i - 1 : contour.Count - 1];
+        //    GridPoint point2 = contour[i];
+        //    GridPoint point3 = contour[(i == contour.Count - 1) ? 0 : i + 1];
+
+        //    Vector2 worldPoint1 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point1);
+        //    Vector2 worldPoint2 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point2);
+        //    Vector2 worldPoint3 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point3);
+        //}
+    }
+
+    public void TranslateSelectionContour(Vector3 delta)
+    {
+        m_selectionContourAnimator.SetPosition(m_selectionContourAnimator.GetPosition() + delta);
+    }
+
+    /**
+     * Fade out and translate the selection contour when shape has been released by the player
+     * **/
+    public void ReleaseSelectionContour()
+    {        
+        m_selectionContourAnimator.SetParentTransform(null);
+        m_selectionContourAnimator.FadeTo(0.0f, 1.0f);
+        m_selectionContourAnimator.TranslateTo(m_selectionContourAnimator.GetPosition() + new Vector3(0, 50, 0), 1.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
     /**

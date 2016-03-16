@@ -24,6 +24,7 @@ public class TouchHandler : MonoBehaviour
     protected LevelManager m_levelManager;
     protected SceneManager m_sceneManager;
     private TouchManager m_touchManager;
+    private CallFuncHandler m_callFuncHandler;
 
     public virtual void Awake()
     {
@@ -232,5 +233,13 @@ public class TouchHandler : MonoBehaviour
             m_sceneManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<SceneManager>();
 
         return m_sceneManager;
+    }
+
+    public CallFuncHandler GetCallFuncHandler()
+    {
+        if (m_callFuncHandler == null)
+            m_callFuncHandler = GameObject.FindGameObjectWithTag("GameController").GetComponent<CallFuncHandler>();
+
+        return m_callFuncHandler;
     }
 }

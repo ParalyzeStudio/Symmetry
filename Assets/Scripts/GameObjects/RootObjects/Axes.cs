@@ -31,7 +31,6 @@ public class Axes : MonoBehaviour
         //Set the symmetry type
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
         symmetrizer.Init();
-        GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();

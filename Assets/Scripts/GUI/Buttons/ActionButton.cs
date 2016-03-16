@@ -34,7 +34,6 @@ public class ActionButton : GUIButton
         m_groupID = groupID;
         m_childIDs = childIDs;
 
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
         m_childButtonSize = new Vector2(width, 90.0f);
 
         //Build group title

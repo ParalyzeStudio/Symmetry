@@ -23,10 +23,12 @@ public class ShapeTouchHandler : TouchHandler
         return false;
     }
 
-    protected override void OnPointerDown(Vector2 pointerLocation)
+    private void SelectShape()
     {
-        Debug.Log("OnPointerDown");
-        Shape pickedShape = this.GetComponent<ShapeMesh>().m_shapeData;
+        m_selected = true;
+
+        ShapeMesh shapeMesh = this.GetComponent<ShapeMesh>();
+        Shape pickedShape = shapeMesh.m_shapeData;
         pickedShape.m_offset = Vector2.zero;
         pickedShape.m_gridOffset = GridPoint.zero;
         pickedShape.m_state = Shape.ShapeState.MOVING_ORIGINAL_SHAPE;
@@ -37,7 +39,14 @@ public class ShapeTouchHandler : TouchHandler
         Vector3 shapeNewPosition = new Vector3(0, 0, GameScene.TILED_BACKGROUND_RELATIVE_Z_VALUE + 1); //place the shape behind the tiled background so it becomes invisible
         shapeAnimator.SetPosition(shapeNewPosition);
 
-        base.OnPointerDown(pointerLocation);
+        //draw contour around shape
+        shapeMesh.DrawSelectionContour();
+    }
+
+    protected override void OnPointerDown(Vector2 pointerLocation)
+    {
+        SelectShape();
+        base.OnPointerDown(pointerLocation);        
     }
 
     protected override bool OnPointerMove(Vector2 pointerLocation, Vector2 delta)
@@ -59,8 +68,9 @@ public class ShapeTouchHandler : TouchHandler
         GridPoint deltaGridOffset = shape.m_gridOffset - prevGridOffset;
         shape.Translate(deltaGridOffset);
                 
-        GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
         shape.InvalidateSubstitutionShapes();
+
+        shapeMesh.TranslateSelectionContour(delta);
 
         return true;
     }
@@ -96,7 +106,10 @@ public class ShapeTouchHandler : TouchHandler
             shape.FinalizeClippingOperationsOnSubstitutionShapes();
 
             m_selected = false;
+
+            //release the contour around shape
+            shapeMesh.TranslateSelectionContour(gameScene.m_grid.TransformWorldVectorIntoGridVector(minTranslation));
+            shapeMesh.ReleaseSelectionContour();
         }
     }
 }
-

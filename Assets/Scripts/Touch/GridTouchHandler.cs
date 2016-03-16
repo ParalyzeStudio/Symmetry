@@ -68,6 +68,10 @@ public class GridTouchHandler : TouchHandler
         Vector2 axisEndpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(axisRenderer.m_axisData.m_pointA);
         pointerLocation = axisEndpoint1WorldPosition + constrainedDirection * projectionLength;
 
+        //Debug.Log("pointerLocation:" + pointerLocation);
+        //axisRenderer.m_axisData.m_pointB = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
+        //axisRenderer.Render();
+
         axisRenderer.SnapAxisEndpointToClosestAnchor(pointerLocation);
 
         //if (axisRenderer.isAxisSnapped())
@@ -100,21 +104,21 @@ public class GridTouchHandler : TouchHandler
             if (currentAxis.m_type == Axis.AxisType.DYNAMIC_SNAPPED)
             {
                 Level currentLevel = GetLevelManager().m_currentLevel;
-                if (currentLevel.m_symmetriesStackable)
-                {
-                    currentAxis.m_type = Axis.AxisType.STATIC_PENDING; //make the axis static
+                //if (currentLevel.m_symmetriesStackable)
+                //{
+                //    currentAxis.m_type = Axis.AxisType.STATIC_PENDING; //make the axis static
 
-                    //stack the symmetry
-                    //gameScene.m_gameStack.PushAxis(currentAxis);
-                }
-                else
-                {
+                //    //stack the symmetry
+                //    //gameScene.m_gameStack.PushAxis(currentAxis);
+                //}
+                //else
+                //{
                     currentAxis.m_type = Axis.AxisType.STATIC_DONE; //make the axis static
 
                     //Launch the symmetry process
                     Symmetrizer symmetrizer = axisRenderer.GetComponent<Symmetrizer>();
                     symmetrizer.Symmetrize();
-                }
+                //}
             }
             else if (currentAxis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED) //we can get rid off this axis
             {

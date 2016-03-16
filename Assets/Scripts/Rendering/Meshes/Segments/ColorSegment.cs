@@ -12,7 +12,6 @@ public class ColorSegment : Segment
         if (bUpdateColor)
         {
             Color color = GetComponent<ColorSegmentAnimator>().m_color;
-            Mesh mesh = GetComponent<MeshFilter>().sharedMesh;
 
             int colorsLength = m_meshVertices.Length;
             if (m_meshColors == null)
