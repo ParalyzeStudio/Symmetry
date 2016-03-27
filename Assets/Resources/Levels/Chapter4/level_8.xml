@@ -23,14 +23,6 @@
 	<shapes>
 		<shape tint="0">
 			<contour>
-				<point column="4" line="3"/>
-				<point column="6" line="3"/>
-				<point column="6" line="5"/>
-				<point column="4" line="5"/>
-			</contour>
-		</shape>
-		<shape tint="0">
-			<contour>
 				<point column="6" line="5"/>
 				<point column="10" line="5"/>
 				<point column="10" line="9"/>
