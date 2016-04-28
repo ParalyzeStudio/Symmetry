@@ -21,8 +21,6 @@ public class AxisRenderer : MonoBehaviour
     public AxisSegment m_axisSegment { get; set; } //the segment joining two endpoints
     public GameObject m_endpoint1 { get; set; } //the first endpoint of this axis
     public GameObject m_endpoint2 { get; set; } //the second endpoint of this axis
-    public GameObject m_endpoint1Circle { get; set; }
-    public GameObject m_endpoint2Circle { get; set; }
     private GameObjectAnimator m_leftIndicatingArrowAnimator;
     private GameObjectAnimator m_rightIndicatingArrowAnimator;
 
@@ -121,23 +119,84 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void BuildElements()
     {
-        GameScene gameScene = GetGameScene();
-        Color axisTintColor = gameScene.GetLevelManager().m_currentChapter.GetThemeColors()[4];
-        axisTintColor = Color.white;
-
         Vector3 endpoint1WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
         Vector3 endpoint2WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);
 
-        //One material per axis
-        Material axisMaterial = Instantiate(m_plainWhiteMaterial);
+        if (m_axisData.m_type == Axis.AxisType.UNDER_CONSTRUCTION) //build only endpoint A
+            BuildEndpointA(endpoint1WorldPosition);
+        else
+        {
+            //segment
+            BuildAxisSegment(endpoint1WorldPosition, endpoint2WorldPosition);
+
+            //endpoints
+            BuildEndpointA(endpoint1WorldPosition);
+            BuildEndpointB(endpoint2WorldPosition);
+
+            //strip        
+            CreateStrip();
+
+            //indicating arrows
+            BuildIndicatingArrows();
+        }
+    }
+
+    public void BuildEndpointA(Vector2 position)
+    {
+        if (m_endpoint1 == null)
+        {
+            m_endpoint1 = BuildEndpointAtPosition(position);
+            m_endpoint1.name = "AxisEndpoint1";
+        }
+    }
+
+    private void BuildEndpointB(Vector2 position)
+    {
+        if (m_endpoint2 == null)
+        {
+            m_endpoint2 = BuildEndpointAtPosition(position);
+            m_endpoint2.name = "AxisEndpoint2";
+        }
+    }
+
+    private GameObject BuildEndpointAtPosition(Vector2 position)
+    {
         Material endpointMaterial = Instantiate(m_endpointMaterial);
         Material endpointOuterContourMaterial = Instantiate(m_endpointOuterContourMaterial);
-        Material indicatingArrowMaterial = Instantiate(m_indicatingArrowMaterial);
-        //Material deployButtonMaterial = Instantiate(m_deployButtonMaterial);
+        Color axisTintColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
         //dimensions of each element
         Vector3 endpointSize = new Vector3(64, 64, 1);
         Vector3 endpointOuterContourSize = new Vector3(128, 128, 1);
+
+        //endpoint
+        GameObject endpoint = (GameObject)Instantiate(m_texQuadPfb);
+        UVQuad endpointMesh = endpoint.GetComponent<UVQuad>();
+        endpointMesh.Init(endpointMaterial);
+        TexturedQuadAnimator endpointAnimator = endpoint.GetComponent<TexturedQuadAnimator>();
+        endpointAnimator.SetParentTransform(this.transform);
+        endpointAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(position, 0));
+        endpointAnimator.SetScale(endpointSize);
+        endpointAnimator.SetColor(axisTintColor);
+
+        //endpoint outer contour
+        GameObject endpointCircle = (GameObject)Instantiate(m_texQuadPfb);
+        endpointCircle.name = "AxisEndpoint1Circle";
+        UVQuad endpointCircleMesh = endpointCircle.GetComponent<UVQuad>();
+        endpointCircleMesh.Init(endpointOuterContourMaterial);
+        TexturedQuadAnimator endpoint1CircleAnimator = endpointCircle.GetComponent<TexturedQuadAnimator>();
+        endpoint1CircleAnimator.SetParentTransform(endpoint.transform);
+        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(position, 0));
+        endpoint1CircleAnimator.SetScale(endpointOuterContourSize);
+        endpoint1CircleAnimator.SetColor(axisTintColor);
+
+        return endpoint;
+    }
+
+    private void BuildAxisSegment(Vector2 endpoint1Position, Vector2 endpoint2Position)
+    {
+        Material axisMaterial = Instantiate(m_plainWhiteMaterial);
+        Color axisTintColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);
@@ -145,66 +204,23 @@ public class AxisRenderer : MonoBehaviour
         axisSegmentAnimator.SetParentTransform(this.transform);
         axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(endpoint1WorldPosition, endpoint2WorldPosition, DEFAULT_AXIS_THICKNESS, axisMaterial, axisTintColor);
+        m_axisSegment.Build(endpoint1Position, endpoint2Position, DEFAULT_AXIS_THICKNESS, axisMaterial, axisTintColor);
+    }
 
-        //endpoint 1
-        m_endpoint1 = (GameObject)Instantiate(m_texQuadPfb);
-        m_endpoint1.name = "AxisEndpoint1";
-        UVQuad endpoint1Mesh = m_endpoint1.GetComponent<UVQuad>();
-        endpoint1Mesh.Init(endpointMaterial);
-        TexturedQuadAnimator endpoint1Animator = m_endpoint1.GetComponent<TexturedQuadAnimator>();
-        endpoint1Animator.SetParentTransform(this.transform);
-        endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
-        endpoint1Animator.SetScale(endpointSize);
-        endpoint1Animator.SetColor(axisTintColor);
-
-        //endpoint 1 outer contour
-        m_endpoint1Circle = (GameObject)Instantiate(m_texQuadPfb);
-        m_endpoint1Circle.name = "AxisEndpoint1Circle";
-        UVQuad endpoint1CircleMesh = m_endpoint1Circle.GetComponent<UVQuad>();
-        endpoint1CircleMesh.Init(endpointOuterContourMaterial);
-        TexturedQuadAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<TexturedQuadAnimator>();
-        endpoint1CircleAnimator.SetParentTransform(this.transform);
-        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
-        endpoint1CircleAnimator.SetScale(endpointOuterContourSize);
-        endpoint1CircleAnimator.SetColor(axisTintColor);
-
-        //endpoint 2
-        m_endpoint2 = (GameObject)Instantiate(m_texQuadPfb);
-        m_endpoint2.name = "AxisEndpoint2";
-        UVQuad endpoint2Mesh = m_endpoint2.GetComponent<UVQuad>();
-        endpoint2Mesh.Init(endpointMaterial);
-        TexturedQuadAnimator endpoint2Animator = m_endpoint2.GetComponent<TexturedQuadAnimator>();
-        endpoint2Animator.SetParentTransform(this.transform);
-        endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
-        endpoint2Animator.SetScale(endpointSize);
-        endpoint2Animator.SetColor(axisTintColor);
-
-        //endpoint 2 circle
-        m_endpoint2Circle = (GameObject)Instantiate(m_texQuadPfb);
-        m_endpoint2Circle.name = "AxisEndpoint2Circle";
-        UVQuad endpoint2CircleMesh = m_endpoint2Circle.GetComponent<UVQuad>();
-        endpoint2CircleMesh.Init(endpointOuterContourMaterial);
-        TexturedQuadAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<TexturedQuadAnimator>();
-        endpoint2CircleAnimator.SetParentTransform(this.transform);
-        endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
-        endpoint2CircleAnimator.SetScale(endpointOuterContourSize);
-        endpoint2CircleAnimator.SetColor(axisTintColor);
-
-        //strip
-        CreateStrip();
-
-        //indicating arrows
-        Vector3 indicatingArrowSize = new Vector3(64, 64, 1);
+    private void BuildIndicatingArrows()
+    {
+        Material arrowMaterial = Instantiate(m_indicatingArrowMaterial);
+        Color arrowColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
+        Vector3 arrowSize = new Vector3(64, 64, 1);
 
         GameObject rightIndicatingArrowObject = (GameObject)Instantiate(m_texQuadPfb);
         rightIndicatingArrowObject.name = "IndicatingArrow";
         UVQuad rightIndicatingArrow = rightIndicatingArrowObject.GetComponent<UVQuad>();
-        rightIndicatingArrow.Init(indicatingArrowMaterial);
+        rightIndicatingArrow.Init(arrowMaterial);
         m_rightIndicatingArrowAnimator = rightIndicatingArrowObject.GetComponent<TexturedQuadAnimator>();
         m_rightIndicatingArrowAnimator.SetParentTransform(this.transform);
-        m_rightIndicatingArrowAnimator.SetScale(indicatingArrowSize);
-        m_rightIndicatingArrowAnimator.SetColor(axisTintColor);
+        m_rightIndicatingArrowAnimator.SetScale(arrowSize);
+        m_rightIndicatingArrowAnimator.SetColor(arrowColor);
         m_rightIndicatingArrowAnimator.SetOpacity(0);
 
         if (m_axisData.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES)
@@ -212,11 +228,11 @@ public class AxisRenderer : MonoBehaviour
             GameObject leftIndicatingArrowObject = (GameObject)Instantiate(m_texQuadPfb);
             leftIndicatingArrowObject.name = "IndicatingArrow";
             UVQuad leftIndicatingArrow = leftIndicatingArrowObject.GetComponent<UVQuad>();
-            leftIndicatingArrow.Init(indicatingArrowMaterial);
+            leftIndicatingArrow.Init(arrowMaterial);
             m_leftIndicatingArrowAnimator = leftIndicatingArrowObject.GetComponent<TexturedQuadAnimator>();
             m_leftIndicatingArrowAnimator.SetParentTransform(this.transform);
-            m_leftIndicatingArrowAnimator.SetScale(indicatingArrowSize);
-            m_leftIndicatingArrowAnimator.SetColor(axisTintColor);
+            m_leftIndicatingArrowAnimator.SetScale(arrowSize);
+            m_leftIndicatingArrowAnimator.SetColor(arrowColor);
             m_leftIndicatingArrowAnimator.SetOpacity(0);
         }
     }
@@ -238,12 +254,12 @@ public class AxisRenderer : MonoBehaviour
         //Set correct position for both endpoints
         GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();        
         GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
-        GameObjectAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<GameObjectAnimator>();
-        GameObjectAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<GameObjectAnimator>();
+        //GameObjectAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<GameObjectAnimator>();
+        //GameObjectAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<GameObjectAnimator>();
         endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
         endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
-        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
-        endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
+        //endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
+        //endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
 
         //render strip if axis is not too small
         if ((endpoint1WorldPosition - endpoint2WorldPosition).sqrMagnitude > 10.0f)
@@ -468,13 +484,13 @@ public class AxisRenderer : MonoBehaviour
         Destroy(m_stripMesh.gameObject);
 
         //Fade out and scale up axis endpoint outer contours
-        Vector3 scaleToValue = new Vector3(256, 256, 1);
-        TexturedQuadAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<TexturedQuadAnimator>();
-        endpoint1CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        endpoint1CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
-        TexturedQuadAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<TexturedQuadAnimator>();
-        endpoint2CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
-        endpoint2CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+        //Vector3 scaleToValue = new Vector3(256, 256, 1);
+        //TexturedQuadAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<TexturedQuadAnimator>();
+        //endpoint1CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        //endpoint1CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
+        //TexturedQuadAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<TexturedQuadAnimator>();
+        //endpoint2CircleAnimator.FadeTo(0.0f, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
+        //endpoint2CircleAnimator.ScaleTo(scaleToValue, 2.0f, 0.0f, ValueAnimator.InterpolationType.LINEAR);
 
         //Start sweeping
         //LaunchSweepingLines();

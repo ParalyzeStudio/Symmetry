@@ -42,12 +42,15 @@ public class AxisSymmetrizer : Symmetrizer
         {
             Shape shape = shapes[i];
 
+            Debug.Log("shape.m_state:" + shape.m_state);
             if (shape.m_state != Shape.ShapeState.STATIC)
                 continue;
 
             if (stripLeftClipShape != null)
             {
                 List<Shape> lResultShapes = m_clippingManager.ShapesOperation(shape, stripLeftClipShape, ClipperLib.ClipType.ctIntersection);
+
+                //Debug.Log("lResultShapes COUNT:" + lResultShapes.Count);
 
                 for (int lShapeIdx = 0; lShapeIdx != lResultShapes.Count; lShapeIdx++)
                 {
@@ -61,6 +64,9 @@ public class AxisSymmetrizer : Symmetrizer
                     m_clippingManager.ClipAgainstStaticShapes(lSymmetricShape, out leftClippedInterShapes, out leftClippedDiffShapes);
                     m_axisLeftClippedInterShapes.AddRange(leftClippedInterShapes);
                     m_axisLeftClippedDiffShapes.AddRange(leftClippedDiffShapes);
+
+                    //Debug.Log("leftClippedInterShapes COUNT:" + leftClippedInterShapes.Count);
+                    //Debug.Log("leftClippedDiffShapes COUNT:" + leftClippedDiffShapes.Count);
                 }
             }
 

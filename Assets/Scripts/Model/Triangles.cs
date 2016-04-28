@@ -114,39 +114,22 @@ public class GridEdge
     }
 
     /**
-     * Return the intersection (if it exists) between this edge and the line defined by linePoint and lineDirection
-     * **/
+      * Return the intersection (if it exists) between this edge and the line defined by linePoint and lineDirection
+      * **/
     public void IntersectionWithLine(GridPoint linePoint, GridPoint lineDirection, out bool intersects, out GridPoint intersection)
     {
         //Store global values in temporary values for the purpose of this calculation
         GridPoint pointA = m_pointA;
         GridPoint pointB = m_pointB;
 
-        //order points by ascending x for the segment only
-        if (pointA.X > pointB.X)
-        {
-            GridPoint tmpPoint = pointB;
-            pointB = pointA;
-            pointA = tmpPoint;
-        }
-        else if (pointA.X == pointB.X) // if x-coordinate is the same for both points, order them by ascending y
-        {
-            if (pointA.Y > pointB.Y)
-            {
-                GridPoint tmpPoint = pointB;
-                pointB = pointA;
-                pointA = tmpPoint;
-            }
-        }
-
         //Both lines equation
-        float x, y;
+        double x, y;
         if (lineDirection.X != 0 && pointA.X != pointB.X) //y = a1x + b1 && y = a2x + b2
         {
-            float a1 = lineDirection.Y / (float) lineDirection.X;
-            float b1 = linePoint.Y - a1 * linePoint.X;
-            float a2 = (pointB.Y - pointA.Y) / (pointB.X - pointA.X);
-            float b2 = pointA.Y - a2 * pointA.X;
+            double a1 = lineDirection.Y / (double)lineDirection.X;
+            double b1 = linePoint.Y - a1 * linePoint.X;
+            double a2 = (pointB.Y - pointA.Y) / (double)(pointB.X - pointA.X);
+            double b2 = pointA.Y - a2 * pointA.X;
 
             if (a1 == a2) //parallel lines
             {
@@ -162,18 +145,18 @@ public class GridEdge
         }
         else if (lineDirection.X != 0 && pointA.X == pointB.X) //y = a1x + b1 && x = a2
         {
-            float a1 = lineDirection.Y / (float) lineDirection.X;
-            float b1 = linePoint.Y - a1 * linePoint.X;
-            float a2 = pointA.X;
+            double a1 = lineDirection.Y / (double)lineDirection.X;
+            double b1 = linePoint.Y - a1 * linePoint.X;
+            double a2 = pointA.X;
 
             x = a2;
             y = a1 * a2 + b1;
         }
         else if (lineDirection.X == 0 && pointA.X != pointB.X) //x = a1 && y = a2x + b2
         {
-            float a1 = linePoint.X;
-            float a2 = (pointB.Y - pointA.Y) / (pointB.X - pointA.X);
-            float b2 = pointA.Y - a2 * pointA.X;
+            double a1 = linePoint.X;
+            double a2 = (pointB.Y - pointA.Y) / (float)(pointB.X - pointA.X);
+            double b2 = pointA.Y - a2 * pointA.X;
 
             x = a1;
             y = a2 * a1 + b2;
@@ -185,40 +168,57 @@ public class GridEdge
             return;
         }
 
-        //Round (x,y)
-        int X = Mathf.RoundToInt(x);
-        int Y = Mathf.RoundToInt(y);
+        //Truncate (x,y). This is ok only if values of x and y are really big and rounding is negligible
+        int X = (int)x;
+        int Y = (int)y;
+        GridPoint tmpIntersection = new GridPoint(X, Y);
 
-        //Check if ((x, y) point is contained in the segment
-        if (pointA.X == pointB.X)
+        //check if the intersection point is inside the segment
+        long edgeMinX = (pointA.X <= pointB.X ? pointA.X : pointB.X);
+        long edgeMaxX = (pointA.X >= pointB.X ? pointA.X : pointB.X);
+        long edgeMinY = (pointA.Y <= pointB.Y ? pointA.Y : pointB.Y);
+        long edgeMaxY = (pointA.Y >= pointB.Y ? pointA.Y : pointB.Y);
+
+        intersects = (tmpIntersection.X >= edgeMinX && tmpIntersection.X <= edgeMaxX)
+                     &&
+                     (tmpIntersection.Y >= edgeMinY && tmpIntersection.Y <= edgeMaxY);
+
+        if (intersects)
+            intersection = tmpIntersection;
+        else
+            intersection = GridPoint.zero;
+    }
+
+    /**
+    * Same as IntersectionWithLine but this time with another edge.
+    * Simply check if the point returned by IntersectionWithLine is contained in this edge.
+    **/
+    public void IntersectionWithEdge(GridEdge edge, out bool intersects, out GridPoint intersection)
+    {
+        GridPoint edgePointA = edge.m_pointA;
+        GridPoint edgePointB = edge.m_pointB;
+
+        GridPoint edgeLineIntersection;
+        bool bIntersects;
+        IntersectionWithLine(edgePointA, edgePointB - edgePointA, out bIntersects, out edgeLineIntersection);
+
+        if (bIntersects)
         {
-            if (Y >= pointA.Y && Y <= pointB.Y)
-            {
-                intersects = true;
-                intersection = new GridPoint(X, Y, false);
-                return;
-            }
-            else
-            {
-                intersects = false;
-                intersection = GridPoint.zero;
-                return;
-            }
+            long segmentMinX = (edgePointA.X <= edgePointB.X ? edgePointA.X : edgePointB.X);
+            long segmentMaxX = (edgePointA.X >= edgePointB.X ? edgePointA.X : edgePointB.X);
+            long segmentMinY = (edgePointA.Y <= edgePointB.Y ? edgePointA.Y : edgePointB.Y);
+            long segmentMaxY = (edgePointA.Y >= edgePointB.Y ? edgePointA.Y : edgePointB.Y);
+
+            intersects = (edgeLineIntersection.X >= segmentMinX && edgeLineIntersection.X <= segmentMaxX)
+                         &&
+                         (edgeLineIntersection.Y >= segmentMinY && edgeLineIntersection.Y <= segmentMaxY);
+
+            intersection = edgeLineIntersection;
         }
         else
         {
-            if (X >= pointA.X && X <= pointB.X)
-            {
-                intersects = true;
-                intersection = new GridPoint(X, Y, false);
-                return;
-            }
-            else
-            {
-                intersects = false;
-                intersection = GridPoint.zero;
-                return;
-            }
+            intersects = false;
+            intersection = GridPoint.zero;
         }
     }
 
@@ -811,6 +811,9 @@ public class GridTriangle
         return true;
     }
 
+    /**
+    * Test if this triangle intersects another with the possibility to test if the intersection has a non-zero area.
+    **/
     public bool IntersectsTriangle(GridTriangle triangle, bool bNonNullIntersection = false)
     {
         for (int i = 0; i != 3; i++)
@@ -838,6 +841,7 @@ public class GridTriangle
     }
 
     /**
+     * DEPRECATED
      * Return true if this triangle intersects the parameter 'triangle'
      * This intersection can have a null area (triangles just share points or portions of edges for instance)
      * To test if this intersection is effectively null, use the method IntersectTriangleWithNonNullIntersection()
@@ -1078,6 +1082,321 @@ public class GridTriangle
     //    }
     //}
 
+
+    /**
+    * Computes the intersection between 'this' triangle and another triangle
+    **/
+    //public Contour IntersectionWithTriangle(GridTriangle triangle)
+    //{
+    //    //find the intersection points between the two triangles. If the intersection is one of the triangles vertices, we do not consider this as an intersection point.
+    //    //So basically we are searching for edges that strictly intersect and whose intersection is different from the edges endpoints.
+    //    List<TrianglesIntersectionPoint> intersectionPoints = new List<TrianglesIntersectionPoint>();
+    //    for (int i = 0; i != 3; i++)
+    //    {
+    //        GridEdge edge = new GridEdge(this.m_points[i], this.m_points[(i == 2) ? 0 : i + 1]);
+    //        bool intersects;
+    //        GridPoint intersection;
+
+    //        //store the intersection points that are on this edge (max 2)
+    //        TrianglesIntersectionPoint[] intersectionPointsOnEdge = new TrianglesIntersectionPoint[2];
+    //        int arrayIndex = 0;
+    //        for (int j = 0; j != 3; j++)
+    //        {
+    //            GridEdge t2edge = new GridEdge(triangle.m_points[j], triangle.m_points[(j == 2) ? 0 : j + 1]);
+    //            edge.IntersectionWithEdge(t2edge, out intersects, out intersection);
+
+    //            if (intersects)
+    //            {
+    //                //check if the intersection is different from edge endpoints
+    //                if (intersection == edge.m_pointA || 
+    //                    intersection == edge.m_pointB ||
+    //                    intersection == t2edge.m_pointA ||
+    //                    intersection == t2edge.m_pointB)
+    //                    continue;
+
+    //                TrianglesIntersectionPoint intersectionPoint = new TrianglesIntersectionPoint();
+    //                intersectionPoint.m_intersectionPoint = intersection;
+    //                intersectionPoint.m_triangle1EdgeIndex = i;
+    //                intersectionPoint.m_triangle2EdgeIndex = j;
+
+    //                //intersectionPointsOnEdge.Add(intersectionPoint);
+    //                intersectionPointsOnEdge[arrayIndex] = intersectionPoint;
+    //                arrayIndex++;
+    //            }
+    //        }
+
+    //        if (arrayIndex == 2) //2 intersection points on this edge
+    //        {
+    //            //reorder them according to the edge direction (from edge pointA to edge pointB)
+    //            float sqrDist1 = (intersectionPointsOnEdge[0].m_intersectionPoint - edge.m_pointA).sqrMagnitude;
+    //            float sqrDist2 = (intersectionPointsOnEdge[1].m_intersectionPoint - edge.m_pointA).sqrMagnitude;
+
+    //            if (sqrDist1 > sqrDist2)
+    //            {
+    //                //swap the 2 elements
+    //                TrianglesIntersectionPoint tmp = intersectionPointsOnEdge[0];
+    //                intersectionPointsOnEdge[0] = intersectionPointsOnEdge[1];
+    //                intersectionPointsOnEdge[1] = tmp;                    
+    //            }
+
+    //            //add the points to the global list
+    //            intersectionPoints.Add(intersectionPointsOnEdge[0]);
+    //            intersectionPoints.Add(intersectionPointsOnEdge[1]);
+    //        }
+    //        else if (arrayIndex == 1) //1 intersection point on the edge
+    //            intersectionPoints.Add(intersectionPointsOnEdge[0]);
+    //        //else no intersection point, nothing to do
+    //    }
+
+    //    if (intersectionPoints.Count <= 1) //one triangle is contained into another or both triangles are disjoined
+    //    {
+    //        if (this.ContainsPoint(triangle.GetCenter())) //t2 is inside t1
+    //            return new Contour(triangle.m_points);
+    //        else if (triangle.ContainsPoint(this.GetCenter())) //t1 is inside t2
+    //            return new Contour(this.m_points);
+    //        else //t1 and t2 are disjoined
+    //            return null;
+    //    }
+    //    else if (intersectionPoints.Count == 2) //this covers most intersection cases
+    //    {
+    //        TrianglesIntersectionPoint m1 = intersectionPoints[0];
+    //        TrianglesIntersectionPoint m2 = intersectionPoints[1];
+
+    //        //go from m1 to m2 and extract all points that are inside triangle2. If nothing is found do the same but from m2 to m1.
+    //        bool bM1toM2 = true;
+    //        List<GridPoint> t1ExtractedPoints = new List<GridPoint>();
+    //        int edgeIndex = m1.m_triangle1EdgeIndex;
+    //        int edgeStopIndex = m2.m_triangle1EdgeIndex;
+    //        while (edgeIndex != edgeStopIndex)
+    //        {
+    //            GridPoint triangle1Vertex = this.m_points[(edgeIndex == 2) ? 0 : edgeIndex + 1];
+    //            if (triangle.ContainsPoint(triangle1Vertex))
+    //                t1ExtractedPoints.Add(triangle1Vertex);
+
+    //            edgeIndex = (edgeIndex == 2) ? 0 : edgeIndex + 1;
+    //        }
+
+    //        if (t1ExtractedPoints.Count == 0)
+    //        {
+    //            bM1toM2 = false;
+
+    //            edgeIndex = m2.m_triangle1EdgeIndex;
+    //            edgeStopIndex = m1.m_triangle1EdgeIndex;
+    //            while (edgeIndex != edgeStopIndex)
+    //            {
+    //                GridPoint triangle1Vertex = this.m_points[(edgeIndex == 2) ? 0 : edgeIndex + 1];
+    //                if (triangle.ContainsPoint(triangle1Vertex))
+    //                    t1ExtractedPoints.Add(triangle1Vertex);
+
+    //                edgeIndex = (edgeIndex == 2) ? 0 : edgeIndex + 1;
+    //            }
+    //        }
+
+    //        //do the same operation on triangle 2 taking the opposite value of bM1toM2    
+    //        bM1toM2 = !bM1toM2;
+    //        List<GridPoint> t2ExtractedPoints = new List<GridPoint>();
+    //        if (bM1toM2)
+    //        {
+    //            edgeIndex = m1.m_triangle2EdgeIndex;
+    //            edgeStopIndex = m2.m_triangle2EdgeIndex;
+    //        }
+    //        else
+    //        {
+    //            edgeIndex = m2.m_triangle2EdgeIndex;
+    //            edgeStopIndex = m1.m_triangle2EdgeIndex;
+    //        }
+
+    //        while (edgeIndex != edgeStopIndex)
+    //        {
+    //            GridPoint triangle2Vertex = triangle.m_points[(edgeIndex == 2) ? 0 : edgeIndex + 1];
+    //            if (this.ContainsPoint(triangle2Vertex))
+    //                t2ExtractedPoints.Add(triangle2Vertex);
+
+    //            edgeIndex = (edgeIndex == 2) ? 0 : edgeIndex + 1;
+    //        }
+
+    //        //now add m1 and m2 to the list and return the contour
+    //        Contour contour = new Contour(t1ExtractedPoints.Count + 2);
+    //        if (bM1toM2) //we went from m2 to m1 on triangle 1
+    //        {
+    //            contour.Add(m2.m_intersectionPoint);
+    //            contour.AddRange(t1ExtractedPoints);
+    //            contour.Add(m1.m_intersectionPoint);
+    //            contour.AddRange(t2ExtractedPoints);
+    //        }
+    //        else //we went from m1 to m2 on triangle 1
+    //        {
+    //            contour.Add(m1.m_intersectionPoint);
+    //            contour.AddRange(t1ExtractedPoints);
+    //            contour.Add(m2.m_intersectionPoint);
+    //            contour.AddRange(t2ExtractedPoints);
+    //        }
+
+    //        return contour;
+    //    }
+    //    else if (intersectionPoints.Count == 3) //vertices of one of the triangles are on the other triangle edges
+    //    {
+    //        if (this.ContainsPoint(triangle.m_points[0]) && this.ContainsPoint(triangle.m_points[1]) && this.ContainsPoint(triangle.m_points[2])) //t2 is inside t1
+    //            return new Contour(triangle.m_points);
+    //        else //t1 is inside t2
+    //            return new Contour(this.m_points);
+    //    }
+    //    else if (intersectionPoints.Count == 4)
+    //    {
+    //        Contour contour = new Contour(4);
+    //        for (int i = 0; i != intersectionPoints.Count; i++)
+    //        {
+    //            contour.Add(intersectionPoints[i].m_intersectionPoint);
+    //        }
+    //        return contour;
+    //    }
+    //    //else no other cases
+
+    //    return null;
+    //}
+
+    /**
+    * Small struct to store an intersection point with additional information such as the indices of edges where this intersection point is located
+    **/
+    private struct TrianglesIntersection
+    {
+        public GridPoint m_intersection;
+        public int m_triangle1EdgeIndex;
+        public int m_triangle2EdgeIndex;
+    }
+
+    /**
+    * Computes the intersection between 'this' triangle and another triangle
+    **/
+    public Contour IntersectionWithTriangle(GridTriangle triangle)
+    {
+        List<TrianglesIntersection> intersections = FindIntersectionsWithTriangle(triangle);
+
+        if (intersections.Count == 0) //one triangle is contained into another or both triangles are disjoined
+        {
+            if (this.ContainsPoint(triangle.GetCenter())) //t2 is inside t1
+                return new Contour(triangle.m_points);
+            else if (triangle.ContainsPoint(this.GetCenter())) //t1 is inside t2
+                return new Contour(this.m_points);
+            else //t1 and t2 are disjoined
+                return null;
+        }
+        else if (intersections.Count == 6) //simply return points of intersection in the order we found them
+        {
+            Contour contour = new Contour(4);
+            for (int i = 0; i != intersections.Count; i++)
+            {
+                contour.Add(intersections[i].m_intersection);
+            }
+            return contour;
+        }
+        else if (intersections.Count == 2 || intersections.Count == 4) //this covers most intersection cases
+        {
+            //extract points between two consecutive points
+            Contour contour = new Contour();
+
+            for (int i = 0; i != intersections.Count; i++)
+            {
+                List<GridPoint> extractedPoints = new List<GridPoint>();
+                TrianglesIntersection intersection = intersections[i];
+                TrianglesIntersection nextIntersection = intersections[(i == intersections.Count - 1) ? 0 : i + 1];
+                ExtractIntersectionContourPoints(extractedPoints, this, triangle, intersection.m_triangle1EdgeIndex, nextIntersection.m_triangle1EdgeIndex);
+                if (extractedPoints.Count == 0)
+                    ExtractIntersectionContourPoints(extractedPoints, triangle, this, intersection.m_triangle2EdgeIndex, nextIntersection.m_triangle2EdgeIndex);
+
+                contour.AddRange(extractedPoints);
+                contour.Add(nextIntersection.m_intersection);
+            }
+
+            return contour;
+        }
+        //there can only be 0, 2, 4 or 6 points of intersections between two triangles. Do not process else statement
+
+        return null;
+    }
+
+    /**
+    * Find the points of intersection between two triangles. If the intersection is one of the triangles vertices, we do not consider this as a point of intersection.
+    * So basically we are searching for edges that strictly intersect and whose intersection is different from the edges endpoints.
+    **/
+    private List<TrianglesIntersection> FindIntersectionsWithTriangle(GridTriangle triangle)
+    {
+        List<TrianglesIntersection> intersections = new List<TrianglesIntersection>();
+        for (int i = 0; i != 3; i++)
+        {
+            GridEdge edge = new GridEdge(this.m_points[i], this.m_points[(i == 2) ? 0 : i + 1]);
+            bool intersects;
+            GridPoint intersection;
+
+            //store the intersection points that are on this edge (max 2)
+            TrianglesIntersection[] intersectionsOnEdge = new TrianglesIntersection[2];
+            int arrayIndex = 0;
+            for (int j = 0; j != 3; j++)
+            {
+                GridEdge t2edge = new GridEdge(triangle.m_points[j], triangle.m_points[(j == 2) ? 0 : j + 1]);
+                edge.IntersectionWithEdge(t2edge, out intersects, out intersection);
+
+                if (intersects)
+                {
+                    //check if the intersection is different from edge endpoints
+                    if (intersection == edge.m_pointA ||
+                        intersection == edge.m_pointB ||
+                        intersection == t2edge.m_pointA ||
+                        intersection == t2edge.m_pointB)
+                        continue;
+
+                    TrianglesIntersection trianglesIntersection = new TrianglesIntersection();
+                    trianglesIntersection.m_intersection = intersection;
+                    trianglesIntersection.m_triangle1EdgeIndex = i;
+                    trianglesIntersection.m_triangle2EdgeIndex = j;
+
+                    //intersectionPointsOnEdge.Add(intersectionPoint);
+                    intersectionsOnEdge[arrayIndex] = trianglesIntersection;
+                    arrayIndex++;
+                }
+            }
+
+            if (arrayIndex == 2) //2 intersection points on this edge
+            {
+                //reorder them according to the edge direction (from edge pointA to edge pointB)
+                float sqrDist1 = (intersectionsOnEdge[0].m_intersection - edge.m_pointA).sqrMagnitude;
+                float sqrDist2 = (intersectionsOnEdge[1].m_intersection - edge.m_pointA).sqrMagnitude;
+
+                if (sqrDist1 > sqrDist2)
+                {
+                    //swap the 2 elements
+                    TrianglesIntersection tmp = intersectionsOnEdge[0];
+                    intersectionsOnEdge[0] = intersectionsOnEdge[1];
+                    intersectionsOnEdge[1] = tmp;
+                }
+
+                //add the points to the global list
+                intersections.Add(intersectionsOnEdge[0]);
+                intersections.Add(intersectionsOnEdge[1]);
+            }
+            else if (arrayIndex == 1) //1 intersection point on the edge
+                intersections.Add(intersectionsOnEdge[0]);
+            //else no intersection point, nothing to do
+        }
+
+        return intersections;
+    }
+
+    /**
+    * Extract vertices from t1 whose indices are between edgeStartIndex and edgeStopIndex and that are contained inside t2
+    **/
+    private void ExtractIntersectionContourPoints(List<GridPoint> extractedPoints, GridTriangle t1, GridTriangle t2, int edgeStartIndex, int edgeStopIndex)
+    {
+        while (edgeStartIndex != edgeStopIndex)
+        {
+            GridPoint t1Vertex = t1.m_points[(edgeStartIndex == 2) ? 0 : edgeStartIndex + 1];
+            if (t2.ContainsPoint(t1Vertex))
+                extractedPoints.Add(t1Vertex);
+
+            edgeStartIndex = (edgeStartIndex == 2) ? 0 : edgeStartIndex + 1;
+        }
+    }
+
     /**
      * Does this triangle intersects the parameter 'edge'
      * **/
@@ -1097,50 +1416,75 @@ public class GridTriangle
     }
 
     /**
-    * Tells if this triangle is fully contained inside the parameter 'outline'
-    **/
+   * Tells if this triangle is fully contained inside the parameter 'outline'.
+   * We compute the intersection shapes between 'this' triangle and all triangles inside this outline.
+   * Then we sum the areas of all these shapes and compare it to the outline area.
+   **/
     public bool IsInsideOutline(DottedOutline outline)
     {
-        //check if triangle intersects strictly the outline main contour
-        Contour contourPoints = outline.m_contour;
-        for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
-        {
-            GridPoint contourSegmentPoint1 = contourPoints[iContourPointIndex];
-            GridPoint contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
+        float sum = 0;
 
-            if (IntersectsEdge(new GridEdge(contourSegmentPoint1, contourSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
-                return false;
+        for (int i = 0; i != outline.m_triangles.Count; i++)
+        {
+            Contour intersectionContour = this.IntersectionWithTriangle(outline.m_triangles[i]);
+
+            if (intersectionContour != null)
+            {
+                GridTriangulable intersectionShape = new GridTriangulable(intersectionContour);
+                intersectionShape.Triangulate();
+                intersectionShape.CalculateArea();
+                sum += intersectionShape.m_area;
+            }
         }
 
-        //check if triangle intersects strictly at least one of the outline holes
-        List<Contour> outlineHoles = outline.m_holes;
-        for (int i = 0; i != outlineHoles.Count; i++)
-        {
-            Contour hole = outlineHoles[i];
-            GridPoint holeSegmentPoint1 = hole[i];
-            GridPoint holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
-
-            if (IntersectsEdge(new GridEdge(holeSegmentPoint1, holeSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
-                return false;
-        }
-
-        //the triangle should be either:
-        // -outside the outline (e.g outside the main contour or inside one hole)
-        // -inside main contour and containing one hole
-        // -inside main contour without containing any hole
-
-        if (!outline.ContainsPoint(this.GetCenter())) //the triangle is outside the outline main contour
-            return false;
-
-        for (int i = 0; i != outlineHoles.Count; i++)
-        {
-            Contour hole = outlineHoles[i];
-            if (this.ContainsContour(hole)) //triangle contains one full hole, it is not completely inside the outline
-                return false;
-        }
-
-        return true;
+        return (sum == this.GetArea());
     }
+
+    /**
+    * Tells if this triangle is fully contained inside the parameter 'outline'
+    **/
+    //public bool IsInsideOutline2(DottedOutline outline)
+    //{
+    //    //check if triangle intersects strictly the outline main contour
+    //    Contour contourPoints = outline.m_contour;
+    //    for (int iContourPointIndex = 0; iContourPointIndex != contourPoints.Count; iContourPointIndex++)
+    //    {
+    //        GridPoint contourSegmentPoint1 = contourPoints[iContourPointIndex];
+    //        GridPoint contourSegmentPoint2 = (iContourPointIndex == contourPoints.Count - 1) ? contourPoints[0] : contourPoints[iContourPointIndex + 1];
+
+    //        if (IntersectsEdge(new GridEdge(contourSegmentPoint1, contourSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
+    //            return false;
+    //    }
+
+    //    //check if triangle intersects strictly at least one of the outline holes
+    //    List<Contour> outlineHoles = outline.m_holes;
+    //    for (int i = 0; i != outlineHoles.Count; i++)
+    //    {
+    //        Contour hole = outlineHoles[i];
+    //        GridPoint holeSegmentPoint1 = hole[i];
+    //        GridPoint holeSegmentPoint2 = (i == hole.Count - 1) ? hole[0] : hole[i + 1];
+
+    //        if (IntersectsEdge(new GridEdge(holeSegmentPoint1, holeSegmentPoint2), GridEdge.EDGES_STRICT_INTERSECTION))
+    //            return false;
+    //    }
+
+    //    //the triangle should be either:
+    //    // -outside the outline (e.g outside the main contour or inside one hole)
+    //    // -inside main contour and containing one hole
+    //    // -inside main contour without containing any hole
+
+    //    if (!outline.ContainsPoint(this.GetCenter())) //the triangle is outside the outline main contour
+    //        return false;
+
+    //    for (int i = 0; i != outlineHoles.Count; i++)
+    //    {
+    //        Contour hole = outlineHoles[i];
+    //        if (this.ContainsContour(hole)) //triangle contains one full hole, it is not completely inside the outline
+    //            return false;
+    //    }
+
+    //    return true;
+    //}
 
     /**
      * Tells if this triangle contains the triangle passed as parameter

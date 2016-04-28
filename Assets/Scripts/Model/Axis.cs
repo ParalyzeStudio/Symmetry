@@ -5,11 +5,12 @@ public class Axis
     public AxisRenderer m_parentRenderer { get; set; }
 
     public GridPoint m_pointA { get; set; }
-    public GridPoint m_pointB { get; set; }    
+    public GridPoint m_pointB { get; set; }
 
     //Type of the axis
     public enum AxisType
     {
+        UNDER_CONSTRUCTION, //axis has been built yet and is waiting for the user to set the second endpoint
         STATIC_PENDING, //axis is waiting for the player to unstack this symmetry
         STATIC_DONE, //player has finished drawing the axis and symmetry has been done
         DYNAMIC_UNSNAPPED, //player is currently drawing the axis but it is not snapped to a grid anchor
@@ -27,12 +28,23 @@ public class Axis
 
     public AxisSymmetryType m_symmetryType { get; set; }
 
-    public Axis(GridPoint pointA, GridPoint pointB, AxisType type, AxisSymmetryType symmetryType)
+    public Axis()
+    {
+        m_pointA = GridPoint.zero;
+        m_pointB = GridPoint.zero;
+    }
+
+    public Axis(GridPoint pointA, AxisType type, AxisSymmetryType symmetryType)
     {
         m_pointA = pointA;
-        m_pointB = pointB;
+        m_pointB = GridPoint.zero;
         m_type = type;
         m_symmetryType = symmetryType;
+    }
+
+    public Axis(GridPoint pointA, GridPoint pointB, AxisType type, AxisSymmetryType symmetryType) : this(pointA, type, symmetryType)
+    {
+        m_pointB = pointB;
     }
 
     /**

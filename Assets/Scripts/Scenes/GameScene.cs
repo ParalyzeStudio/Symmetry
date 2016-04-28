@@ -131,124 +131,44 @@ public class GameScene : GUIScene
         //callFuncHandler.AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowElements), 0.5f);       
         ShowElements();
 
-        //Shape subjShape = new Shape();
-        //Contour subjShapeContour = new Contour(4);
-        //subjShapeContour.Add(new GridPoint(0, 0, true));
-        //subjShapeContour.Add(new GridPoint(4, 0, true));
-        //subjShapeContour.Add(new GridPoint(4, 4, true));
-        //subjShapeContour.Add(new GridPoint(0, 4, true));
-
-        //subjShape.m_contour = subjShapeContour;
-
-        //subjShape.m_color = Color.white;
-
-        //Shape clipShape = new Shape();
-        //Contour clipShapeContour = new Contour(4);
-        //clipShapeContour.Add(new GridPoint(2, 0, true));
-        //clipShapeContour.Add(new GridPoint(4, 2, true));
-        //clipShapeContour.Add(new GridPoint(2, 4, true));
-        //clipShapeContour.Add(new GridPoint(0, 2, true));
-
-        //List<Shape> resultShapes = GetClippingManager().ShapesOperation(subjShape, clipShape, ClipperLib.ClipType.ctDifference);
-
-        //shape1.Triangulate();
-        //m_shapesHolder.CreateShapeObjectFromData(shape1, false);
-        //shape1.CalculateArea();
-
-        //Debug.Log("Diff area:" + (shape1.m_area - shape2.m_area));
-
-        /**
-         * TEST TRIANGLES INTERSECTIONS
-         * **/
-        //UnitTests.TestTrianglesIntersections();
-
-        //Contour subjShapeContour1 = new Contour(4);
-        //subjShapeContour1.Add(new Vector2(0, 0));
-        //subjShapeContour1.Add(new Vector2(300, 0));
-        //subjShapeContour1.Add(new Vector2(300, 300));
-        //subjShapeContour1.Add(new Vector2(0, 300));
-        //Contour clipShapeContour1 = new Contour(4);
-        //clipShapeContour1.Add(new Vector2(200, 200));
-        //clipShapeContour1.Add(new Vector2(500, 200));
-        //clipShapeContour1.Add(new Vector2(500, 500));
-        //clipShapeContour1.Add(new Vector2(200, 500));
-        //Shape subjShape1 = new Shape(true, subjShapeContour1);
-        //Shape clipShape1 = new Shape(true, clipShapeContour1);
-
+        ////-----TEST 5-----// 
         //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         //sw.Start();
-        //for (int i = 0; i != 100; i++)
+
+        //for (int i = 0; i != 1000; i++)
         //{
-        //m_shapesHolder.CreateShapeObjectFromData(subjShape1, true);
+        //    GridTriangle triangle1 = new GridTriangle();
+        //    triangle1.m_points[0] = new GridPoint(0, 3, true);
+        //    triangle1.m_points[1] = new GridPoint(0, -3, true);
+        //    triangle1.m_points[2] = new GridPoint(4, 0, true);
+        //    GridTriangle triangle2 = new GridTriangle();
+        //    triangle2.m_points[0] = new GridPoint(1, 1, true);
+        //    triangle2.m_points[1] = new GridPoint(1, -1, true);
+        //    triangle2.m_points[2] = new GridPoint(4, 0, true);
+
+        //    triangle1.IntersectionWithTriangle(triangle2);
         //}
         //sw.Stop();
-        //Debug.Log("cellRendering took " + sw.ElapsedMilliseconds + " ms");
-        //sw = new System.Diagnostics.Stopwatch();
-        //sw.Start();
-        //for (int i = 0; i != 100; i++)
-        //{
-        //m_shapesHolder.CreateShapeObjectFromData(subjShape1, false);
-        //}
-        //sw.Stop();
-        //Debug.Log("normalRendering took " + sw.ElapsedMilliseconds + " ms");
-
-
-        /**
-         * TEST SEGMENTS INTERSECTION
-         * **/
-
-        //UnitTests.TestSegmentsIntersecion();
-
-        /**
-         * TEST SHAPE CLIPPING
-         * **/
-
-        //UnitTests.TestShapesClipping();
-
-        /**
-         * TEST OVERLAP TIME
-         * **/
-        //Contour contourShape1 = new Contour(4);
-        //contourShape1.Add(new Vector2(0, 0));
-        //contourShape1.Add(new Vector2(1, 0));
-        //contourShape1.Add(new Vector2(1, 1));
-        //contourShape1.Add(new Vector2(0, 1));
-
-        //Shape shape1 = new Shape(true, contourShape1);
-        //shape1.Triangulate();
-
-        //Contour contourShape2 = new Contour(4);
-        //contourShape2.Add(new Vector2(1, 1));
-        //contourShape2.Add(new Vector2(1, 0));
-        //contourShape2.Add(new Vector2(2, 0));
-        //contourShape2.Add(new Vector2(2, 1));
-
-        //Shape shape2 = new Shape(true, contourShape2);
-        //shape2.Triangulate();
-
-        //bool bOverlap = shape1.OverlapsShape(shape2);
-        //Debug.Log("Overlaps:" + bOverlap);
-
-        //System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-
-        //sw.Start();
-        //for (int i = 0; i != 100000; i++)
-        //{
-        //    shape1.OverlapsShape(shape2);
-        //}
-        //sw.Stop();
-
-        //Debug.Log("1>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
+        //Debug.Log("elapsedTime1:" + sw.ElapsedMilliseconds + " ms");
 
         //sw = new System.Diagnostics.Stopwatch();
         //sw.Start();
-        //for (int i = 0; i != 100000; i++)
+        //for (int i = 0; i != 1000; i++)
         //{
-        //    shape1.OverlapsShape(shape2);
-        //    ClippingBooleanOperations.ShapesOperation(shape1, shape2, ClipperLib.ClipType.ctIntersection);
+        //    Contour contour1 = new Contour(3);
+        //    contour1.Add(new GridPoint(0, 3, true));
+        //    contour1.Add(new GridPoint(0, -3, true));
+        //    contour1.Add(new GridPoint(4, 0, true));
+        //    Contour contour2 = new Contour(3);
+        //    contour2.Add(new GridPoint(1, 1, true));
+        //    contour2.Add(new GridPoint(1, -1, true));
+        //    contour2.Add(new GridPoint(4, 0, true));
+        //    Shape shape1 = new Shape(contour1);
+        //    Shape shape2 = new Shape(contour2);
+        //    GetClippingManager().ShapesOperation(shape1, shape2, ClipperLib.ClipType.ctIntersection, true);
         //}
         //sw.Stop();
-        //Debug.Log("2>>>elapsedTime(ms):" + sw.ElapsedMilliseconds);
+        //Debug.Log("elapsedTime2:" + sw.ElapsedMilliseconds + " ms");
     }
 
     public GameObject m_debugSweepLinePfb;
@@ -300,18 +220,21 @@ public class GameScene : GUIScene
         //Show outlines (if applicable)
         ShowOutlines();
 
+        //Show axes the user can drag onto the grid
+        ShowDraggableAxes();
+
         //Show available symmetry axes
         BuildConstrainedDirections();
-        ShowAxisConstraintsIcons();
+        //ShowAxisConstraintsIcons();
 
         //Show action buttons
-        ShowActionButtons();
+        //ShowActionButtons();
 
         //Show axis deployment buttons
-        ShowDeployAxisButtons();
+        //ShowDeployAxisButtons();
 
         //Show point symmetry buttons
-        ShowSymmetryPointButtons();
+        //ShowSymmetryPointButtons();
 
         //Show starting shapes
         //GetCallFuncHandler().AddCallFuncInstance(new CallFuncHandler.CallFunc(ShowInitialShapes), 1.0f);
@@ -321,7 +244,7 @@ public class GameScene : GUIScene
         //ShowSymmetryStack();
 
         //Draw hatchings to show empty areas like holes or borders
-        DrawHatchings();
+        //DrawHatchings();
 
         //add small debug button to skip the level
         Vector2 screenSize = ScreenUtils.GetScreenSize();
@@ -332,7 +255,6 @@ public class GameScene : GUIScene
         skipLevelButtonAnimator.SetPosition(new Vector3(0.5f * screenSize.x - 64.0f, -0.5f * screenSize.y + 64.0f, -10));
 
         m_gameStatus = GameStatus.RUNNING;
-
 
         //Set up the ClippingManager
         InitClippingManager();
@@ -464,53 +386,53 @@ public class GameScene : GUIScene
         backgroundShapeAnimator.SetColor(Color.white);
 
         //Borders
-        float contourThickness = 3.0f;
+        //float contourThickness = 3.0f;
         
-        if (0.5f * (m_grid.m_maxGridSize.y - m_grid.m_gridSize.y) >= DRAW_HATCHINGS_THRESHOLD)
-        {
-            GameObject topContourObject = Instantiate(m_colorQuadPfb);
-            topContourObject.name = "TopGridContour";
-            ColorQuad topContour = topContourObject.GetComponent<ColorQuad>();
-            topContour.Init(m_plainWhiteMaterial);
-            ColorQuadAnimator topContourAnimator = topContourObject.GetComponent<ColorQuadAnimator>();
-            topContourAnimator.SetParentTransform(gridObject.transform);
-            topContourAnimator.SetScale(new Vector3(m_grid.m_gridSize.x, contourThickness, 1));
-            topContourAnimator.SetPosition(new Vector3(0, 0.5f * m_grid.m_gridSize.y, 0));
-            topContourAnimator.SetColor(Color.white);
+        //if (0.5f * (m_grid.m_maxGridSize.y - m_grid.m_gridSize.y) >= DRAW_HATCHINGS_THRESHOLD)
+        //{
+        //    GameObject topContourObject = Instantiate(m_colorQuadPfb);
+        //    topContourObject.name = "TopGridContour";
+        //    ColorQuad topContour = topContourObject.GetComponent<ColorQuad>();
+        //    topContour.Init(m_plainWhiteMaterial);
+        //    ColorQuadAnimator topContourAnimator = topContourObject.GetComponent<ColorQuadAnimator>();
+        //    topContourAnimator.SetParentTransform(gridObject.transform);
+        //    topContourAnimator.SetScale(new Vector3(m_grid.m_gridSize.x, contourThickness, 1));
+        //    topContourAnimator.SetPosition(new Vector3(0, 0.5f * m_grid.m_gridSize.y, 0));
+        //    topContourAnimator.SetColor(Color.white);
 
-            GameObject bottomContourObject = Instantiate(m_colorQuadPfb);
-            bottomContourObject.name = "BottomGridContour";
-            ColorQuad bottomContour = bottomContourObject.GetComponent<ColorQuad>();
-            bottomContour.Init(m_plainWhiteMaterial);
-            ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
-            bottomContourAnimator.SetParentTransform(gridObject.transform);
-            bottomContourAnimator.SetScale(new Vector3(m_grid.m_maxGridSize.x, contourThickness, 1));
-            bottomContourAnimator.SetPosition(new Vector3(0, -0.5f * m_grid.m_gridSize.y, 0));
-            bottomContourAnimator.SetColor(Color.white);
-        }
+        //    GameObject bottomContourObject = Instantiate(m_colorQuadPfb);
+        //    bottomContourObject.name = "BottomGridContour";
+        //    ColorQuad bottomContour = bottomContourObject.GetComponent<ColorQuad>();
+        //    bottomContour.Init(m_plainWhiteMaterial);
+        //    ColorQuadAnimator bottomContourAnimator = bottomContourObject.GetComponent<ColorQuadAnimator>();
+        //    bottomContourAnimator.SetParentTransform(gridObject.transform);
+        //    bottomContourAnimator.SetScale(new Vector3(m_grid.m_maxGridSize.x, contourThickness, 1));
+        //    bottomContourAnimator.SetPosition(new Vector3(0, -0.5f * m_grid.m_gridSize.y, 0));
+        //    bottomContourAnimator.SetColor(Color.white);
+        //}
 
-        if (0.5f * (m_grid.m_maxGridSize.x - m_grid.m_gridSize.x) >= DRAW_HATCHINGS_THRESHOLD)
-        {
-            GameObject leftContourObject = Instantiate(m_colorQuadPfb);
-            leftContourObject.name = "LeftGridContour";
-            ColorQuad leftContour = leftContourObject.GetComponent<ColorQuad>();
-            leftContour.Init(m_plainWhiteMaterial);
-            ColorQuadAnimator leftContourAnimator = leftContourObject.GetComponent<ColorQuadAnimator>();
-            leftContourAnimator.SetParentTransform(gridObject.transform);
-            leftContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-            leftContourAnimator.SetPosition(new Vector3(-0.5f * m_grid.m_gridSize.x, 0, 0));
-            leftContourAnimator.SetColor(Color.white);
+        //if (0.5f * (m_grid.m_maxGridSize.x - m_grid.m_gridSize.x) >= DRAW_HATCHINGS_THRESHOLD)
+        //{
+        //    GameObject leftContourObject = Instantiate(m_colorQuadPfb);
+        //    leftContourObject.name = "LeftGridContour";
+        //    ColorQuad leftContour = leftContourObject.GetComponent<ColorQuad>();
+        //    leftContour.Init(m_plainWhiteMaterial);
+        //    ColorQuadAnimator leftContourAnimator = leftContourObject.GetComponent<ColorQuadAnimator>();
+        //    leftContourAnimator.SetParentTransform(gridObject.transform);
+        //    leftContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
+        //    leftContourAnimator.SetPosition(new Vector3(-0.5f * m_grid.m_gridSize.x, 0, 0));
+        //    leftContourAnimator.SetColor(Color.white);
 
-            GameObject rightContourObject = Instantiate(m_colorQuadPfb);
-            rightContourObject.name = "RightGridContour";
-            ColorQuad rightContour = rightContourObject.GetComponent<ColorQuad>();
-            rightContour.Init(m_plainWhiteMaterial);
-            ColorQuadAnimator rightContourAnimator = rightContourObject.GetComponent<ColorQuadAnimator>();
-            rightContourAnimator.SetParentTransform(gridObject.transform);
-            rightContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
-            rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, 0));
-            rightContourAnimator.SetColor(Color.white);
-        }       
+        //    GameObject rightContourObject = Instantiate(m_colorQuadPfb);
+        //    rightContourObject.name = "RightGridContour";
+        //    ColorQuad rightContour = rightContourObject.GetComponent<ColorQuad>();
+        //    rightContour.Init(m_plainWhiteMaterial);
+        //    ColorQuadAnimator rightContourAnimator = rightContourObject.GetComponent<ColorQuadAnimator>();
+        //    rightContourAnimator.SetParentTransform(gridObject.transform);
+        //    rightContourAnimator.SetScale(new Vector3(contourThickness, m_grid.m_gridSize.y, 1));
+        //    rightContourAnimator.SetPosition(new Vector3(0.5f * m_grid.m_gridSize.x, 0, 0));
+        //    rightContourAnimator.SetColor(Color.white);
+        //}       
     }
 
     /**
@@ -688,6 +610,22 @@ public class GameScene : GUIScene
         m_outlines = outlinesObject.GetComponent<Outlines>();
         m_outlines.Build();
         m_outlines.Show(false);
+    }
+
+    /**
+    * For some chapters, axes are predefined and can be dragged directly onto the scene.
+    * We build them here
+    **/
+    private void ShowDraggableAxes()
+    {
+        //List<PredefinedAxis> predefinedAxes = GetLevelManager().m_currentLevel.m_predefinedAxes;
+
+        //for (int i = 0; i != predefinedAxes.Count; i++)
+        //{
+        //    PredefinedAxis predefinedAxis = predefinedAxes[i];
+
+        //    DraggableAxisButton button = (DraggableAxisButton)Instantiate(DraggableAxisButton);
+        //}
     }
 
     /**
@@ -1392,7 +1330,6 @@ public class GameScene : GUIScene
 
         for (int i = 0; i != outlines.Count; i++)
         {
-            outlines[i].CalculateArea();
             outlinesArea += outlines[i].m_area;
         }
 
@@ -1443,7 +1380,7 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP3 CHECK");
+        Debug.Log("STEP3 CHECK");
 
         
 

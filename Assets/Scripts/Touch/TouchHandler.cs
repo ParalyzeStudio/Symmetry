@@ -111,7 +111,7 @@ public class TouchHandler : MonoBehaviour
      * **/
     protected virtual void OnClick(Vector2 clickLocation)
     {
-
+        Debug.Log("OnClick");
     }
 
     /**

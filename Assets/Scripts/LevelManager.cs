@@ -82,14 +82,15 @@ public class LevelManager : MonoBehaviour
         level.m_maxActions = int.Parse(strMaxActions);
 
         //Parse stack information
-        XMLNode stackNode = levelNode.GetNode("stack>0");
-        if (stackNode != null)
-        {
-            level.m_symmetriesStackable = true;
-            level.m_symmetryStackSize = int.Parse(stackNode.GetValue("@size"));
-        }
-        else
-            level.m_symmetriesStackable = false;
+        //XMLNode stackNode = levelNode.GetNode("stack>0");
+        //if (stackNode != null)
+        //{
+        //    level.m_symmetriesStackable = true;
+        //    level.m_symmetryStackSize = int.Parse(stackNode.GetValue("@size"));
+        //}
+        //else
+        //    level.m_symmetriesStackable = false;
+        level.m_symmetriesStackable = false;
 
         //Parse grid information
         XMLNode gridNode = levelNode.GetNode("grid>0");

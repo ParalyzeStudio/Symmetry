@@ -32,6 +32,9 @@ public class Outlines : MonoBehaviour
             //First triangulate the outline
             clonedOutline.Triangulate();
 
+            //cache the area of this outline
+            clonedOutline.CalculateArea();
+
             //Then draw the outline
             GameObject outlineObject = new GameObject("Outline");
 

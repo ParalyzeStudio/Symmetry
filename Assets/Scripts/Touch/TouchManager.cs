@@ -133,16 +133,21 @@ public class TouchManager : MonoBehaviour
                         //or the shapes
                         List<Shape> shapes = gameScene.m_shapesHolder.m_shapes;
                         int shapesCount = shapes.Count;
+                        bool bShapeSwallowedEvent = false;
                         for (int iShapeIdx = 0; iShapeIdx != shapesCount; iShapeIdx++)
                         {
                             ShapeTouchHandler shapeTouchHandler = shapes[iShapeIdx].m_parentMesh.gameObject.GetComponent<ShapeTouchHandler>();
                             //one shape swallows the touch, break the loop because shapes are likely to be added or deleted to m_shapes list
                             //making it no longer valid
-                            if (shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType)) 
+                            if (shapeTouchHandler.ProcessPointerEvent(pointerLocation, eventType))
+                            {
+                                bShapeSwallowedEvent = true;
                                 break;
+                            }
                         }
 
-                        gameScene.m_shapesHolder.DeleteDeadShapes();
+                        if (bShapeSwallowedEvent)
+                            gameScene.m_shapesHolder.DeleteDeadShapes();
                     }
                 }
             }

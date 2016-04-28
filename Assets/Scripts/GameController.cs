@@ -33,7 +33,7 @@ public class GameController : MonoBehaviour
         //fillQuadAnimator.SetColor(0.12f * Color.white);
         //fillQuadAnimator.gameObject.transform.localScale = ScreenUtils.GetScreenSize();
 
-        UnitTests.Init();
+        //UnitTests.Init();
 
         //parse xml levels files
         GetLevelManager().ParseAllLevels();

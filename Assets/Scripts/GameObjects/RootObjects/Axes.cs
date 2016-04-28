@@ -28,10 +28,9 @@ public class Axes : MonoBehaviour
         axisAnimator.SetParentTransform(this.transform);
         axisAnimator.SetPosition(Vector3.zero);
 
-        //Set the symmetry type
+        //Build a symmetrizer object
         Symmetrizer symmetrizer = newAxis.GetComponent<Symmetrizer>();
         symmetrizer.Init();
-        GameScene parentScene = this.transform.parent.gameObject.GetComponent<GameScene>();
 
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
@@ -97,6 +96,22 @@ public class Axes : MonoBehaviour
             {
                 return axis;
             }
+        }
+
+        return null;
+    }
+
+    /**
+    * Search for an axis that is currently built by the user
+    ***/
+    public Axis FindAxisUnderConstruction()
+    {
+        for (int i = 0; i != m_axes.Count; i++)
+        {
+            Axis axis = m_axes[i].GetComponent<AxisRenderer>().m_axisData;
+
+            if (axis.m_type == Axis.AxisType.UNDER_CONSTRUCTION)
+                return axis;
         }
 
         return null;

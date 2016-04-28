@@ -135,7 +135,7 @@ public class PersistentDataManager : MonoBehaviour
             {
                 fs = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
             }
-            catch (System.Exception e)
+            catch (System.Exception)
             {
                 fs.Close();
                 levelData = new LevelData(iAbsoluteLevelNumber);

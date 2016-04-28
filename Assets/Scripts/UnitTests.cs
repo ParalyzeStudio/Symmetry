@@ -714,9 +714,9 @@ public class UnitTests
     }
     
     /**
-     * Test intersections between 2 triangles with the possibility to test if this intersection is non-empty
+     * Test if 2 triangles intersect with the possibility to test if this intersection is non-empty
      * **/
-    public static void TestTrianglesIntersections()
+    public static void TestTrianglesIntersect()
     {
         //-----TEST 1-----// O points
         GridTriangle triangle1 = new GridTriangle();
@@ -1042,6 +1042,142 @@ public class UnitTests
             Debug.Log("TEST 19 SUCCESS:" + bResult);
         else
             Debug.Log("TEST 19 FAILURE:" + bResult);
+    }
+
+    /**
+    * Test intersection between 2 triangles
+    **/
+    public static void TestTrianglesIntersection()
+    {
+        //-----TEST 1-----// 0/0 empty intersection
+        GridTriangle triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 0, true);
+        triangle1.m_points[1] = new GridPoint(2, 0, true);
+        triangle1.m_points[2] = new GridPoint(1, 2, true);
+        GridTriangle triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(3, 0, true);
+        triangle2.m_points[1] = new GridPoint(5, 0, true);
+        triangle2.m_points[2] = new GridPoint(4, 3, true);
+
+        Contour intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        if (intersectionContour == null)
+            Debug.Log("TEST 1 SUCCESS");
+        else
+            Debug.Log("TEST 1 FAILURE");
+
+        //-----TEST 2-----// 3/0
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 0, true);
+        triangle1.m_points[1] = new GridPoint(4, 0, true);
+        triangle1.m_points[2] = new GridPoint(2, 4, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(1, 1, true);
+        triangle2.m_points[1] = new GridPoint(3, 1, true);
+        triangle2.m_points[2] = new GridPoint(2, 3, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        Contour expectedShapeContour = new Contour();
+        expectedShapeContour.Add(new GridPoint(1, 1, true));
+        expectedShapeContour.Add(new GridPoint(3, 1, true));
+        expectedShapeContour.Add(new GridPoint(2, 3, true));
+        if (intersectionContour != null && intersectionContour.EqualsContour(expectedShapeContour))
+            Debug.Log("TEST 2 SUCCESS");
+        else
+            Debug.Log("TEST 2 FAILURE");
+
+        //-----TEST 3-----// 1/1
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 0, true);
+        triangle1.m_points[1] = new GridPoint(20, 0, true);
+        triangle1.m_points[2] = new GridPoint(0, 20, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(-15, 5, true);
+        triangle2.m_points[1] = new GridPoint(5, -15, true);
+        triangle2.m_points[2] = new GridPoint(5, 5, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        expectedShapeContour = new Contour();
+        expectedShapeContour.Add(new GridPoint(0, 5, true));
+        expectedShapeContour.Add(new GridPoint(0, 0, true));
+        expectedShapeContour.Add(new GridPoint(5, 0, true));
+        expectedShapeContour.Add(new GridPoint(5, 5, true));
+        if (intersectionContour != null && intersectionContour.EqualsContour(expectedShapeContour))
+            Debug.Log("TEST 3 SUCCESS");
+        else
+            Debug.Log("TEST 3 FAILURE");
+
+        //-----TEST 4-----// 0/0 non-empty intersection
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 2, true);
+        triangle1.m_points[1] = new GridPoint(4, -2, true);
+        triangle1.m_points[2] = new GridPoint(1, 4, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(0, 0, true);
+        triangle2.m_points[1] = new GridPoint(4, 0, true);
+        triangle2.m_points[2] = new GridPoint(3, 3, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        expectedShapeContour = new Contour();
+        expectedShapeContour.Add(new GridPoint(1, 1, true));
+        expectedShapeContour.Add(new GridPoint(2, 0, true));
+        expectedShapeContour.Add(new GridPoint(3, 0, true));
+        expectedShapeContour.Add(new GridPoint(2, 2, true));
+        if (intersectionContour != null && intersectionContour.EqualsContour(expectedShapeContour))
+            Debug.Log("TEST 4 SUCCESS");
+        else
+            Debug.Log("TEST 4 FAILURE");
+
+        //-----TEST 5-----// 
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 3, true);
+        triangle1.m_points[1] = new GridPoint(0, -3, true);
+        triangle1.m_points[2] = new GridPoint(4, 0, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(1, 1, true);
+        triangle2.m_points[1] = new GridPoint(1, -1, true);
+        triangle2.m_points[2] = new GridPoint(4, 0, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        expectedShapeContour = new Contour();
+        expectedShapeContour.Add(new GridPoint(1, 1, true));
+        expectedShapeContour.Add(new GridPoint(1, -1, true));
+        expectedShapeContour.Add(new GridPoint(4, 0, true));
+        if (intersectionContour != null && intersectionContour.EqualsContour(expectedShapeContour))
+            Debug.Log("TEST 5 SUCCESS");
+        else
+            Debug.Log("TEST 5 FAILURE");
+
+        //-----TEST 6-----// 
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 0, true);
+        triangle1.m_points[1] = new GridPoint(4, 0, true);
+        triangle1.m_points[2] = new GridPoint(2, 4, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(3, 2, true);
+        triangle2.m_points[1] = new GridPoint(5, 2, true);
+        triangle2.m_points[2] = new GridPoint(4, 4, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        if (intersectionContour == null)
+            Debug.Log("TEST 6 SUCCESS");
+        else
+            Debug.Log("TEST 6 FAILURE");
+
+        //-----TEST 7-----// 
+        triangle1 = new GridTriangle();
+        triangle1.m_points[0] = new GridPoint(0, 0, true);
+        triangle1.m_points[1] = new GridPoint(4, 0, true);
+        triangle1.m_points[2] = new GridPoint(2, 4, true);
+        triangle2 = new GridTriangle();
+        triangle2.m_points[0] = new GridPoint(3, 2, true);
+        triangle2.m_points[1] = new GridPoint(2, 2, true);
+        triangle2.m_points[2] = new GridPoint(1, 1, true);
+
+        intersectionContour = triangle1.IntersectionWithTriangle(triangle2);
+        if (intersectionContour == null)
+            Debug.Log("TEST 7 SUCCESS");
+        else
+            Debug.Log("TEST 7 FAILURE");
     }
 
     /**
