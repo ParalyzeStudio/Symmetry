@@ -3,19 +3,19 @@ using System.Collections.Generic;
 
 public class GameScene : GUIScene
 {
-    public const float ACTION_BUTTONS_Z_VALUE = -22.0f;
-    public const float INTERFACE_BUTTONS_Z_VALUE = -22.0f;
-    public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -22.0f;
-    public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -22.0f;
+    public const float ACTION_BUTTONS_Z_VALUE = -23.0f;
+    public const float INTERFACE_BUTTONS_Z_VALUE = -23.0f;
+    public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -23.0f;
+    public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -23.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
     public const float CHALKBOARD_Z_VALUE = -10.0f;
-    public const float CHALKBOARD_TOP_SEPARATION_Z_VALUE = -22.0f;
+    public const float CHALKBOARD_TOP_SEPARATION_Z_VALUE = -23.0f;
     public const float HATCHINGS_Z_VALUE = -20.0f;
     public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 1.0f;
-    public const float GRID_Z_VALUE = -21.0f;
-    public const float OUTLINES_Z_VALUE = -22.0f;
+    public const float GRID_Z_VALUE = -22.0f;
+    public const float OUTLINES_Z_VALUE = -23.0f;
     public const float SHAPES_Z_VALUE = -20.0f;
-    public const float AXES_Z_VALUE = -22.0f;
+    public const float AXES_Z_VALUE = -23.0f;
     //public const float SYMMETRY_STACK_Z_VALUE = -20.0f;
 
     //dimensions of scenes partitions
@@ -441,7 +441,6 @@ public class GameScene : GUIScene
     private void ShowInterfaceButtons()
     {
         float triangleHeight = GetBackgroundRenderer().m_triangleHeight;
-        float triangleEdgeLength = GetBackgroundRenderer().m_triangleEdgeLength;
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         m_interfaceButtonsHolder = new GameObject("InterfaceButtonsHolder");
@@ -635,7 +634,6 @@ public class GameScene : GUIScene
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
         List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
-        Color tintColor = GetLevelManager().m_currentChapter.GetThemeColors()[4];
 
         //Show icons
         m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
@@ -902,6 +900,7 @@ public class GameScene : GUIScene
     private void ShowInitialShapes()
     {
         List<Shape> initialShapes = GetLevelManager().m_currentLevel.m_initialShapes;
+        Debug.Log(GetLevelManager().m_currentLevel.m_chapterRelativeNumber);
         for (int iShapeIndex = 0; iShapeIndex != initialShapes.Count; iShapeIndex++)
         {
             Shape shape = new Shape(initialShapes[iShapeIndex]); //make a deep copy of the shape object stored in the level manager
@@ -1111,7 +1110,7 @@ public class GameScene : GUIScene
         Shape dummySubjShape = new Shape(dummyContour);
         Shape dummyClipShape = new Shape(dummyContour);
 
-        List<Shape> result = m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
+        m_clippingManager.ShapesOperation(dummySubjShape, dummyClipShape, ClipperLib.ClipType.ctUnion, true);
     }
 
     /**

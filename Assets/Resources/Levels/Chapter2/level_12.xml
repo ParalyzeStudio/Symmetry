@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 12" number="12">
+	<counter maxActions="4"/>
+	<grid exactNumColumns="12" minNumLines="8"/>
+	
+	
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
+</level>

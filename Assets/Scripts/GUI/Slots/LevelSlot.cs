@@ -16,6 +16,9 @@ public class LevelSlot : BaseSlot
         base.Init(parentScene);
         m_level = m_parentScene.GetLevelManager().GetLevelForCurrentChapterAndLevelRelativeNumber(iLevelNumber);
 
+        if (m_level == null)
+            return;
+
         //Add a background only if level is completed        
         //int iAbsoluteLevelNumber = m_parentScene.GetLevelManager().GetAbsoluteLevelNumberForCurrentChapterAndLevel(iLevelNumber);
         CircleMeshAnimator slotBgAnimator = m_background.GetComponent<CircleMeshAnimator>();
@@ -77,6 +80,9 @@ public class LevelSlot : BaseSlot
 
     public override void Show()
     {
+        if (m_level == null)
+            return;
+
         base.Show();
 
         GameObjectAnimator slotAnimator = this.gameObject.GetComponent<GameObjectAnimator>();
@@ -89,7 +95,7 @@ public class LevelSlot : BaseSlot
 
     public override void ShowSlotBackground()
     {
-        if (m_background != null)
+        if (m_level != null && m_background != null)
         {
             CircleMeshAnimator slotBackgroundAnimator = m_background.GetComponent<CircleMeshAnimator>();
 
@@ -100,6 +106,9 @@ public class LevelSlot : BaseSlot
 
     public override void ShowSlotContour()
     {
+        if (m_level == null)
+            return;
+
         TexturedQuadAnimator slotContourAnimator = m_contour.GetComponent<TexturedQuadAnimator>();
 
         slotContourAnimator.SetOpacity(0);

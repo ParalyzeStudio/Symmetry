@@ -1,44 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<level name="Debug level 3" number="0">
-	<counter maxActions="4"/>
-	<grid exactNumColumns="20" minNumLines="14"/>
+<level name="Level 7" number="7">
+	<counter maxActions="6"/>
+	<grid exactNumColumns="15" minNumLines="16"/>
 	<dottedOutlines>
-		<!-- <dottedOutline>
+		<dottedOutline>
 			<contour>
-				<point column="5" line="5"/>
-				<point column="5.5" line="4.5"/>
-				<point column="5" line="4"/>
-				<point column="6" line="3"/>
-				<point column="6.5" line="3.5"/>
-				<point column="7" line="3"/>
-				<point column="8" line="4"/>
-				<point column="7.5" line="4.5"/>
-				<point column="8" line="5"/>
-				<point column="7" line="6"/>
-				<point column="6.5" line="5.5"/>
-				<point column="6" line="6"/>
+				<point column="8" line="8"/>
+				<point column="10" line="8"/>
+				<point column="10" line="10"/>
+				<point column="8" line="10"/>
 			</contour>
-		</dottedOutline>  -->
+		</dottedOutline>
 	</dottedOutlines>
 	<shapes>
 		<shape tint="240">
 			<contour>
-				<point column="4" line="3"/>
-				<point column="8" line="3"/>
-				<point column="8" line="9"/>
-				<point column="6" line="9"/>
-				<point column="6" line="5"/>
-				<point column="4" line="5"/>
+				<point column="6" line="6"/>
+				<point column="10" line="6"/>
+				<point column="10" line="12"/>
+				<point column="8" line="12"/>
+				<point column="8" line="8"/>
+				<point column="6" line="8"/>
 			</contour>
 		</shape>
 		<shape tint="0">
 			<contour>
-				<point column="4" line="5"/>
-				<point column="6" line="5"/>
-				<point column="6" line="9"/>
-				<point column="8" line="9"/>
-				<point column="8" line="11"/>
-				<point column="4" line="11"/>
+				<point column="6" line="8"/>
+				<point column="8" line="8"/>
+				<point column="8" line="12"/>
+				<point column="10" line="12"/>
+				<point column="10" line="14"/>
+				<point column="6" line="14"/>
 			</contour>
 		</shape>
 	</shapes>

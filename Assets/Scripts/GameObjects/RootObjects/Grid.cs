@@ -56,9 +56,7 @@ public class Grid : MonoBehaviour
         int exactNumLines = currentLevel.m_gridExactNumLines;
         int exactNumColumns = currentLevel.m_gridExactNumColumns;
 
-        //get the screen viewport dimensions
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-     
+        //get the screen viewport dimensions     
         float lineGridSpacing, columnGridSpacing;
         if (exactNumLines > 0)
             lineGridSpacing = maxGridSize.y / (float)(exactNumLines - 1);
@@ -217,6 +215,17 @@ public class Grid : MonoBehaviour
     }
 
     /**
+     * Converts a grid vector into a world vector
+     * **/
+    public Vector2 TransformWorldVectorIntoGridVector(GridPoint gridVector)
+    {
+        float X = gridVector.X * m_gridSpacing / (float) GridPoint.DEFAULT_SCALE_PRECISION;
+        float Y = gridVector.Y * m_gridSpacing / (float)GridPoint.DEFAULT_SCALE_PRECISION;
+
+        return new Vector2(X, Y);
+    }
+
+    /**
      * Returns the grid coordinates of the anchor whose index is passed as parameter
      * **/
     public Vector2 GetAnchorGridCoordinatesForAnchorIndex(int iAnchorIndex)
@@ -238,16 +247,19 @@ public class Grid : MonoBehaviour
 
         float sqrMinDistance = float.MaxValue;
         int iMinDistanceAnchorIndex = -1;
+
+        int neighborAnchorCount = 0;
         
         for (int iAnchorIndex = 0; iAnchorIndex != m_anchors.Length; iAnchorIndex++)
         {
             Vector2 gridAnchorLocalPosition = m_anchors[iAnchorIndex].m_localPosition;
-            float dx = localPosition.x - gridAnchorLocalPosition.x;
+            float dx = Mathf.Abs(localPosition.x - gridAnchorLocalPosition.x);
             if (dx <= m_gridSpacing)
             {
-                float dy = localPosition.y - gridAnchorLocalPosition.y;
+                float dy = Mathf.Abs(localPosition.y - gridAnchorLocalPosition.y);
                 if (dy <= m_gridSpacing)
                 {
+                    neighborAnchorCount++;
                     //this anchor is one of the 4 anchors surrounding the position
                     float sqrDistance = (localPosition - gridAnchorLocalPosition).sqrMagnitude;
                     if (sqrDistance < sqrMinDistance)
@@ -258,6 +270,8 @@ public class Grid : MonoBehaviour
                 }
             }
         }
+
+        Debug.Log("neighborAnchorCount:" + neighborAnchorCount);
 
         if (iMinDistanceAnchorIndex >= 0)
             return m_anchors[iMinDistanceAnchorIndex];

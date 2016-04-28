@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<level name="Debug level 3" number="0">
+<level name="Level 8" number="8">
 	<counter maxActions="4"/>
 	<grid exactNumColumns="20" minNumLines="14"/>
 	<dottedOutlines>
@@ -21,14 +21,6 @@
 		</dottedOutline>  -->
 	</dottedOutlines>
 	<shapes>
-		<shape tint="0">
-			<contour>
-				<point column="4" line="3"/>
-				<point column="6" line="3"/>
-				<point column="6" line="5"/>
-				<point column="4" line="5"/>
-			</contour>
-		</shape>
 		<shape tint="0">
 			<contour>
 				<point column="6" line="5"/>

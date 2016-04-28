@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level name="Level 11" number="11">
+	<counter maxActions="4"/>
+	<grid exactNumColumns="13" exactNumLines="13"/>
+	
+	<constraints>
+		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
+		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>	
+		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
+		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
+		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+	</constraints>
+</level>

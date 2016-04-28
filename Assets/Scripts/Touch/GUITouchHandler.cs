@@ -71,7 +71,6 @@ public class GUITouchHandler : TouchHandler
         {
             m_selectedSymmetryPoint.DetachCircle(); //detach circle if not done already
 
-            Vector3 oldPosition = m_selectedSymmetryPoint.GetCirclePosition();
             //m_selectedSymmetryPoint.SetCirclePosition(oldPosition + GeometryUtils.BuildVector3FromVector2(delta, 0));
 
             Grid grid = ((GameScene)GetSceneManager().m_currentScene).m_grid;

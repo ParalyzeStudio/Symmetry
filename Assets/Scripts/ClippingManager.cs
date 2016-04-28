@@ -297,7 +297,6 @@ public class ClippingManager : MonoBehaviour
      * **/
     public List<Shape> PerformDifferenceAgainstShapes(Shape subjShape, List<Shape> clipShapes)
     {
-        List<Shape> allShapes = m_shapesHolder.m_shapes;
         List<Shape> clippedDiffShapes = new List<Shape>(10); //build a list with big enough capacity to store result of clipping on subjShape
         clippedDiffShapes.Add(subjShape);
 

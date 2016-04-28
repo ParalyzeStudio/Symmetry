@@ -602,7 +602,6 @@ public class Shape : GridTriangulable
         }
         else if (IsDynamic())
         {
-            List<Shape> shapes = m_parentMesh.GetShapesHolder().m_shapes;
             //ensure that FindGameObjectWithTag is not called inside the thread to go by setting relevant global instances in parent classes
             EnsureUnityInstancesAreSetBeforeThreading();
 
@@ -652,14 +651,12 @@ public class Shape : GridTriangulable
      * **/
     public void FinalizeClippingOperationsOnSubstitutionShapes()
     {
-        Shapes shapesHolder1 = this.m_parentMesh.GetShapesHolder();
         for (int i = 0; i != m_substitutionShapes.Count; i++)
         {
             m_substitutionShapes[i].FinalizeClippingOperations();
         }
 
         //destroy this shape object
-        Shapes shapesHolder = this.m_parentMesh.GetShapesHolder();
         this.m_state = ShapeState.DESTROYED;
     }
 
