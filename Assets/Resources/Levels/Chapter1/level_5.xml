@@ -54,7 +54,10 @@
 			</contour>
 		</shape>
 	</shapes>
+	<actions>
+		<action tag="ACTION_ONE_SIDED_SYMMETRY"/>
+	</actions>
 	<constraints>
-		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_VERTICAL"/>
 	</constraints>
 </level>

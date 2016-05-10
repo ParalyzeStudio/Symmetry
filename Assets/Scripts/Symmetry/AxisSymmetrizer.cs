@@ -25,11 +25,11 @@ public class AxisSymmetrizer : Symmetrizer
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
 
         //Split the strip first
-        m_axisRenderer.m_stripData.Split();
+        m_axisRenderer.m_axisData.Strip.Split();
 
         //Get strip left and right clip shapes
-        Shape stripLeftClipShape = m_axisRenderer.m_stripData.m_stripLeftSubShape;
-        Shape stripRightClipShape = m_axisRenderer.m_stripData.m_stripRightSubShape;
+        Shape stripLeftClipShape = m_axisRenderer.m_axisData.Strip.m_stripLeftSubShape;
+        Shape stripRightClipShape = m_axisRenderer.m_axisData.Strip.m_stripRightSubShape;
 
         //Clip all shapes
         List<Shape> shapes = shapesHolder.m_shapes;

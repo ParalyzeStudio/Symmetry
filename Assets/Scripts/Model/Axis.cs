@@ -7,8 +7,18 @@ public class Axis
     public GridPoint m_pointA { get; set; }
     public GridPoint m_pointB { get; set; }
 
+    private Strip m_strip;
+    public Strip Strip
+    {
+        get
+        {
+            return m_strip;
+        }
+    }
+    
+
     //Type of the axis
-    public enum AxisType
+    public enum AxisState
     {
         UNDER_CONSTRUCTION, //axis has been built yet and is waiting for the user to set the second endpoint
         STATIC_PENDING, //axis is waiting for the player to unstack this symmetry
@@ -18,15 +28,15 @@ public class Axis
         HINT //axis is displayed when the player has requested some help
     }
 
-    public AxisType m_type { get; set; }
+    public AxisState m_state { get; set; }
 
-    public enum AxisSymmetryType
+    public enum AxisType
     {
         SYMMETRY_AXES_ONE_SIDE,
         SYMMETRY_AXES_TWO_SIDES
     }
 
-    public AxisSymmetryType m_symmetryType { get; set; }
+    public AxisType m_type { get; set; }
 
     public Axis()
     {
@@ -34,30 +44,37 @@ public class Axis
         m_pointB = GridPoint.zero;
     }
 
-    public Axis(GridPoint pointA, AxisType type, AxisSymmetryType symmetryType)
+    public Axis(GridPoint pointA, AxisState type, AxisType symmetryType)
     {
         m_pointA = pointA;
         m_pointB = GridPoint.zero;
-        m_type = type;
-        m_symmetryType = symmetryType;
+        m_state = type;
+        m_type = symmetryType;
     }
 
-    public Axis(GridPoint pointA, GridPoint pointB, AxisType type, AxisSymmetryType symmetryType) : this(pointA, type, symmetryType)
+    public Axis(GridPoint pointA, GridPoint pointB, AxisState type, AxisType symmetryType) : this(pointA, type, symmetryType)
     {
         m_pointB = pointB;
+    }
+
+    public void CalculateStripContour()
+    {
+        //initialize the strip data
+        m_strip = new Strip(this);
+        m_strip.CalculateContour();
     }
 
     /**
      * Set the symmetry type for this axis based on the currently selected action button ID
      * **/
-    public static AxisSymmetryType GetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)
+    public static AxisType GetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)
     {
         if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES)
-            return AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES;
+            return AxisType.SYMMETRY_AXES_TWO_SIDES;
         else if (buttonID == GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE)
-            return AxisSymmetryType.SYMMETRY_AXES_ONE_SIDE;
+            return AxisType.SYMMETRY_AXES_ONE_SIDE;
         else //default
-            return AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES;
+            return AxisType.SYMMETRY_AXES_TWO_SIDES;
     }
 
     /**

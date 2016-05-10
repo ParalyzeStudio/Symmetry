@@ -133,26 +133,6 @@ public class ShapeMesh : TexturedMesh
         }
     }
 
-    /**
-     * PENDING WORK Draw an inner blur for a closed contour
-     * **/
-    private void DrawInnerBlur(Contour contour)
-    {
-        ////start by building an inner belt joining points on bisector edges
-        //float beltThickness = 20.0f;
-
-        //for (int i = 0; i != contour.Count; i++)
-        //{
-        //    GridPoint point1 = contour[(i > 0) ? i - 1 : contour.Count - 1];
-        //    GridPoint point2 = contour[i];
-        //    GridPoint point3 = contour[(i == contour.Count - 1) ? 0 : i + 1];
-
-        //    Vector2 worldPoint1 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point1);
-        //    Vector2 worldPoint2 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point2);
-        //    Vector2 worldPoint3 = GetGrid().GetPointWorldCoordinatesFromGridCoordinates(point3);
-        //}
-    }
-
     public void TranslateSelectionContour(Vector3 delta)
     {
         m_selectionContourAnimator.SetPosition(m_selectionContourAnimator.GetPosition() + delta);

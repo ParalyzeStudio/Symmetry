@@ -21,7 +21,7 @@ public class Axes : MonoBehaviour
         m_circleMaterial = Instantiate(m_positionColorMaterial);
     }
 
-    public AxisRenderer BuildAxis(Axis axis)
+    public AxisRenderer BuildAxisRenderer(Axis axis)
     {
         GameObject newAxis = (GameObject)Instantiate(m_axisPfb);
         GameObjectAnimator axisAnimator = newAxis.GetComponent<GameObjectAnimator>();
@@ -35,7 +35,6 @@ public class Axes : MonoBehaviour
         //Build and render the axis once
         AxisRenderer axisRenderer = newAxis.GetComponent<AxisRenderer>();
         axisRenderer.SetAxisData(axis);
-        axisRenderer.BuildElements();
 
         AddAxis(axisRenderer);
         return axisRenderer;
@@ -91,8 +90,8 @@ public class Axes : MonoBehaviour
         {
             Axis axis = m_axes[i].GetComponent<AxisRenderer>().m_axisData;
             //stop at the first dynamic axis as th
-            if (axis.m_type == Axis.AxisType.DYNAMIC_SNAPPED ||
-                axis.m_type == Axis.AxisType.DYNAMIC_UNSNAPPED)
+            if (axis.m_state == Axis.AxisState.DYNAMIC_SNAPPED ||
+                axis.m_state == Axis.AxisState.DYNAMIC_UNSNAPPED)
             {
                 return axis;
             }
@@ -110,7 +109,7 @@ public class Axes : MonoBehaviour
         {
             Axis axis = m_axes[i].GetComponent<AxisRenderer>().m_axisData;
 
-            if (axis.m_type == Axis.AxisType.UNDER_CONSTRUCTION)
+            if (axis.m_state == Axis.AxisState.UNDER_CONSTRUCTION)
                 return axis;
         }
 

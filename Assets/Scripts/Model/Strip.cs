@@ -4,7 +4,6 @@ using System.Collections.Generic;
 public class Strip : GridTriangulable
 {
     private Axis m_parentAxis;
-    private Symmetrizer m_parentSymmetrizer;
 
     //parts of the strip that are on the left and on the right of the axis
     public Shape m_stripLeftSubShape { get; set; }
@@ -13,16 +12,16 @@ public class Strip : GridTriangulable
     public Strip(Axis parentAxis) : base()
     {
         m_parentAxis = parentAxis;
-        m_parentSymmetrizer = parentAxis.m_parentRenderer.GetComponent<Symmetrizer>();
     }
 
     /**
-  * Find the contour of this strip and triangulate it
-  * **/
+    * Find the contour of this strip and triangulate it
+    * **/
     public void CalculateContour()
     {
-        //Calculate intersection points
         Grid grid = m_parentAxis.m_parentRenderer.GetGameScene().m_grid;
+
+        //Calculate intersection points
         Vector2 axisNormal = m_parentAxis.GetNormal();
         GridPoint gridAxisNormal = new GridPoint(Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.x),
                                                  Mathf.RoundToInt(GridPoint.DEFAULT_SCALE_PRECISION * axisNormal.y),
@@ -174,7 +173,7 @@ public class Strip : GridTriangulable
 
         m_stripLeftSubShape = new Shape(leftSubContour);
 
-        if (m_parentAxis.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        if (m_parentAxis.m_type == Axis.AxisType.SYMMETRY_AXES_TWO_SIDES)
         {
             Contour rightSubContour = new Contour(); //the contour associated with the 'right' sub shape
             rightSubContour.Add(m_parentAxis.m_pointA);

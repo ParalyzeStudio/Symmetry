@@ -30,16 +30,16 @@ public class GUITouchHandler : TouchHandler
                 }
 
                 //check action buttons
-                //List<ActionButton> actionButtons = GetGUIManager().m_actionButtons;
+                ActionButton[] actionButtons = GetSceneManager().m_currentScene.GetComponentsInChildren<ActionButton>();
 
-                //for (int i = 0; i != actionButtons.Count; i++)
-                //{
-                //    if (actionButtons[i].ContainsPoint(pointerLocation))
-                //    {
-                //        m_selectedGUIButton = actionButtons[i];
-                //        return true;
-                //    }
-                //}
+                for (int i = 0; i != actionButtons.Length; i++)
+                {
+                    if (actionButtons[i].ContainsPoint(pointerLocation))
+                    {
+                        m_selectedGUIButton = actionButtons[i];
+                        return true;
+                    }
+                }
 
                 //check symmetry points
                 List<SymmetryPoint> symmetryPoints = GetGUIManager().m_symmetryPoints;

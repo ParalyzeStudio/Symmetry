@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class GameScene : GUIScene
 {
-    public const float ACTION_BUTTONS_Z_VALUE = -23.0f;
+    public const float ACTION_MENU_Z_VALUE = -23.0f;
     public const float INTERFACE_BUTTONS_Z_VALUE = -23.0f;
     public const float DEPLOY_AXIS_BUTTONS_Z_VALUE = -23.0f;
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -23.0f;
@@ -65,7 +65,6 @@ public class GameScene : GUIScene
 
     //holders
     private GameObject m_interfaceButtonsHolder;
-    private GameObject m_actionButtonsHolder;
     private GameObject m_axisConstraintsIconsHolder;
 
     //interface buttons
@@ -75,8 +74,30 @@ public class GameScene : GUIScene
     public Material m_blurrySegmentMaterial;
     public Material m_sharpSegmentMaterial;
 
-    //action buttons
-    private ActionButton[] m_actionButtons;
+    //actions
+    public enum Action
+    {
+        NONE = 0,
+        SHOWING_ACTION_MENU,
+        DRAWING_AXIS,
+        DRAWING_POINT_SYMMETRY,
+        MOVING_SHAPE
+    }
+    public Action m_currentAction { get; set; }
+
+    public GameObject m_actionMenuPfb;
+    private GameObject m_actionMenuObject;
+
+    //Anchors that are available when drawing an axis
+    private GameObject m_availableAnchorsHolder;
+    private List<GridPoint> m_availableAnchors;
+    public List<GridPoint> AvailableAnchors
+    {
+        get
+        {
+            return m_availableAnchors;
+        }
+    }
 
     //deploy axis buttons
     public GameObject m_deployAxisButtonPfb;
@@ -87,15 +108,10 @@ public class GameScene : GUIScene
     //grid contour
     public Material m_gridTopContourMaterial;
 
-    //Constraints on axes
-    public const string CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL = "SYMMETRY_AXIS_HORIZONTAL";
-    public const string CONSTRAINT_SYMMETRY_AXIS_VERTICAL = "SYMMETRY_AXIS_VERTICAL";
-    public const string CONSTRAINT_SYMMETRY_AXES_STRAIGHT = "SYMMETRY_AXES_STRAIGHT";
-    public const string CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT = "SYMMETRY_AXIS_DIAGONAL_LEFT";
-    public const string CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT = "SYMMETRY_AXIS_DIAGONAL_RIGHT";
-    public const string CONSTRAINT_SYMMETRY_AXES_DIAGONALS = "SYMMETRY_AXES_DIAGONALS";
+    public List<GridPoint> m_constrainedDirections { get; set; }
 
-    public List<Vector2> m_constrainedDirections { get; set; }
+    //available anchors when drawing axis
+    public Material m_availableAnchorMaterial;
 
     //stack for symmetries
     //public GameObject m_gameStackPfb;
@@ -115,6 +131,7 @@ public class GameScene : GUIScene
     public void Init()
     {
         m_gameStatus = GameStatus.WAITING_FOR_START;
+        m_currentAction = Action.NONE;
     }
 
     public override void Show()
@@ -632,49 +649,49 @@ public class GameScene : GUIScene
      * **/
     private void ShowAxisConstraintsIcons()
     {
-        Vector2 screenSize = ScreenUtils.GetScreenSize();
-        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
+        //Vector2 screenSize = ScreenUtils.GetScreenSize();
+        //List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
 
-        //Show icons
-        m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
+        ////Show icons
+        //m_axisConstraintsIconsHolder = new GameObject("AxisConstraintsIconsHolder");
 
-        GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
-        axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
-        axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.5f * m_bottomContentHeight, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
+        //GameObjectAnimator axisConstraintsIconsHolderAnimator = m_axisConstraintsIconsHolder.AddComponent<GameObjectAnimator>();
+        //axisConstraintsIconsHolderAnimator.SetParentTransform(this.transform);
+        //axisConstraintsIconsHolderAnimator.SetPosition(new Vector3(0, -0.5f * screenSize.y + 0.5f * m_bottomContentHeight, AXIS_CONSTRAINTS_ICONS_Z_VALUE));
 
-        float iconMargin = 20.0f;
-        Vector2 iconSize = new Vector2(64, 64);
+        //float iconMargin = 20.0f;
+        //Vector2 iconSize = new Vector2(64, 64);
 
-        for (int i = 0; i != axisConstraints.Count; i++)
-        {
-            GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
-            iconObject.name = "ConstraintAxisIcon";
+        //for (int i = 0; i != axisConstraints.Count; i++)
+        //{
+        //    GameObject iconObject = (GameObject)Instantiate(m_texQuadPfb);
+        //    iconObject.name = "ConstraintAxisIcon";
 
-            UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
-            iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
+        //    UVQuad iconQuad = iconObject.GetComponent<UVQuad>();
+        //    iconQuad.Init(GetMaterialForAxisConstraint(axisConstraints[i]));
 
-            TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
-            iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-            iconAnimator.SetScale(iconSize);
-            iconAnimator.SetColor(Color.white);
-            float iconPositionX;
-            if (axisConstraints.Count % 2 == 0) //even
-                iconPositionX = (i - axisConstraints.Count / 2 + 0.5f) * (iconSize.x + iconMargin);
-            else //odd
-                iconPositionX = (i - axisConstraints.Count / 2) * (iconSize.x + iconMargin);
-            iconAnimator.SetPosition(new Vector3(iconPositionX, 0, 0));
-        }
+        //    TexturedQuadAnimator iconAnimator = iconObject.GetComponent<TexturedQuadAnimator>();
+        //    iconAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+        //    iconAnimator.SetScale(iconSize);
+        //    iconAnimator.SetColor(Color.white);
+        //    float iconPositionX;
+        //    if (axisConstraints.Count % 2 == 0) //even
+        //        iconPositionX = (i - axisConstraints.Count / 2 + 0.5f) * (iconSize.x + iconMargin);
+        //    else //odd
+        //        iconPositionX = (i - axisConstraints.Count / 2) * (iconSize.x + iconMargin);
+        //    iconAnimator.SetPosition(new Vector3(iconPositionX, 0, 0));
+        //}
 
-        //build a horizontal line to show separation between axis constraints and grid
-        GameObject lineObject = Instantiate(m_colorQuadPfb);
-        lineObject.name = "SeparationLine";
-        ColorQuad line = lineObject.GetComponent<ColorQuad>();
-        line.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
-        lineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
-        lineAnimator.SetScale(new Vector3(screenSize.x, 6.0f, 1));
-        lineAnimator.SetPosition(new Vector3(0, 0.5f * m_bottomContentHeight, 0));
-        lineAnimator.SetColor(Color.white);
+        ////build a horizontal line to show separation between axis constraints and grid
+        //GameObject lineObject = Instantiate(m_colorQuadPfb);
+        //lineObject.name = "SeparationLine";
+        //ColorQuad line = lineObject.GetComponent<ColorQuad>();
+        //line.Init(m_plainWhiteMaterial);
+        //ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+        //lineAnimator.SetParentTransform(m_axisConstraintsIconsHolder.transform);
+        //lineAnimator.SetScale(new Vector3(screenSize.x, 6.0f, 1));
+        //lineAnimator.SetPosition(new Vector3(0, 0.5f * m_bottomContentHeight, 0));
+        //lineAnimator.SetColor(Color.white);
     }
 
     public void DismissAxisConstraintsIcons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
@@ -689,89 +706,162 @@ public class GameScene : GUIScene
      * -Second button is for modifying the behavior of color symmetrization (addition or soustraction)
      * -Third button is for picking a color that will apply to the symmetry done by the user by filtering shapes that are not of that specific color
      * **/
-    private void ShowActionButtons()
+    //private void ShowActionButtons()
+    //{
+    //    Vector2 screenSize = ScreenUtils.GetScreenSize();
+
+    //    Vector2 actionButtonsHolderSize = new Vector2(m_leftContentWidth, m_grid.m_maxGridSize.y);
+    //    m_actionButtonsHolder = new GameObject("ActionButtons");
+    //    GameObjectAnimator actionButtonsHolderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
+    //    actionButtonsHolderAnimator.SetParentTransform(this.transform);
+    //    actionButtonsHolderAnimator.SetPosition(new Vector3(-0.5f * screenSize.x + 0.5f * actionButtonsHolderSize.x, m_grid.transform.localPosition.y, ACTION_BUTTONS_Z_VALUE));
+
+    //    m_actionButtons = new ActionButton[3];
+
+    //    //Show MAIN_ACTIONS button
+    //    GUIButton.GUIButtonID[] childIDs = new GUIButton.GUIButtonID[4];
+    //    childIDs[0] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
+    //    childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
+    //    childIDs[2] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
+    //    childIDs[3] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
+
+    //    //Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 100.0f, 0);
+    //    Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 50.0f, 0);
+
+    //    GameObject buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.MAIN_ACTIONS,
+    //                                                                 childIDs,
+    //                                                                 m_leftContentWidth);
+    //    buttonObject.name = "TopActionBtn";
+
+    //    ActionButton button = buttonObject.GetComponent<ActionButton>();
+    //    m_actionButtons[0] = button;
+
+    //    GameObjectAnimator buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+    //    buttonAnimator.SetParentTransform(m_actionButtonsHolder.transform);
+    //    buttonAnimator.SetPosition(buttonPosition);
+
+    //    ////Show CLIP_OPERATION button
+    //    //childIDs = new GUIButton.GUIButtonID[2];
+    //    //childIDs[0] = GUIButton.GUIButtonID.ID_OPERATION_ADD;
+    //    //childIDs[1] = GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT;
+
+    //    //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.CLIP_OPERATION,
+    //    //                                                  childIDs);
+
+    //    //buttonObject.name = "MiddleActionBtn";
+
+    //    //button = buttonObject.GetComponent<ActionButton>();
+    //    //m_actionButtons[1] = button;
+
+    //    //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+    //    //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+    //    //buttonAnimator.SetPosition(buttonPosition);
+
+    //    ////Show COLOR_FILTERING button
+    //    //childIDs = new GUIButton.GUIButtonID[1];
+    //    //childIDs[0] = GUIButton.GUIButtonID.ID_COLOR_FILTER;
+
+    //    //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.COLOR_FILTERING,
+    //    //                                                  childIDs);
+
+    //    //buttonObject.name = "BottomActionBtn";
+
+    //    //button = buttonObject.GetComponent<ActionButton>();
+    //    //m_actionButtons[2] = button;
+
+    //    //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+    //    //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
+    //    //buttonAnimator.SetPosition(buttonPosition);
+
+    //    for (int i = 0; i != m_actionButtons.Length; i++)
+    //    {
+    //        if (m_actionButtons[i] != null)
+    //            m_actionButtons[i].Show();
+    //    }
+
+    //    //build a vertical line to show separation between action buttons and grid
+    //    GameObject lineObject = Instantiate(m_colorQuadPfb);
+    //    lineObject.name = "SeparationLine";
+    //    ColorQuad line = lineObject.GetComponent<ColorQuad>();
+    //    line.Init(m_plainWhiteMaterial);
+    //    ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
+    //    lineAnimator.SetParentTransform(m_actionButtonsHolder.transform);
+    //    lineAnimator.SetScale(new Vector3(6.0f, screenSize.y - m_topContentHeight - m_bottomContentHeight, 1));
+    //    lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
+    //    lineAnimator.SetColor(Color.white);
+    //}
+
+    /**
+    * Display a menu that contains actions the user can perform on the scene when clicking a grid point
+    **/
+    public bool ShowActionMenu(Grid.GridAnchor relatedAnchor)
     {
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
-        Vector2 actionButtonsHolderSize = new Vector2(m_leftContentWidth, m_grid.m_maxGridSize.y);
-        m_actionButtonsHolder = new GameObject("ActionButtons");
-        GameObjectAnimator actionButtonsHolderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
-        actionButtonsHolderAnimator.SetParentTransform(this.transform);
-        actionButtonsHolderAnimator.SetPosition(new Vector3(-0.5f * screenSize.x + 0.5f * actionButtonsHolderSize.x, m_grid.transform.localPosition.y, ACTION_BUTTONS_Z_VALUE));
+        m_actionMenuObject = (GameObject)Instantiate(m_actionMenuPfb);
+        m_actionMenuObject.name = "ActionButtons";
+        m_actionMenuObject.transform.parent = this.transform;
 
-        m_actionButtons = new ActionButton[3];
+        Vector3 position = new Vector3(0.5f * screenSize.x - 0.5f * m_rightContentWidth, m_grid.transform.localPosition.y, ACTION_MENU_Z_VALUE);
+        return m_actionMenuObject.GetComponent<ActionMenu>().Build(this, position, relatedAnchor);
 
-        //Show MAIN_ACTIONS button
-        GUIButton.GUIButtonID[] childIDs = new GUIButton.GUIButtonID[4];
-        childIDs[0] = GUIButton.GUIButtonID.ID_MOVE_SHAPE;
-        childIDs[1] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE;
-        childIDs[2] = GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES;
-        childIDs[3] = GUIButton.GUIButtonID.ID_POINT_SYMMETRY;
+        ////Build the object that will hold the action buttons
+        //m_actionButtonsHolder = new GameObject("ActionButtons");
+        //GameObjectAnimator holderAnimator = m_actionButtonsHolder.AddComponent<GameObjectAnimator>();
+        //holderAnimator.SetParentTransform(this.transform);
 
-        //Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 100.0f, 0);
-        Vector3 buttonPosition = new Vector3(0, 0.5f * actionButtonsHolderSize.y - 50.0f, 0);
+        //Vector2 screenSize = ScreenUtils.GetScreenSize();
+        //Vector3 holderPosition = new Vector3(0.5f * (screenSize.x - m_rightContentWidth), m_grid.transform.localPosition.y, ACTION_BUTTONS_Z_VALUE);
 
-        GameObject buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.MAIN_ACTIONS,
-                                                                     childIDs,
-                                                                     m_leftContentWidth);
-        buttonObject.name = "TopActionBtn";
+        //holderAnimator.SetPosition(holderPosition);
 
-        ActionButton button = buttonObject.GetComponent<ActionButton>();
-        m_actionButtons[0] = button;
+        ////Build the child action buttons
+        //int availableActions = GetLevelManager().m_currentLevel.Actions;
+        //bool bTwoSidedSymmetry = (availableActions & Level.ACTION_TWO_SIDED_SYMMETRY) > 0;
+        //bool bPointSymmetry = (availableActions & Level.ACTION_POINT_SYMMETRY) > 0;
 
-        GameObjectAnimator buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
-        buttonAnimator.SetParentTransform(m_actionButtonsHolder.transform);
-        buttonAnimator.SetPosition(buttonPosition);
+        //List<GUIButton.GUIButtonID> actionIDs = new List<GUIButton.GUIButtonID>();
+        //if (bTwoSidedSymmetry)
+        //{
+        //    actionIDs.Add(GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE);
+        //    actionIDs.Add(GUIButton.GUIButtonID.ID_AXIS_SYMMETRY_TWO_SIDES);
+        //}
+        //if (bPointSymmetry)
+        //    actionIDs.Add(GUIButton.GUIButtonID.ID_POINT_SYMMETRY);
 
-        ////Show CLIP_OPERATION button
-        //childIDs = new GUIButton.GUIButtonID[2];
-        //childIDs[0] = GUIButton.GUIButtonID.ID_OPERATION_ADD;
-        //childIDs[1] = GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT;
+        //if (actionIDs.Count == 0)
+        //    return false;
 
-        //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.CLIP_OPERATION,
-        //                                                  childIDs);
+        //Vector2 actionButtonSize = new Vector2(128, 128);
+        //float verticalMargin = 50.0f;
+        //for (int i = 0; i != actionIDs.Count; i++)
+        //{
+        //    GameObject buttonObject = GetGUIManager().CreateActionButtonForID(actionIDs[i], actionButtonSize);
 
-        //buttonObject.name = "MiddleActionBtn";
+        //    Vector3 buttonPosition;
+        //    if (actionIDs.Count % 2 == 0)
+        //    {
+        //        buttonPosition = new Vector3(0, (actionButtonSize.y + verticalMargin) * (i - actionIDs.Count / 2 + 0.5f), 0);
+        //    }
+        //    else
+        //    {
+        //        buttonPosition = new Vector3(0, (actionButtonSize.y + verticalMargin) * (i - actionIDs.Count / 2), 0);
+        //    }
 
-        //button = buttonObject.GetComponent<ActionButton>();
-        //m_actionButtons[1] = button;
+        //    GameObjectAnimator buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
+        //    buttonAnimator.SetParentTransform(m_actionButtonsHolder.transform);
+        //    buttonAnimator.SetPosition(buttonPosition);
+        //}
 
-        //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
-        //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
-        //buttonAnimator.SetPosition(buttonPosition);
+        //return true;
+    }
 
-        ////Show COLOR_FILTERING button
-        //childIDs = new GUIButton.GUIButtonID[1];
-        //childIDs[0] = GUIButton.GUIButtonID.ID_COLOR_FILTER;
-
-        //buttonObject = GetGUIManager().CreateActionButton(ActionButton.GroupID.COLOR_FILTERING,
-        //                                                  childIDs);
-
-        //buttonObject.name = "BottomActionBtn";
-
-        //button = buttonObject.GetComponent<ActionButton>();
-        //m_actionButtons[2] = button;
-
-        //buttonAnimator = buttonObject.GetComponent<GameObjectAnimator>();
-        //buttonAnimator.SetParentTransform(actionButtonsHolder.transform);
-        //buttonAnimator.SetPosition(buttonPosition);
-
-        for (int i = 0; i != m_actionButtons.Length; i++)
-        {
-            if (m_actionButtons[i] != null)
-                m_actionButtons[i].Show();
-        }
-
-        //build a vertical line to show separation between action buttons and grid
-        GameObject lineObject = Instantiate(m_colorQuadPfb);
-        lineObject.name = "SeparationLine";
-        ColorQuad line = lineObject.GetComponent<ColorQuad>();
-        line.Init(m_plainWhiteMaterial);
-        ColorQuadAnimator lineAnimator = lineObject.GetComponent<ColorQuadAnimator>();
-        lineAnimator.SetParentTransform(m_actionButtonsHolder.transform);
-        lineAnimator.SetScale(new Vector3(6.0f, screenSize.y - m_topContentHeight - m_bottomContentHeight, 1));
-        lineAnimator.SetPosition(new Vector3(0.5f * actionButtonsHolderSize.x, 0, 0));
-        lineAnimator.SetColor(Color.white);
+    /**
+    * Remove the action menu from scene
+    **/
+    public void DismissActionMenu()
+    {
+        Destroy(m_actionMenuObject);
     }
 
     /**
@@ -850,33 +940,6 @@ public class GameScene : GUIScene
 
             GetGUIManager().m_symmetryPoints.Add(symmetryPoint);
         }
-    }
-
-    private void DismissActionButtons(float fDuration = 0.5f, float fDelay = 0.0f, bool bDestroyOnFinish = true)
-    {
-        m_actionButtonsHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, fDuration, fDelay, ValueAnimator.InterpolationType.LINEAR, bDestroyOnFinish);
-
-        ////Fade out every button
-        //for (int i = 0; i != m_actionButtons.Length; i++)
-        //{
-        //    if (m_actionButtons[i] != null)
-        //        m_actionButtons[i].Dismiss(fDuration, fDelay, bDestroyOnFinish);
-        //}
-
-    }
-
-    /**
-     * Returns the current ID of the action button at specified location
-     * **/
-    public GUIButton.GUIButtonID GetActionButtonID(ActionButton.GroupID groupID)
-    {
-        for (int i = 0; i != m_actionButtons.Length; i++)
-        {
-            if (m_actionButtons[i].m_groupID == groupID)
-                return m_actionButtons[i].GetSelectedChildID();
-        }
-
-        return GUIButton.GUIButtonID.NONE;
     }
 
     /**
@@ -1118,82 +1181,45 @@ public class GameScene : GUIScene
      * **/
     public void BuildConstrainedDirections()
     {
-        m_constrainedDirections = new List<Vector2>();
+        m_constrainedDirections = new List<GridPoint>();
         m_constrainedDirections.Capacity = 8;
 
-        Vector2 rightDirection = new Vector2(1, 0);
-        Vector2 bottomDirection = new Vector2(0, -1);
-        Vector2 leftDirection = new Vector2(-1, 0);
-        Vector2 topDirection = new Vector2(0, 1);
-        Vector2 topRightDirection = new Vector2(1, 1);
-        Vector2 bottomRightDirection = new Vector2(1, -1);
-        Vector2 bottomLeftDirection = new Vector2(-1, -1);
-        Vector2 topLeftDirection = new Vector2(-1, 1);
-        topRightDirection.Normalize();
-        bottomRightDirection.Normalize();
-        bottomLeftDirection.Normalize();
-        topLeftDirection.Normalize();
+        GridPoint rightDirection = new GridPoint(1, 0);
+        GridPoint bottomDirection = new GridPoint(0, -1);
+        GridPoint leftDirection = new GridPoint(-1, 0);
+        GridPoint topDirection = new GridPoint(0, 1);
+        GridPoint topRightDirection = new GridPoint(1, 1);
+        GridPoint bottomRightDirection = new GridPoint(1, -1);
+        GridPoint bottomLeftDirection = new GridPoint(-1, -1);
+        GridPoint topLeftDirection = new GridPoint(-1, 1);
 
-        ///***
-        // * TMP DEBUG: unlock all directions
-        // * ***/
-        //AddConstrainedDirection(rightDirection);
-        //AddConstrainedDirection(bottomDirection);
-        //AddConstrainedDirection(leftDirection);
-        //AddConstrainedDirection(topDirection);
-        //AddConstrainedDirection(topRightDirection);
-        //AddConstrainedDirection(bottomRightDirection);
-        //AddConstrainedDirection(bottomLeftDirection);
-        //AddConstrainedDirection(topLeftDirection);
-        //return;
-        ///***
-        // * 
-        // * ***/
-
-        List<string> axisConstraints = GetLevelManager().m_currentLevel.m_axisConstraints;
-        for (int i = 0; i != axisConstraints.Count; i++)
+        int constraints = GetLevelManager().m_currentLevel.Constraints;
+        if ((constraints & Level.CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL) > 0)
         {
-            if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL))
-            {
-                AddConstrainedDirection(rightDirection);
-                AddConstrainedDirection(leftDirection);
-            }
-            else if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXIS_VERTICAL))
-            {
-                AddConstrainedDirection(topDirection);
-                AddConstrainedDirection(bottomDirection);
-            }
-            else if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXES_STRAIGHT))
-            {
-                AddConstrainedDirection(rightDirection);
-                AddConstrainedDirection(leftDirection);
-                AddConstrainedDirection(topDirection);
-                AddConstrainedDirection(bottomDirection);
-            }
-            else if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT))
-            {
-                AddConstrainedDirection(topLeftDirection);
-                AddConstrainedDirection(bottomRightDirection);
-            }
-            else if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT))
-            {
-                AddConstrainedDirection(topRightDirection);
-                AddConstrainedDirection(bottomLeftDirection);
-            }
-            else if (axisConstraints[i].Equals(CONSTRAINT_SYMMETRY_AXES_DIAGONALS))
-            {
-                AddConstrainedDirection(topLeftDirection);
-                AddConstrainedDirection(bottomRightDirection);
-                AddConstrainedDirection(topRightDirection);
-                AddConstrainedDirection(bottomLeftDirection);
-            }
+            AddConstrainedDirection(rightDirection);
+            AddConstrainedDirection(leftDirection);
+        }
+        if ((constraints & Level.CONSTRAINT_SYMMETRY_AXIS_VERTICAL) > 0)
+        {
+            AddConstrainedDirection(topDirection);
+            AddConstrainedDirection(bottomDirection);
+        }
+        if ((constraints & Level.CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT) > 0)
+        {
+            AddConstrainedDirection(topLeftDirection);
+            AddConstrainedDirection(bottomRightDirection);
+        }
+        if ((constraints & Level.CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT) > 0)
+        {
+            AddConstrainedDirection(topRightDirection);
+            AddConstrainedDirection(bottomLeftDirection);
         }
     }
 
     /**
      * Add a constrained direction if not already stored
      * **/
-    private void AddConstrainedDirection(Vector2 direction)
+    private void AddConstrainedDirection(GridPoint direction)
     {
         for (int i = 0; i != m_constrainedDirections.Count; i++)
         {
@@ -1205,22 +1231,52 @@ public class GameScene : GUIScene
     }
 
     /**
+    * Display which anchors are available for drawing the current axis
+    **/
+    public void DisplayAnchorsForAxis(GridPoint axisPointA)
+    {
+        if (m_availableAnchorsHolder == null)
+        {
+            m_availableAnchorsHolder = new GameObject("AvailableAnchors");
+            m_availableAnchorsHolder.transform.parent = this.transform;
+        }
+
+        m_availableAnchors = m_grid.FindAvailableAnchorsForAxis(axisPointA, m_constrainedDirections);   
+
+        for (int i = 0; i != m_availableAnchors.Count; i++)
+        {
+            Vector2 anchorPosition = m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_availableAnchors[i]);
+
+            GameObject availableAnchorObject = (GameObject)Instantiate(m_texQuadPfb);
+            availableAnchorObject.name = "AvailableAnchor";
+            availableAnchorObject.GetComponent<UVQuad>().Init(m_availableAnchorMaterial);
+
+            GameObjectAnimator availableAnchorAnimator = availableAnchorObject.GetComponent<GameObjectAnimator>();
+            availableAnchorAnimator.SetParentTransform(m_availableAnchorsHolder.transform);
+            availableAnchorAnimator.SetScale(new Vector3(64, 64, 1));
+
+            //draw an hexagon
+            availableAnchorObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(anchorPosition.x, anchorPosition.y, -50));
+        }
+    }
+
+    /**
      * Clone the relevant material for the passed axis constraint string
      * **/
     private Material GetMaterialForAxisConstraint(string axisConstraint)
     {
-        if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL))
-            return Instantiate(m_horizontalAxisMaterial);
-        else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_VERTICAL))
-            return Instantiate(m_verticalAxisMaterial);
-        else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXES_STRAIGHT))
-            return Instantiate(m_straightAxesMaterial);
-        else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT))
-            return Instantiate(m_leftDiagonalAxisMaterial);
-        else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT))
-            return Instantiate(m_rightDiagonalAxisMaterial);
-        else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXES_DIAGONALS))
-            return Instantiate(m_diagonalAxesMaterial);
+        //if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL))
+        //    return Instantiate(m_horizontalAxisMaterial);
+        //else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_VERTICAL))
+        //    return Instantiate(m_verticalAxisMaterial);
+        //else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXES_STRAIGHT))
+        //    return Instantiate(m_straightAxesMaterial);
+        //else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT))
+        //    return Instantiate(m_leftDiagonalAxisMaterial);
+        //else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT))
+        //    return Instantiate(m_rightDiagonalAxisMaterial);
+        //else if (axisConstraint.Equals(CONSTRAINT_SYMMETRY_AXES_DIAGONALS))
+        //    return Instantiate(m_diagonalAxesMaterial);
 
         return null;
     }
@@ -1467,7 +1523,6 @@ public class GameScene : GUIScene
         m_axesHolder.Dismiss(1.0f);
         DismissGridPoints(0.5f);
         DismissInterfaceButtons(0.5f);
-        DismissActionButtons(1.0f);
         DismissAxisConstraintsIcons(0.5f);
         DismissCounter(0.5f);
         //DismissShapes(0.5f, 4.0f);

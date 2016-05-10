@@ -55,6 +55,7 @@ public class GUIButton : MonoBehaviour
         ID_OPERATION_ADD,
         ID_OPERATION_SUBSTRACT,
         ID_COLOR_FILTER,
+        ID_CANCEL_ACTION_MENU,
 
         //temporary debug
         ID_DEBUG_SKIP_LEVEL,

@@ -40,7 +40,11 @@
 			</contour>
 		</shape>
 	</shapes>
+	<actions>
+		<action tag="ACTION_ONE_SIDED_SYMMETRY"/>
+	</actions>
 	<constraints>
-		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT"/>
 	</constraints>
 </level>

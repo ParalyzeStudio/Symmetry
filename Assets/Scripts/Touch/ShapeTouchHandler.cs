@@ -10,18 +10,13 @@ public class ShapeTouchHandler : TouchHandler
         GameScene gameScene = (GameScene)GetSceneManager().m_currentScene;
 
         GridPoint pointerGridLocation = gameScene.m_grid.GetPointGridCoordinatesFromWorldCoordinates(pointerLocation);
+        Shape shape = GetComponent<ShapeMesh>().m_shapeData;
 
-        //GUIButton.GUIButtonID mainActionsButtonID = gameScene.GetActionButtonID(ActionButton.GroupID.MAIN_ACTIONS);
-        //if (mainActionsButtonID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
-        //{
-            Shape shape = GetComponent<ShapeMesh>().m_shapeData;
-
-            if (shape.m_state == Shape.ShapeState.STATIC) //we can only move STATIC shapes
-            {
-                //Get the triangles of this shape from the MeshFilter
-                return shape.ContainsPoint(pointerGridLocation);
-            }
-        //}
+        if (shape.m_state == Shape.ShapeState.STATIC) //we can only move STATIC shapes
+        {
+            //Get the triangles of this shape from the MeshFilter
+            return shape.ContainsPoint(pointerGridLocation);
+        }
         return false;
     }
 
@@ -35,15 +30,18 @@ public class ShapeTouchHandler : TouchHandler
         pickedShape.m_gridOffset = GridPoint.zero;
 
         m_shapeMoved = false;
+    }
 
-        //pickedShape.InvalidateSubstitutionShapes();
-
-        //TexturedMeshAnimator shapeAnimator = this.GetComponent<TexturedMeshAnimator>();
-        //Vector3 shapeNewPosition = new Vector3(0, 0, GameScene.TILED_BACKGROUND_RELATIVE_Z_VALUE + 1); //place the shape behind the tiled background so it becomes invisible
-        //shapeAnimator.SetPosition(shapeNewPosition);
-
-        //draw contour around shape
-        shapeMesh.DrawSelectionContour();
+    /**
+    * Process the pointer event and dispatch it to the relevant callback
+    * **/
+    public override bool ProcessPointerEvent(Vector2 pointerLocation, TouchManager.PointerEventType eventType)
+    {
+        //we do not process events on shapes if moving a shape is disabled in this level
+        if ((GetLevelManager().m_currentLevel.Actions & Level.ACTION_MOVE_SHAPE) == 0)
+            return false;
+        else
+            return base.ProcessPointerEvent(pointerLocation, eventType);
     }
 
     protected override void OnPointerDown(Vector2 pointerLocation)
@@ -69,6 +67,9 @@ public class ShapeTouchHandler : TouchHandler
 
             //Change the state of this shape
             shape.m_state = Shape.ShapeState.MOVING_ORIGINAL_SHAPE;
+
+            //draw contour around shape
+            shapeMesh.DrawSelectionContour();
 
             //toggle the boolean value so the previous code is not called later again
             m_shapeMoved = true;

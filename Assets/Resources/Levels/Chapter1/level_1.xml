@@ -71,18 +71,11 @@
 			</contour>
 		</shape> -->
 	</shapes>
+	<actions>
+		<action tag="ACTION_ONE_SIDED_SYMMETRY"/>
+		<action tag="ACTION_TWO_SIDED_SYMMETRY"/>
+	</actions>
 	<constraints>
-		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
-		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>
-		<!-- 		
-		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>
-		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>
-		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>
-		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>
-		<constraint tag="SYMMETRY_AXIS_DIAGONAL_RIGHT"/>
-		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>
-		<constraint tag="SYMMETRY_AXES_ALL"/>
-		<constraint tag="SYMMETRY_POINT"/> 
-		-->
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_VERTICAL"/>
 	</constraints>
 </level>

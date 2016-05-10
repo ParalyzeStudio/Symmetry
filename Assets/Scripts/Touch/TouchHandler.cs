@@ -41,7 +41,7 @@ public class TouchHandler : MonoBehaviour
     /**
      * Process the pointer event and dispatch it to the relevant callback
      * **/
-    public bool ProcessPointerEvent(Vector2 pointerLocation, TouchManager.PointerEventType eventType)
+    public virtual bool ProcessPointerEvent(Vector2 pointerLocation, TouchManager.PointerEventType eventType)
     {
         if (eventType == TouchManager.PointerEventType.POINTER_DOWN)
         {

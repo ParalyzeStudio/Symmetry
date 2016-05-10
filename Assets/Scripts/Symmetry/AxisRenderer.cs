@@ -32,7 +32,6 @@ public class AxisRenderer : MonoBehaviour
     //Strip
     public GameObject m_stripPfb;
     public Material m_stripMaterial;
-    public Strip m_stripData { get; set; } //the points defining the contour of this strip
     public StripMesh m_stripMesh { get; set; }
 
     //Sweeping lines that reveal shapes. Axis and sweeping line are parallel so define this line with two points 
@@ -114,47 +113,62 @@ public class AxisRenderer : MonoBehaviour
         axis.m_parentRenderer = this;
     }
 
+    ///**
+    // * Build endpoints, segment, strip, indicating arrows and deploy button
+    // * **/
+    //public void BuildElements()
+    //{
+    //    Vector3 endpoint1WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
+    //    Vector3 endpoint2WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);
+
+    //    //segment
+    //    BuildAxisSegment(endpoint1WorldPosition, endpoint2WorldPosition);
+
+    //    //endpoints
+    //    BuildEndpointA(endpoint1WorldPosition);
+    //    BuildEndpointB(endpoint2WorldPosition);
+
+    //    //strip        
+    //    CreateStrip();
+
+    //    //indicating arrows
+    //    BuildIndicatingArrows();
+    //}
+
     /**
-     * Build endpoints, segment, strip, indicating arrows and deploy button
-     * **/
-    public void BuildElements()
+    * Call this method when creating a new axis with only one point at disposal
+    **/
+    public void InitializeRendering()
     {
-        Vector3 endpoint1WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
-        Vector3 endpoint2WorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);
-
-        if (m_axisData.m_type == Axis.AxisType.UNDER_CONSTRUCTION) //build only endpoint A
-            BuildEndpointA(endpoint1WorldPosition);
-        else
-        {
-            //segment
-            BuildAxisSegment(endpoint1WorldPosition, endpoint2WorldPosition);
-
-            //endpoints
-            BuildEndpointA(endpoint1WorldPosition);
-            BuildEndpointB(endpoint2WorldPosition);
-
-            //strip        
-            CreateStrip();
-
-            //indicating arrows
-            BuildIndicatingArrows();
-        }
+        BuildEndpointA();
     }
 
-    public void BuildEndpointA(Vector2 position)
+    /**
+    * Call this method to finalize the creation of the axis when setting the second endpoint
+    **/
+    public void FinalizeRendering()
+    {
+        BuildEndpointB();
+        BuildAxisSegment();
+        BuildIndicatingArrows();
+        CalculateStrip();
+        CreateStrip();
+    }
+
+    private void BuildEndpointA()
     {
         if (m_endpoint1 == null)
         {
-            m_endpoint1 = BuildEndpointAtPosition(position);
+            m_endpoint1 = BuildEndpointAtPosition(GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA));
             m_endpoint1.name = "AxisEndpoint1";
         }
     }
 
-    private void BuildEndpointB(Vector2 position)
+    private void BuildEndpointB()
     {
         if (m_endpoint2 == null)
         {
-            m_endpoint2 = BuildEndpointAtPosition(position);
+            m_endpoint2 = BuildEndpointAtPosition(GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB));
             m_endpoint2.name = "AxisEndpoint2";
         }
     }
@@ -193,7 +207,7 @@ public class AxisRenderer : MonoBehaviour
         return endpoint;
     }
 
-    private void BuildAxisSegment(Vector2 endpoint1Position, Vector2 endpoint2Position)
+    private void BuildAxisSegment()
     {
         Material axisMaterial = Instantiate(m_plainWhiteMaterial);
         Color axisTintColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
@@ -204,7 +218,9 @@ public class AxisRenderer : MonoBehaviour
         axisSegmentAnimator.SetParentTransform(this.transform);
         axisSegmentObject.name = "AxisSegment";
         m_axisSegment = axisSegmentObject.GetComponent<AxisSegment>();
-        m_axisSegment.Build(endpoint1Position, endpoint2Position, DEFAULT_AXIS_THICKNESS, axisMaterial, axisTintColor);
+        Vector3 pointAWorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
+        Vector3 pointBWorldPosition = GetGameScene().m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);
+        m_axisSegment.Build(pointAWorldPosition, pointBWorldPosition, DEFAULT_AXIS_THICKNESS, axisMaterial, axisTintColor);
     }
 
     private void BuildIndicatingArrows()
@@ -223,7 +239,7 @@ public class AxisRenderer : MonoBehaviour
         m_rightIndicatingArrowAnimator.SetColor(arrowColor);
         m_rightIndicatingArrowAnimator.SetOpacity(0);
 
-        if (m_axisData.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES)
+        if (m_axisData.m_type == Axis.AxisType.SYMMETRY_AXES_TWO_SIDES)
         {
             GameObject leftIndicatingArrowObject = (GameObject)Instantiate(m_texQuadPfb);
             leftIndicatingArrowObject.name = "IndicatingArrow";
@@ -240,162 +256,168 @@ public class AxisRenderer : MonoBehaviour
     /**
      * Renders the axis between 2 points using grid coordinates
      * **/
-    public void Render()
+    //public void Render()
+    //{
+    //    GameScene gameScene = GetGameScene();
+
+    //    Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
+    //    Vector2 endpoint2WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);        
+
+    //    //Set correct points coordinates for segment
+    //    m_axisSegment.SetPointA(endpoint1WorldPosition, false);
+    //    m_axisSegment.SetPointB(endpoint2WorldPosition, true);
+
+    //    //Set correct position for both endpoints
+    //    GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();        
+    //    GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
+    //    //GameObjectAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<GameObjectAnimator>();
+    //    //GameObjectAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<GameObjectAnimator>();
+    //    endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
+    //    endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
+    //    //endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
+    //    //endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
+
+    //    //render strip if axis is not too small
+    //    if ((endpoint1WorldPosition - endpoint2WorldPosition).sqrMagnitude > 10.0f)
+    //        RenderStrip();
+    //    else
+    //        m_stripMesh.Hide();
+
+    //    GridPoint pointA = m_axisData.m_pointA;
+    //    GridPoint pointB = m_axisData.m_pointB;
+    //    if (pointA != pointB)
+    //    {
+    //        float axisAngle = Mathf.Atan2(pointB.Y - pointA.Y, pointB.X - pointA.X) * Mathf.Rad2Deg;
+    //        Vector2 normalizedAxisDirection = (pointB - pointA).NormalizeAsVector2();
+    //        Vector3 cwAxisNormal = new Vector3(normalizedAxisDirection.y, -normalizedAxisDirection.x, 0);
+
+    //        float distanceFromAxis = 50.0f;
+
+    //        Vector3 rightArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
+    //        rightArrowPosition += distanceFromAxis * cwAxisNormal;
+
+    //        m_rightIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
+    //        m_rightIndicatingArrowAnimator.SetRotationAngle(axisAngle - 90);
+    //        m_rightIndicatingArrowAnimator.SetPosition(rightArrowPosition);
+    //        m_rightIndicatingArrowAnimator.SetOpacity(1);
+
+    //        if (m_axisData.m_type == Axis.AxisType.SYMMETRY_AXES_TWO_SIDES)
+    //        {
+    //            Vector3 leftArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
+    //            leftArrowPosition -= distanceFromAxis * cwAxisNormal;
+
+    //            m_leftIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
+    //            m_leftIndicatingArrowAnimator.SetRotationAngle(axisAngle + 90);
+    //            m_leftIndicatingArrowAnimator.SetPosition(leftArrowPosition);
+    //            m_leftIndicatingArrowAnimator.SetOpacity(1);
+    //        }
+    //    }
+    //    else //hide some elements, just display the first endpoint
+    //    {
+    //        if (m_leftIndicatingArrowAnimator != null)
+    //            m_leftIndicatingArrowAnimator.SetOpacity(0);
+    //        m_rightIndicatingArrowAnimator.SetOpacity(0);
+    //    }
+    //}
+
+    private void CalculateStrip()
     {
-        GameScene gameScene = GetGameScene();
-
-        Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
-        Vector2 endpoint2WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointB);        
-
-        //Set correct points coordinates for segment
-        m_axisSegment.SetPointA(endpoint1WorldPosition, false);
-        m_axisSegment.SetPointB(endpoint2WorldPosition, true);
-        
-        //Set correct position for both endpoints
-        GameObjectAnimator endpoint1Animator = m_endpoint1.GetComponent<GameObjectAnimator>();        
-        GameObjectAnimator endpoint2Animator = m_endpoint2.GetComponent<GameObjectAnimator>();
-        //GameObjectAnimator endpoint1CircleAnimator = m_endpoint1Circle.GetComponent<GameObjectAnimator>();
-        //GameObjectAnimator endpoint2CircleAnimator = m_endpoint2Circle.GetComponent<GameObjectAnimator>();
-        endpoint1Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
-        endpoint2Animator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
-        //endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint1WorldPosition, 0));
-        //endpoint2CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(endpoint2WorldPosition, 0));
-
-        //render strip if axis is not too small
-        if ((endpoint1WorldPosition - endpoint2WorldPosition).sqrMagnitude > 10.0f)
-            RenderStrip();
-        else
-            m_stripMesh.Hide();
-
-        GridPoint pointA = m_axisData.m_pointA;
-        GridPoint pointB = m_axisData.m_pointB;
-        if (pointA != pointB)
-        {
-            float axisAngle = Mathf.Atan2(pointB.Y - pointA.Y, pointB.X - pointA.X) * Mathf.Rad2Deg;
-            Vector2 normalizedAxisDirection = (pointB - pointA).NormalizeAsVector2();
-            Vector3 cwAxisNormal = new Vector3(normalizedAxisDirection.y, -normalizedAxisDirection.x, 0);
-
-            float distanceFromAxis = 50.0f;
-
-            Vector3 rightArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
-            rightArrowPosition += distanceFromAxis * cwAxisNormal;
-
-            m_rightIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
-            m_rightIndicatingArrowAnimator.SetRotationAngle(axisAngle - 90);
-            m_rightIndicatingArrowAnimator.SetPosition(rightArrowPosition);
-            m_rightIndicatingArrowAnimator.SetOpacity(1);
-
-            if (m_axisData.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES)
-            {
-                Vector3 leftArrowPosition = 0.5f * (endpoint1WorldPosition + endpoint2WorldPosition);
-                leftArrowPosition -= distanceFromAxis * cwAxisNormal;
-
-                m_leftIndicatingArrowAnimator.SetRotationAxis(Vector3.forward);
-                m_leftIndicatingArrowAnimator.SetRotationAngle(axisAngle + 90);
-                m_leftIndicatingArrowAnimator.SetPosition(leftArrowPosition);
-                m_leftIndicatingArrowAnimator.SetOpacity(1);
-            }
-        }
-        else //hide some elements, just display the first endpoint
-        {
-            if (m_leftIndicatingArrowAnimator != null)
-                m_leftIndicatingArrowAnimator.SetOpacity(0);
-            m_rightIndicatingArrowAnimator.SetOpacity(0);
-        }
+        m_axisData.CalculateStripContour();
     }
 
     /**
      * Create the strip object with related mesh
      * **/
-    public void CreateStrip(bool bCreateMesh = true)
+    private void CreateStrip()
     {
-        //initialize the strip data
-        m_stripData = new Strip(m_axisData);
-        m_stripData.CalculateContour();
+        if (m_axisData.Strip == null)
+            return;
 
         //build the strip mesh
-        if (bCreateMesh)
-        {
-            GameObject stripObject = (GameObject)Instantiate(m_stripPfb);
-            stripObject.name = "Strip";
+        GameObject stripObject = (GameObject)Instantiate(m_stripPfb);
+        stripObject.name = "Strip";
 
-            m_stripMesh = stripObject.GetComponent<StripMesh>();
-            m_stripMesh.Init(m_stripData, Instantiate(m_stripMaterial));
+        m_stripMesh = stripObject.GetComponent<StripMesh>();
+        m_stripMesh.Init(m_axisData.Strip, Instantiate(m_stripMaterial));
 
-            //Set the color of the strip
-            StripAnimator stripAnimator = stripObject.GetComponent<StripAnimator>();
-            stripAnimator.SetParentTransform(this.transform);
-            stripAnimator.SetColor(new Color(1, 1, 1, 0.5f));
-            stripAnimator.SetPosition(Vector3.zero);
-        }
+        //Set the color of the strip
+        StripAnimator stripAnimator = stripObject.GetComponent<StripAnimator>();
+        stripAnimator.SetParentTransform(this.transform);
+        stripAnimator.SetColor(new Color(1, 1, 1, 0.5f));
+        stripAnimator.SetPosition(Vector3.zero);
+
+        //render it
+        RenderStrip();
     }
 
     /**
      * Try to snap the second endpoint of the axis to a grid anchor if the distance between the current touch and anchor is the smallest
      * **/
-    public bool SnapAxisEndpointToClosestAnchor(Vector2 pointerLocation)
-    {
-        GameScene gameScene = GetGameScene();
+    //public bool SnapAxisEndpointToClosestAnchor(Vector2 pointerLocation)
+    //{
+    //    GameScene gameScene = GetGameScene();
 
-        Grid.GridAnchor closestAnchor = gameScene.m_grid.GetClosestGridAnchorForWorldPosition(pointerLocation);
-        if (closestAnchor == null) //we got out of grid bounds and could not find an anchor
-            return false;
+    //    Grid.GridAnchor closestAnchor = gameScene.m_grid.GetClosestGridAnchorForWorldPosition(pointerLocation);
+    //    if (closestAnchor == null) //we got out of grid bounds and could not find an anchor
+    //        return false;
 
-        if (closestAnchor != m_snappedAnchor)
-        {
-            m_snappedAnchor = closestAnchor;
-            if (m_axisData.m_pointA == m_snappedAnchor.m_gridPosition)
-            {
-                m_axisData.m_type = Axis.AxisType.DYNAMIC_UNSNAPPED;
-            }
-            else
-            {
-                m_axisData.m_type = Axis.AxisType.DYNAMIC_SNAPPED;
-            }
-            m_axisData.m_pointB = closestAnchor.m_gridPosition;
-            Render();
+    //    if (closestAnchor != m_snappedAnchor)
+    //    {
+    //        m_snappedAnchor = closestAnchor;
+    //        if (m_axisData.m_pointA == m_snappedAnchor.m_gridPosition)
+    //        {
+    //            m_axisData.m_state = Axis.AxisState.DYNAMIC_UNSNAPPED;
+    //        }
+    //        else
+    //        {
+    //            m_axisData.m_state = Axis.AxisState.DYNAMIC_SNAPPED;
+    //        }
+    //        m_axisData.m_pointB = closestAnchor.m_gridPosition;
+    //        Render();
 
-            return true;
-        }
+    //        return true;
+    //    }
 
-        return false;
-    }
+    //    return false;
+    //}
 
     /**
      * Find the direction (among all constrained directions) of the axis the player is currently drawing
      * **/
-    public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
-    {
-        //Find all possible directions for our axis
-        GameScene gameScene = this.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
-        List<Vector2> constrainedDirections = gameScene.m_constrainedDirections;
+    //public void FindConstrainedDirection(Vector2 pointerLocation, out Vector2 constrainedDirection, out float projectionLength)
+    //{
+    //    //Find all possible directions for our axis
+    //    GameScene gameScene = this.transform.parent.transform.parent.gameObject.GetComponent<GameScene>();
+    //    List<GridPoint> constrainedDirections = gameScene.m_constrainedDirections;
 
-        float maxDotProduct = float.MinValue;
-        constrainedDirection = Vector2.zero;
-        projectionLength = 0;
-        Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
-        for (int iDirectionIndex = 0; iDirectionIndex != constrainedDirections.Count; iDirectionIndex++)
-        {
-            Vector2 axisEndpoint1ToPointer = pointerLocation - endpoint1WorldPosition;
-            float axisEndpoint1ToPointerDistance = axisEndpoint1ToPointer.magnitude; //store vector length before normalizing it
-            axisEndpoint1ToPointer.Normalize();
+    //    float maxDotProduct = float.MinValue;
+    //    constrainedDirection = Vector2.zero;
+    //    projectionLength = 0;
+    //    Vector2 endpoint1WorldPosition = gameScene.m_grid.GetPointWorldCoordinatesFromGridCoordinates(m_axisData.m_pointA);
+    //    for (int iDirectionIndex = 0; iDirectionIndex != constrainedDirections.Count; iDirectionIndex++)
+    //    {
+    //        Vector2 axisEndpoint1ToPointer = pointerLocation - endpoint1WorldPosition;
+    //        float axisEndpoint1ToPointerDistance = axisEndpoint1ToPointer.magnitude; //store vector length before normalizing it
+    //        axisEndpoint1ToPointer.Normalize();
 
-            float dotProduct = Vector2.Dot(axisEndpoint1ToPointer, constrainedDirections[iDirectionIndex]);
-            if (dotProduct > maxDotProduct)
-            {
-                maxDotProduct = dotProduct;
-                constrainedDirection = constrainedDirections[iDirectionIndex];
-                projectionLength = axisEndpoint1ToPointerDistance;
-            }
-        }
-    }
+    //        float dotProduct = Vector2.Dot(axisEndpoint1ToPointer, constrainedDirections[iDirectionIndex]);
+    //        if (dotProduct > maxDotProduct)
+    //        {
+    //            maxDotProduct = dotProduct;
+    //            constrainedDirection = constrainedDirections[iDirectionIndex];
+    //            projectionLength = axisEndpoint1ToPointerDistance;
+    //        }
+    //    }
+    //}
     
     /**
      * Renders the strip that indicates which parts of grid elements will be symmetrized
      * **/
     public void RenderStrip()
     {
-        m_stripData.CalculateContour();
+        if (m_axisData.Strip == null)
+            return;
+
         m_stripMesh.Render();
     }   
 
@@ -404,7 +426,7 @@ public class AxisRenderer : MonoBehaviour
      * **/
     public void LaunchSweepingLines()
     {
-        m_sweepingLeft = (m_axisData.m_symmetryType == Axis.AxisSymmetryType.SYMMETRY_AXES_TWO_SIDES);
+        m_sweepingLeft = (m_axisData.m_type == Axis.AxisType.SYMMETRY_AXES_TWO_SIDES);
         m_sweepingRight = true;
     }
 

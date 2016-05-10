@@ -116,23 +116,24 @@ public class GUIManager : MonoBehaviour
         //Set the size of the button skin
         button.SetSize(size);
 
-        //m_guiButtons.Add(button);
-
         return buttonObject;
     }
 
     /**
-     * Same as previous method but for an action button
+     * Same as CreateGUIButtonForID() but for an action button instead
      * **/
-    public GameObject CreateActionButton(ActionButton.GroupID groupID, GUIButton.GUIButtonID[] childIDs, float width)
+    public GameObject CreateActionButtonForID(ActionMenu parentMenu, GUIButton.GUIButtonID iID, Vector2 size, Material forcedSkinMaterial = null)
     {
         GameObject buttonObject = (GameObject)Instantiate(m_actionButtonPfb);
 
         //Set the relevant skin material for the specified button ID
+        Material buttonSkinMaterial = (forcedSkinMaterial == null) ? GetClonedSkinMaterialForID(iID) : forcedSkinMaterial;
         ActionButton button = buttonObject.GetComponent<ActionButton>();
-        button.Init(groupID, childIDs, width);
+        button.Init(parentMenu, buttonSkinMaterial);
+        button.m_ID = iID;
 
-        //m_actionButtons.Add(button);
+        //Set the size of the button skin
+        button.SetSize(size);
 
         return buttonObject;
     }
@@ -190,6 +191,8 @@ public class GUIManager : MonoBehaviour
             skinMaterial = m_skinPointSymmetry;
         else if (iID == GUIButton.GUIButtonID.ID_MOVE_SHAPE)
             skinMaterial = m_skinMoveShape;
+        else if (iID == GUIButton.GUIButtonID.ID_CANCEL_ACTION_MENU)
+            skinMaterial = m_skinBack;
         else if (iID == GUIButton.GUIButtonID.ID_OPERATION_ADD)
             skinMaterial = m_skinOperationAdd;
         else if (iID == GUIButton.GUIButtonID.ID_OPERATION_SUBSTRACT)

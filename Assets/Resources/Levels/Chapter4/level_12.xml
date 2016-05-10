@@ -3,11 +3,13 @@
 	<counter maxActions="4"/>
 	<grid exactNumColumns="20" minNumLines="14"/>
 	
+	<actions>
+		<action tag="ACTION_ONE_SIDED_SYMMETRY"/>
+	</actions>
 	<constraints>
-		<constraint tag="SYMMETRY_AXES_STRAIGHT"/>	
-		<constraint tag="SYMMETRY_AXES_DIAGONALS"/>			
-		<constraint tag="SYMMETRY_AXIS_HORIZONTAL"/>	
-		<constraint tag="SYMMETRY_AXIS_VERTICAL"/>	
-		<constraint tag="SYMMETRY_AXIS_DIAGONAL_LEFT"/>	
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_VERTICAL"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_LEFT"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_DIAGONAL_RIGHT"/>
 	</constraints>
 </level>

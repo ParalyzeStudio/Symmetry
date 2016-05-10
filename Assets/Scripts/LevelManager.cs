@@ -53,6 +53,7 @@ public class LevelManager : MonoBehaviour
 
     public Level ParseLevelFile(Chapter chapter, int iLevelNumber, bool bDebugLevel = false)
     {
+
         string levelFilename;
         if (bDebugLevel)
             levelFilename = "Levels/debug_level" + iLevelNumber;
@@ -265,11 +266,21 @@ public class LevelManager : MonoBehaviour
         XMLNodeList constraintsNodeList = levelNode.GetNodeList("constraints>0>constraint");
         if (constraintsNodeList != null)
         {
-            level.m_axisConstraints.Capacity = constraintsNodeList.Count;
             foreach (XMLNode actionNode in constraintsNodeList)
             {
                 string actionTag = actionNode.GetValue("@tag");
-                level.m_axisConstraints.Add(actionTag);
+                level.AddConstraintFromFile(actionTag);
+            }
+        }
+
+        //Parse available actions
+        XMLNodeList actionsNodeList = levelNode.GetNodeList("actions>0>action");
+        if (actionsNodeList != null)
+        {
+            foreach (XMLNode actionNode in actionsNodeList)
+            {
+                string actionTag = actionNode.GetValue("@tag");
+                level.AddActionFromFile(actionTag);
             }
         }
 

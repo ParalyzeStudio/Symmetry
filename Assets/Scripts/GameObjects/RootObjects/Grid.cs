@@ -298,6 +298,40 @@ public class Grid : MonoBehaviour
         return null;
     }
 
+    /**
+    * Find all anchors that can be used to draw the second endpoint of an axis based on the constrained directions defined in the current level
+    **/
+    public List<GridPoint> FindAvailableAnchorsForAxis(GridPoint axisPointA, List<GridPoint> constrainedDirections)
+    {
+        List<GridPoint> availableAnchorsPositions = new List<GridPoint>();
+
+        for (int i = 0; i != m_anchors.Length; i++)
+        {
+            GridPoint anchorPosition = m_anchors[i].m_gridPosition;
+
+            if (anchorPosition == axisPointA) //same point
+                continue;
+
+            GridPoint anchorToAxisEndpoint = axisPointA - anchorPosition;
+
+            //GridPoints are scaled, and as they are grid anchors positions we can downscale them before performing calculation on them
+            anchorToAxisEndpoint /= GridPoint.DEFAULT_SCALE_PRECISION;
+            
+
+            for (int j = 0; j != constrainedDirections.Count; j++)
+            {
+                GridPoint constrainedDirection = constrainedDirections[j];
+                long dotProduct = MathUtils.DotProduct(anchorToAxisEndpoint, constrainedDirection);
+                if ((dotProduct * dotProduct) == (anchorToAxisEndpoint.sqrMagnitude * constrainedDirection.sqrMagnitude))
+                {
+                    availableAnchorsPositions.Add(anchorPosition);
+                }
+            }
+        }
+
+        return availableAnchorsPositions;
+    }
+
     public struct GridBoxPoint
     {
         public GridBoxPoint(GridPoint position, GridBoxEdgeLocation edgeLocation) { m_position = position; m_edgeLocation = edgeLocation; }

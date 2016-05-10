@@ -123,7 +123,7 @@ public class PointSymmetrizer : Symmetrizer
         GridPoint symmetricAxisPointA = CalculateSymmetricPoint(axis.m_pointA);
         GridPoint symmetricAxisPointB = CalculateSymmetricPoint(axis.m_pointB);
 
-        Axis symmetricAxis = new Axis(symmetricAxisPointA, symmetricAxisPointB, Axis.AxisType.STATIC_PENDING, axis.m_symmetryType);
+        Axis symmetricAxis = new Axis(symmetricAxisPointA, symmetricAxisPointB, Axis.AxisState.STATIC_PENDING, axis.m_type);
 
         return symmetricAxis;
     }
@@ -166,7 +166,7 @@ public class PointSymmetrizer : Symmetrizer
             for (int p = 0; p != m_symmetrizedAxes.Count; p++)
             {
                 Axis axis = m_symmetrizedAxes[p];
-                axesHolder.BuildAxis(axis);
+                axesHolder.BuildAxisRenderer(axis);
             }
         }
 
