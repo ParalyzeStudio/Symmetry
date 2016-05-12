@@ -83,6 +83,27 @@ public class Symmetrizer : MonoBehaviour
     }
 
     /**
+    * Call this function to render shapes obtained from the process of symmetrization.
+    **/
+    protected void RenderSymmetrizedShapes(List<Shape> shapes)
+    {
+        if (shapes != null)
+        {
+            for (int i = 0; i != shapes.Count; i++)
+            {
+                Shapes shapesHolder = m_gameScene.m_shapesHolder;
+
+                shapes[i].Triangulate();
+                GameObject shapeObject = shapesHolder.CreateShapeObjectFromData(shapes[i], false);
+                ShapeMesh shapeMesh = shapeObject.GetComponent<ShapeMesh>();
+                shapeMesh.DrawSelectionContour(false);
+                shapeMesh.ReleaseSelectionContour();
+                shapes[i].FinalizeClippingOperations();
+            }
+        }
+    }
+
+    /**
      * Set the symmetry type for this axis based on the currently selected action button ID
      * **/
     ////public static SymmetryType GetSymmetryTypeFromActionButtonID(GUIButton.GUIButtonID buttonID)

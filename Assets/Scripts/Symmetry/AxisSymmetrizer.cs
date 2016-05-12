@@ -171,55 +171,12 @@ public class AxisSymmetrizer : Symmetrizer
     public override void OnSymmetryDone()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
-
-
+        
         //build the difference shape objects
-        if (m_axisLeftClippedInterShapes != null)
-        {
-            for (int p = 0; p != m_axisLeftClippedInterShapes.Count; p++)
-            {
-                m_axisLeftClippedInterShapes[p].Triangulate();
-                //shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedInterShapes[p], true);
-                shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedInterShapes[p], false);
-                m_axisLeftClippedInterShapes[p].FinalizeClippingOperations();
-            }
-        }
-
-        //build the intersection shape objects
-        if (m_axisLeftClippedDiffShapes != null)
-        {
-            for (int p = 0; p != m_axisLeftClippedDiffShapes.Count; p++)
-            {
-                m_axisLeftClippedDiffShapes[p].Triangulate();
-                //shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedDiffShapes[p], true);
-                shapesHolder.CreateShapeObjectFromData(m_axisLeftClippedDiffShapes[p], false);
-                m_axisLeftClippedDiffShapes[p].FinalizeClippingOperations();
-            }
-        }
-
-        //build the difference shape objects
-        if (m_axisRightClippedInterShapes != null)
-        {
-            for (int p = 0; p != m_axisRightClippedInterShapes.Count; p++)
-            {
-                m_axisRightClippedInterShapes[p].Triangulate();
-                //shapesHolder.CreateShapeObjectFromData(m_axisRightClippedInterShapes[p], true);
-                shapesHolder.CreateShapeObjectFromData(m_axisRightClippedInterShapes[p], false);
-                m_axisRightClippedInterShapes[p].FinalizeClippingOperations();
-            }
-        }
-
-        //build the intersection shape objects
-        if (m_axisRightClippedDiffShapes != null)
-        {
-            for (int p = 0; p != m_axisRightClippedDiffShapes.Count; p++)
-            {
-                m_axisRightClippedDiffShapes[p].Triangulate();
-                //shapesHolder.CreateShapeObjectFromData(m_axisRightClippedDiffShapes[p], true);
-                shapesHolder.CreateShapeObjectFromData(m_axisRightClippedDiffShapes[p], false);
-                m_axisRightClippedDiffShapes[p].FinalizeClippingOperations();
-            }
-        }
+        RenderSymmetrizedShapes(m_axisLeftClippedInterShapes);
+        RenderSymmetrizedShapes(m_axisLeftClippedDiffShapes);
+        RenderSymmetrizedShapes(m_axisRightClippedInterShapes);
+        RenderSymmetrizedShapes(m_axisRightClippedDiffShapes);      
 
         //Callback on the AxisRenderer
         m_axisRenderer.OnPerformSymmetry();

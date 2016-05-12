@@ -177,7 +177,7 @@ public class AxisRenderer : MonoBehaviour
     {
         Material endpointMaterial = Instantiate(m_endpointMaterial);
         Material endpointOuterContourMaterial = Instantiate(m_endpointOuterContourMaterial);
-        Color axisTintColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
+        Color axisTintColor = Color.white;
 
         //dimensions of each element
         Vector3 endpointSize = new Vector3(64, 64, 1);
@@ -194,15 +194,15 @@ public class AxisRenderer : MonoBehaviour
         endpointAnimator.SetColor(axisTintColor);
 
         //endpoint outer contour
-        GameObject endpointCircle = (GameObject)Instantiate(m_texQuadPfb);
-        endpointCircle.name = "AxisEndpoint1Circle";
-        UVQuad endpointCircleMesh = endpointCircle.GetComponent<UVQuad>();
-        endpointCircleMesh.Init(endpointOuterContourMaterial);
-        TexturedQuadAnimator endpoint1CircleAnimator = endpointCircle.GetComponent<TexturedQuadAnimator>();
-        endpoint1CircleAnimator.SetParentTransform(endpoint.transform);
-        endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(position, 0));
-        endpoint1CircleAnimator.SetScale(endpointOuterContourSize);
-        endpoint1CircleAnimator.SetColor(axisTintColor);
+        //GameObject endpointCircle = (GameObject)Instantiate(m_texQuadPfb);
+        //endpointCircle.name = "AxisEndpoint1Circle";
+        //UVQuad endpointCircleMesh = endpointCircle.GetComponent<UVQuad>();
+        //endpointCircleMesh.Init(endpointOuterContourMaterial);
+        //TexturedQuadAnimator endpoint1CircleAnimator = endpointCircle.GetComponent<TexturedQuadAnimator>();
+        //endpoint1CircleAnimator.SetParentTransform(endpoint.transform);
+        //endpoint1CircleAnimator.SetPosition(GeometryUtils.BuildVector3FromVector2(position, 0));
+        //endpoint1CircleAnimator.SetScale(endpointOuterContourSize);
+        //endpoint1CircleAnimator.SetColor(axisTintColor);
 
         return endpoint;
     }
@@ -210,7 +210,7 @@ public class AxisRenderer : MonoBehaviour
     private void BuildAxisSegment()
     {
         Material axisMaterial = Instantiate(m_plainWhiteMaterial);
-        Color axisTintColor = GetGameScene().GetLevelManager().m_currentChapter.GetThemeColors()[4];
+        Color axisTintColor = Color.white;
 
         //segment
         GameObject axisSegmentObject = (GameObject)Instantiate(m_axisSegmentPfb);

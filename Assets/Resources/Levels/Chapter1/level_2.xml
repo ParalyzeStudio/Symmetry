@@ -31,5 +31,6 @@
 	</actions>
 	<constraints>
 		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_HORIZONTAL"/>
+		<constraint tag="CONSTRAINT_SYMMETRY_AXIS_VERTICAL"/>
 	</constraints>
 </level>

@@ -151,7 +151,7 @@ public class Grid : MonoBehaviour
     {
         //build a line for every grid border (left, top, right, bottom)
         m_borders = new GridBorder[4];
-        float margin = 0.15f * this.m_gridSpacing; //the relaxed position is a bit off the grid       
+        float margin = 0.1f * this.m_gridSpacing; //the relaxed position is a bit off the grid       
 
         //left
         GameObject lineObject = (GameObject)Instantiate(m_gridBorderPfb);

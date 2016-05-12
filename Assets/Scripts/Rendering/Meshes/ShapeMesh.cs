@@ -101,7 +101,7 @@ public class ShapeMesh : TexturedMesh
     /**
      * Draw some contour around the shape to indicate that the player has selected this shape
      * **/
-    public void DrawSelectionContour()
+    public void DrawSelectionContour(bool bAnimated = true)
     {
         Contour shapeContour = m_shapeData.m_contour;
 
@@ -128,8 +128,13 @@ public class ShapeMesh : TexturedMesh
             contourSegment.Build(worldPointB, worldPointA, 6, m_transpColorMaterial, contourColor, 4);
 
             SegmentAnimator segmentAnimator = segmentObject.GetComponent<SegmentAnimator>();
-            segmentAnimator.SetOpacity(0.0f);
-            segmentAnimator.FadeTo(1.0f, 0.5f);
+            if (bAnimated)
+            {
+                segmentAnimator.SetOpacity(0.0f);
+                segmentAnimator.FadeTo(1.0f, 0.5f);
+            }
+            else
+                segmentAnimator.SetOpacity(1);
         }
     }
 

@@ -53,7 +53,7 @@ public class GameController : MonoBehaviour
         //ShowMainMenu();
         //DebugShowChapters();
         //DebugShowLevels(1);
-        DebugShowSpecificLevel(2, 2, false);
+        DebugShowSpecificLevel(1, 2, false);
         //DebugShowDebugLevel(3, false);
         //m_sceneManager.ShowContent(SceneManager.DisplayContent.LEVELS, true, 2.0f);
 

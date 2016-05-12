@@ -89,9 +89,9 @@ public class GridTouchHandler : TouchHandler
                 axis.m_parentRenderer.InitializeRendering();
 
                 axis.m_type = Axis.AxisType.SYMMETRY_AXES_ONE_SIDE;
-                
-                gameScene.DisplayAnchorsForAxis(axis.m_pointA);
-                gameScene.m_currentAction = GameScene.Action.DRAWING_AXIS;                
+
+                gameScene.DisplayAvailableAnchorsForAxis(axis.m_pointA);
+                gameScene.m_currentAction = GameScene.Action.DRAWING_AXIS;
             }
         }
         else if (gameScene.m_currentAction == GameScene.Action.DRAWING_AXIS)
@@ -108,6 +108,7 @@ public class GridTouchHandler : TouchHandler
                 Destroy(axis.m_parentRenderer.gameObject);
                 gameScene.m_axesHolder.RemoveAxis(axis.m_parentRenderer);
                 gameScene.DismissActionMenu();
+                gameScene.m_currentAction = GameScene.Action.NONE;
                 return;
             }
 
@@ -116,16 +117,12 @@ public class GridTouchHandler : TouchHandler
             AxisRenderer axisRenderer = axis.m_parentRenderer;
             axisRenderer.FinalizeRendering();
 
-            //perform symmetry
-            //if (axis.m_state == Axis.AxisState.DYNAMIC_SNAPPED)
-            //{
-            //    Level currentLevel = GetLevelManager().m_currentLevel;
-            //    axis.m_state = Axis.AxisState.STATIC_DONE; //make the axis static
+            Symmetrizer symmetrizer = axisRenderer.GetComponent<Symmetrizer>();
+            symmetrizer.Symmetrize();
 
-            //    //Launch the symmetry process
-            //    Symmetrizer symmetrizer = axisRenderer.GetComponent<Symmetrizer>();
-            //    symmetrizer.Symmetrize();
-            //}
+            gameScene.DismissAvailableAnchors();
+
+            gameScene.m_currentAction = GameScene.Action.NONE;
         }
     }
 }

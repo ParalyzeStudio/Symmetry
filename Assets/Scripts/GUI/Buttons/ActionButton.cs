@@ -127,7 +127,7 @@ public class ActionButton : GUIButton
             axis.m_parentRenderer.InitializeRendering();
             axis.m_type = (m_ID == GUIButtonID.ID_AXIS_SYMMETRY_ONE_SIDE) ? Axis.AxisType.SYMMETRY_AXES_ONE_SIDE : Axis.AxisType.SYMMETRY_AXES_TWO_SIDES;
             
-            gameScene.DisplayAnchorsForAxis(axis.m_pointA);
+            gameScene.DisplayAvailableAnchorsForAxis(axis.m_pointA);
             gameScene.m_currentAction = GameScene.Action.DRAWING_AXIS;
         }
         else if (m_ID == GUIButtonID.ID_POINT_SYMMETRY)

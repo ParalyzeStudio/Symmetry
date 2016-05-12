@@ -301,6 +301,9 @@ public class GameScene : GUIScene
         chalkboardAnimator.SetOpacity(0);
         chalkboardAnimator.FadeTo(0.85f, 1.0f);
 
+        //show a separation line above the dark background
+        //GameObject separationLine = (GameObject)Instantiate(m);
+
         //m_chalkboardObject = (GameObject)Instantiate(m_texQuadPfb);
         //m_chalkboardObject.name = "Chalkboard";
 
@@ -701,6 +704,7 @@ public class GameScene : GUIScene
     **/
     public bool ShowActionMenu(Grid.GridAnchor relatedAnchor)
     {
+        Debug.Log("Show action menu");
         Vector2 screenSize = ScreenUtils.GetScreenSize();
 
         m_actionMenuObject = (GameObject)Instantiate(m_actionMenuPfb);
@@ -708,7 +712,14 @@ public class GameScene : GUIScene
         m_actionMenuObject.transform.parent = this.transform;
 
         Vector3 position = new Vector3(0.5f * screenSize.x - 0.5f * m_rightContentWidth, m_grid.transform.localPosition.y, ACTION_MENU_Z_VALUE);
-        return m_actionMenuObject.GetComponent<ActionMenu>().Build(this, position, relatedAnchor);
+        bool menuIsBuilt = m_actionMenuObject.GetComponent<ActionMenu>().Build(this, position, relatedAnchor);
+        if (menuIsBuilt)
+            return true;
+        else
+        {
+            DismissActionMenu();
+            return false;
+        }
 
         ////Build the object that will hold the action buttons
         //m_actionButtonsHolder = new GameObject("ActionButtons");
@@ -1138,12 +1149,15 @@ public class GameScene : GUIScene
     /**
     * Display which anchors are available for drawing the current axis
     **/
-    public void DisplayAnchorsForAxis(GridPoint axisPointA)
+    public void DisplayAvailableAnchorsForAxis(GridPoint axisPointA)
     {
         if (m_availableAnchorsHolder == null)
         {
             m_availableAnchorsHolder = new GameObject("AvailableAnchors");
-            m_availableAnchorsHolder.transform.parent = this.transform;
+
+            GameObjectAnimator holderAnimator = m_availableAnchorsHolder.AddComponent<GameObjectAnimator>();
+            holderAnimator.SetParentTransform(this.transform);
+            
         }
 
         m_availableAnchors = m_grid.FindAvailableAnchorsForAxis(axisPointA, m_constrainedDirections);   
@@ -1158,11 +1172,21 @@ public class GameScene : GUIScene
 
             GameObjectAnimator availableAnchorAnimator = availableAnchorObject.GetComponent<GameObjectAnimator>();
             availableAnchorAnimator.SetParentTransform(m_availableAnchorsHolder.transform);
-            availableAnchorAnimator.SetScale(new Vector3(64, 64, 1));
+            availableAnchorAnimator.SetColor(Color.white);
+            availableAnchorAnimator.SetScale(new Vector3(0, 0, 1));
+            availableAnchorAnimator.ScaleTo(new Vector3(64, 64, 1), 0.3f, 0);
 
             //draw an hexagon
             availableAnchorObject.GetComponent<GameObjectAnimator>().SetPosition(new Vector3(anchorPosition.x, anchorPosition.y, -50));
         }
+    }
+
+    /**
+    * Dismiss previously created available anchors from scene
+    **/
+    public void DismissAvailableAnchors()
+    {
+        m_availableAnchorsHolder.GetComponent<GameObjectAnimator>().FadeTo(0.0f, 0.3f, 0.0f, ValueAnimator.InterpolationType.LINEAR, true);
     }
 
     /**
@@ -1273,8 +1297,6 @@ public class GameScene : GUIScene
                 return false;
         }
 
-        //Debug.Log("STEP1 CHECK");
-
         //Check if the sum of shapes areas is equal to the sum of outlines areas        
         List<DottedOutline> outlines = m_outlines.m_outlinesList;
         float shapesArea = 0;
@@ -1293,9 +1315,8 @@ public class GameScene : GUIScene
             outlinesArea += outlines[i].m_area;
         }
 
-        //Debug.Log("shapesArea:" + shapesArea + " outlinesArea:" + outlinesArea);
-        //if (MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1))
-        //    Debug.Log("STEP2 CHECK");
+        if (!MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1)) //set an error of 1 to test if shapes areas are equal
+            return false;
 
         //Finally check if every shape is fully inside one of the dotted outlines
         if (outlines.Count == 0) //if a level contains no outline (i.e in debug mode for instance)
@@ -1318,33 +1339,13 @@ public class GameScene : GUIScene
                     bInsideOneOutline = true;
                     break; //no need to test other outlines
                 }
-
-                ////Check if every point of every triangle in shape and its center is inside the outline
-                //if (!bInsideOneOutline)
-                //{
-                //    for (int iTriangleIdx = 0; iTriangleIdx != shape.m_triangles.Count; iTriangleIdx++)
-                //    {
-                //        GridTriangle triangle = shape.m_triangles[iTriangleIdx];
-                //        if (outline.ContainsPoint(triangle.m_points[0]) &&
-                //            outline.ContainsPoint(triangle.m_points[1]) &&
-                //            outline.ContainsPoint(triangle.m_points[2]) &&
-                //            outline.ContainsPoint(triangle.GetCenter()))
-                //        {
-                //            bInsideOneOutline = true;
-                //        }
-                //    }
-                //}
             }
 
             if (!bInsideOneOutline)
                 return false;
-        }
+        }        
 
-        Debug.Log("STEP3 CHECK");
-
-        
-
-        return MathUtils.AreFloatsEqual(shapesArea, outlinesArea, 1); //set an error of 1 to test if shapes areas are equal
+        return true;
     }
 
     /**

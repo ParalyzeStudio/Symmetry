@@ -57,6 +57,7 @@ public class ShapeTouchHandler : TouchHandler
 
         ShapeMesh shapeMesh = this.GetComponent<ShapeMesh>();
         Shape shape = shapeMesh.m_shapeData;
+        Grid grid = ((GameScene)GetSceneManager().m_currentScene).m_grid;
 
         if (!m_shapeMoved) //shape has not been moved yet
         {
@@ -74,6 +75,14 @@ public class ShapeTouchHandler : TouchHandler
 
             //toggle the boolean value so the previous code is not called later again
             m_shapeMoved = true;
+
+            //unlock any grid border that is intersecting this shape
+            GridBorder[] gridborders = grid.Borders;
+            for (int i = 0; i != gridborders.Length; i++)
+            {
+                if (shapeMesh.m_shapeData.m_contour.IntersectsEdge(grid.GetGridBoxEdgeForLocation(gridborders[i].m_location)))
+                    gridborders[i].Unlock();
+            }
         }
 
         //convert the delta vector to grid coordinates and set it to the shape                
@@ -83,7 +92,6 @@ public class ShapeTouchHandler : TouchHandler
         //we add the delta to the world offset of the shape. Then we transform the global offset once
         //(i.e instead of adding multiple big approximation errors we only make one when transforming the whole offset)
         GridPoint prevGridOffset = shape.m_gridOffset;
-        Grid grid = ((GameScene) GetSceneManager().m_currentScene).m_grid;
         shape.m_gridOffset = grid.TransformWorldVectorIntoGridVector(shape.m_offset);
         GridPoint deltaGridOffset = shape.m_gridOffset - prevGridOffset;
         shape.Translate(deltaGridOffset);
@@ -138,6 +146,15 @@ public class ShapeTouchHandler : TouchHandler
             //release the contour around shape
             shapeMesh.TranslateSelectionContour(gameScene.m_grid.TransformWorldVectorIntoGridVector(minTranslation));
             shapeMesh.ReleaseSelectionContour();
+
+            //lock any grid border that is intersecting this shape
+            Grid grid = gameScene.m_grid;
+            GridBorder[] gridborders = grid.Borders;
+            for (int i = 0; i != gridborders.Length; i++)
+            {
+                if (shapeMesh.m_shapeData.m_contour.IntersectsEdge(grid.GetGridBoxEdgeForLocation(gridborders[i].m_location)))
+                    gridborders[i].Lock();
+            }
         }
     }
 }
