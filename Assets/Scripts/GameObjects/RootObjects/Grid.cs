@@ -38,6 +38,17 @@ public class Grid : MonoBehaviour
         TOP
     }
 
+    //grid borders (left, top, right, bottom in this order)
+    private GridBorder[] m_borders;
+    public GridBorder[] Borders
+    {
+        get
+        {
+            return m_borders;
+        }
+    }
+    public GameObject m_gridBorderPfb;
+
     public void Build(Vector2 maxGridSize, Material gridMaterial)
     {
         m_maxGridSize = maxGridSize;
@@ -129,6 +140,90 @@ public class Grid : MonoBehaviour
                 m_anchors[iAnchorIndex] = new GridAnchor(anchorGridPosition, anchorPosition);
             }
         }
+
+        BuildBorders();
+    }
+
+    /**
+    * Build a border around the grid
+    **/
+    private void BuildBorders()
+    {
+        //build a line for every grid border (left, top, right, bottom)
+        m_borders = new GridBorder[4];
+        float margin = 0.15f * this.m_gridSpacing; //the relaxed position is a bit off the grid       
+
+        //left
+        GameObject lineObject = (GameObject)Instantiate(m_gridBorderPfb);
+        lineObject.name = "LeftBorder";
+
+        Vector3 contractedPosition = new Vector3(-0.5f * m_gridSize.x, 0, 0);
+        Vector3 relaxedPosition = contractedPosition - new Vector3(margin, 0, 0);
+
+        UVQuad lineQuad = lineObject.GetComponent<UVQuad>();
+        lineQuad.Init();
+
+        GameObjectAnimator lineAnimator = lineObject.GetComponent<GameObjectAnimator>();
+        lineAnimator.SetParentTransform(this.transform);
+        lineAnimator.SetPosition(relaxedPosition);
+        lineAnimator.SetScale(new Vector3(m_gridSize.y, 16, 1));
+        lineAnimator.SetRotationAxis(Vector3.forward);
+        lineAnimator.SetRotationAngle(90);
+
+        m_borders[0] = new GridBorder(GridBoxEdgeLocation.LEFT, lineObject, relaxedPosition, contractedPosition);
+
+        //top
+        lineObject = (GameObject)Instantiate(m_gridBorderPfb);
+        lineObject.name = "TopBorder";
+
+        contractedPosition = new Vector3(0, 0.5f * m_gridSize.y, 0);
+        relaxedPosition = contractedPosition + new Vector3(0,margin,0);
+
+        lineQuad = lineObject.GetComponent<UVQuad>();
+        lineQuad.Init();
+
+        lineAnimator = lineObject.GetComponent<GameObjectAnimator>();
+        lineAnimator.SetParentTransform(this.transform);
+        lineAnimator.SetPosition(relaxedPosition);
+        lineAnimator.SetScale(new Vector3(m_gridSize.x, 16, 1));
+
+        m_borders[1] = new GridBorder(GridBoxEdgeLocation.TOP, lineObject, relaxedPosition, contractedPosition);
+
+        //right
+        lineObject = (GameObject)Instantiate(m_gridBorderPfb);
+        lineObject.name = "RightBorder";
+
+        contractedPosition = new Vector3(0.5f * m_gridSize.x, 0, 0);
+        relaxedPosition = contractedPosition + new Vector3(margin, 0, 0);
+
+        lineQuad = lineObject.GetComponent<UVQuad>();
+        lineQuad.Init();
+
+        lineAnimator = lineObject.GetComponent<GameObjectAnimator>();
+        lineAnimator.SetParentTransform(this.transform);
+        lineAnimator.SetPosition(relaxedPosition);
+        lineAnimator.SetScale(new Vector3(m_gridSize.y, 16, 1));
+        lineAnimator.SetRotationAxis(Vector3.forward);
+        lineAnimator.SetRotationAngle(90);
+
+        m_borders[2] = new GridBorder(GridBoxEdgeLocation.RIGHT, lineObject, relaxedPosition, contractedPosition);
+
+        //bottom
+        lineObject = (GameObject)Instantiate(m_gridBorderPfb);
+        lineObject.name = "RightBorder";
+
+        contractedPosition = new Vector3(0, -0.5f * m_gridSize.y, 0);
+        relaxedPosition = contractedPosition - new Vector3(0, margin, 0);
+
+        lineQuad = lineObject.GetComponent<UVQuad>();
+        lineQuad.Init();
+
+        lineAnimator = lineObject.GetComponent<GameObjectAnimator>();
+        lineAnimator.SetParentTransform(this.transform);
+        lineAnimator.SetPosition(relaxedPosition);
+        lineAnimator.SetScale(new Vector3(m_gridSize.x, 16, 1));
+
+        m_borders[3] = new GridBorder(GridBoxEdgeLocation.BOTTOM, lineObject, relaxedPosition, contractedPosition);
     }
 
     /**
@@ -389,6 +484,26 @@ public class Grid : MonoBehaviour
      * **/
     private GridBoxPoint CheckLineIntersectionOnGridEdge(GridBoxEdgeLocation edgeLocation, GridPoint linePoint, GridPoint lineDirection)
     {
+        GridEdge borderEdge = GetGridBoxEdgeForLocation(edgeLocation);
+
+        GridPoint intersection;
+        bool intersects;
+        GridEdge edge = new GridEdge(borderEdge.m_pointA, borderEdge.m_pointB);
+        edge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
+        if (intersects)
+        {
+            GridBoxPoint intersectionPoint = new GridBoxPoint(intersection, edgeLocation);
+            return intersectionPoint;
+        }
+
+        return new GridBoxPoint(GridPoint.zero, GridBoxEdgeLocation.NONE);
+    }
+
+    /**
+    * Return the edge associated with one of the four grid borders
+    **/
+    public GridEdge GetGridBoxEdgeForLocation(GridBoxEdgeLocation edgeLocation)
+    {
         //Set the grid coordinates of edge endpoints
         GridPoint edgePointA, edgePointB;
         if (edgeLocation == GridBoxEdgeLocation.LEFT)
@@ -412,17 +527,7 @@ public class Grid : MonoBehaviour
             edgePointB = new GridPoint(1, m_numLines, true);
         }
 
-        GridPoint intersection;
-        bool intersects;
-        GridEdge edge = new GridEdge(edgePointA, edgePointB);
-        edge.IntersectionWithLine(linePoint, lineDirection, out intersects, out intersection);
-        if (intersects)
-        {
-            GridBoxPoint intersectionPoint = new GridBoxPoint(intersection, edgeLocation);
-            return intersectionPoint;
-        }
-
-        return new GridBoxPoint(GridPoint.zero, GridBoxEdgeLocation.NONE);
+        return new GridEdge(edgePointA, edgePointB);
     }
 
     /**

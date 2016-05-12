@@ -401,24 +401,22 @@ public class Contour : List<GridPoint>
 
         return true;
     }
+    
+    /**
+    * Tell if one of the contour edge intersects the edge passed as parameter
+    **/
+    public bool IntersectsEdge(GridEdge edge)
+    {
+        for (int i = 0; i != this.Count; i++)
+        {
+            GridEdge contourEdge = new GridEdge(this[i], this[(i == this.Count - 1) ? 0 : i + 1]);
 
+            if (contourEdge.IntersectsEdge(edge) > 0)
+                return true;
+        }
 
-
-     /**
-     * Approximate vertices coordinates by rounding values to 'significantFiguresCount' after the decimal point
-     * For instance passing 0 will round all values to the closest integer
-     * passing 1 will maintain 1 digit after the after the decimal point, passing 2 will maintain 2 digits and so on
-     * **/
-    //public void ApproximateVertices(int significantFiguresCount)
-    //{
-    //    for (int i = 0; i != this.Count; i++)
-    //    {
-    //        Vector2 vertex = this[i];
-    //        vertex.x = MathUtils.ApproximateNumber(vertex.x, 1);
-    //        vertex.y = MathUtils.ApproximateNumber(vertex.y, 1);
-    //        this[i] = vertex;
-    //    }
-    //}
+        return false;
+    }
 }
 
 /**

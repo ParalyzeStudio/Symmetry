@@ -155,7 +155,7 @@ public class GridEdge
         else if (lineDirection.X == 0 && pointA.X != pointB.X) //x = a1 && y = a2x + b2
         {
             double a1 = linePoint.X;
-            double a2 = (pointB.Y - pointA.Y) / (float)(pointB.X - pointA.X);
+            double a2 = (pointB.Y - pointA.Y) / (double)(pointB.X - pointA.X);
             double b2 = pointA.Y - a2 * pointA.X;
 
             x = a1;

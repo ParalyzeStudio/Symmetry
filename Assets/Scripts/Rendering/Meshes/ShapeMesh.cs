@@ -136,6 +136,17 @@ public class ShapeMesh : TexturedMesh
     public void TranslateSelectionContour(Vector3 delta)
     {
         m_selectionContourAnimator.SetPosition(m_selectionContourAnimator.GetPosition() + delta);
+
+        //check if the shape contour intersects one of the grid borders
+        Grid grid = GetGameScene().m_grid;
+        GridBorder[] gridborders = grid.Borders;
+        for (int i = 0; i != gridborders.Length; i++)
+        {
+            if (m_shapeData.m_contour.IntersectsEdge(grid.GetGridBoxEdgeForLocation(gridborders[i].m_location)))
+                gridborders[i].Contract();
+            else
+                gridborders[i].Relax();
+        }
     }
 
     /**

@@ -317,20 +317,9 @@ public class Shape : GridTriangulable
         return false;
     }
 
-    public bool OverlapsTriangulable(Shape shape, bool bEnsureNonNullIntersection)
-    {
-        for (int i = 0; i != shape.m_triangles.Count; i++)
-        {
-            if (OverlapsTriangle(shape.m_triangles[i], bEnsureNonNullIntersection))
-                return true;
-        }
-
-        return false;
-    }
-
     /**
     * Does 'this' shape overlaps the triangle passed as parameter
-     * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
+    * We set a boolean to decide if we accept empty intersections (points and portions of contour edges in common exclusively)
     * **/
     public bool OverlapsTriangle(GridTriangle triangle, bool bEnsureNonNullIntersection)
     {
@@ -344,8 +333,8 @@ public class Shape : GridTriangulable
     }
 
     /**
-     * Translate this shape (contour and holes) by a certain vector
-     * **/
+    * Translate this shape (contour and holes) by a certain vector
+    * **/
     public void Translate(GridPoint translation)
     {
         //Contour

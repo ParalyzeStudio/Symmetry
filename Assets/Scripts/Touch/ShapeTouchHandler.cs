@@ -60,9 +60,10 @@ public class ShapeTouchHandler : TouchHandler
 
         if (!m_shapeMoved) //shape has not been moved yet
         {
-            //place the shape behind the tiled background so it becomes invisible
+            //place the shape behind the whole scene (scene is at 0) so it becomes invisible
             TexturedMeshAnimator shapeAnimator = this.GetComponent<TexturedMeshAnimator>();
-            Vector3 shapeNewPosition = new Vector3(0, 0, GameScene.TILED_BACKGROUND_RELATIVE_Z_VALUE + 1);
+            shapeAnimator.SetParentTransform(null);
+            Vector3 shapeNewPosition = new Vector3(0, 0, 1);
             shapeAnimator.SetPosition(shapeNewPosition);
 
             //Change the state of this shape
