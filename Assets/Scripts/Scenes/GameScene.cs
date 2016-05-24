@@ -9,7 +9,6 @@ public class GameScene : GUIScene
     public const float AXIS_CONSTRAINTS_ICONS_Z_VALUE = -23.0f;
     public const float COUNTER_Z_VALUE = -15.0f;
     public const float CHALKBOARD_Z_VALUE = -10.0f;
-    public const float CHALKBOARD_TOP_SEPARATION_Z_VALUE = -23.0f;
     public const float HATCHINGS_Z_VALUE = -20.0f;
     public const float TILED_BACKGROUND_RELATIVE_Z_VALUE = 1.0f;
     public const float GRID_Z_VALUE = -22.0f;
@@ -60,6 +59,7 @@ public class GameScene : GUIScene
     //chalkboard
     private GameObject m_chalkboardObject;
     public Material m_chalkboardMaterial;
+    public Material m_blurryLineMaterial;
 
     //holders
     private GameObject m_interfaceButtonsHolder;
@@ -298,11 +298,20 @@ public class GameScene : GUIScene
         chalkboardAnimator.SetScale(chalkboardSize);
         chalkboardAnimator.SetPosition(chalkboardPosition);
         chalkboardAnimator.SetColor(Color.black);
-        chalkboardAnimator.SetOpacity(0);
-        chalkboardAnimator.FadeTo(0.85f, 1.0f);
+        chalkboardAnimator.SetOpacity(0.85f);
 
         //show a separation line above the dark background
-        //GameObject separationLine = (GameObject)Instantiate(m);
+        GameObject separationLineObject = (GameObject)Instantiate(m_texQuadPfb);
+        separationLineObject.name = "SeparationLine";
+
+        UVQuad separationLine = separationLineObject.GetComponent<UVQuad>();
+        separationLine.Init(Instantiate(m_blurryLineMaterial));
+
+        TexturedQuadAnimator separationLineAnimator = separationLineObject.GetComponent<TexturedQuadAnimator>();
+        separationLineAnimator.SetParentTransform(this.transform);
+        separationLineAnimator.SetScale(new Vector3(screenSize.x, 16, 1));
+        separationLineAnimator.SetPosition(new Vector3(0, 0.5f * screenSize.y - m_topContentHeight, CHALKBOARD_Z_VALUE - 1)); //above background
+        separationLineAnimator.SetColor(GetLevelManager().m_currentChapter.GetThemeColors()[4]);
 
         //m_chalkboardObject = (GameObject)Instantiate(m_texQuadPfb);
         //m_chalkboardObject.name = "Chalkboard";

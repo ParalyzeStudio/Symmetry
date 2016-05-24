@@ -166,13 +166,13 @@ public class AxisSymmetrizer : Symmetrizer
     }
 
     /**
-    * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
-    * **/
+     * When the job of clipping has been done through threading, this method is called to generate objects and animations on axis inside the main GUI thread
+     * **/
     public override void OnSymmetryDone()
     {
         Shapes shapesHolder = m_gameScene.m_shapesHolder;
         
-        //build the difference shape objects
+        //Build the difference shape objects
         RenderSymmetrizedShapes(m_axisLeftClippedInterShapes);
         RenderSymmetrizedShapes(m_axisLeftClippedDiffShapes);
         RenderSymmetrizedShapes(m_axisRightClippedInterShapes);
@@ -183,9 +183,9 @@ public class AxisSymmetrizer : Symmetrizer
     }
 
     /**
- * Find all intersections between a line and the box determined by grid boundaries
- * linePoint has to be specified in grid coordinates
- * **/
+     * Find all intersections between a line and the box determined by grid boundaries
+     * linePoint has to be specified in grid coordinates
+     * **/
     private List<GridPoint> FindLineGridBoxIntersections(GridPoint linePoint, GridPoint lineDirection)
     {
         List<GridPoint> intersections = new List<GridPoint>();
